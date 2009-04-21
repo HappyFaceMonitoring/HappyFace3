@@ -15,9 +15,9 @@ class GetData(ModuleBase):
 
 
     # execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
-    def getDataWget(self, url, path, image_name):
+    def getDataWget(self, url, path, file):
 
-        retcode = subprocess.call(["wget","-q","--output-document=" + path + "/"  + image_name, url])
+        retcode = subprocess.call(["wget","-q","--output-document=" + path + "/"  + file, url])
 
         if retcode == 0: return True
 

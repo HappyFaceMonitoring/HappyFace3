@@ -38,7 +38,7 @@ def HappyFace():
     try:
 	config.readfp(open('./run.cfg'))
     except IOError:
-        sys.stdout.write('Could not find configuration file ' + config_file + '.cfg, aborting ...\n')
+        sys.stdout.write('Could not find configuration file run.cfg, aborting ...\n')
         sys.exit(-1)
 
     # try to open local config file if available (standard config settings will be overwritten)
