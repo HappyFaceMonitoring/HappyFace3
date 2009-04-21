@@ -43,7 +43,7 @@ def HappyFace():
 
     # try to open local config file if available (standard config settings will be overwritten)
     try:
-	config.readfp(open('/run.local'))
+	config.readfp(open('./run.local'))
     except IOError:
         pass
 
@@ -87,13 +87,15 @@ def HappyFace():
     for category in config.get('setup','categories').split(","):
 	for module in config.get(category,'modules').split(","):
 
+	    if module == "": continue
+
             # import module class dynamically
 	    modClass = __import__(module)
 
-            # create a object of the class dynamically
-            modObj_list[module] = getattr(modClass,module)(category, timestamp, archive_dir)
+       	    # create a object of the class dynamically
+       	    modObj_list[module] = getattr(modClass,module)(category, timestamp, archive_dir)
 
-            # execute the object in a thread
+       	    # execute the object in a thread
 	    modObj_list[module].start()
 
     # lock object for exclusive database access
@@ -107,6 +109,8 @@ def HappyFace():
         cat_content	= ""
 
 	for module in config.get(category,'modules').split(","):
+
+	    if module == "": continue
 
             ##### this part will be re-written!!!!! #####
             # every module has to be finished in min: 20 sec
