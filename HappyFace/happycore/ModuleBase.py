@@ -30,6 +30,7 @@ class ModuleBase(Thread,object):
 	if os.path.isfile('./modules.local/' + self.__module__ + '.py') == True:
 	    module_config_file = './modules.local/' + self.__module__
         self.mod_config = self.readConfigFile(module_config_file)
+        self.mod_config
 
 	self.mod_title		= self.mod_config.get('setup','mod_title',self.__module__)
 	self.mod_type		= self.mod_config.get('setup','mod_type',"rated")
@@ -92,7 +93,8 @@ class ModuleBase(Thread,object):
     def readConfigFile(self,config_file):
 
 	config = ConfigParser.ConfigParser()
-
+        config.optionxform = str #Needed to enable capital letters
+        
         # try to open standard config file, must be available
         try:
 	    config.readfp(open(config_file + '.cfg'))
