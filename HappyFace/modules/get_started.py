@@ -30,6 +30,10 @@ class get_started(ModuleBase):
 
         # create output sting, will be executed by a printf('') PHP command
         # all data stored in DB is available via a $data[key] call
-        module_content = """<h3>' . $data["message"] . '</h3>"""
+        module_content = """
+	<?php
+		printf('<h3>' . $data["message"] . '</h3>');
+	?>
+	"""
 
         return self.PHPOutput(module_content)
