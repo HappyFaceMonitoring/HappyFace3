@@ -92,6 +92,8 @@ class Uschi(XMLParsing,GetData):
 	# all information in the database are available via a $data["key"] call
 
         module_content = """
+        <?php
+        printf('
             <table class="uschi">
                 <tr>
                     <td><div style="text-align:center;"><strong>last USCHI execution: </strong>'.$data["uschi_timestamp"].'</div></td>
@@ -105,6 +107,9 @@ class Uschi(XMLParsing,GetData):
             <input type="button" value="show/hide results" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
             <div id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>
             <br />
+            ');
+            ?>
+
 	"""
  
 	return self.PHPOutput(module_content)

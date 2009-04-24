@@ -150,10 +150,15 @@ class ModuleBase(Thread,object):
 		    </tr>
 		    '.$error_message.'
                     <tr>
-		        <td></td><td>"""+ infobox + module_content + """</td>
-		    </tr>
-               </table>
-                <br/><hr/>
+		        <td></td><td>""" + infobox + """');
+            ?>
+            """ + module_content + """
+            <?php
+            printf('
+              </td>
+             </tr>
+            </table>
+            <br/><hr/>
             ');
         }
         ?>

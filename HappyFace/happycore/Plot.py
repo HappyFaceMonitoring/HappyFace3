@@ -37,7 +37,12 @@ class Plot(GetData):
 
         # this module_content string will be executed by a printf('') PHP command
         # all information in the database are available via a $data["key"] call
-        if self.status == -1: module_content = ""
-        else: module_content = """<a href="' .$data["url"]. '"><img alt="" src="' .$data["filename"]. '" style="border: 0px solid;" /></a>"""
-
+        module_content = """
+        <?php
+        printf('
+        <a href="' .$data["url"]. '"><img alt="" src="' .$data["filename"]. '" style="border: 0px solid;" /></a>
+        ');
+        ?>
+        """
+        
         return self.PHPOutput(module_content)
