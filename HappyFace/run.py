@@ -101,6 +101,9 @@ def HappyFace():
     # lock object for exclusive database access
     lock = thread.allocate_lock()
 
+    # definition of the global timeout
+    timeout	= int(config.get('setup','timeout'))
+
     for category in config.get('setup','categories').split(","):
 
         cat_title	= config.get(category,'cat_title')
@@ -108,15 +111,22 @@ def HappyFace():
         cat_algo	= config.get(category,'cat_algo')
         cat_content	= ""
 
+	# wait till all modules are finish OR till the global timeout
 	for module in config.get(category,'modules').split(","):
 
 	    if module == "": continue
 
-            ##### this part will be re-written!!!!! #####
-            # every module has to be finished in min: 20 sec
-            # because of the for-loop the last module has theoretically max: N_modules * 20 seconds
-            
-	    modObj_list[module].join(20)
+            start = int(time())
+            modObj_list[module].join(timeout)
+            timeout -= int(time()) - start
+	    if timeout < 1:
+		break
+
+	for module in config.get(category,'modules').split(","):
+
+	    if module == "": continue
+
+	    # if the are any running modules: kill them
             if modObj_list[module].isAlive() == True:
                 modObj_list[module]._Thread__stop()
                 modObj_list[module].error_message += "\nCould not execute module in time, " + modObj_list[module].__module__ + " abborting ...\n"
