@@ -22,6 +22,6 @@ class TimeMachineController(object):
 		<input name="submit" type="submit" value="Jump" />
 	    </div>
 	    </form>
-	    </td><?php printf($time_error_message) ?></tr></table></div>
+	    </td><?php printf($time_error_message); ?></tr></table></div>
 	</div>
 	"""
