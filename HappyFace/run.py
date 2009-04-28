@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os
-from time import time
+from time import time, localtime, mktime
 import thread
 import ConfigParser
 
@@ -51,8 +51,9 @@ def HappyFace():
     webpage_dir	= config.get('setup','webpage_dir')
     theme	= config.get('setup','theme')
 
-    # create timestamp (unixtime[sec]) 
-    timestamp = int(time())
+    # create timestamp (unixtime), set seconds to "0"
+    time_tuple = localtime() 
+    timestamp = int(mktime(time_tuple)) - time_tuple[5]
 
     # create archive directory for binary files
     archive_dir = webpage_dir + "/archive/" + str(timestamp)
