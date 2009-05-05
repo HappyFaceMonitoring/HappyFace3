@@ -44,6 +44,7 @@ class ModuleBase(Thread,object):
 	self.db_keys = {}
 	self.db_values = {}
 
+	self.db_keys["module"]		= StringCol()
 	self.db_keys["category"]	= StringCol()
 	self.db_keys["timestamp"]	= IntCol()
 	self.db_keys["status"]		= FloatCol()
@@ -57,6 +58,7 @@ class ModuleBase(Thread,object):
     def storeToDB(self,lock):
 
 	# definition of the databases values which should be stored
+	self.db_values['module']	= self.__module__
 	self.db_values['category']	= self.category
 	self.db_values['timestamp']	= self.timestamp
 	self.db_values['status']	= self.status
@@ -94,7 +96,7 @@ class ModuleBase(Thread,object):
 
 	config = ConfigParser.ConfigParser()
         config.optionxform = str #Needed to enable capital letters
-        
+
         # try to open standard config file, must be available
         try:
 	    config.readfp(open(config_file + '.cfg'))
@@ -143,6 +145,7 @@ class ModuleBase(Thread,object):
 
             /*** print the HTML output ***/
             printf('
+		<a id="' . $data["module"]. '"></a>
                 <table class="main" style="width:1000px;">
                     <tr>
                         <td style="width:64px;"><button class="button" type="button" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_info\\\'" + """);">' .$status_symbol. '</button></td>

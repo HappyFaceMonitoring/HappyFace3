@@ -15,6 +15,8 @@ class ModuleResultsArrayBuilder(object):
 	# will be used by the CategoryStatusLogic (called by CategoryNavigationTab)
 	foreach ($sql_queries as $module=>$query) {
 	    foreach ($query as $data) {
+		$ModuleResultsArray[$module]["module"]		= $data["module"];
+		$ModuleResultsArray[$module]["mod_title"]	= $data["mod_title"];
 		$ModuleResultsArray[$module]["status"]		= $data["status"];
 		$ModuleResultsArray[$module]["mod_type"]	= $data["mod_type"];
 		$ModuleResultsArray[$module]["weight"]		= $data["weight"];

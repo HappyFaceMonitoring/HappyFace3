@@ -8,7 +8,7 @@ class CategoryStatusLogic(object):
 	<?php
 	# $ModuleResultsArray is created before (see ModuleResultsArrayBuilder)
 	# and used by the class CatStatusLogic
-	# structure: [module]["status"=> ...,"mod_type"=> ...,"weight"=> ...,"category"=> ...]
+	# structure: [module]["mod_title"=> ...,"status"=> ...,"mod_type"=> ...,"weight"=> ...,"category"=> ...]
 
 	class CatStatusRating {
 

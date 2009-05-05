@@ -140,7 +140,7 @@ def HappyFace():
 
         # collect all navigation and content tabs
         navigation	+= CategoryNavigationTab(category, cat_title, cat_type, cat_algo).output
-        content		+= CategoryContentTab(cat_content,timestamp).output
+        content		+= CategoryContentTab(cat_content,config,category,timestamp).output
 
     # create final PHP/HTML output
     final_output = FinalOutput(config,theme,navigation,content).output

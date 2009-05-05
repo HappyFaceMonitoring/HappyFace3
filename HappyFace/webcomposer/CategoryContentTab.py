@@ -1,7 +1,7 @@
 import sys, os
 
 class CategoryContentTab(object):
-    def __init__(self,cat_content,timestamp):
+    def __init__(self,cat_content,config,category,timestamp):
 
 	# a few symbols / hyperlinks for the status bar ;-)
 	valid_xhtml11 = """
@@ -22,10 +22,62 @@ class CategoryContentTab(object):
 
 	output = ""
 
-        output += '<div class="TabbedPanelsContent"><br/>' + "\n"
+        output += '<div class="TabbedPanelsContent">' + "\n"
+
+
+	output += '<table style="width:1250px">' + "\n"
+	output += '  <tr>' + "\n"
+	
+	output += '    <td style="width:250px;">' + "\n"
+        output += '<div class="nav">' + "\n"
+	output += """
+	<?php
+	    if ( is_array($ModuleResultsArray) ) {
+		printf('<ul>');
+	        foreach ($ModuleResultsArray as $module) {
+
+	            if ($module["category"] == """ + category + """) {
+
+			$nav_symbol = getModNavSymbol($module["status"], $module["mod_type"]);
+
+		        printf('<li>
+				<table class="nav_entry">
+				<tr style="border-bottom:1px solid #FFF;">
+				<td style="width:40px;"><div class="imgdiv">' . $nav_symbol . '</div></td>
+				<td style="width:200px;"><a href="#' . $module["module"] . '">' . $module["mod_title"] . '</a></td>
+				</tr>
+				</table>
+				</li>
+			');
+	            }
+	        }
+		printf('</ul>');
+	    }
+	?>
+	"""
+	output += '</div>' + "\n"
+	output += '    </td>' + "\n"
+
+	output += '    <td>' + "\n"
         output += cat_content + "\n"
         output += valid_xhtml11 + valid_css + python + sqlite + php + "\n"
+	output += '    </td>' + "\n"
+	
+	output += '  </tr>' + "\n"
+	output += '</table>' + "\n"
+
+
+
 	output += '</div>' + "\n"
 
         self.output = output
 
+
+
+
+	#<div id="imgdiv"><img src="config/themes/armin_box_arrows/nav_neutral.png" /></div>
+	#for category in config.get('setup','categories').split(","):
+	#    for module in config.get(category,'modules').split(","):
+	#	if module == "": continue
+	#	output += '<li><a href="#' + module + '">' + module + '</a></li>' + "\n"
+        #output += '<li><a href="#top">top </a></li>' + "\n"
