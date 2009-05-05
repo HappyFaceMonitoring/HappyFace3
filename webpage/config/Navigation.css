@@ -50,6 +50,15 @@ is a way later.
 	/*overflow-x: no;*/
 }
 
+
+.nav_entry {
+	vertical-align:middle;
+	width:240px;
+	border-left: 5px solid #696969;
+	border-collapse:collapse;
+	background-color:#696969;
+}
+
 .imgdiv {
 	width:32px;
 	height:32px; 
