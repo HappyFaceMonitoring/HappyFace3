@@ -1,0 +1,59 @@
+a {
+	text-decoration:none;
+	color:#464646;
+}
+
+/*
+the scrollbar of the navigator is on the right side. I have found no way
+to move it to the left side, nor to change its width or color. Maybe there
+is a way later. 
+*/
+
+.nav {
+	position: fixed;
+	top: 234px;
+	left: 10px;
+	width:250px;
+	margin:0 0 0 0;
+ 	padding:0 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: 70%;
+	font: bold 0.7em sans-serif;
+}
+
+.nav ul {
+	list-style:none;
+	margin:0;
+	padding:0;
+	overflow-x: hidden;
+}
+ 
+.nav li {
+	margin:0;
+	padding:0;
+}
+
+.nav a:link,
+.nav a:visited {
+	display:block;
+	margin:0;
+	padding:1.0em;
+       	text-decoration: none;
+	background-color:#696969;
+	color:#f8f8ff;
+}
+
+.nav a:hover {
+	/*border-color:#AFBCA0;*/
+	background-color:#a9a9a9;
+	/*overflow-x: no;*/
+}
+
+.imgdiv {
+	width:32px;
+	height:32px; 
+	border:0px;
+	right: 0px;
+}
+
