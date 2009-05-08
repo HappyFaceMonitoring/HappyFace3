@@ -77,6 +77,9 @@ class FinalOutput(object):
 
 	output += '</div>' + "\n"
 
+	# include layer to hide content when scrolling
+	output += '<div class="HappySolidLayer"></div>' + "\n"
+
 	# some javascripts for website navigation
 	output += '<script type="text/javascript">' + "\n"
 	output += '<!--' + "\n"

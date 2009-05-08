@@ -11,14 +11,14 @@ class CategoryStatusSymbolLogic(object):
 	    $cat_status = getCatStatus($category,$cat_algo,$ModuleResultsArray);
 	
 	    if ($cat_type == "plots") { 
-	        if ($cat_status >= 0) { return '<img alt="" class="navtab" src="config/themes/""" + theme + """/cat_avail_plot.png" />'; }
-		else if ($cat_status == -1) { return '<img alt="" class="navtab" src="config/themes/""" + theme + """/cat_unavail_plot.png" />'; }
+	        if ($cat_status >= 0) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_avail_plot.png" />'; }
+		else if ($cat_status == -1) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_unavail_plot.png" />'; }
 	    }
 	    else if ($cat_type == "rated") {
-		if ($cat_status > 0.66 && $cat_status <= 1.0) { return '<img alt="" class="navtab" src="config/themes/""" + theme + """/cat_happy.png" />'; }
-		else if ($cat_status > 0.33 && $cat_status <= 0.66) { return '<img alt="" class="navtab" src="config/themes/""" + theme + """/cat_neutral.png" />'; }
-		else if ($cat_status >= 0.0 && $cat_status <= 0.33) { return '<img alt="" class="navtab" src="config/themes/""" + theme + """/cat_unhappy.png" />'; }
-		else if ($cat_status == -1) { return '<img alt="" class="navtab" src="config/themes/""" + theme + """/cat_noinfo.png" />'; }
+		if ($cat_status > 0.66 && $cat_status <= 1.0) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_happy.png" />'; }
+		else if ($cat_status > 0.33 && $cat_status <= 0.66) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_neutral.png" />'; }
+		else if ($cat_status >= 0.0 && $cat_status <= 0.33) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_unhappy.png" />'; }
+		else if ($cat_status == -1) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_noinfo.png" />'; }
 	    }
 	}
 	?>

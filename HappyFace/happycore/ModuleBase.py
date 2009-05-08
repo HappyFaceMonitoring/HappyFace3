@@ -146,7 +146,7 @@ class ModuleBase(Thread,object):
 
         infobox = """
 	<div id=""" + "\\\'" + self.__module__+ "_info\\\'" + """ style="display: none;">
-	<table class="desc">
+	<table class="HappyDesc">
 		<tr><td style="width:20%%">Module File:</td><td>""" + self.__module__ + ".py" + """</td></tr>
 		<tr><td style="width:20%%">Module Type:</td><td>' . $data["mod_type"].'</td></tr>
 		<tr><td style="width:20%%">Status Value:</td><td>' . number_format($data["status"],1). '</td></tr>
@@ -175,7 +175,7 @@ class ModuleBase(Thread,object):
 		<a id="' . $data["module"]. '"></a>
                 <table class="main" style="width:1000px;">
                     <tr>
-                        <td style="width:64px;"><button class="button" type="button" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_info\\\'" + """);">' .$status_symbol. '</button></td>
+                        <td style="width:64px;"><button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_info\\\'" + """);">' .$status_symbol. '</button></td>
                         <td><strong>' .$data['mod_title']. '<br />' . $mod_time_message . '</strong></td>
 		    </tr>
 		    '.$error_message.'

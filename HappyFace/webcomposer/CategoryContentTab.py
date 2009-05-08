@@ -32,7 +32,7 @@ class CategoryContentTab(object):
                 printf('<li>
                         <table class="nav_entry">
                         <tr style="border-bottom:1px solid #FFF;">
-                        <td style="width:200px;"><div class="topdiv">Move navigation bar</div></td>
+                        <td style="width:200px;"><div class="topdiv">Move Navigation Bar</div></td>
                         <td style="width:40px;"><div class="topdiv"><a href="javascript:movenav()" onFocus="this.blur()"><img id="navarrow" alt="" border="0" width="32px" src="config/images/leftarrow.png" /></a></div></td>
                         </tr>
                         </table>
