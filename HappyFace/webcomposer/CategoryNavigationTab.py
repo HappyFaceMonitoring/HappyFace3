@@ -6,11 +6,11 @@ class CategoryNavigationTab(object):
 	# build navigation tab for the navigation bar
 	output = ""
 	
-	output += '    <li class="TabbedPanelsTab">' + "\n" # tabindex="0" onfocus="this.blur()"
+	output += '    <li id="HappyPanelsTab1" class="HappyPanelsTab">' + "\n" # tabindex="0" onfocus="this.blur()"
 	output += '      <table>' + "\n"
 	output += '        <tr>' + "\n"
 	output += '          <td><div style="text-align:center;">' + "\n"
-	output += '<?php printf(getCatStatusSymbol("' + category + '","' + cat_type + '","' + cat_algo + '", $ModuleResultsArray)); ?>' + "\n"
+	output += '           <?php printf(getCatStatusSymbol("' + category + '","' + cat_type + '","' + cat_algo + '", $ModuleResultsArray)); ?>' + "\n"
 	output += '          </div></td>' + "\n"
 	output += '        </tr>' + "\n"
 	output += '        <tr>' + "\n"

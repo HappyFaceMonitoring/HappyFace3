@@ -49,11 +49,10 @@ class FinalOutput(object):
 	
 	# header
 	output += '<head>' + "\n"
-	#output += '<meta http-equiv="refresh" content="300" charset=utf-8" />' + "\n"
 	output += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />' + "\n"
 	output += '<title>HappyFace v2.0a</title>' + "\n"
-	output += '<script src="config/SpryTabbedPanels.js" type="text/javascript"></script>' + "\n"
-	output += '<link href="config/SpryTabbedPanels.css" rel="stylesheet" type="text/css" />' + "\n"
+	output += '<script src="config/TabNavigation.js" type="text/javascript"></script>' + "\n"
+	output += '<link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '<script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
 	output += '<link href="config/FastNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '</head>' + "\n"
@@ -64,15 +63,15 @@ class FinalOutput(object):
 	# time bar on the top of the website, input forms for time control
 	output += TimeMachineController().output
 
-	output += '<div id="TabbedPanels1" class="TabbedPanels">' + "\n"
+	output += '<div id="HappyPanels1" class="HappyPanels">' + "\n"
 
 	# input navigation
-	output += '  <ul class="TabbedPanelsTabGroup">' + "\n"
+	output += '  <ul id="HappyPanelsTabGroup1" class="HappyPanelsTabGroup">' + "\n"
 	output += navigation
 	output += '  </ul>' + "\n"
 
 	# input content
-	output += '  <div class="TabbedPanelsContentGroup">' + "\n"
+	output += '  <div id="HappyPanelsContentGroup1" class="HappyPanelsContentGroup">' + "\n"
 	output += content + "\n"
 	output += '  </div>' + "\n"
 
@@ -81,7 +80,7 @@ class FinalOutput(object):
 	# some javascripts for website navigation
 	output += '<script type="text/javascript">' + "\n"
 	output += '<!--' + "\n"
-	output += 'var TabbedPanels1 = new Spry.Widget.TabbedPanels("TabbedPanels1");' + "\n"
+	output += 'var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1");' + "\n"
 	output += '//-->' + "\n"
 	output += '</script>' + "\n"
 	
