@@ -11,11 +11,10 @@ is a way later.
 
 .nav {
 	position: fixed;
-	top: 234px;
-	left: 10px;
+	z-index: 5;
+	top: 155px;
+	left: 8px;
 	width:250px;
-	margin:0 0 0 0;
- 	padding:0 0;
 	overflow-x: hidden;
 	overflow-y: auto;
 	height: 70%;
@@ -30,14 +29,14 @@ is a way later.
 }
  
 .nav li {
-	margin:0;
-	padding:0;
+	margin:0px;
+	padding:0px;
 }
 
 .nav a:link,
 .nav a:visited {
 	display:block;
-	margin:0;
+	margin:0px;
 	padding:1.0em;
        	text-decoration: none;
 	background-color:#696969;
@@ -45,11 +44,8 @@ is a way later.
 }
 
 .nav a:hover {
-	/*border-color:#AFBCA0;*/
 	background-color:#a9a9a9;
-	/*overflow-x: no;*/
 }
-
 
 .nav_entry {
 	vertical-align:middle;
@@ -59,6 +55,7 @@ is a way later.
 	background-color:#696969;
 }
 
+/* div with the navbar icons */
 .imgdiv {
 	width:32px;
 	height:32px; 
@@ -66,3 +63,19 @@ is a way later.
 	right: 0px;
 }
 
+/* div with the hide FastNav button */
+.topdiv {
+	margin:0px;
+	margin-left:10px;
+	margin-right:0.8em;
+}
+
+.topdiv a:link,
+.topdiv a:visited {
+	display:block;
+	margin:0px;
+	padding:0.2em;
+       	text-decoration: none;
+	background-color:#696969;
+	color:#f8f8ff;
+}

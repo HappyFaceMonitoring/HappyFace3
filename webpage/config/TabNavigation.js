@@ -1,50 +1,25 @@
-/* SpryTabbedPanels.js - Revision: Spry Preview Release 1.4 */
-// Copyright (c) 2006. Adobe Systems Incorporated.
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-//   * Redistributions of source code must retain the above copyright notice,
-//     this list of conditions and the following disclaimer.
-//   * Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
-//     and/or other materials provided with the distribution.
-//   * Neither the name of Adobe Systems Incorporated nor the names of its
-//     contributors may be used to endorse or promote products derived from this
-//     software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+/* Javascript functions for the HappyFace tab navigation */
 
-var Spry;
-if (!Spry) Spry = {};
-if (!Spry.Widget) Spry.Widget = {};
+/* Initialise */
+var HappyTab;
+if (!HappyTab) HappyTab = {};
+if (!HappyTab.Widget) HappyTab.Widget = {};
 
-Spry.Widget.TabbedPanels = function(element, opts)
+HappyTab.Widget.HappyPanels = function(element, opts)
 {
 	this.element = this.getElement(element);
 	this.defaultTab = 0; // Show the first panel by default.
 	this.bindings = [];
-	this.tabSelectedClass = "TabbedPanelsTabSelected";
-	this.tabHoverClass = "TabbedPanelsTabHover";
-	this.tabFocusedClass = "TabbedPanelsTabFocused";
-	this.panelVisibleClass = "TabbedPanelsContentVisible";
+	this.tabSelectedClass = "HappyPanelsTabSelected";
+	this.tabHoverClass = "HappyPanelsTabHover";
+	this.tabFocusedClass = "HappyPanelsTabFocused";
+	this.panelVisibleClass = "HappyPanelsContentVisible";
 	this.focusElement = null;
 	this.hasFocus = false;
 	this.currentTabIndex = 0;
 	this.enableKeyboardNavigation = true;
 
-	Spry.Widget.TabbedPanels.setOptions(this, opts);
+	HappyTab.Widget.HappyPanels.setOptions(this, opts);
 
 	// If the defaultTab is expressed as a number/index, convert
 	// it to an element.
@@ -55,7 +30,7 @@ Spry.Widget.TabbedPanels = function(element, opts)
 			this.defaultTab = 0;
 		else
 		{
-			var count = this.getTabbedPanelCount();
+			var count = this.getHappyPanelCount();
 			if (this.defaultTab >= count)
 				this.defaultTab = (count > 1) ? (count - 1) : 0;
 		}
@@ -73,14 +48,14 @@ Spry.Widget.TabbedPanels = function(element, opts)
 	this.attachBehaviors();
 };
 
-Spry.Widget.TabbedPanels.prototype.getElement = function(ele)
+HappyTab.Widget.HappyPanels.prototype.getElement = function(ele)
 {
 	if (ele && typeof ele == "string")
 		return document.getElementById(ele);
 	return ele;
 }
 
-Spry.Widget.TabbedPanels.prototype.getElementChildren = function(element)
+HappyTab.Widget.HappyPanels.prototype.getElementChildren = function(element)
 {
 	var children = [];
 	var child = element.firstChild;
@@ -93,21 +68,21 @@ Spry.Widget.TabbedPanels.prototype.getElementChildren = function(element)
 	return children;
 };
 
-Spry.Widget.TabbedPanels.prototype.addClassName = function(ele, className)
+HappyTab.Widget.HappyPanels.prototype.addClassName = function(ele, className)
 {
 	if (!ele || !className || (ele.className && ele.className.search(new RegExp("\\b" + className + "\\b")) != -1))
 		return;
 	ele.className += (ele.className ? " " : "") + className;
 };
 
-Spry.Widget.TabbedPanels.prototype.removeClassName = function(ele, className)
+HappyTab.Widget.HappyPanels.prototype.removeClassName = function(ele, className)
 {
 	if (!ele || !className || (ele.className && ele.className.search(new RegExp("\\b" + className + "\\b")) == -1))
 		return;
 	ele.className = ele.className.replace(new RegExp("\\s*\\b" + className + "\\b", "g"), "");
 };
 
-Spry.Widget.TabbedPanels.setOptions = function(obj, optionsObj, ignoreUndefinedProps)
+HappyTab.Widget.HappyPanels.setOptions = function(obj, optionsObj, ignoreUndefinedProps)
 {
 	if (!optionsObj)
 		return;
@@ -119,7 +94,7 @@ Spry.Widget.TabbedPanels.setOptions = function(obj, optionsObj, ignoreUndefinedP
 	}
 };
 
-Spry.Widget.TabbedPanels.prototype.getTabGroup = function()
+HappyTab.Widget.HappyPanels.prototype.getTabGroup = function()
 {
 	if (this.element)
 	{
@@ -130,7 +105,7 @@ Spry.Widget.TabbedPanels.prototype.getTabGroup = function()
 	return null;
 };
 
-Spry.Widget.TabbedPanels.prototype.getTabs = function()
+HappyTab.Widget.HappyPanels.prototype.getTabs = function()
 {
 	var tabs = [];
 	var tg = this.getTabGroup();
@@ -139,7 +114,7 @@ Spry.Widget.TabbedPanels.prototype.getTabs = function()
 	return tabs;
 };
 
-Spry.Widget.TabbedPanels.prototype.getContentPanelGroup = function()
+HappyTab.Widget.HappyPanels.prototype.getContentPanelGroup = function()
 {
 	if (this.element)
 	{
@@ -150,7 +125,7 @@ Spry.Widget.TabbedPanels.prototype.getContentPanelGroup = function()
 	return null;
 };
 
-Spry.Widget.TabbedPanels.prototype.getContentPanels = function()
+HappyTab.Widget.HappyPanels.prototype.getContentPanels = function()
 {
 	var panels = [];
 	var pg = this.getContentPanelGroup();
@@ -159,7 +134,7 @@ Spry.Widget.TabbedPanels.prototype.getContentPanels = function()
 	return panels;
 };
 
-Spry.Widget.TabbedPanels.prototype.getIndex = function(ele, arr)
+HappyTab.Widget.HappyPanels.prototype.getIndex = function(ele, arr)
 {
 	ele = this.getElement(ele);
 	if (ele && arr && arr.length)
@@ -173,7 +148,7 @@ Spry.Widget.TabbedPanels.prototype.getIndex = function(ele, arr)
 	return -1;
 };
 
-Spry.Widget.TabbedPanels.prototype.getTabIndex = function(ele)
+HappyTab.Widget.HappyPanels.prototype.getTabIndex = function(ele)
 {
 	var i = this.getIndex(ele, this.getTabs());
 	if (i < 0)
@@ -181,17 +156,17 @@ Spry.Widget.TabbedPanels.prototype.getTabIndex = function(ele)
 	return i;
 };
 
-Spry.Widget.TabbedPanels.prototype.getCurrentTabIndex = function()
+HappyTab.Widget.HappyPanels.prototype.getCurrentTabIndex = function()
 {
 	return this.currentTabIndex;
 };
 
-Spry.Widget.TabbedPanels.prototype.getTabbedPanelCount = function(ele)
+HappyTab.Widget.HappyPanels.prototype.getHappyPanelCount = function(ele)
 {
 	return Math.min(this.getTabs().length, this.getContentPanels().length);
 };
 
-Spry.Widget.TabbedPanels.addEventListener = function(element, eventType, handler, capture)
+HappyTab.Widget.HappyPanels.addEventListener = function(element, eventType, handler, capture)
 {
 	try
 	{
@@ -203,40 +178,40 @@ Spry.Widget.TabbedPanels.addEventListener = function(element, eventType, handler
 	catch (e) {}
 };
 
-Spry.Widget.TabbedPanels.prototype.onTabClick = function(e, tab)
+HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 {
 	this.showPanel(tab);
 };
 
-Spry.Widget.TabbedPanels.prototype.onTabMouseOver = function(e, tab)
+HappyTab.Widget.HappyPanels.prototype.onTabMouseOver = function(e, tab)
 {
 	this.addClassName(tab, this.tabHoverClass);
 };
 
-Spry.Widget.TabbedPanels.prototype.onTabMouseOut = function(e, tab)
+HappyTab.Widget.HappyPanels.prototype.onTabMouseOut = function(e, tab)
 {
 	this.removeClassName(tab, this.tabHoverClass);
 };
 
-Spry.Widget.TabbedPanels.prototype.onTabFocus = function(e, tab)
+HappyTab.Widget.HappyPanels.prototype.onTabFocus = function(e, tab)
 {
 	this.hasFocus = true;
 	this.addClassName(this.element, this.tabFocusedClass);
 };
 
-Spry.Widget.TabbedPanels.prototype.onTabBlur = function(e, tab)
+HappyTab.Widget.HappyPanels.prototype.onTabBlur = function(e, tab)
 {
 	this.hasFocus = false;
 	this.removeClassName(this.element, this.tabFocusedClass);
 };
 
-Spry.Widget.TabbedPanels.ENTER_KEY = 13;
-Spry.Widget.TabbedPanels.SPACE_KEY = 32;
+HappyTab.Widget.HappyPanels.ENTER_KEY = 13;
+HappyTab.Widget.HappyPanels.SPACE_KEY = 32;
 
-Spry.Widget.TabbedPanels.prototype.onTabKeyDown = function(e, tab)
+HappyTab.Widget.HappyPanels.prototype.onTabKeyDown = function(e, tab)
 {
 	var key = e.keyCode;
-	if (!this.hasFocus || (key != Spry.Widget.TabbedPanels.ENTER_KEY && key != Spry.Widget.TabbedPanels.SPACE_KEY))
+	if (!this.hasFocus || (key != HappyTab.Widget.HappyPanels.ENTER_KEY && key != HappyTab.Widget.HappyPanels.SPACE_KEY))
 		return true;
 
 	this.showPanel(tab);
@@ -249,7 +224,7 @@ Spry.Widget.TabbedPanels.prototype.onTabKeyDown = function(e, tab)
 	return false;
 };
 
-Spry.Widget.TabbedPanels.prototype.preorderTraversal = function(root, func)
+HappyTab.Widget.HappyPanels.prototype.preorderTraversal = function(root, func)
 {
 	var stopTraversal = false;
 	if (root)
@@ -268,12 +243,12 @@ Spry.Widget.TabbedPanels.prototype.preorderTraversal = function(root, func)
 	return stopTraversal;
 };
 
-Spry.Widget.TabbedPanels.prototype.addPanelEventListeners = function(tab, panel)
+HappyTab.Widget.HappyPanels.prototype.addPanelEventListeners = function(tab, panel)
 {
 	var self = this;
-	Spry.Widget.TabbedPanels.addEventListener(tab, "click", function(e) { return self.onTabClick(e, tab); }, false);
-	Spry.Widget.TabbedPanels.addEventListener(tab, "mouseover", function(e) { return self.onTabMouseOver(e, tab); }, false);
-	Spry.Widget.TabbedPanels.addEventListener(tab, "mouseout", function(e) { return self.onTabMouseOut(e, tab); }, false);
+	HappyTab.Widget.HappyPanels.addEventListener(tab, "click", function(e) { return self.onTabClick(e, tab); }, false);
+	HappyTab.Widget.HappyPanels.addEventListener(tab, "mouseover", function(e) { return self.onTabMouseOver(e, tab); }, false);
+	HappyTab.Widget.HappyPanels.addEventListener(tab, "mouseout", function(e) { return self.onTabMouseOut(e, tab); }, false);
 
 	if (this.enableKeyboardNavigation)
 	{
@@ -309,14 +284,14 @@ Spry.Widget.TabbedPanels.prototype.addPanelEventListeners = function(tab, panel)
 
 		if (this.focusElement)
 		{
-			Spry.Widget.TabbedPanels.addEventListener(this.focusElement, "focus", function(e) { return self.onTabFocus(e, tab); }, false);
-			Spry.Widget.TabbedPanels.addEventListener(this.focusElement, "blur", function(e) { return self.onTabBlur(e, tab); }, false);
-			Spry.Widget.TabbedPanels.addEventListener(this.focusElement, "keydown", function(e) { return self.onTabKeyDown(e, tab); }, false);
+			HappyTab.Widget.HappyPanels.addEventListener(this.focusElement, "focus", function(e) { return self.onTabFocus(e, tab); }, false);
+			HappyTab.Widget.HappyPanels.addEventListener(this.focusElement, "blur", function(e) { return self.onTabBlur(e, tab); }, false);
+			HappyTab.Widget.HappyPanels.addEventListener(this.focusElement, "keydown", function(e) { return self.onTabKeyDown(e, tab); }, false);
 		}
 	}
 };
 
-Spry.Widget.TabbedPanels.prototype.showPanel = function(elementOrIndex)
+HappyTab.Widget.HappyPanels.prototype.showPanel = function(elementOrIndex)
 {
 	var tpIndex = -1;
 	
@@ -325,15 +300,15 @@ Spry.Widget.TabbedPanels.prototype.showPanel = function(elementOrIndex)
 	else // Must be the element for the tab or content panel.
 		tpIndex = this.getTabIndex(elementOrIndex);
 	
-	if (!tpIndex < 0 || tpIndex >= this.getTabbedPanelCount())
+	if (!tpIndex < 0 || tpIndex >= this.getHappyPanelCount())
 		return;
 
 	var tabs = this.getTabs();
 	var panels = this.getContentPanels();
 
-	var numTabbedPanels = Math.max(tabs.length, panels.length);
+	var numHappyPanels = Math.max(tabs.length, panels.length);
 
-	for (var i = 0; i < numTabbedPanels; i++)
+	for (var i = 0; i < numHappyPanels; i++)
 	{
 		if (i != tpIndex)
 		{
@@ -354,11 +329,11 @@ Spry.Widget.TabbedPanels.prototype.showPanel = function(elementOrIndex)
 	this.currentTabIndex = tpIndex;
 };
 
-Spry.Widget.TabbedPanels.prototype.attachBehaviors = function(element)
+HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(element)
 {
 	var tabs = this.getTabs();
 	var panels = this.getContentPanels();
-	var panelCount = this.getTabbedPanelCount();
+	var panelCount = this.getHappyPanelCount();
 
 	for (var i = 0; i < panelCount; i++)
 		this.addPanelEventListeners(tabs[i], panels[i]);

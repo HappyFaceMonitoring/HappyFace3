@@ -1,0 +1,155 @@
+@charset "UTF-8";
+
+/* CSS configuration for the main HappyFace setup and the tabbed browsing
+ * part.
+ *
+ * Stylesheet configurations for the FastNavigation bar can be found in
+ * FastNavigation.css.
+ *
+ * The module dependent stylesheets are placed in:
+ * .../webpage/config/modules/*.css
+ */
+
+/* Main container for the complete site tabs */
+.HappyPanels {
+	margin: 0px;
+	padding: 0px 0px;
+	float: left;
+	clear: none;
+	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
+	border-left: solid 1px #999;
+}
+
+/* Main container for the navigation tabs */
+.HappyPanelsTabGroup {
+	position: fixed;
+	z-index: 5;
+	top: 50px;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	border-right: solid 0px #999;
+	border-bottom: solid 1px #999;
+}
+
+/* Container for the each tab button */
+.HappyPanelsTab {
+	position: relative;
+	float: left;
+	padding: 4px 10px;
+	margin: 0px 0px 0px 0px;
+	font: bold 0.7em sans-serif;
+	background-color: #DDD;
+	list-style: none;
+	border-left: solid 0px #CCC;
+	border-bottom: solid 0px #999;
+	border-top: solid 1px #999;
+	border-right: solid 1px #999;
+	cursor: pointer;
+}
+
+/* What happens on mouse-over on the tab button? */
+.HappyPanelsTabHover {
+	background-color: #CCC;
+}
+
+/* Look & feel of the selected tab button */
+.HappyPanelsTabSelected {
+	background-color: #FFFFFF;
+	border-bottom: 0px solid #FFF;
+}
+
+/* Look & feel of links within the tab button */
+.HappyPanelsTab a {
+	color: black;
+	text-decoration: none;
+}
+
+/* Definition of all content layers */
+.HappyPanelsContentGroup {
+	clear: both;
+	border-left: solid 0px #CCC;
+	border-bottom: solid 1px #999;
+	border-top: solid 0px #999;
+	border-right: solid 0px #999;
+}
+
+/* Definition of a single content layer */
+.HappyPanelsContent {
+	position: relative;
+	margin-top: 143px;
+	margin-left: 40px;
+	font-family: sans-serif;
+}
+
+/* Configuration of the title bar/history bar */
+div.TitleBar{
+	position: fixed;
+	z-index: 5;
+	margin: 0px 0px 10px 0px;
+	padding: 0px 0px;
+	background-color: #464646;
+	float: left;
+	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
+	border-left: solid 0px #999;
+	border-right: solid 0px #999;
+	border-bottom: solid 0px #999;
+	border-top: solid 0px #999;
+}
+div.TitleBarElement {
+	position: relative;
+	float: left;
+	padding: 4px 10px;
+	margin: 0px 0px 0px 0px;
+	font: bold 1.0em sans-serif;
+	color: white;
+	list-style: none;
+	border-left: solid 0px #999;
+	border-bottom: solid 0px #999;
+	border-top: solid 0px #999;
+	border-right: solid 1px #999;
+}
+table.TitleBarElementTable {
+	vertical-align:middle;
+	text-align: center;
+	height:30px;
+}
+
+/* Information table for each module which shows up after clicking
+ * on the status button.
+ */
+table.desc {
+	text-align: left;
+	width:860px;
+	background-color: #ddd;
+	border: 1px #999 solid;
+}
+table.desc td {
+	color: #000;
+	padding: 2px;
+	text-align: left;
+	font: bold 0.7em sans-serif;
+}
+
+/* Buttons/Status pictures in the content layer besides each module */ 
+.button {
+	background-color: #FFFFFF;
+	border: 0px;
+	padding: 0px;
+	width: 64px;
+        cursor: pointer;
+}
+
+/* Buttons/Status pictures in the navigation tab at the top of the page */
+.navtab {
+	width: 64px;
+}
+
+/* Separator between the modules */
+hr {
+	border: 0px;
+	border-top: solid 1px #999;
+	border-bottom: transparent;
+	width: 100%;
+}
+
