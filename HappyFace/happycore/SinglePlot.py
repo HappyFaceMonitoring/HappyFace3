@@ -11,5 +11,4 @@ class SinglePlot(Plot):
 	
         # read class config file
 	config = self.readConfigFile('./happycore/SinglePlot') # empty
-	
-	self.url = self.mod_config.get('setup','url')
+

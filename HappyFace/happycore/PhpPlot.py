@@ -35,5 +35,5 @@ class PhpPlot(Plot):
             argList.append(i+'='+self.phpArgs[i])
 
         argList.sort()
-            
-        self.url = self.base_url+"?"+"&".join(argList)
+        self.downloadRequest['plot'] = 'wget:png:'+self.base_url+"?"+"&".join(argList)
+

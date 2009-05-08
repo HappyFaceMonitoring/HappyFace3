@@ -1,18 +1,10 @@
 from xml.dom.minidom import * # for XML parsing
 
-from ModuleBase import *
 
 #############################################
 # class to parse XML sources
 #############################################
-class XMLParsing(ModuleBase):
-
-    def __init__(self, category, timestamp, archive_dir,):
-        ModuleBase.__init__(self, category, timestamp, archive_dir)
-
-	# read class config file
-        config = self.readConfigFile('./happycore/XMLParsing') # empty
-
+class XMLParsing():
 
     def parse_xmlfile_minidom(self,xml_file):
 

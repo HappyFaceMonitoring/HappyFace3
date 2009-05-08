@@ -1,14 +1,17 @@
 from GetData import *
+from ModuleBase import *
+from DownloadTag import *
 
 #############################################
 # class to donwload plots (via WGET command)
 # self.url has to be defined by the inhereting module
 #############################################
-class Plot(GetData):
 
+class Plot(ModuleBase):
+    
     def __init__(self, category, timestamp, archive_dir):
-        GetData.__init__(self, category, timestamp, archive_dir)
-
+        ModuleBase.__init__(self, category, timestamp, archive_dir)
+        
         # read class config file
 	config = self.readConfigFile('./happycore/Plot') # empty
 
@@ -19,20 +22,40 @@ class Plot(GetData):
 	self.db_values['url'] = ""
 	self.db_values['filename'] = ""
 
+        self.plotTag = 'plot'
+
+        
+                
     def run(self):
 
         # run the test
-        success = self.getDataWget(self.url, self.archive_dir, self.__module__) # return True or False
+
+        if not self.plotTag in self.downloadRequest:
+            err = 'Error: Could not find required tag: '+self.plotTag+'\n'
+            sys.stdout.write(err)
+            self.error_message +=err
+            return -1
+
+
+        fileType = self.downloadService.getFileType(self.downloadRequest[self.plotTag])
+
+        filenameFullPath = self.archive_dir +"/" + self.__module__+"."+fileType
+        success,stderr = self.downloadService.copyFile(self.downloadRequest[self.plotTag],filenameFullPath)
+        self.error_message +=stderr
+        
 	if success == True:
 	    self.status = 1.0
-	    filename = "archive/" + str(self.timestamp) + "/" + self.__module__
+	    filename = "archive/" + str(self.timestamp) + "/" + self.__module__+"."+fileType
 	else:
 	    filename = ""
 
-	# definition fo the database table values
-	self.db_values['url'] = self.url.replace('&','&amp;').replace('%','%%') # the replacement ensures the XHTML validation by W3C / printf() PHP command
-	self.db_values['filename'] = filename
 
+	# definition fo the database table values
+        # self.db_values['url'] = self.url.replace('&','&amp;').replace('%','%%') # the replacement ensures the XHTML validation by W3C / printf() PHP command
+
+	self.db_values['filename'] = filename
+	self.db_values['url'] = filename
+        
     def output(self):
 
         # this module_content string will be executed by a printf('') PHP command

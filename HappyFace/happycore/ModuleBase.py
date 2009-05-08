@@ -55,6 +55,33 @@ class ModuleBase(Thread,object):
 	self.db_keys["definition"]	= StringCol()
 	self.db_keys["instruction"]	= StringCol()
 	
+        self.downloadRequest = {}
+        if self.mod_config.has_section('downloadservice'):
+            for i in self.mod_config.items('downloadservice'):
+                self.downloadRequest[i[0]] = i[1]
+                
+
+    def setDownloadService(self,downloadService):
+        self.downloadService = downloadService
+        
+
+
+    def getDownloadRequests(self):
+        downloadList = []
+        for downloadTag in self.downloadRequest:
+            downloadRequest.append(self.downloadRequest[downloadTag])
+        return downloadList
+
+
+
+
+    def getDownloadRequests(self):
+        downloadList = []
+        for downloadTag in self.downloadRequest:
+            downloadList.append(self.downloadRequest[downloadTag])
+        return downloadList
+
+
     def storeToDB(self,lock):
 
 	# definition of the databases values which should be stored

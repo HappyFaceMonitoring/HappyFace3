@@ -1,19 +1,22 @@
 from XMLParsing import *
 from GetData import *
+from ModuleBase import *
 
 #############################################
 # class for USCHI tests (used at Tier1 GridKa)
 #############################################
-class Uschi(XMLParsing,GetData):
+class Uschi(ModuleBase):
 
     def __init__(self, category, timestamp, storage_dir):
-	XMLParsing.__init__(self, category, timestamp, storage_dir)
+	ModuleBase.__init__(self, category, timestamp, storage_dir)
 
 	# read class config file
 	config = self.readConfigFile('./happycore/Uschi')
-	
-	self.source_url = config.get('setup','source_url')
-	self.source_path = config.get('setup','source_path')
+        self.downloadRequest = {}
+        if config.has_section('downloadservice'):
+            for i in config.items('downloadservice'):
+                self.downloadRequest[i[0]] = i[1]
+                
 
 	# from module specifig config file
 	self.testname_string = self.mod_config.get('setup','testname_string')
@@ -29,16 +32,28 @@ class Uschi(XMLParsing,GetData):
 	self.db_values['log'] = ""
 	self.db_values['about'] = ""
 
+
+
+        self.dsTag = 'uschi_xml'
+
+                
     def run(self):
 
         ##############################################################################
         # run the test
 	# downlaod the XML source file and saves it under: __module__ + "source.xml"
-	if self.getDataWget(self.source_url,self.source_path,self.__module__ + "source.xml") == False:
-	    return
-	
-	# parse the XML source file
-	uschi_dom_object = self.parse_xmlfile_minidom(self.source_path + "/" + self.__module__ + "source.xml")
+
+
+        if not self.dsTag in self.downloadRequest:
+            err = 'Error: Could not find required tag: '+self.dsTag+'\n'
+            sys.stdout.write(err)
+            self.error_message +=err
+            return -1
+
+        success,uschiFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+	uschi_dom_object = XMLParsing().parse_xmlfile_minidom(uschiFile)
+
+
 
         ##############################################################################
         # if xml parsing fails, abort the test; 

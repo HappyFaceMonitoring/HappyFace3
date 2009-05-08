@@ -21,6 +21,8 @@ from CategoryNavigationTab import *
 from CategoryContentTab import *
 from FinalOutput import *
 
+from DownloadService import *
+
 ##########################################################
 # load the config file
 # create storage directory for binary files
@@ -49,6 +51,7 @@ def HappyFace():
 
     # relative path of the output directory (index.php, archive, database, ...)
     webpage_dir	= config.get('setup','webpage_dir')
+    tmp_dir     = config.get('setup','tmp_dir')
     theme	= config.get('setup','theme')
 
     # create timestamp (unixtime), set seconds to "0"
@@ -74,6 +77,14 @@ def HappyFace():
         sys.stdout.write('Could not initiate or create the database ' + os.getcwd() + "/" + database + ', aborting ...\n')
         sys.exit(-1)
 
+
+    # definition of the global timeout
+    timeout        =  int(config.get('setup','timeout_module'))
+    timeoutDowload =  int(config.get('setup','timeout_download'))
+
+
+
+
     ##########################################################
     ################ start with the execution ################
 
@@ -83,8 +94,9 @@ def HappyFace():
     # directory collects the module objects
     modObj_list = {}
 
-    # parallel execution of the modules (threading)
-    # see therefore: http://www.wellho.net/solutions/python-python-threads-a-first-example.html
+    print "HappyFace:Start with module preparation."
+    moduleCount = 0
+    # Initialisation of Modules
     for category in config.get('setup','categories').split(","):
 	for module in config.get(category,'modules').split(","):
 
@@ -92,18 +104,41 @@ def HappyFace():
 
             # import module class dynamically
 	    modClass = __import__(module)
-
+            moduleCount+=1
        	    # create a object of the class dynamically
        	    modObj_list[module] = getattr(modClass,module)(category, timestamp, archive_dir)
+            print "  "+str(moduleCount)+": "+module
+    print "HappyFace: Module preparation finished."
 
-       	    # execute the object in a thread
-	    modObj_list[module].start()
+
+    # Preparation of Download Service
+    # All files are selected for download
+    downloadService = DownloadService(tmp_dir)
+    for module in modObj_list.keys():
+        for downloadTag in modObj_list[module].getDownloadRequests():
+            downloadService.add(downloadTag)
+
+
+    #Start parallel download of all specified files
+    #timeout will come soon
+    print "DownloadService: Start file download"
+    downloadService.download(timeoutDowload)
+    print "DownloadService: Download finished"
+
+    # parallel execution of the modules (threading)
+    # see therefore: http://www.wellho.net/solutions/python-python-threads-a-first-example.html
+    for module in modObj_list.keys():
+        # make downloadService available for each module
+        modObj_list[module].setDownloadService(downloadService)
+        # execute the object in a thread
+        modObj_list[module].start()
+
+
+
+    print "HappyFace: Start module processing." 
 
     # lock object for exclusive database access
     lock = thread.allocate_lock()
-
-    # definition of the global timeout
-    timeout	= int(config.get('setup','timeout'))
 
     for category in config.get('setup','categories').split(","):
 
@@ -142,6 +177,8 @@ def HappyFace():
         navigation	+= CategoryNavigationTab(category, cat_title, cat_type, cat_algo).output
         content		+= CategoryContentTab(cat_content,config,category,timestamp).output
 
+    print "HappyFace: Module processing finished." 
+
     # create final PHP/HTML output
     final_output = FinalOutput(config,theme,navigation,content).output
 
@@ -153,6 +190,9 @@ def HappyFace():
     except:
         sys.stdout.write('Could not create final output ' + webpage_dir + '/index.php , aborting ...\n')
         sys.exit(-1)
+
+
+    downloadService.clean()
 
     print "\nDONE!!\n"
 
