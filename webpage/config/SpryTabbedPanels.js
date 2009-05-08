@@ -1,5 +1,4 @@
 /* SpryTabbedPanels.js - Revision: Spry Preview Release 1.4 */
-
 // Copyright (c) 2006. Adobe Systems Incorporated.
 // All rights reserved.
 //
