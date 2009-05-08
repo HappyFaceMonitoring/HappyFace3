@@ -54,7 +54,8 @@ class FinalOutput(object):
 	output += '<title>HappyFace v2.0a</title>' + "\n"
 	output += '<script src="config/SpryTabbedPanels.js" type="text/javascript"></script>' + "\n"
 	output += '<link href="config/SpryTabbedPanels.css" rel="stylesheet" type="text/css" />' + "\n"
-	output += '<link href="config/Navigation.css" rel="stylesheet" type="text/css" />' + "\n"
+	output += '<script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
+	output += '<link href="config/FastNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '</head>' + "\n"
 	
 	# body
