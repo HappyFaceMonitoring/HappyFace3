@@ -188,7 +188,7 @@ class ModuleBase(Thread,object):
               </td>
              </tr>
             </table>
-            <br/><hr/>
+            <br/><hr class="HappyHr"/>
             ');
         }
         ?>

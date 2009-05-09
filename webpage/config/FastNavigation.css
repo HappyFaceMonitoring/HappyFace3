@@ -1,7 +1,14 @@
-a {
-	text-decoration:none;
-	color:#464646;
-}
+/* CSS configuration for the HappyFace FastNavigation part.
+ *
+ * Stylesheet configurations for the main HappyFace can be found in
+ * TabNavigation.css.
+ *
+ * The module dependent stylesheets are placed in:
+ * .../webpage/config/modules/*.css
+ *
+ * Naming convention FastNavigation:
+ * All class/id definitions should start with HappyFN...
+ */
 
 /*
 the scrollbar of the navigator is on the right side. I have found no way
@@ -9,72 +16,83 @@ to move it to the left side, nor to change its width or color. Maybe there
 is a way later. 
 */
 
-.nav {
-	position: fixed;
-	z-index: 5;
-	top: 155px;
-	left: 8px;
+/* FastNavigation div configuration */
+.HappyFNnav {
+	position:fixed;
+	z-index:5;
+	top:155px;
+	left:-192px;
 	width:250px;
-	overflow-x: hidden;
-	overflow-y: auto;
-	font: bold 0.7em sans-serif;
+	overflow-x:hidden;
+	overflow-y:auto;
+	font:bold 0.7em sans-serif;
 }
-
-.nav ul {
+.HappyFNnav ul {
 	list-style:none;
 	margin:0;
 	padding:0;
-	overflow-x: hidden;
+	overflow-x:hidden;
 }
- 
-.nav li {
+.HappyFNnav li {
 	margin:0px;
 	padding:0px;
 }
-
-.nav a:link,
-.nav a:visited {
+.HappyFNnav a:link,
+.HappyFNnav a:visited {
 	display:block;
 	margin:0px;
 	padding:1.0em;
-       	text-decoration: none;
+	text-decoration:none;
 	background-color:#696969;
 	color:#f8f8ff;
 }
-
-.nav a:hover {
+.HappyFNnav a:hover {
 	background-color:#a9a9a9;
 }
 
-.nav_entry {
+/* Module name part of FastNav */
+.HappyFNnaventry {
 	vertical-align:middle;
 	width:240px;
-	border-left: 5px solid #696969;
+	border-left:5px solid #696969;
 	border-collapse:collapse;
 	background-color:#696969;
+	opacity:0.9;
 }
 
 /* div with the navbar icons */
-.imgdiv {
+.HappyFNnavimg {
 	width:32px;
 	height:32px; 
 	border:0px;
-	right: 0px;
+	right:0px;
+}
+.HappyFNnavimg a:link,
+.HappyFNnavimg a:visited {
+	display:block;
+	margin:0px;
+	padding:0.0em;
+	text-decoration: none;
+	background-color:#696969;
+	color:#f8f8ff;
+}
+.HappyFNnavimg a:hover {
+	opacity:0.6;
+	filter:alpha(opacity=60);
 }
 
 /* div with the hide FastNav button */
-.topdiv {
+.HappyFNtopdiv {
 	margin:0px;
 	margin-left:10px;
 	margin-right:0.8em;
 }
-
-.topdiv a:link,
-.topdiv a:visited {
+.HappyFNtopdiv a:link,
+.HappyFNtopdiv a:visited {
 	display:block;
 	margin:0px;
 	padding:0.2em;
-       	text-decoration: none;
+	text-decoration: none;
 	background-color:#696969;
 	color:#f8f8ff;
 }

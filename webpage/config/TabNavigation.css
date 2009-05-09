@@ -8,6 +8,9 @@
  *
  * The module dependent stylesheets are placed in:
  * .../webpage/config/modules/*.css
+ *
+ * Naming convention TabNavigation:
+ * All class/id definitions should start with Happy...
  */
 
 /* Main container for the complete site tabs */
@@ -91,6 +94,7 @@
 	margin: 0px 0px 10px 0px;
 	padding: 0px 0px;
 	background-color: #464646;
+	left: 8px;
 	float: left;
 	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
 	border-left: solid 0px #999;
@@ -147,14 +151,6 @@
 	width: 64px;
 }
 
-/* Separator between the modules */
-hr {
-	border: 0px;
-	border-top: solid 1px #999;
-	border-bottom: transparent;
-	width: 100%;
-}
-
 /* Layer below the navigation part to hide the content layer */
 .HappySolidLayer {
 	position: fixed;
@@ -165,5 +161,13 @@ hr {
 	border-left: solid 0px #999;
 	border-bottom: solid 0px #999;
 	z-index: 4;
+}
+
+/* Separator between the modules */
+.HappyHr {
+	border: 0px;
+	border-top: solid 1px #999;
+	border-bottom: transparent;
+	width: 100%;
 }
 

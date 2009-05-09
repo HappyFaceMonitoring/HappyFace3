@@ -66,12 +66,12 @@ class FinalOutput(object):
 	output += '<div id="HappyPanels1" class="HappyPanels">' + "\n"
 
 	# input navigation
-	output += '  <ul id="HappyPanelsTabGroup1" class="HappyPanelsTabGroup">' + "\n"
+	output += '  <ul class="HappyPanelsTabGroup">' + "\n"
 	output += navigation
 	output += '  </ul>' + "\n"
 
 	# input content
-	output += '  <div id="HappyPanelsContentGroup1" class="HappyPanelsContentGroup">' + "\n"
+	output += '  <div class="HappyPanelsContentGroup">' + "\n"
 	output += content + "\n"
 	output += '  </div>' + "\n"
 
