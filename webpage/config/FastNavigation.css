@@ -96,3 +96,7 @@ is a way later.
 	background-color:#696969;
 	color:#f8f8ff;
 }
+.HappyFNtopdiv a:hover {
+	opacity:0.6;
+	filter:alpha(opacity=60);
+}
