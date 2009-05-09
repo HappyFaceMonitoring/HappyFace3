@@ -20,7 +20,7 @@
 	float: left;
 	clear: none;
 	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
-	border-left: solid 1px #999;
+	border-left: solid 0px #999;
 }
 
 /* Main container for the navigation tabs */
@@ -74,7 +74,7 @@
 .HappyPanelsContentGroup {
 	clear: both;
 	border-left: solid 0px #CCC;
-	border-bottom: solid 1px #999;
+	border-bottom: solid 0px #999;
 	border-top: solid 0px #999;
 	border-right: solid 0px #999;
 }
@@ -83,8 +83,11 @@
 .HappyPanelsContent {
 	position: relative;
 	margin-top: 143px;
-	margin-left: 40px;
+	margin-left: 0px;
+	padding: 0px 40px;
 	font-family: sans-serif;
+	border-left: solid 1px #999;
+	border-bottom: solid 1px #999;
 }
 
 /* Configuration of the title bar/history bar */

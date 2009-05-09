@@ -10,7 +10,7 @@ pic2.src = "config/images/rightarrow.png";
  * values compared to e.g. Firefox. Therefore this strange
  * number of '42'.
  */
-function movenav (navid) {
+function movenav(navid) {
 	if (document.getElementById(navid).offsetLeft >= -42) {
 		document.getElementById(navid).style.left="-192px";
 		document.getElementById(navid + "arrow").src="config/images/rightarrow.png";
@@ -18,4 +18,11 @@ function movenav (navid) {
 		document.getElementById(navid).style.left="8px";
 		document.getElementById(navid + "arrow").src="config/images/leftarrow.png";
 	}
+}
+
+/* Functiony to jump to the different modules and move content 
+ * layer to the proper position.
+ */
+function goto(id,target) {
+	window.scroll(0,document.getElementById(target).offsetTop+15);
 }
