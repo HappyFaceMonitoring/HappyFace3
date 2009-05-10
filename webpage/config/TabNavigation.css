@@ -127,6 +127,7 @@
 }
 .HappyTitleBarElementTable form {
 	margin: 0px 0px 0px 0px;
+	padding: 0px;
 }
 
 /* Information table for each module which shows up after clicking
