@@ -26,7 +26,7 @@ class CategoryContentTab(object):
 
 	output = ""
 
-        output += '<div id="HappyPanelsContent" class="HappyPanelsContent">' + "\n"
+        output += '<div class="HappyPanelsContent">' + "\n"
 
         output += fast_nav + "\n"
 

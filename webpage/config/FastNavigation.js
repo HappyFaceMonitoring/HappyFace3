@@ -39,17 +39,18 @@ function goto(target) {
 
 /* Get browser type */
 function getBrowser() {
+	var browser = "UNKNOWN";
 	if (navigator.userAgent.search(/Firefox/) > -1) {
-		var browser = "FF";
+		browser = "FF";
 	}
 	if (navigator.userAgent.search(/MSIE 7/) > -1) {
-		var browser = "IE7";
+		browser = "IE7";
 	}
 	if (navigator.userAgent.search(/MSIE 8/) > -1) {
-		var browser = "IE8";
+		browser = "IE8";
 	}
 	if (navigator.userAgent.search(/Opera/) > -1) {
-		var browser = "OP";
+		browser = "OP";
 	}
 	return browser;
 };

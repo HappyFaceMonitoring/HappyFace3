@@ -12,26 +12,26 @@ class TimeMachineController(object):
 	    <tr><td>
 	    <form action="<?php echo $PHP_SELF; ?>" method="get">
 	    <div>
-		Date: <input name="date" type="text" size="12" style="text-align:center;" value="<?php echo $date_string; ?>" />
-		Time: <input name="time" type="text" size="6" style="text-align:center;" value="<?php echo $time_string; ?>" />
-		<input name="submit" type="submit" value="Goto" />
+		 Date: <input name="date" type="text" size="10" style="text-align:center;" value="<?php echo $date_string; ?>" />
+		 Time: <input name="time" type="text" size="4" style="text-align:center;" value="<?php echo $time_string; ?>" />
+  	         <button onclick="javascript:this.submit()" onfocus="this.blur()">Goto</button>
 	    </div></form>
             </td><td>
 	    <form action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
 	    <div>
-		 <input name="reset" type="submit" value="Now" />
+		 <button onclick="javascript:this.submit()" onfocus="this.blur()">Now</button>
 	    </div>
 	    </form>
 	    </td><td>
 	    <form action="<?php echo $PHP_SELF; ?>" method="get">
 	    <div>
-		 <input name="back" type="submit" value="<--" />
+  	         <button onclick="javascript:this.submit()" onfocus="this.blur()">&lt;--</button>
 	    </div>
 	    </form>
 	    </td><td>
 	    <form action="<?php echo $PHP_SELF; ?>" method="get">
 	    <div>
-		 <input name="fwd" type="submit" value="-->" />
+  	         <button onclick="javascript:this.submit()" onfocus="this.blur()">--&gt;</button>
 	    </div>
 	    </form>	   
 	    </td><td>

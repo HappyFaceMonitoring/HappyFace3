@@ -6,7 +6,7 @@ class CategoryNavigationTab(object):
 	# build navigation tab for the navigation bar
 	output = ""
 	
-	output += '    <li id="HappyPanelsTab1" class="HappyPanelsTab">' + "\n" # tabindex="0" onfocus="this.blur()"
+	output += '    <li class="HappyPanelsTab">' + "\n" # tabindex="0" onfocus="this.blur()"
 	output += '      <table>' + "\n"
 	output += '        <tr>' + "\n"
 	output += '          <td><div style="text-align:center;">' + "\n"
