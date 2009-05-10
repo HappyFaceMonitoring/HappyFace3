@@ -50,7 +50,7 @@ class FinalOutput(object):
 	# header
 	output += '<head>' + "\n"
 	output += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />' + "\n"
-	output += '<title>HappyFace v2.0a</title>' + "\n"
+	output += '<title>HappyFace v2</title>' + "\n"
 	output += '<script src="config/TabNavigation.js" type="text/javascript"></script>' + "\n"
 	output += '<link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '<script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"

@@ -9,7 +9,8 @@ class TimeMachineController(object):
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td style="color:orange;">HappyFace Project v2</td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td><?php printf($time_message); ?></td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable">
-	    <tr><td><form action="<?php echo $PHP_SELF; ?>" method="get">
+	    <tr><td>
+	    <form action="<?php echo $PHP_SELF; ?>" method="get">
 	    <div>
 		Date: <input name="date" type="text" size="12" style="text-align:center;" value="<?php echo $date_string; ?>" />
 		Time: <input name="time" type="text" size="6" style="text-align:center;" value="<?php echo $time_string; ?>" />
