@@ -5,10 +5,10 @@ var HappyTab;
 if (!HappyTab) HappyTab = {};
 if (!HappyTab.Widget) HappyTab.Widget = {};
 
-HappyTab.Widget.HappyPanels = function(element, opts)
+HappyTab.Widget.HappyPanels = function(element, defTab, opts)
 {
 	this.element = this.getElement(element);
-	this.defaultTab = 0; // Show the first panel by default.
+	this.defaultTab = defTab;
 	this.bindings = [];
 	this.tabSelectedClass = "HappyPanelsTabSelected";
 	this.tabHoverClass = "HappyPanelsTabHover";
@@ -53,7 +53,7 @@ HappyTab.Widget.HappyPanels.prototype.getElement = function(ele)
 	if (ele && typeof ele == "string")
 		return document.getElementById(ele);
 	return ele;
-}
+};
 
 HappyTab.Widget.HappyPanels.prototype.getElementChildren = function(element)
 {
@@ -181,6 +181,7 @@ HappyTab.Widget.HappyPanels.addEventListener = function(element, eventType, hand
 HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 {
 	this.showPanel(tab);
+	window.scroll(0,0);
 };
 
 HappyTab.Widget.HappyPanels.prototype.onTabMouseOver = function(e, tab)

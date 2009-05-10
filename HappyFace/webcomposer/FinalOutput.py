@@ -80,10 +80,17 @@ class FinalOutput(object):
 	# include layer to hide content when scrolling
 	output += '<div class="HappySolidLayer"></div>' + "\n"
 
+	# check which tab was selected for reload
+	output += '<script type="text/javascript">' + "\n"
+	output += '<!--' + "\n"
+	output += 'var selectedTab=0;' + "\n"
+	output += '//-->' + "\n"
+	output += '</script>' + "\n"
+
 	# some javascripts for website navigation
 	output += '<script type="text/javascript">' + "\n"
 	output += '<!--' + "\n"
-	output += 'var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1");' + "\n"
+	output += 'var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab);' + "\n"
 	output += '//-->' + "\n"
 	output += '</script>' + "\n"
 	
@@ -98,7 +105,7 @@ class FinalOutput(object):
 	output += '}' + "\n"
 	output += '//-->' + "\n"
 	output += '</script>' + "\n"
-	
+
 	# end of html output
 	output += '</body>' + "\n"
 	output += '</html>' + "\n"

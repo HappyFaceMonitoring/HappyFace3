@@ -18,11 +18,38 @@ function movenav(navid) {
 		document.getElementById(navid).style.left="8px";
 		document.getElementById(navid + "arrow").src="config/images/leftarrow.png";
 	}
-}
+};
 
 /* Functiony to jump to the different modules and move content 
  * layer to the proper position.
  */
-function goto(id,target) {
-	window.scroll(0,document.getElementById(target).offsetTop+15);
-}
+function goto(target) {
+	var browser = getBrowser();
+	if (browser == "FF") {
+		var targetY = document.getElementById(target).offsetTop+15;
+	} 
+	else if (browser == "IE7") {
+		var targetY = document.getElementById(target).offsetTop-140;
+	} 
+	else {
+		var targetY = document.getElementById(target).offsetTop;
+	}
+	window.scrollTo(0,targetY);
+};
+
+/* Get browser type */
+function getBrowser() {
+	if (navigator.userAgent.search(/Firefox/) > -1) {
+		var browser = "FF";
+	}
+	if (navigator.userAgent.search(/MSIE 7/) > -1) {
+		var browser = "IE7";
+	}
+	if (navigator.userAgent.search(/MSIE 8/) > -1) {
+		var browser = "IE8";
+	}
+	if (navigator.userAgent.search(/Opera/) > -1) {
+		var browser = "OP";
+	}
+	return browser;
+};

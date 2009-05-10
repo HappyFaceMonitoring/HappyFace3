@@ -19,7 +19,6 @@ is a way later.
 /* FastNavigation div configuration */
 .HappyFNnav {
 	position:fixed;
-	z-index:5;
 	top:155px;
 	left:-192px;
 	width:250px;
@@ -77,8 +76,8 @@ is a way later.
 	color:#f8f8ff;
 }
 .HappyFNnavimg a:hover {
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
 	opacity:0.6;
-	filter:alpha(opacity=60);
 }
 
 /* div with the hide FastNav button */
@@ -97,6 +96,6 @@ is a way later.
 	color:#f8f8ff;
 }
 .HappyFNtopdiv a:hover {
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
 	opacity:0.6;
-	filter:alpha(opacity=60);
 }
