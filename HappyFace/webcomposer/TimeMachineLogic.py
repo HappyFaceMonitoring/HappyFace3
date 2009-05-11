@@ -22,6 +22,9 @@ class TimeMachineLogic(object):
 	    # read $_GET["..."] variables (from previous views)
 	    if ($_GET["date"] != "" && $_GET["time"] != "") {
 
+		# variable to disable the auto reload on history view
+		$historyview = "true";
+	
 	    	# build timestamp array
 		$ta = date_parse($_GET["date"] . " " . $_GET["time"]);
 
@@ -61,5 +64,6 @@ class TimeMachineLogic(object):
 	    # define a RED colored time string for the time bar output
 	    if ($server_time - $timestamp < 1800) { $time_message = '<span>' . date("D, d. M Y, H:i", $timestamp) . '</span>'; }
 	    else { $time_message = '<span style="color:red;">' . date("D, d. M Y, H:i", $timestamp) . '</span>'; }
+
 	?>
 	"""

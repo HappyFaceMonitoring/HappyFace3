@@ -34,6 +34,7 @@ function goto(target) {
 	else {
 		var targetY = document.getElementById(target).offsetTop;
 	}
+	document.getElementById('ReloadMod').value=target;
 	window.scrollTo(0,targetY);
 };
 

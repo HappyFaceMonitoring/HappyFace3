@@ -58,7 +58,7 @@ class FinalOutput(object):
 	output += '</head>' + "\n"
 	
 	# body
-	output += '<body>' + "\n"
+	output += '<body onload="javascript:HappyReload(300)">' + "\n"
 
 	# time bar on the top of the website, input forms for time control
 	output += TimeMachineController().output
@@ -72,6 +72,7 @@ class FinalOutput(object):
 
 	# input content
 	output += '  <div class="HappyPanelsContentGroup">' + "\n"
+
 	output += content + "\n"
 	output += '  </div>' + "\n"
 
@@ -80,12 +81,47 @@ class FinalOutput(object):
 	# include layer to hide content when scrolling
 	output += '<div class="HappySolidLayer"></div>' + "\n"
 
-	# check which tab was selected for reload
-	output += '<script type="text/javascript">' + "\n"
-	output += '<!--' + "\n"
-	output += 'var selectedTab=0;' + "\n"
-	output += '//-->' + "\n"
-	output += '</script>' + "\n"
+	# logic to memorize selected tab on auto reload
+	output += """
+		<?php
+			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
+			else { $selectedTab = "0"; }
+			printf('
+				<script type="text/javascript">
+				<!-- 
+				var selectedTab='.$selectedTab.'; 
+				//-->
+				</script>
+			');
+			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
+		?>
+		"""
+	output += '<form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get"><div>' + "\n"
+	output += ' <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
+	output += ' <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
+	output += '</div></form>' + "\n"
+	output += """
+		<?php
+			if ($selectedMod != "") {
+				printf('
+					<script type="text/javascript">
+					<!-- 
+					goto("'.$selectedMod.'"); 
+					//-->
+					</script>	
+				');
+			}
+			if ($historyview) {
+				printf('
+					<script type="text/javascript">
+					<!-- 
+					DontReload=true; 
+					//-->
+					</script>	
+				');
+			}
+		?>
+		"""
 
 	# some javascripts for website navigation
 	output += '<script type="text/javascript">' + "\n"

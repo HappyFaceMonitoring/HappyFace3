@@ -2,6 +2,7 @@
 
 /* Initialise */
 var HappyTab;
+var DontReload = false;
 if (!HappyTab) HappyTab = {};
 if (!HappyTab.Widget) HappyTab.Widget = {};
 
@@ -181,6 +182,8 @@ HappyTab.Widget.HappyPanels.addEventListener = function(element, eventType, hand
 HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 {
 	this.showPanel(tab);
+	document.getElementById('ReloadTab').value=this.getTabIndex(tab);
+	document.getElementById('ReloadMod').value='';
 	window.scroll(0,0);
 };
 
@@ -341,3 +344,10 @@ HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(element)
 
 	this.showPanel(this.defaultTab);
 };
+
+/* function to set the right values before auto-reloading */
+function HappyReload(time) {
+	if(!DontReload) {
+		refresh = setTimeout("document.getElementById('ReloadForm').submit();", time*1000);
+	}
+}
