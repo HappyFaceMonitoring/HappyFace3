@@ -11,6 +11,18 @@ from ModuleResultsArrayBuilder import *
 class FinalOutput(object):
     def __init__(self,config,theme,navigation,content):
 
+        self.config     = config
+        self.theme      = theme
+        self.navigation = navigation
+        self.content    = content
+        self.cssList = []
+
+
+    def setCss(self,cssList):
+        self.cssList = cssList
+
+    def getOutput(self):
+
 	output = ""
 
 	#######################################################
@@ -26,7 +38,7 @@ class FinalOutput(object):
 	output += TimeMachineLogic().output
 	
 	# SQL call routines for all active modules
-	output += SQLCallRoutines(config).output
+	output += SQLCallRoutines(self.config).output
 
 	# create an multi-array variable with all important information from the modules:
 	# status, type, weight, category => used by the CategoryStatusLogic
@@ -36,10 +48,10 @@ class FinalOutput(object):
 	output += CategoryStatusLogic().output
 
 	# provides a function for the category status symbol
-	output += CategoryStatusSymbolLogic(theme).output
+	output += CategoryStatusSymbolLogic(self.theme).output
 
 	# provides a function for the module status symbol
-	output += ModuleStatusSymbolLogic(theme).output
+	output += ModuleStatusSymbolLogic(self.theme).output
 	
 	#######################################################
 
@@ -55,6 +67,9 @@ class FinalOutput(object):
 	output += '<link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '<script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
 	output += '<link href="config/FastNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
+        for css in self.cssList:
+            output += '<link href="'+css+'" rel="stylesheet" type="text/css" />' + "\n"
+        
 	output += '</head>' + "\n"
 	
 	# body
@@ -67,13 +82,13 @@ class FinalOutput(object):
 
 	# input navigation
 	output += '  <ul class="HappyPanelsTabGroup">' + "\n"
-	output += navigation
+	output += self.navigation
 	output += '  </ul>' + "\n"
 
 	# input content
 	output += '  <div class="HappyPanelsContentGroup">' + "\n"
 
-	output += content + "\n"
+	output += self.content + "\n"
 	output += '  </div>' + "\n"
 
 	output += '</div>' + "\n"
@@ -154,4 +169,4 @@ class FinalOutput(object):
 	
 	#######################################################
 	
-	self.output = output
+	return output

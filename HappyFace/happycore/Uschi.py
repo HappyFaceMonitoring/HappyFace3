@@ -12,11 +12,10 @@ class Uschi(ModuleBase):
 
 	# read class config file
 	config = self.readConfigFile('./happycore/Uschi')
-        self.downloadRequest = {}
-        if config.has_section('downloadservice'):
-            for i in config.items('downloadservice'):
-                self.downloadRequest[i[0]] = i[1]
-                
+        self.readDownloadRequests(config)
+
+
+
 
 	# from module specifig config file
 	self.testname_string = self.mod_config.get('setup','testname_string')

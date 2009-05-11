@@ -11,6 +11,8 @@ class PhpPlotCMSPhedex(PhpPlot):
 	
         # read class config file
 	config = self.readConfigFile('./happycore/PhpPlotCMSPhedex')
+
+        
 	self.base_url = config.get('setup','base_url')
         self.getPhpArgs(config)
 

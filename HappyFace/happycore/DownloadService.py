@@ -35,9 +35,9 @@ class DownloadService():
 
         if not downloadstring in self.downloadTags:
             self.downloadTags[downloadstring] = DownloadTag(prog,filetype,args,self.subdir)
-#            print "DownloadService: Adding "+downloadstring+" for download."
         else:
-            print "DownloadService: "+downloadstring+" already scheduled for download."
+            print "DownloadService: Tag already scheduled for download."
+            print "    "+downloadstring
         
 
     def download(self,timeout):
@@ -60,6 +60,8 @@ class DownloadService():
 
 
     def clean(self):
+        if len(self.downloadTags.keys()) > 0:
+            print "DownloadService: deleting tmp files"
         for i in self.downloadTags.keys():
             os.remove(self.downloadTags[i].getFilePath())
             

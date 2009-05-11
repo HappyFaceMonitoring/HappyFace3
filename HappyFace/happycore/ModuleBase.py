@@ -15,7 +15,11 @@ class ModuleBase(Thread,object):
 
         # read class config file
         config = self.readConfigFile('./happycore/ModuleBase') # empty
+        self.cssFiles = {}
+        self.addCssFile(config,'./happycore/ModuleBase')
 
+            
+        
         self.category = category
 	self.timestamp = timestamp
         self.archive_dir = archive_dir
@@ -25,12 +29,17 @@ class ModuleBase(Thread,object):
         self.error_message = ""
 
 	# read module specific config file, check where the module is stored
+        module_path = ""
 	if os.path.isfile('./modules/' + self.__module__ + '.py') == True:
-	    module_config_file = './modules/' + self.__module__
+	    module_path = './modules/'
 	if os.path.isfile('./modules.local/' + self.__module__ + '.py') == True:
-	    module_config_file = './modules.local/' + self.__module__
+	    module_path = './modules.local/' 
+
+        
+        module_config_file = module_path+self.__module__
         self.mod_config = self.readConfigFile(module_config_file)
-        self.mod_config
+        self.addCssFile(self.mod_config,module_config_file)
+        
 
 	self.mod_title		= self.mod_config.get('setup','mod_title',self.__module__)
 	self.mod_type		= self.mod_config.get('setup','mod_type',"rated")
@@ -56,10 +65,35 @@ class ModuleBase(Thread,object):
 	self.db_keys["instruction"]	= StringCol()
 	
         self.downloadRequest = {}
-        if self.mod_config.has_section('downloadservice'):
-            for i in self.mod_config.items('downloadservice'):
+        # Read download requests from module config
+        self.readDownloadRequests(self.mod_config)
+        
+
+
+    def addCssFile(self,config,cssfile):
+        use_css = True
+        if config.has_option('setup','css'):
+            use_css = config.getboolean('setup','css')
+            
+        if use_css == True:
+            cssfile+=".css"
+            if os.path.isfile(cssfile):
+                self.cssFiles[os.path.basename(cssfile)] = cssfile
+
+
+    def getCssRequests(self):
+        return self.cssFiles
+
+
+
+    def readDownloadRequests(self,config):
+        if config.has_section('downloadservice'):
+            for i in config.items('downloadservice'):
                 self.downloadRequest[i[0]] = i[1]
                 
+
+
+        
 
     def setDownloadService(self,downloadService):
         self.downloadService = downloadService
@@ -71,8 +105,6 @@ class ModuleBase(Thread,object):
         for downloadTag in self.downloadRequest:
             downloadRequest.append(self.downloadRequest[downloadTag])
         return downloadList
-
-
 
 
     def getDownloadRequests(self):

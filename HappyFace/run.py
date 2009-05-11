@@ -22,6 +22,7 @@ from CategoryContentTab import *
 from FinalOutput import *
 
 from DownloadService import *
+from CssService import *
 
 ##########################################################
 # load the config file
@@ -111,12 +112,18 @@ def HappyFace():
     print "HappyFace: Module preparation finished."
 
 
-    # Preparation of Download Service
-    # All files are selected for download
+    # Preparation of Download and CSS Service
+    # Selecting all files for download
+    # Prepare list of needed css files
     downloadService = DownloadService(tmp_dir)
+    cssService = CssService(webpage_dir,'config/modules')
+    
     for module in modObj_list.keys():
         for downloadTag in modObj_list[module].getDownloadRequests():
             downloadService.add(downloadTag)
+            
+        cssService.add(modObj_list[module].getCssRequests())
+
 
 
     #Start parallel download of all specified files
@@ -178,9 +185,15 @@ def HappyFace():
         content		+= CategoryContentTab(cat_content,config,category,timestamp).output
 
     print "HappyFace: Module processing finished." 
+    print "HappyFace: Start building web page." 
 
     # create final PHP/HTML output
-    final_output = FinalOutput(config,theme,navigation,content).output
+    theFinalOutput = FinalOutput(config,theme,navigation,content)
+    theFinalOutput.setCss(cssService.getCssWebDirFiles())
+    final_output = theFinalOutput.getOutput()
+
+    cssService.syncCssFiles()
+    
 
     # save the output file
     try:
@@ -191,6 +204,7 @@ def HappyFace():
         sys.stdout.write('Could not create final output ' + webpage_dir + '/index.php , aborting ...\n')
         sys.exit(-1)
 
+    print "HappyFace: web page building finished." 
 
     downloadService.clean()
 

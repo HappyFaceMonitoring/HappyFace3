@@ -12,6 +12,7 @@ class PhpPlot(Plot):
         # read class config file
 	config = self.readConfigFile('./happycore/PhpPlot') #empty
 
+        
         self.base_url = ""
         self.phpArgs = {}
 

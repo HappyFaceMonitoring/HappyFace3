@@ -15,6 +15,7 @@ class Plot(ModuleBase):
         # read class config file
 	config = self.readConfigFile('./happycore/Plot') # empty
 
+
         # definition of the database table keys and pre-defined values
 	self.db_keys['url'] = StringCol()
 	self.db_keys['filename'] = StringCol()
