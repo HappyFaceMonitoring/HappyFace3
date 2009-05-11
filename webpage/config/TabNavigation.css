@@ -51,6 +51,7 @@
 	border-top: solid 1px #999;
 	border-right: solid 1px #999;
 	cursor: pointer;
+	min-width: 90px;
 }
 
 /* What happens on mouse-over on the tab button? */
@@ -135,7 +136,7 @@
  */
 .HappyDesc {
 	text-align: left;
-	width:860px;
+	width:800px;
 	background-color: #ddd;
 	border: 1px #999 solid;
 }

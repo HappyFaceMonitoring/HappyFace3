@@ -23,13 +23,14 @@ is a way later.
 	left:-192px;
 	width:250px;
 	font:bold 0.7em sans-serif;
-	overflow:hidden;
+	overflow-x:hidden;
+	overflow-y:auto;
+	max-height:500px;
 }
 .HappyFNnav ul {
 	list-style:none;
 	margin:0;
 	padding:0;
-	overflow:hidden;
 }
 .HappyFNnav li {
 	margin:0px;
