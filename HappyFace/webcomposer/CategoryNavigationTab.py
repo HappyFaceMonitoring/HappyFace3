@@ -7,7 +7,7 @@ class CategoryNavigationTab(object):
 	output = ""
 	
 	output += '    <li class="HappyPanelsTab">' + "\n" # tabindex="0" onfocus="this.blur()"
-	output += '      <table>' + "\n"
+	output += '      <table width="100%">' + "\n"
 	output += '        <tr>' + "\n"
 	output += '          <td><div style="text-align:center;">' + "\n"
 	output += '           <?php printf(getCatStatusSymbol("' + category + '","' + cat_type + '","' + cat_algo + '", $ModuleResultsArray)); ?>' + "\n"

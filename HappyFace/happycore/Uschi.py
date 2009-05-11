@@ -13,9 +13,7 @@ class Uschi(ModuleBase):
 	# read class config file
 	config = self.readConfigFile('./happycore/Uschi')
         self.readDownloadRequests(config)
-
-
-
+	self.addCssFile(config,'./happycore/Uschi')
 
 	# from module specifig config file
 	self.testname_string = self.mod_config.get('setup','testname_string')
@@ -31,17 +29,13 @@ class Uschi(ModuleBase):
 	self.db_values['log'] = ""
 	self.db_values['about'] = ""
 
-
-
         self.dsTag = 'uschi_xml'
-
                 
     def run(self):
 
         ##############################################################################
         # run the test
 	# downlaod the XML source file and saves it under: __module__ + "source.xml"
-
 
         if not self.dsTag in self.downloadRequest:
             err = 'Error: Could not find required tag: '+self.dsTag+'\n'
@@ -51,8 +45,6 @@ class Uschi(ModuleBase):
 
         success,uschiFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
 	uschi_dom_object = XMLParsing().parse_xmlfile_minidom(uschiFile)
-
-
 
         ##############################################################################
         # if xml parsing fails, abort the test; 
@@ -108,18 +100,18 @@ class Uschi(ModuleBase):
         module_content = """
         <?php
         printf('
-            <table class="uschi">
+            <table class="UschiTable">
                 <tr>
-                    <td><div style="text-align:center;"><strong>last USCHI execution: </strong>'.$data["uschi_timestamp"].'</div></td>
-                    <th rowspan="2"><div style="text-align:center;"><strong>error code: '.$data["result"].'</strong></div></th>
+                    <td class="UschiTableHeader">Last USCHI execution: <span style="color:#FF9900"><b>'.$data["uschi_timestamp"].'</b></span></td>
+                    <th rowspan="2">error code: '.$data["result"].'</th>
                 </tr>
                 <tr>
-                    <td><i>'.$data["about"].'</i></td>
+                    <td class="UschiTableInfo">'.$data["about"].'</td>
                 </tr>
             </table>
             <br />
-            <input type="button" value="show/hide results" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-            <div id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>
+            <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
+            <div class="UschiDetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>
             <br />
             ');
             ?>

@@ -1,0 +1,33 @@
+/* CSS file for the HappyFace module: Uschi */
+
+.UschiTable {
+	border: solid 1px #999;
+	width: 800px;
+}
+
+.UschiTable td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+	width: 80%;
+}
+
+.UschiTable th {
+	border: solid 1px #999;
+	text-align: center;
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
+.UschiTableHeader {
+	font-style: normal;
+}
+
+.UschiTableInfo {
+	font-style: oblique;
+}
+
+.UschiDetailedInfo {
+	font-family: monospace;
+	line-height: 14px;
+}
