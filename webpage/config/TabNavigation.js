@@ -2,7 +2,7 @@
 
 /* Initialise */
 var HappyTab;
-var DontReload = false;
+var AutoReload = true;
 if (!HappyTab) HappyTab = {};
 if (!HappyTab.Widget) HappyTab.Widget = {};
 
@@ -347,7 +347,7 @@ HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(element)
 
 /* function to set the right values before auto-reloading */
 function HappyReload(time) {
-	if(!DontReload) {
+	if(AutoReload) {
 		refresh = setTimeout("document.getElementById('ReloadForm').submit();", time*1000);
 	}
 }

@@ -1,0 +1,14 @@
+/* Sample css file for the HappyFace module: get_started 
+ * 
+ * !!! You really should keep to the naming conventions
+ * !!! in order to avoid interactions with other modules.
+ *
+ * Naming convention: All css class/id identifiers should
+ * start with the <module_name>.
+ *
+ * In this case: e.g. get_startedHeader 
+ */
+
+.get_startedHeader {
+	color: #FF0000;
+}

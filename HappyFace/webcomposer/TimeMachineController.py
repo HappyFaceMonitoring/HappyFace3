@@ -6,7 +6,7 @@ class TimeMachineController(object):
 
 	self.output = """	
 	<div class="HappyTitleBar">
-	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td style="color:orange;">HappyFace Project v2</td></tr></table></div>
+	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td style="color:#FF9900;">HappyFace Project v2</td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td><?php printf($time_message); ?></td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable">
 	    <tr><td>

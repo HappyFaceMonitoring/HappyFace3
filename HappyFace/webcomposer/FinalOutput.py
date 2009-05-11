@@ -17,7 +17,6 @@ class FinalOutput(object):
         self.content    = content
         self.cssList = []
 
-
     def setCss(self,cssList):
         self.cssList = cssList
 
@@ -130,7 +129,7 @@ class FinalOutput(object):
 				printf('
 					<script type="text/javascript">
 					<!-- 
-					DontReload=true; 
+					AutoReload=false; 
 					//-->
 					</script>	
 				');

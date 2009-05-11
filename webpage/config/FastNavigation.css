@@ -22,15 +22,14 @@ is a way later.
 	top:155px;
 	left:-192px;
 	width:250px;
-	overflow-x:hidden;
-	overflow-y:auto;
 	font:bold 0.7em sans-serif;
+	overflow:hidden;
 }
 .HappyFNnav ul {
 	list-style:none;
 	margin:0;
 	padding:0;
-	overflow-x:hidden;
+	overflow:hidden;
 }
 .HappyFNnav li {
 	margin:0px;
@@ -76,7 +75,7 @@ is a way later.
 	color:#f8f8ff;
 }
 .HappyFNnavimg a:hover {
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+	/*-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";*/
 	opacity:0.6;
 }
 
@@ -96,6 +95,6 @@ is a way later.
 	color:#f8f8ff;
 }
 .HappyFNtopdiv a:hover {
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+	/*-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";*/
 	opacity:0.6;
 }

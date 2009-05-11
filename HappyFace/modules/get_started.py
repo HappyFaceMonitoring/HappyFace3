@@ -32,7 +32,13 @@ class get_started(ModuleBase):
         # all data stored in DB is available via a $data[key] call
         module_content = """
 	<?php
-		printf('<h3>' . $data["message"] . '</h3>');
+		printf('
+			<h3>' . $data["message"] . '</h3>
+			<br />
+			And this is the css-modified part of this message:
+			<br /><br />
+			<h3 class="get_startedHeader">' . $data["message"] . '</h3>
+		');
 	?>
 	"""
 
