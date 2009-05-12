@@ -15,7 +15,12 @@ class PhpPlot(Plot):
         
         self.base_url = ""
         self.phpArgs = {}
+        self.fileType = ""
 
+        if config.has_option('setup','fileextension'):
+            self.fileType = config.get('setup','fileextension')
+            
+        
 
     def getPhpArgs(self, config):
         for i in config.items('phpArgs'):
@@ -36,5 +41,5 @@ class PhpPlot(Plot):
             argList.append(i+'='+self.phpArgs[i])
 
         argList.sort()
-        self.downloadRequest['plot'] = 'wget:png:'+self.base_url+"?"+"&".join(argList)
+        self.downloadRequest['plot'] = 'wget:'+self.fileType+':'+self.base_url+"?"+"&".join(argList)
 

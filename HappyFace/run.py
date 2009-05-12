@@ -144,8 +144,34 @@ def HappyFace():
 
     print "HappyFace: Start module processing." 
 
+    # wait till all modules are finish OR till the global timeout
+    for module in modObj_list.keys():
+        start = int(time())
+        modObj_list[module].join(timeout)
+        timeout -= int(time()) - start
+        if timeout < 1:
+            break
+
+
     # lock object for exclusive database access
     lock = thread.allocate_lock()
+    for module in modObj_list.keys():
+        if modObj_list[module].isAlive() == True:
+            modObj_list[module]._Thread__stop()
+            modObj_list[module].error_message += "\nCould not execute module in time, "\
+                                                 + modObj_list[module].__module__ \
+                                                 + " abborting ...\n"
+            sys.stdout.write(modObj_list[module].error_message)
+
+         # store results (or pre-defined values if timeout) to DB
+         # collect the output and results of the modules and compose category content
+        modObj_list[module].storeToDB(lock)
+
+
+            
+
+
+
 
     for category in config.get('setup','categories').split(","):
 
@@ -154,30 +180,10 @@ def HappyFace():
         cat_algo	= config.get(category,'cat_algo')
         cat_content	= ""
 
-	# wait till all modules are finish OR till the global timeout
-	for module in config.get(category,'modules').split(","):
-
-	    if module == "": continue
-
-            start = int(time())
-            modObj_list[module].join(timeout)
-            timeout -= int(time()) - start
-	    if timeout < 1:
-		break
 
 	for module in config.get(category,'modules').split(","):
 
 	    if module == "": continue
-
-	    # if the are any running modules: kill them
-            if modObj_list[module].isAlive() == True:
-                modObj_list[module]._Thread__stop()
-                modObj_list[module].error_message += "\nCould not execute module in time, " + modObj_list[module].__module__ + " abborting ...\n"
-                sys.stdout.write(modObj_list[module].error_message)
-
-            # store results (or pre-defined values if timeout) to DB
-            # collect the output and results of the modules and compose category content
-            modObj_list[module].storeToDB(lock)
             cat_content += modObj_list[module].output()
 
         # collect all navigation and content tabs

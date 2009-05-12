@@ -67,8 +67,20 @@ class ModuleBase(Thread,object):
         self.downloadRequest = {}
         # Read download requests from module config
         self.readDownloadRequests(self.mod_config)
+
+##        print self.__class__
+##        print self.listClasses(self.__class__)
+##        print __file__
+##        print "---------------"
         
 
+    def listClasses(self,b):
+        a = []
+        for i in b.__bases__:
+            a.append(str(i))
+            for j in self.listClasses(i):
+                a.append(str(j))
+        return a
 
     def addCssFile(self,config,cssfile):
         use_css = True

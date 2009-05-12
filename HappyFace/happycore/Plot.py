@@ -40,13 +40,13 @@ class Plot(ModuleBase):
 
         fileType = self.downloadService.getFileType(self.downloadRequest[self.plotTag])
 
-        filenameFullPath = self.archive_dir +"/" + self.__module__+"."+fileType
+        filenameFullPath = self.archive_dir +"/" + self.__module__+fileType
         success,stderr = self.downloadService.copyFile(self.downloadRequest[self.plotTag],filenameFullPath)
         self.error_message +=stderr
         
 	if success == True:
 	    self.status = 1.0
-	    filename = "archive/" + str(self.timestamp) + "/" + self.__module__+"."+fileType
+	    filename = "archive/" + str(self.timestamp) + "/" + self.__module__+fileType
 	else:
 	    filename = ""
 

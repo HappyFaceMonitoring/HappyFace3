@@ -73,7 +73,11 @@ class DownloadService():
 
     def getFileType(self,downloadstring):
         if downloadstring in self.downloadTags:
-            return self.downloadTags[downloadstring].fileType
+            fileType =  self.downloadTags[downloadstring].fileType
+            if fileType == "":
+                return fileType
+            else:
+                return "."+fileType
 
 
     def copyFile(self,downloadstring,destfile):

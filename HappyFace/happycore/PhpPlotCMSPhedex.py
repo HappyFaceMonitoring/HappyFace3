@@ -1,8 +1,6 @@
 from PhpPlot import *
 
-#############################################
-# class to donwload plots (via WGET command)
-#############################################
+
 class PhpPlotCMSPhedex(PhpPlot):
 
     def __init__(self, category, timestamp, archive_dir):
@@ -11,9 +9,16 @@ class PhpPlotCMSPhedex(PhpPlot):
 	
         # read class config file
 	config = self.readConfigFile('./happycore/PhpPlotCMSPhedex')
-
+        if config.has_option('setup','fileextension'):
+            self.fileType = config.get('setup','fileextension')
         
 	self.base_url = config.get('setup','base_url')
+        
+        if config.has_option('setup','fileextension'):
+            self.fileType = config.get('setup','fileextension')
+            
+
+
         self.getPhpArgs(config)
 
 

@@ -11,7 +11,8 @@ class PhpPlotDashboard(PhpPlot):
 	
         # read class config file
 	config = self.readConfigFile('./happycore/PhpPlotDashboard')
-
+        if config.has_option('setup','fileextension'):
+            self.fileType = config.get('setup','fileextension')
         
 	self.base_url = config.get('setup','base_url')
         self.getPhpArgs(config)
