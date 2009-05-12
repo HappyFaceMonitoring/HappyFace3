@@ -212,7 +212,7 @@ class ModuleBase(Thread,object):
                 <table class="main" style="width:1000px;">
                     <tr>
                         <td style="width:64px;"><button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_info\\\'" + """);">' .$status_symbol. '</button></td>
-                        <td><strong><a href="?date='.$date_string.'&time='.$time_string.'&t='.$category_id.'&m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' .$data['mod_title']. '</a><br />' . $mod_time_message . '</strong></td>
+                        <td><strong><a href="?date='.$date_string.'&amp;time='.$time_string.'&amp;='.$category_id.'&amp;m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' .$data['mod_title']. '</a><br />' . $mod_time_message . '</strong></td>
 		    </tr>
 		    '.$error_message.'
                     <tr>

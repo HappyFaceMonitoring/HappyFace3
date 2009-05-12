@@ -56,6 +56,9 @@ class WebCreator(object):
 	#######################################################
 	################## create index.php ###################
 
+	# this should be used to get validated PHP hrefs (only cosmetics ;-) )
+	output += '<?php ini_set("arg_separator.output","&amp;"); ?>'
+
 	# initiate the database
 	output += '<?php' + "\n"
 	output += '    /*** connect to SQLite database ***/' + "\n"
