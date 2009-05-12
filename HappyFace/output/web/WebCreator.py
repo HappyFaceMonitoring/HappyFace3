@@ -1,5 +1,7 @@
 import sys, os
 
+from CategoryNavigationTab import *
+from CategoryContentTab import *
 from ModuleStatusSymbolLogic import *
 from CategoryStatusLogic import *
 from CategoryStatusSymbolLogic import *
@@ -8,19 +10,39 @@ from TimeMachineController import *
 from SQLCallRoutines import *
 from ModuleResultsArrayBuilder import *
 
-class FinalOutput(object):
-    def __init__(self,config,theme,navigation,content):
+class WebCreator(object):
+    def __init__(self,config,modObj_list,timestamp):
 
-        self.config     = config
-        self.theme      = theme
-        self.navigation = navigation
-        self.content    = content
-        self.cssList = []
+        self.config      = config
+	self.modObj_list = modObj_list
+	self.timestamp   = timestamp
+        self.cssList     = []
+
+	self.theme	 = config.get('setup','theme')
 
     def setCss(self,cssList):
-        self.cssList = cssList
+        self.cssList     = cssList
 
     def getOutput(self):
+
+   	navigation       = ""
+        content 	 = ""
+
+        for category in self.config.get('setup','categories').split(","):
+
+             cat_title   = self.config.get(category,'cat_title')
+             cat_type    = self.config.get(category,'cat_type')
+             cat_algo    = self.config.get(category,'cat_algo')
+             cat_content = ""
+
+             for module in self.config.get(category,'modules').split(","):
+
+                  if module == "": continue
+                  cat_content += self.modObj_list[module].output()
+
+	     # collect all navigation and content tabs
+             navigation  += CategoryNavigationTab(category,cat_title,cat_type,cat_algo).output
+             content     += CategoryContentTab(cat_content,self.config,category,self.timestamp).output
 
 	output = ""
 
@@ -74,28 +96,7 @@ class FinalOutput(object):
 	# body
 	output += '<body onload="javascript:HappyReload(300)">' + "\n"
 
-	# time bar on the top of the website, input forms for time control
-	output += TimeMachineController().output
-
-	output += '<div id="HappyPanels1" class="HappyPanels">' + "\n"
-
-	# input navigation
-	output += '  <ul class="HappyPanelsTabGroup">' + "\n"
-	output += self.navigation
-	output += '  </ul>' + "\n"
-
-	# input content
-	output += '  <div class="HappyPanelsContentGroup">' + "\n"
-
-	output += self.content + "\n"
-	output += '  </div>' + "\n"
-
-	output += '</div>' + "\n"
-
-	# include layer to hide content when scrolling
-	output += '<div class="HappySolidLayer"></div>' + "\n"
-
-	# logic to memorize selected tab on auto reload
+	# logic to memorize selected tab on auto reload part 1
 	output += """
 		<?php
 			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
@@ -114,6 +115,29 @@ class FinalOutput(object):
 	output += ' <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
 	output += ' <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
 	output += '</div></form>' + "\n"
+
+	# time bar on the top of the website, input forms for time control
+	output += TimeMachineController().output
+
+	output += '<div id="HappyPanels1" class="HappyPanels">' + "\n"
+
+	# input navigation
+	output += '  <ul class="HappyPanelsTabGroup">' + "\n"
+	output += navigation
+	output += '  </ul>' + "\n"
+
+	# input content
+	output += '  <div class="HappyPanelsContentGroup">' + "\n"
+
+	output += content + "\n"
+	output += '  </div>' + "\n"
+
+	output += '</div>' + "\n"
+
+	# include layer to hide content when scrolling
+	output += '<div class="HappySolidLayer"></div>' + "\n"
+
+	# logic to memorize selected tab on auto reload part 2
 	output += """
 		<?php
 			if ($selectedMod != "") {

@@ -214,13 +214,15 @@ class ModuleBase(Thread,object):
 	    if ($server_time - $data["timestamp"] < 1800) { $mod_time_message = '<span style="color:#999; font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>'; }
 	    else { $mod_time_message = '<span style="color:#FF6666;font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>'; }
 
+	    /*** Get variables for the direct module link ***/
+
             /*** print the HTML output ***/
             printf('
 		<a id="' . $data["module"]. '"></a>
                 <table class="main" style="width:1000px;">
                     <tr>
                         <td style="width:64px;"><button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_info\\\'" + """);">' .$status_symbol. '</button></td>
-                        <td><strong>' .$data['mod_title']. '<br />' . $mod_time_message . '</strong></td>
+                        <td><strong><a href="ToCome.html" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' .$data['mod_title']. '</a><br />' . $mod_time_message . '</strong></td>
 		    </tr>
 		    '.$error_message.'
                     <tr>
