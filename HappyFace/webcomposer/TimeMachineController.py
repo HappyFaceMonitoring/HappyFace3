@@ -6,7 +6,7 @@ class TimeMachineController(object):
 
 	self.output = """	
 	<div class="HappyTitleBar">
-	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face<br />Project<span style="font-size:0.7em;color:#FFFFFF;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rev. %s</span></td></tr></table></div>
+	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face<br />Project<span style="font-size:0.7em;color:#FFFFFF;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s</span></td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td><?php printf($time_message); ?></td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable">
 	    <tr><td>
@@ -37,4 +37,4 @@ class TimeMachineController(object):
             </td><td>
 	    <?php printf($time_error_message); ?></td></tr></table></div>
 	</div>
-	""" %("$Revision$".strip("$"))
+	""" % popen2.popen2('svnversion %s' % "../")[0].read().strip()

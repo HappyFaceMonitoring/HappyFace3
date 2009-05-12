@@ -100,6 +100,7 @@
 	margin: 0px 0px 10px 0px;
 	padding: 0px 0px;
 	background-color: #464646;
+	height: 42px;
 	left: 8px;
 	float: left;
 	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
@@ -109,22 +110,24 @@
 	border-top: solid 0px #999;
 }
 .HappyTitleBarElement {
-	position: relative;
 	float: left;
-	padding: 4px 10px;
+	padding: 0px 10px;
 	margin: 0px 0px 0px 0px;
-	font: bold 1.0em sans-serif;
+	font: bold 0.95em sans-serif;
 	color: white;
 	list-style: none;
 	border-left: solid 0px #999;
 	border-bottom: solid 0px #999;
 	border-top: solid 0px #999;
 	border-right: solid 1px #999;
+	height: 100%;
 }
 .HappyTitleBarElementTable {
-	vertical-align:middle;
 	text-align: center;
-	height:30px;
+	height:100%;
+}
+.HappyTitleBarElementTable td {
+	vertical-align: middle;
 }
 .HappyTitleBarElementTable form {
 	margin: 0px 0px 0px 0px;
