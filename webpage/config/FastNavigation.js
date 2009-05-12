@@ -35,6 +35,8 @@ function goto(target) {
 		var targetY = document.getElementById(target).offsetTop;
 	}
 	document.getElementById('ReloadMod').value=target;
+	document.getElementById('HistoReloadMod1').value=target;
+	document.getElementById('HistoReloadMod2').value=target;
 	window.scrollTo(0,targetY);
 };
 

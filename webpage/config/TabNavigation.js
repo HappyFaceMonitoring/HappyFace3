@@ -184,6 +184,10 @@ HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 	this.showPanel(tab);
 	document.getElementById('ReloadTab').value=this.getTabIndex(tab);
 	document.getElementById('ReloadMod').value='';
+	document.getElementById('HistoReloadTab1').value=this.getTabIndex(tab);
+	document.getElementById('HistoReloadMod1').value='';
+	document.getElementById('HistoReloadTab2').value=this.getTabIndex(tab);
+	document.getElementById('HistoReloadMod2').value='';
 	window.scroll(0,0);
 };
 

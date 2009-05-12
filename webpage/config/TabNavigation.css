@@ -51,6 +51,7 @@
 	border-top: solid 1px #999;
 	border-right: solid 1px #999;
 	cursor: pointer;
+	width:90px; /* Needed for IE7 */
 	min-width: 90px;
 }
 
