@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, popen2
 
 class TimeMachineController(object):
 	
@@ -6,7 +6,7 @@ class TimeMachineController(object):
 
 	self.output = """	
 	<div class="HappyTitleBar">
-	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face<br />Project<span style="font-size:0.7em;color:#FFFFFF;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s</span></td></tr></table></div>
+	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td colspan="2" style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face</td></tr><tr><td style="color:#FF9900;vertical-align:middle;text-align:left;">Project <td style="font-size:0.7em;color:#FFFFFF;vertical-align:middle;text-align:right;">Rev.%s</td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable"><tr><td><?php printf($time_message); ?></td></tr></table></div>
 	    <div class="HappyTitleBarElement"><table border="0" class="HappyTitleBarElementTable">
 	    <tr><td>
