@@ -2,14 +2,14 @@ import sys, os, popen2
 
 class TimeMachineController(object):
 	
-    def __init__(self):
+    def __init__(self, logo_image):
 
 	self.output = """	
 	<div class="HappyTitleBar">
 	    <div class="HappyTitleBarElement">
 		<table border="0" class="HappyTitleBarElementTable">
 			<tr><td>
-				<img style="border:solid 1px #000;height:35px;" alt="" src="config/images/default_logo.jpg" />
+				<img style="border:solid 1px #000;height:35px;" alt="" src='""" + logo_image + """' />
 			</td></tr>
 		</table>
 	    </div>
@@ -30,13 +30,15 @@ class TimeMachineController(object):
 		<table border="0" class="HappyTitleBarElementTable">
 			<form id="HistoForm1" action="<?php echo $PHP_SELF; ?>" method="get">
 			<tr><td>
-	    			<div><button onclick="javascript:submit()" onfocus="this.blur()">&lt;--</button></div>
+	    			<div><button onclick="javascript:HappyHistoNav('back','<?php echo $timestamp; ?>')" onfocus="this.blur()">&lt;--</button></div>
 			</td><td>
-				<input name="step" type="text" size="5" style="text-align:center;" value="00:15" />
+				<input type="text" id="HistoStep" name="s" size="5" style="text-align:center;" value="<?php echo $histo_step; ?>" />
+                                <input type="hidden" id="HistoNavDate" name="date" value="<?php echo $date_string; ?>" />
+                                <input type="hidden" id="HistoNavTime" name="time" value="<?php echo $time_string; ?>" />
                                 <input type="hidden" id="HistoReloadTab1" name="t" value="<?php echo $selectedTab; ?>" />
                                 <input type="hidden" id="HistoReloadMod1" name="m" value="<?php echo $selectedMod; ?>" />
 			</td><td>
-	    			<div><button onclick="javascript:submit()" onfocus="this.blur()">--&gt;</button></div>
+	    			<div><button onclick="javascript:HappyHistoNav('fwd','<?php echo $timestamp; ?>')" onfocus="this.blur()">--&gt;</button></div>
 			</td></tr>
 			</form>
 		</table>

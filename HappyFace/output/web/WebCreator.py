@@ -27,6 +27,11 @@ class WebCreator(object):
 
    	navigation       = ""
         content 	 = ""
+	category_id	 = 0
+
+	web_title	 = self.config.get('setup','web_title')
+	logo_image	 = self.config.get('setup','logo_image')
+	histo_step	 = self.config.get('setup','histo_step')
 
         for category in self.config.get('setup','categories').split(","):
 
@@ -42,7 +47,9 @@ class WebCreator(object):
 
 	     # collect all navigation and content tabs
              navigation  += CategoryNavigationTab(category,cat_title,cat_type,cat_algo).output
-             content     += CategoryContentTab(cat_content,self.config,category,self.timestamp).output
+             content     += CategoryContentTab(cat_content,self.config,category,category_id,self.timestamp).output
+
+	     category_id += 1
 
 	output = ""
 
@@ -56,7 +63,7 @@ class WebCreator(object):
 	output += '?>' + "\n"
 
 	# provides the logic for the timestamp definition
-	output += TimeMachineLogic().output
+	output += TimeMachineLogic(histo_step).output
 	
 	# SQL call routines for all active modules
 	output += SQLCallRoutines(self.config).output
@@ -83,7 +90,7 @@ class WebCreator(object):
 	# header
 	output += '<head>' + "\n"
 	output += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />' + "\n"
-	output += '<title>HappyFace v2</title>' + "\n"
+	output += '<title>The HappyFace Project - ' + web_title + ' </title>' + "\n"
 	output += '<script src="config/TabNavigation.js" type="text/javascript"></script>' + "\n"
 	output += '<link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '<script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
@@ -117,7 +124,7 @@ class WebCreator(object):
 	output += '</div></form>' + "\n"
 
 	# time bar on the top of the website, input forms for time control
-	output += TimeMachineController().output
+	output += TimeMachineController(logo_image).output
 
 	output += '<div id="HappyPanels1" class="HappyPanels">' + "\n"
 

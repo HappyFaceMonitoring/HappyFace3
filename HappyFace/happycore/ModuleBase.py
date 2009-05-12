@@ -17,8 +17,6 @@ class ModuleBase(Thread,object):
         config = self.readConfigFile('./happycore/ModuleBase') # empty
         self.cssFiles = {}
         self.addCssFile(config,'./happycore/ModuleBase')
-
-            
         
         self.category = category
 	self.timestamp = timestamp
@@ -34,13 +32,11 @@ class ModuleBase(Thread,object):
 	    module_path = './modules/'
 	if os.path.isfile('./modules.local/' + self.__module__ + '.py') == True:
 	    module_path = './modules.local/' 
-
         
         module_config_file = module_path+self.__module__
         self.mod_config = self.readConfigFile(module_config_file)
         self.addCssFile(self.mod_config,module_config_file)
         
-
 	self.mod_title		= self.mod_config.get('setup','mod_title',self.__module__)
 	self.mod_type		= self.mod_config.get('setup','mod_type',"rated")
 	self.weight		= float(self.mod_config.get('setup','weight',1.0))
@@ -73,7 +69,6 @@ class ModuleBase(Thread,object):
 ##        print __file__
 ##        print "---------------"
         
-
     def listClasses(self,b):
         a = []
         for i in b.__bases__:
@@ -97,20 +92,15 @@ class ModuleBase(Thread,object):
         return self.cssFiles
 
 
-
     def readDownloadRequests(self,config):
         if config.has_section('downloadservice'):
             for i in config.items('downloadservice'):
                 self.downloadRequest[i[0]] = i[1]
-                
-
-
-        
+                        
 
     def setDownloadService(self,downloadService):
         self.downloadService = downloadService
         
-
 
     def getDownloadRequests(self):
         downloadList = []
@@ -222,7 +212,7 @@ class ModuleBase(Thread,object):
                 <table class="main" style="width:1000px;">
                     <tr>
                         <td style="width:64px;"><button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_info\\\'" + """);">' .$status_symbol. '</button></td>
-                        <td><strong><a href="ToCome.html" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' .$data['mod_title']. '</a><br />' . $mod_time_message . '</strong></td>
+                        <td><strong><a href="?date='.$date_string.'&time='.$time_string.'&t='.$category_id.'&m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' .$data['mod_title']. '</a><br />' . $mod_time_message . '</strong></td>
 		    </tr>
 		    '.$error_message.'
                     <tr>

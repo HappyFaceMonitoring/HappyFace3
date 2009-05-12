@@ -3,7 +3,7 @@ import sys, os
 from CategoryFastNavigation import *
 
 class CategoryContentTab(object):
-    def __init__(self,cat_content,config,category,timestamp):
+    def __init__(self,cat_content,config,category,cat_id,timestamp):
 
 	fast_nav = CategoryFastNavigation(category).output
 
@@ -25,7 +25,9 @@ class CategoryContentTab(object):
 	"""
 
 	output = ""
-
+	
+        output += '<?php $category_id=' + str(cat_id) + ' ?>' + "\n"
+	
         output += '<div class="HappyPanelsContent">' + "\n"
 
         output += fast_nav + "\n"
@@ -34,6 +36,7 @@ class CategoryContentTab(object):
 
         output += ' <div>' + "\n"
         output += valid_xhtml11 + valid_css + python + sqlite + php + "\n"
+
         output += ' </div>' + "\n"
 
 	output += '</div>' + "\n"

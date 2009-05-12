@@ -2,10 +2,14 @@ import sys, os
 
 class TimeMachineLogic(object):
 	
-    def __init__(self):
+    def __init__(self,histo_step):
 
 	self.output = """
 	<?php
+	    # check if stepping is set, otherwise use default
+	    if ($_GET["s"] != "") { $histo_step = $_GET["s"];}
+	    else { $histo_step = '""" + histo_step + """';}
+
 	    # function to reset the date/time input variables from previous views
 	    # used by the TimeMachineControler part
 	    function reset_time () {

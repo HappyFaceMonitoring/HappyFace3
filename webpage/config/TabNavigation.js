@@ -355,3 +355,41 @@ function HappyReload(time) {
 		refresh = setTimeout("document.getElementById('ReloadForm').submit();", time*1000);
 	}
 }
+
+/* function to navigate the histo bar with the arrows */
+function HappyHistoNav(direction, timestamp) {
+	var step 		= document.getElementById('HistoStep').value;	
+	var theStep  		= step.split(":");
+
+	if((step.length != 5) || (theStep[0].length != 2) || (theStep[1].length != 2)) {
+		document.getElementById('HistoStep').value="";
+		document.getElementById('HistoForm').submit();
+	;}
+
+	timestamp		= Number(timestamp);
+
+	if(direction == "back") {
+		timestamp 	= timestamp - (Number(theStep[0])*60 + Number(theStep[1]))*60;
+	}
+	if(direction == "fwd") {
+		timestamp	= timestamp + (Number(theStep[0])*60 + Number(theStep[1]))*60;
+	}
+
+	var theDate 		= new Date(timestamp * 1000);
+
+	var std = theDate.getHours();
+	var min = theDate.getMinutes();
+	var day = theDate.getDate();
+	var mth = Number(theDate.getMonth());
+	mth += 1;
+	var stdPrint = ((std < 10) ? "0" + std : std);
+	var minPrint = ((min < 10) ? "0" + min : min);
+	var dayPrint = ((day < 10) ? "0" + day : day);
+	var mthPrint = ((mth < 10) ? "0" + mth : mth);
+
+	var theNewDate		= theDate.getFullYear() + "-" + mthPrint + "-" + dayPrint;
+	var theNewTime		= stdPrint + ":" + minPrint;
+
+	document.getElementById('HistoNavDate').value=theNewDate;
+	document.getElementById('HistoNavTime').value=theNewTime;
+}
