@@ -12,8 +12,8 @@ class TimeMachineController(object):
 	    <tr><td>
 	    <form action="<?php echo $PHP_SELF; ?>" method="get">
 	    <div>
-		 Date: <input name="date" type="text" size="10" style="text-align:center;" value="<?php echo $date_string; ?>" />
-		 Time: <input name="time" type="text" size="4" style="text-align:center;" value="<?php echo $time_string; ?>" />
+		 <input name="date" type="text" size="10" style="text-align:center;" value="<?php echo $date_string; ?>" />
+		 - <input name="time" type="text" size="4" style="text-align:center;" value="<?php echo $time_string; ?>" />
   	         <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
 	    </div></form>
 	    </td><td>

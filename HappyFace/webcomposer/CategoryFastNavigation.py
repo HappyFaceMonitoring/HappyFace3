@@ -11,8 +11,8 @@ class CategoryFastNavigation(object):
 	    if ( is_array($ModuleResultsArray) ) {
 		printf('<ul>');
                 printf('<li>
-                        <table class="HappyFNnaventry">
-                        <tr style="border-bottom:1px solid #FFF;">
+                        <table class="HappyFNnaventry" style="border-top: solid 1px #999;">
+                        <tr>
                         <td style="width:200px;" align="left"><div class="HappyFNtopdiv">Fast Navigation Bar</div></td>
                         <td style="width:40px;" align="center"><div class="HappyFNtopdiv"><a href="javascript:movenav(\\\'HappyFNnav_""" + category + """\\\')" onfocus="this.blur()"><img id="HappyFNnav_""" + category + """arrow" alt="" style="width:32px;border:0px;" src="config/images/rightarrow.png" /></a></div></td>
                         </tr>
