@@ -130,8 +130,8 @@
 .HappyTitleBarElementTable td {
 	vertical-align: middle;
 }
-.HappyTitleBarElementTable form {
-	margin: 0px 0px 0px 0px;
+.HappyTitleBarForm {
+	margin: 6px 0px 0px 0px;
 	padding: 0px;
 }
 

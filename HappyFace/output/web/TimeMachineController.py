@@ -27,7 +27,7 @@ class TimeMachineController(object):
 		</table>
 	    </div>
 	    <div class="HappyTitleBarElement">
-		<form id="HistoForm1" action="<?php echo $PHP_SELF; ?>" method="get">
+		<form id="HistoForm1" class="HappyTitleBarForm" action="<?php echo $PHP_SELF; ?>" method="get">
 		<table border="0" class="HappyTitleBarElementTable">
 			<tr><td>
 	    			<div><button onclick="javascript:HappyHistoNav('back','<?php echo $timestamp; ?>')" onfocus="this.blur()">&lt;--</button></div>
@@ -44,7 +44,7 @@ class TimeMachineController(object):
 		</form>
 	    </div>
 	    <div class="HappyTitleBarElement">
-		<form id="HistoForm2" action="<?php echo $PHP_SELF; ?>" method="get">
+		<form id="HistoForm2" class="HappyTitleBarForm" action="<?php echo $PHP_SELF; ?>" method="get">
 		<table border="0" class="HappyTitleBarElementTable">
 	    		<tr><td>
 	    			<div>
@@ -59,7 +59,7 @@ class TimeMachineController(object):
 		</form>
 	    </div>
 	    <div class="HappyTitleBarElement">
-		<form action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
+		<form class="HappyTitleBarForm" action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
 		<table border="0" class="HappyTitleBarElementTable">
 			<tr><td>
 		    		<div>

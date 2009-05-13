@@ -363,8 +363,9 @@ function HappyHistoNav(direction, timestamp) {
 
 	if((step.length != 5) || (theStep[0].length != 2) || (theStep[1].length != 2)) {
 		document.getElementById('HistoStep').value="";
-		document.getElementById('HistoForm').submit();
-	;}
+		document.getElementById('HistoForm1').submit();
+		exit;
+	}
 
 	timestamp		= Number(timestamp);
 
@@ -392,4 +393,5 @@ function HappyHistoNav(direction, timestamp) {
 
 	document.getElementById('HistoNavDate').value=theNewDate;
 	document.getElementById('HistoNavTime').value=theNewTime;
+	document.getElementById('HistoForm1').submit();
 }
