@@ -54,6 +54,8 @@ is a way later.
 	vertical-align:middle;
 	width:240px;
 	background-color:#696969;
+	/*-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";*/
+	/*filter:Alpha(opacity=60);*/
 	opacity:0.9;
 	border-left: solid 1px #999;
 	border-right: solid 1px #999;
@@ -78,6 +80,7 @@ is a way later.
 }
 .HappyFNnavimg a:hover {
 	/*-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";*/
+	/*filter:Alpha(opacity=60);*/
 	opacity:0.6;
 }
 
@@ -98,5 +101,6 @@ is a way later.
 }
 .HappyFNtopdiv a:hover {
 	/*-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";*/
+	/*filter:Alpha(opacity=60);*/
 	opacity:0.6;
 }
