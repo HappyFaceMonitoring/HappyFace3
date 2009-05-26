@@ -1,0 +1,25 @@
+/* CSS file for the HappyFace module: PhedexStats */
+
+.PhedexStatsTable,.PhedexStatsTableDetails {
+	border: solid 1px #999;
+	width: 800px;
+}
+
+.PhedexStatsTable td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+	width:65%;
+}
+
+
+.PhedexStatsTableDetails td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.PhedexStatsDetailedInfo {
+	font-family: monospace;
+	line-height: 14px;
+}
