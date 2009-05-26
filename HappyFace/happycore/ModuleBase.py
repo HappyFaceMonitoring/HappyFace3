@@ -3,16 +3,20 @@ import ConfigParser
 
 from sqlobject import *		# for SQL database functionality
 from threading import Thread	# for threading functionality
+from DataBaseLock import *
 
 #########################################################
 # basic class for all test modules
 #########################################################
-class ModuleBase(Thread,object):
+class ModuleBase(Thread,DataBaseLock,object):
 
     def __init__(self, category, timestamp, archive_dir):
 
 	Thread.__init__(self)
 
+	lock_obj = DataBaseLock()
+	self.lock = lock_obj.lock
+	
         # read class config file
         config = self.readConfigFile('./happycore/ModuleBase') # empty
         self.cssFiles = {}
@@ -45,7 +49,7 @@ class ModuleBase(Thread,object):
 
         # definitions for the database table
 	self.database = self.__module__ + '_table'
-	
+
 	self.db_keys = {}
 	self.db_values = {}
 
@@ -116,7 +120,7 @@ class ModuleBase(Thread,object):
         return downloadList
 
 
-    def storeToDB(self,lock):
+    def storeToDB(self):
 
 	# definition of the databases values which should be stored
 	self.db_values['module']	= self.__module__
@@ -131,7 +135,7 @@ class ModuleBase(Thread,object):
 	self.db_values['instruction']	= self.instruction
 
 	# lock object enables exclusive access to the database
-	lock.acquire()
+	self.lock.acquire()
 
 	# create dynamically a SQLObject Class
 	# the name of the class corresponds to the table name in the DB
@@ -149,7 +153,7 @@ class ModuleBase(Thread,object):
 	My_DB_Class(**self.db_values)
 	
 	# unlock the database access
-	lock.release()
+	self.lock.release()
 
 
     # reading config files and return the corresponding directory structure

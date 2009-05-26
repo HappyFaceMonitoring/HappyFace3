@@ -143,8 +143,6 @@ def HappyFace():
         if timeout < 1:
             break
 
-    # lock object for exclusive database access
-    lock = thread.allocate_lock()
     for module in modObj_list.keys():
         if modObj_list[module].isAlive() == True:
             modObj_list[module]._Thread__stop()
@@ -155,7 +153,7 @@ def HappyFace():
 
         # store results (or pre-defined values if timeout) to DB
         # collect the output and results of the modules and compose category content
-        modObj_list[module].storeToDB(lock)
+        modObj_list[module].storeToDB()
 
     print "HappyFace: Module processing finished." 
 
