@@ -47,6 +47,28 @@ class PhedexStats(ModuleBase):
 	self.db_values["startlocaltime"] = root_attrib["startlocaltime"]
 	self.db_values["endlocaltime"] = root_attrib["endlocaltime"]
 
+	# pre-defined direction of transfers
+	transfer_direction = "incoming"
+
+	total_transfers = 0
+
+	for element in root:
+	    if element.tag == "SiteStat":
+		for fromsite in element:
+		    fromsite_attrib = fromsite.attrib
+
+		    # check for the direction of transfers
+		    # for outgoing tranfers there is no information about total/successful transfers
+		    if fromsite_attrib["name"] == "noinfo":
+			transfer_direction = "outgoing"
+			total_transfers = None
+			break
+		    if "OK" in fromsite_attrib:		total_transfers = total_transfers + int(fromsite_attrib["OK"])
+		    if "FAILED" in fromsite_attrib:	total_transfers = total_transfers + int(fromsite_attrib["FAILED"])
+	
+	self.db_values["total_transfers"] = total_transfers
+
+
 	#############################################################################
 	# parse the details and store it in a special database table
 	details_database = self.__module__ + "_details_" + str(self.timestamp) + "_table"
@@ -77,19 +99,18 @@ class PhedexStats(ModuleBase):
 	for element in root:
 
 	    if element.tag == "fromsite":
+		if transfer_direction == "incoming": details_db_values["site_name"] = element.attrib["name"]
 
 		for tosite in element:
 
-		    tosite_attrib = tosite.attrib
 		    for reason in tosite:
 
-			reason_attrib = reason.attrib
-			details_db_values["site_name"] = tosite_attrib["name"]
-			details_db_values["number"] = int(reason_attrib["n"])
-			details_db_values["origin"] = reason_attrib["origin"]
+			if transfer_direction == "outgoing": details_db_values["site_name"] = tosite.attrib["name"]
+			details_db_values["number"] = int(reason.attrib["n"])
+			details_db_values["origin"] = reason.attrib["origin"]
 			details_db_values["error_message"] = reason.text
 			
-			failed_transfers = failed_transfers + int(reason_attrib["n"])
+			failed_transfers = failed_transfers + int(reason.attrib["n"])
 			
 			# store the values to the database
 			Details_DB_Class(**details_db_values)
@@ -98,22 +119,6 @@ class PhedexStats(ModuleBase):
 	self.lock.release()
 
 	self.db_values["failed_transfers"] = failed_transfers
-
-	total_transfers = 0
-
-	for element in root:
-	    if element.tag == "SiteStat":
-		for fromsite in element:
-		    fromsite_attrib = fromsite.attrib
-		    if fromsite_attrib["name"] == "noinfo":
-			total_transfers = None
-			break
-		    if "OK" in fromsite_attrib:		total_transfers = total_transfers + int(fromsite_attrib["OK"])
-		    if "FAILED" in fromsite_attrib:	total_transfers = total_transfers + int(fromsite_attrib["FAILED"])
-	
-	
-
-	self.db_values["total_transfers"] = total_transfers
 
 	# at the moment always happy
 	self.status = 1.0
