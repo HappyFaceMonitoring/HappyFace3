@@ -87,7 +87,7 @@ class DownloadService():
                 ret = os.system('cp '+localFile+' '+destfile)
                 return True,""
             else:
-                return False,"Download failed for \'"+downloadstring+"\'."
+                return False,"Download failed for \'"+downloadstring.replace('&','&amp;').replace('%','%%') +"\'."
                 
 
         else:
