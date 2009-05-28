@@ -35,6 +35,7 @@ class DownloadService():
 
         if not downloadstring in self.downloadTags:
             self.downloadTags[downloadstring] = DownloadTag(prog,filetype,args,self.subdir)
+#            print "DownloadService: adding "+downloadstring
         else:
             print "DownloadService: Tag already scheduled for download."
             print "    "+downloadstring

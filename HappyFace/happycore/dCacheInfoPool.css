@@ -1,0 +1,42 @@
+/* CSS file for the HappyFace module: dCacheInfoPool */
+
+.dCacheInfoPoolTable,.dCacheInfoPoolTableDetails {
+	border: solid 1px #999;
+	width: 800px;
+}
+
+.dCacheInfoPoolTable td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.dCacheInfoPoolTableDetails1RowHead {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.dCacheInfoPoolTableDetailsRestRowHead {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+        width:80px;
+}
+
+.dCacheInfoPoolTableDetails1Row {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.dCacheInfoPoolTableDetailsRestRow {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: right;
+}
+
+.dCacheInfoPoolDetailedInfo {
+	font-family: monospace;
+	line-height: 14px;
+}
