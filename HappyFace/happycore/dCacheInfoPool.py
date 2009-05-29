@@ -12,7 +12,7 @@ class dCacheInfoPool(dCacheInfo):
 	self.addCssFile(config,'./happycore/dCacheInfoPool')
 
 
-        self.poolType = 'cms-write-tape-pools'
+        self.poolType = self.mod_config.get('setup','pooltype')
 
         self.poolAttribs = []
         self.poolAttribs.append({'id':'total' , 'name':'Total Space [GB]'})
@@ -22,24 +22,92 @@ class dCacheInfoPool(dCacheInfo):
         self.poolAttribs.append({'id':'removable' , 'name':'Removable Space [GB]'})
 
 
-        self.db_keys['poolnumber'] = IntCol()
-        self.db_values['poolnumber'] = None
+        
 	self.db_keys["details_database"] = StringCol()
         self.db_values["details_database"] = ""
 
         self.sumInfo = {}
-
         for att in self.poolAttribs:
             self.db_keys[ att['id'] ] = IntCol()
             self.db_values[ att['id'] ] = None
             self.sumInfo[ att['id'] ] = 0
 
+        for val in ['poolnumber','poolwarning']:
+            self.db_keys[val] = IntCol()
+            self.db_values[val] = None
+            self.sumInfo[val] = 0
+            
+
+
         self.fromBytetToGb = 1024*1024*1024
 
 
+
+        self.thresholdGlobal = {}
+        self.thresholdLocal = {}
+
+        self.getThresholds(config)
+        self.getThresholds(self.mod_config)
+
+
+
+    def getThresholds(self,config):
+        for i in config.items('global_limits'):
+            self.thresholdGlobal[i[0]] = i[1]
+        for i in config.items('local_limits'):
+            self.thresholdLocal[i[0]] = i[1]
+
+
+
+    def limitExceeded(self,thePoolInfo,theThresholds):
+        exceeded = False
+        for check in theThresholds.keys():
+            checkList = check.split("/")
+
+            for val in checkList:
+                if not val in thePoolInfo:
+                    print "Warning: No such variable "+val
+                    continue
+
+            theRelVal = 0.
+            if len(checkList) == 1:
+                theRelVal = float(thePoolInfo[checkList[0]])
+            elif len(checkList) == 2:
+                theRelVal = float(thePoolInfo[checkList[0]])/float(thePoolInfo[checkList[1]])
+
+
+            theCond = str(theThresholds[check])[:1]
+            theRef = float(str(theThresholds[check])[1:])
+
+
+            if theCond == ">":
+                if theRelVal > theRef:
+                    exceeded = True
+            elif theCond == "<":
+                if theRelVal < theRef:
+                    exceeded = True
+            else:
+                print "Warning: No such condition "+check+" "+theThresholds[check]
+
+#            print checkList
+#            print str(theRelVal)+theCond+str(theRef)+" --> "+str(exceeded)
+
+
+        return exceeded
+
+
+
     def run(self):
+
         thePoolInfo = self.getPoolInfo(self.poolType)
-        self.db_values['poolnumber'] = len(thePoolInfo)
+        
+        
+        # make poolAttrib as GB
+        for pool in thePoolInfo.keys():
+            for att in self.poolAttribs:
+                theId = att['id']
+                thePoolInfo[pool][theId] = float(thePoolInfo[pool][theId]) / self.fromBytetToGb
+
 
 
 
@@ -51,6 +119,7 @@ class dCacheInfoPool(dCacheInfo):
 	details_db_values = {}
         
         details_db_keys["poolname"] = StringCol()
+        details_db_keys["poolstatus"] = FloatCol()
         for att in self.poolAttribs:
             details_db_keys[ att['id'] ] = IntCol()
 
@@ -67,12 +136,22 @@ class dCacheInfoPool(dCacheInfo):
 
         
         for pool in thePoolInfo.keys():
+            self.sumInfo['poolnumber'] +=1
             details_db_values["poolname"] = pool
+            if self.limitExceeded(thePoolInfo[pool],self.thresholdLocal) == False:
+                # Set 1.0 for Pool is OK
+                details_db_values["poolstatus"] = 1.
+            else:
+                # Set 0.0 for Pool is Critical
+                details_db_values["poolstatus"] = 0.
+                self.sumInfo['poolwarning'] +=1
             for att in self.poolAttribs:
                 theId = att['id']
-                theVal =int( int(thePoolInfo[pool][theId]) /self.fromBytetToGb)
+                theVal = thePoolInfo[pool][theId]
                 self.sumInfo[theId] += theVal
-                details_db_values[theId] = theVal
+                details_db_values[theId] = int(round(theVal))
+
+
 
             # store the values to the database
             Details_DB_Class(**details_db_values)
@@ -80,11 +159,39 @@ class dCacheInfoPool(dCacheInfo):
 	# unlock the database access
 	self.lock.release()
 
-        for att in self.poolAttribs:
-            self.db_values[ att['id'] ] = self.sumInfo[ att['id'] ]
+
+        for att in self.sumInfo.keys():
+            self.db_values[ att ] = int(round(self.sumInfo[att]))
+
+ 
+        if self.limitExceeded(self.sumInfo,self.thresholdGlobal) == False:
+            self.status = 1.0
+        else:
+            self.status = 0.0
+            
+        self.definition+= "Poolgroup: "+self.poolType+"<br/>"
+        self.definition+= self.formatLimits()
 
 
+    def formatLimits(self):
+        theLines = []
+        globLim = []
+        for entry in self.thresholdGlobal.keys():
+            globLim.append(entry+self.thresholdGlobal[entry])
+        locLim = []
+        for entry in self.thresholdLocal.keys():
+            locLim.append(entry+self.thresholdLocal[entry])
 
+        theLines.append("Global Limits: "+", ".join(globLim))
+        theLines.append("Limits per poolnode: "+", ".join(locLim))
+
+        var = ""
+        for line in theLines:
+            var+=line+"<br/>"
+        return var
+
+
+        
 
     def output(self):
 
@@ -104,6 +211,10 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("  <tr>")
         mc.append("    <td>Number of pools</td>")
         mc.append("""    <td>'.$data["poolnumber"].'</td>""")
+        mc.append("   </tr>")
+        mc.append("  <tr>")
+        mc.append("    <td>Number of pools with warning</td>")
+        mc.append("""    <td>'.$data["poolwarning"].'</td>""")
         mc.append("   </tr>")
 
         for att in self.poolAttribs:
@@ -125,6 +236,7 @@ class dCacheInfoPool(dCacheInfo):
         mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolname</td>')
         for att in self.poolAttribs:
             mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+att["name"]+'</td>')
+        mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolstatus</td>')
         mc.append("  </tr>")
      
 
@@ -136,6 +248,7 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
         for att in self.poolAttribs:
             mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.$sub_data["""+'"'+ att['id'] +'"'+ """].'</td>""")
+        mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolstatus"].'</td>""")
         mc.append("   </tr>")
         mc.append("  ');")
         mc.append(" }")
