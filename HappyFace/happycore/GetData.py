@@ -1,5 +1,4 @@
-import subprocess # for traping errors of subprocesses like WGET
-import sys
+import sys,os
 
 
 #############################################
@@ -10,7 +9,7 @@ class GetData():
     # execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
     def getDataWget(self, url, path, file):
 
-        retcode = subprocess.call(["wget","-q","--output-document=" + path + "/"  + file, url])
+	retcode = os.system('wget -q --output-document=' + path + "/" + file + " " + "\'"+url+"\'")
         success = False
         stderr = ""
 
@@ -19,10 +18,24 @@ class GetData():
             stderr = ""
 
         else:
-#            self.error_message += '\nCould not download ' + self.url + ', ' + self.__module__ + ' abborting ...\n'
-#            sys.stdout.write(self.error_message)
-            stderr = '\nCould not download ' + url + ', ' +path+' , '+path + ' abborting ...\n'
+            stderr = '\nCould not download ' + url + ', abborting ...\n'
             sys.stdout.write(stderr)
             success = False
         return success,stderr
-    
+
+    # execute the Wget with special parameters to load and XML file
+    def getDataWgetXmlRequest(self,url,path,file):
+
+	retcode = os.system('wget -q --header="Accept: text/xml" --output-document=' + path + "/" + file + " " + "\'"+url+"\'")
+        success = False
+        stderr = ""
+
+        if retcode == 0:
+            success =  True
+            stderr = ""
+
+        else:
+            stderr = '\nCould not download ' + url + ', abborting ...\n'
+            sys.stdout.write(stderr)
+            success = False
+        return success,stderr

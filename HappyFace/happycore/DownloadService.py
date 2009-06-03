@@ -5,12 +5,6 @@ import os
 from time import time, localtime, mktime
 from DownloadTag import *
 
-
-
-#############################################
-# class to donwload plots (via WGET command)
-# self.url has to be defined by the inhereting module
-#############################################
 class DownloadService():
 
     def __init__(self, subdir):

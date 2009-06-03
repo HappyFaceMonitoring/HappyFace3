@@ -24,6 +24,8 @@ class DownloadTag(Thread):
     def download(self):
         if self.program == "wget":
             self.success,stderr = self.dataFetcher.getDataWget(self.url, self.archive_dir, self.localFile)
+        elif self.program == "wgetXmlRequest":
+            self.success,stderr = self.dataFetcher.getDataWgetXmlRequest(self.url, self.archive_dir, self.localFile)
         else:
             print "DownloadTag: "+self.program+" currently not supported!"
 

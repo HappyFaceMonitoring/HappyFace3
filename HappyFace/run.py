@@ -185,7 +185,7 @@ def HappyFace():
     print "HappyFace: Output processing finished." 
 
     # cleanup
-    downloadService.clean()
+    #downloadService.clean()
 
     print "\nDONE!!\n"
 
