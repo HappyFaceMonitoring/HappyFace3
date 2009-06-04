@@ -106,7 +106,8 @@ class dCacheInfoPool(dCacheInfo):
         for pool in thePoolInfo.keys():
             for att in self.poolAttribs:
                 theId = att['id']
-                thePoolInfo[pool][theId] = float(thePoolInfo[pool][theId]) / self.fromBytetToGb
+                if theId in thePoolInfo[pool]:
+                    thePoolInfo[pool][theId] = float(thePoolInfo[pool][theId]) / self.fromBytetToGb
 
 
 
@@ -138,18 +139,29 @@ class dCacheInfoPool(dCacheInfo):
         for pool in thePoolInfo.keys():
             self.sumInfo['poolnumber'] +=1
             details_db_values["poolname"] = pool
+
             if self.limitExceeded(thePoolInfo[pool],self.thresholdLocal) == False:
                 # Set 1.0 for Pool is OK
                 details_db_values["poolstatus"] = 1.
             else:
                 # Set 0.0 for Pool is Critical
                 details_db_values["poolstatus"] = 0.
-                self.sumInfo['poolwarning'] +=1
+
+
             for att in self.poolAttribs:
                 theId = att['id']
-                theVal = thePoolInfo[pool][theId]
-                self.sumInfo[theId] += theVal
-                details_db_values[theId] = int(round(theVal))
+                if theId in thePoolInfo[pool]:
+                    theVal = thePoolInfo[pool][theId]
+                    self.sumInfo[theId] += theVal
+                    details_db_values[theId] = int(round(theVal))
+                else:
+                    details_db_values[theId] = -1
+                    details_db_values["poolstatus"] = 0.
+
+            if details_db_values["poolstatus"] == 0.:
+                self.sumInfo['poolwarning'] +=1
+
+
 
 
 
