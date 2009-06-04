@@ -32,7 +32,7 @@ class dCacheInfoPool(dCacheInfo):
             self.db_values[ att['id'] ] = None
             self.sumInfo[ att['id'] ] = 0
 
-        for val in ['poolnumber','poolwarning']:
+        for val in ['poolnumber','poolcritical','poolwarning']:
             self.db_keys[val] = IntCol()
             self.db_values[val] = None
             self.sumInfo[val] = 0
@@ -43,24 +43,31 @@ class dCacheInfoPool(dCacheInfo):
 
 
 
-        self.thresholdGlobal = {}
-        self.thresholdLocal = {}
+        self.thresholds = {}
+        self.thresholds['limit_global_critical'] = {}
+        self.thresholds['limit_local_critical'] = {}
+        self.thresholds['limit_global_warning'] = {}
+        self.thresholds['limit_local_warning'] = {}
+
+
 
         self.getThresholds(config)
         self.getThresholds(self.mod_config)
 
 
 
+
     def getThresholds(self,config):
-        for i in config.items('global_limits'):
-            self.thresholdGlobal[i[0]] = i[1]
-        for i in config.items('local_limits'):
-            self.thresholdLocal[i[0]] = i[1]
+        for sec in self.thresholds.keys():
+            if  config.has_section(sec):
+                for i in config.items(sec):
+                    self.thresholds[sec][i[0]] = i[1]
 
 
 
-    def limitExceeded(self,thePoolInfo,theThresholds):
+    def limitExceeded(self,thePoolInfo,cat):
         exceeded = False
+        theThresholds = self.thresholds[cat]
         for check in theThresholds.keys():
             checkList = check.split("/")
 
@@ -140,9 +147,12 @@ class dCacheInfoPool(dCacheInfo):
             self.sumInfo['poolnumber'] +=1
             details_db_values["poolname"] = pool
 
-            if self.limitExceeded(thePoolInfo[pool],self.thresholdLocal) == False:
+            if self.limitExceeded(thePoolInfo[pool],'limit_local_critical') == False:
                 # Set 1.0 for Pool is OK
                 details_db_values["poolstatus"] = 1.
+            elif self.limitExceeded(thePoolInfo[pool],'limit_local_warning') == False:
+                # Set 0.5 for Pool for Warning
+                details_db_values["poolstatus"] = 0.5
             else:
                 # Set 0.0 for Pool is Critical
                 details_db_values["poolstatus"] = 0.
@@ -158,8 +168,10 @@ class dCacheInfoPool(dCacheInfo):
                     details_db_values[theId] = -1
                     details_db_values["poolstatus"] = 0.
 
-            if details_db_values["poolstatus"] == 0.:
+            if details_db_values["poolstatus"] == 0.5:
                 self.sumInfo['poolwarning'] +=1
+            elif details_db_values["poolstatus"] == 0.:
+                self.sumInfo['poolcritical'] +=1
 
 
 
@@ -176,10 +188,12 @@ class dCacheInfoPool(dCacheInfo):
             self.db_values[ att ] = int(round(self.sumInfo[att]))
 
  
-        if self.limitExceeded(self.sumInfo,self.thresholdGlobal) == False:
-            self.status = 1.0
-        else:
+        if self.limitExceeded(self.sumInfo,'limit_global_critical') == True:
             self.status = 0.0
+        elif self.limitExceeded(self.sumInfo,'limit_global_warning') == True:
+            self.status = 0.5
+        else:
+            self.status = 1.0
             
         self.definition+= "Poolgroup: "+self.poolType+"<br/>"
         self.definition+= self.formatLimits()
@@ -187,22 +201,20 @@ class dCacheInfoPool(dCacheInfo):
 
     def formatLimits(self):
         theLines = []
-        globLim = []
-        for entry in self.thresholdGlobal.keys():
-            globLim.append(entry+self.thresholdGlobal[entry])
-        locLim = []
-        for entry in self.thresholdLocal.keys():
-            locLim.append(entry+self.thresholdLocal[entry])
+        for i in ['limit_global_critical','limit_local_critical','limit_global_warning','limit_local_warning']:
+            theLines.append(i+": "+self.getLimitVals(i))
 
-        theLines.append("Global Limits: "+", ".join(globLim))
-        theLines.append("Limits per poolnode: "+", ".join(locLim))
 
         var = ""
         for line in theLines:
             var+=line+"<br/>"
         return var
 
-
+    def getLimitVals(self,val):
+        limVec = []
+        for entry in self.thresholds[val].keys():
+            limVec.append(entry+self.thresholds[val][entry])
+        return ", ".join(limVec)
         
 
     def output(self):
@@ -225,8 +237,11 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("""    <td>'.$data["poolnumber"].'</td>""")
         mc.append("   </tr>")
         mc.append("  <tr>")
-        mc.append("    <td>Number of pools with warning</td>")
+        mc.append("    <td>Number of pools with status warning </td>")
         mc.append("""    <td>'.$data["poolwarning"].'</td>""")
+        mc.append("   </tr>")
+        mc.append("    <td>Number of pools with status critical</td>")
+        mc.append("""    <td>'.$data["poolcritical"].'</td>""")
         mc.append("   </tr>")
 
         for att in self.poolAttribs:
