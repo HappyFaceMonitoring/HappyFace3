@@ -63,8 +63,6 @@ class Sam(ModuleBase):
 
         #argList.sort()
         self.downloadRequest[self.dsTag] = 'wgetXmlRequest:'+self.fileType+':'+self.base_url+"?"+"&".join(argList)
-	print 'wgetXmlRequest:'+self.fileType+':'+self.base_url+"?"+"&".join(argList)
-
 
 	
     def run(self):
