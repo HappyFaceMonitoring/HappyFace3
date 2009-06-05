@@ -121,9 +121,7 @@ def HappyFace():
         cssService.add(modObj_list[module].getCssRequests())
 
     # Start parallel download of all specified files
-    print "DownloadService: Start file download:"
     downloadService.download(timeoutDowload)
-    print "DownloadService: Download finished."
 
     # parallel execution of the modules (threading)
     # see therefore: http://www.wellho.net/solutions/python-python-threads-a-first-example.html

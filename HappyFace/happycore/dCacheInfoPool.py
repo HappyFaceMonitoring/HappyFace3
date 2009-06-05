@@ -74,7 +74,7 @@ class dCacheInfoPool(dCacheInfo):
             
             for val in checkList:
                 if not val in thePoolInfo:
-                    print "Warning: No such variable "+val+" for limit check."
+                    print "Warning: No such variable for limit check in "+self.__module__+": "+val
                     print "         Return that limit is exceeded."
                     return True
 

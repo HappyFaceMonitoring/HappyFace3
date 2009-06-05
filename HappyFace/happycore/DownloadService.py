@@ -36,8 +36,13 @@ class DownloadService():
         
 
     def download(self,timeout):
+        print "DownloadService: Start file download:"
         resttime = timeout
+        print "DownloadService: Download tags:"
+        counter = 0
         for i in self.downloadTags.keys():
+            counter+= 1
+            print "  "+str(counter)+" "+i
             self.downloadTags[i].start()
         for i in self.downloadTags.keys():
             start = int(time())
@@ -51,7 +56,7 @@ class DownloadService():
                 self.downloadTags[i]._Thread__stop()
                 print "DownloadService: Download not finished after "+str(timeout)+"s: "+i
 
-        
+        print "DownloadService: Download finished."
 
 
     def clean(self):
