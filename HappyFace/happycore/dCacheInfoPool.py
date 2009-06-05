@@ -243,6 +243,7 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("    <td>Number of pools with status warning </td>")
         mc.append("""    <td>'.$data["poolwarning"].'</td>""")
         mc.append("   </tr>")
+        mc.append("  <tr>")
         mc.append("    <td>Number of pools with status critical</td>")
         mc.append("""    <td>'.$data["poolcritical"].'</td>""")
         mc.append("   </tr>")
@@ -274,7 +275,7 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("foreach ($dbh->query($details_db_sqlquery) as $sub_data)")
         mc.append(" {")
         mc.append("  printf('")
-        mc.append("   </tr>")
+        mc.append("   <tr>")
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
         for att in self.poolAttribs:
             mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.$sub_data["""+'"'+ att['id'] +'"'+ """].'</td>""")
