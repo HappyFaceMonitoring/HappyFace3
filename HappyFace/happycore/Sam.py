@@ -217,14 +217,14 @@ class Sam(ModuleBase):
 	printf('
 		<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
 		<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_success_result\\\'" + """);" />
-		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_success_result\\\'" + """ style="display:none;">
+		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
 		<table class="SamTableDetails">
 			<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
 	    ');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
-	    if ($results["status"] == "ok")
+	    if ($results["status"] != "ok" && $results["status"] != "")
 		printf('<tr>
 			<td>'.$results["service_type"].'</td>
 			<td>'.$results["service_name"].'</td>
@@ -236,14 +236,14 @@ class Sam(ModuleBase):
 	printf('</table></div>');
 
 	printf('
-		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
+		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_success_result\\\'" + """ style="display:none;">
 		<table class="SamTableDetails">
 		<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
 	    ');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
-	    if ($results["status"] != "ok" && $results["status"] != "")
+	    if ($results["status"] == "ok")
 		printf('<tr>
 			<td>'.$results["service_type"].'</td>
 			<td>'.$results["service_name"].'</td>
