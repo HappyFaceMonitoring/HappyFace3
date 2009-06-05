@@ -26,16 +26,15 @@ class Sam(ModuleBase):
 	self.db_values["site"] = ""
 	
 	
-	self.base_url = config.get('setup','base_url')
-	self.report_url	= config.get('setup','report_url')
+	self.base_url = self.mod_config.get('setup','base_url')
+	self.report_url	= self.mod_config.get('setup','report_url')
         self.phpArgs = {}
         self.fileType = ""
 	
-        if config.has_option('setup','fileextension'):
-            self.fileType = config.get('setup','fileextension')
+        if self.mod_config.has_option('setup','fileextension'):
+            self.fileType = self.mod_config.get('setup','fileextension')
 
 
-	self.getPhpArgs(config)
         # read module specific phpArgs from modul config file
         self.getPhpArgs(self.mod_config)	
 	
@@ -172,7 +171,7 @@ class Sam(ModuleBase):
 				    details_db_values["service_name"] = ServiceName
 				    details_db_values["service_status"] = ServiceStatus
 				    details_db_values["status"] = Status
-				    details_db_values["url"] = self.report_url + Url.__str__()
+				    details_db_values["url"] = (self.report_url + Url.__str__()).replace('&','&amp;').replace('%','%%')
 				    details_db_values["age"] = Age
 				    details_db_values["type"] = Type
 				    details_db_values["time"] = Time
@@ -201,35 +200,57 @@ class Sam(ModuleBase):
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
 	    if ($temp_element != $info["service_name"]) {
+
 		if ($info["service_status"] == "1") {
-		    printf('<tr class="success"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
+		    $service_status_color_flag = "success";
 		} else {
-		    printf('<tr class="fail"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
+		    $service_status_color_flag = "fail";
 		}
+		
+		printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
 	    }
 	    $temp_element = $info["service_name"];
 	}
 	
+	printf('</table><br/>');
 	
 	printf('
-	</table><br>
+		<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
+		<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_success_result\\\'" + """);" />
+		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_success_result\\\'" + """ style="display:none;">
+		<table class="SamTableDetails">
+			<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
+	    ');
 	
-	<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-	<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
-	<table class="SamTableDetails">
-		<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
-	');
-	
-	foreach ($dbh->query($details_db_sqlquery) as $info)
-       	{
-	    if ($info["status"] != "ok" && $info["status"] != "")
+	foreach ($dbh->query($details_db_sqlquery) as $results)
+	{
+	    if ($results["status"] == "ok")
 		printf('<tr>
-			<td>'.$info["service_type"].'</td>
-			<td>'.$info["service_name"].'</td>
-			<td><a href="'.$info["url"].'"><strong>'.$info["status"].'</strong></a></td>
-			<td>'.$info["type"].'</td>
-			<td>'.$info["time"].'</td>
-			</tr>');
+			<td>'.$results["service_type"].'</td>
+			<td>'.$results["service_name"].'</td>
+			<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong></a></td>
+			<td>'.$results["type"].'</td>
+			<td>'.$results["time"].'</td>
+		</tr>');
+	}
+	printf('</table></div>');
+
+	printf('
+		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
+		<table class="SamTableDetails">
+		<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
+	    ');
+	
+	foreach ($dbh->query($details_db_sqlquery) as $results)
+	{
+	    if ($results["status"] != "ok" && $results["status"] != "")
+		printf('<tr>
+			<td>'.$results["service_type"].'</td>
+			<td>'.$results["service_name"].'</td>
+			<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong></a></td>
+			<td>'.$results["type"].'</td>
+			<td>'.$results["time"].'</td>
+		</tr>');
 	}
 	printf('</table></div><br/>');
 	?>
