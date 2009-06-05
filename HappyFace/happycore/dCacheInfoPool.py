@@ -71,10 +71,13 @@ class dCacheInfoPool(dCacheInfo):
         for check in theThresholds.keys():
             checkList = check.split("/")
 
+            
             for val in checkList:
                 if not val in thePoolInfo:
-                    print "Warning: No such variable "+val
-                    continue
+                    print "Warning: No such variable "+val+" for limit check."
+                    print "         Return that limit is exceeded."
+                    return True
+
 
             theRelVal = 0.
             if len(checkList) == 1:
