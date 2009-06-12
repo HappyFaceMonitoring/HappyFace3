@@ -156,8 +156,6 @@ class ModuleBase(Thread,DataBaseLock,object):
 	# store the values self.db_values to the database
 	My_DB_Class(**self.db_values)
 
-        print self.__module__ + " database access finished!!"
-	
 	# unlock the database access
 	self.lock.release()
 
