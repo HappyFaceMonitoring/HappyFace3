@@ -63,6 +63,10 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_keys["weight"]		= FloatCol()
 	self.db_keys["definition"]	= StringCol()
 	self.db_keys["instruction"]	= StringCol()
+
+	# create an index for the timestap column for faster access
+	self.db_keys["index"] = DatabaseIndex('timestamp')
+
 	
         self.downloadRequest = {}
         # Read download requests from module config
@@ -151,6 +155,8 @@ class ModuleBase(Thread,DataBaseLock,object):
 	
 	# store the values self.db_values to the database
 	My_DB_Class(**self.db_values)
+
+        print self.__module__ + " database access finished!!"
 	
 	# unlock the database access
 	self.lock.release()
