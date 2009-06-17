@@ -71,11 +71,18 @@ class PhedexStats(ModuleBase):
 
 	#############################################################################
 	# parse the details and store it in a special database table
-	details_database = self.__module__ + "_details_" + str(self.timestamp) + "_table"
+	details_database = self.__module__ + "_table_details"
 	self.db_values["details_database"] = details_database
 
 	details_db_keys = {}
 	details_db_values = {}
+
+	# write global after which the query will work
+	details_db_keys["timestamp"] = IntCol()
+	details_db_values["timestamp"] = self.timestamp
+
+	# create index for timestamp
+	details_db_keys["index"] = DatabaseIndex('timestamp')
 
 	details_db_keys["site_name"] = StringCol()
 	details_db_keys["number"] = IntCol()
@@ -161,7 +168,7 @@ class PhedexStats(ModuleBase):
 		<tr><td><strong>Site Name</strong></td><td><strong>Failed Transfers</strong></td><td><strong>Origin</strong></td><td><strong>Error Message</strong></td></tr>
 	');
 	
-	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"];
+	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
 		printf('<tr><td>'.$info["site_name"].'</td><td>'.$info["number"].'</td><td>'.$info["origin"].'</td><td>'.$info["error_message"].'</td></tr>');

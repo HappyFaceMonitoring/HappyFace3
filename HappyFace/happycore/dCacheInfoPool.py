@@ -122,7 +122,7 @@ class dCacheInfoPool(dCacheInfo):
 
 
 
-        details_database = self.__module__ + "_details_" + str(self.timestamp) + "_table"
+        details_database = self.__module__ + "_table_details"
         self.db_values["details_database"] = details_database
 
         
@@ -131,6 +131,14 @@ class dCacheInfoPool(dCacheInfo):
         
         details_db_keys["poolname"] = StringCol()
         details_db_keys["poolstatus"] = FloatCol()
+	
+	# write global after which the query will work
+	details_db_keys["timestamp"] = IntCol()
+	details_db_values["timestamp"] = self.timestamp
+
+	# create index for timestamp
+	details_db_keys["index"] = DatabaseIndex('timestamp')
+
         for att in self.poolAttribs:
             details_db_keys[ att['id'] ] = IntCol()
 
@@ -228,7 +236,7 @@ class dCacheInfoPool(dCacheInfo):
         mc = []
         mc.append("<?php")
         # Define sub_table for this module
-        mc.append('$details_db_sqlquery = "SELECT * FROM " . $data["details_database"];')
+        mc.append('$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];')
       
         #Start with module output
         mc.append("printf('")

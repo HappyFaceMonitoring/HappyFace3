@@ -84,7 +84,7 @@ class Sam(ModuleBase):
         if source_tree == "": return
 
 	# parse the details and store it in a special database table
-	details_database = self.__module__ + "_details_" + str(self.timestamp) + "_table"
+	details_database = self.__module__ + "_table_details"
 	
 	self.db_values["details_database"] = details_database
 
@@ -99,6 +99,14 @@ class Sam(ModuleBase):
 	details_db_keys["age"] = StringCol()
 	details_db_keys["type"] = StringCol()
 	details_db_keys["time"] = StringCol()
+
+	# write global after which the query will work
+	details_db_keys["timestamp"] = IntCol()
+	details_db_values["timestamp"] = self.timestamp
+
+	# create index for timestamp
+	details_db_keys["index"] = DatabaseIndex('timestamp')
+
 
 	# lock object enables exclusive access to the database
 	self.lock.acquire()
@@ -192,7 +200,7 @@ class Sam(ModuleBase):
         # all information in the database are available via a $data["key"] call
         module_content = """
         <?php
-	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"];
+	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	$temp_element = "";
 		
 	printf('<table class="SamTable">');
