@@ -4,6 +4,7 @@ import ConfigParser
 from sqlobject import *		# for SQL database functionality
 from threading import Thread	# for threading functionality
 from DataBaseLock import *
+import re
 
 #########################################################
 # basic class for all test modules
@@ -48,7 +49,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.instruction	= self.mod_config.get('setup','instruction',"")
 
         # definitions for the database table
-	self.database = self.__module__ + '_table'
+	self.database_table = self.__module__ + '_table'
 
 	self.db_keys = {}
 	self.db_values = {}
@@ -138,23 +139,36 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_values['definition']	= self.definition
 	self.db_values['instruction']	= self.instruction
 
+	db_keys = self.db_keys
+	db_values = self.db_values
+	tableName = self.database_table
+
 	# lock object enables exclusive access to the database
 	self.lock.acquire()
-
-	# create dynamically a SQLObject Class
-	# the name of the class corresponds to the table name in the DB
-	# table name = self.database; structure = self.db_keys
-        My_DB_Class = type(self.database, (SQLObject,), self.db_keys )
 	
-	My_DB_Class.sqlmeta.cacheValues = False
-	My_DB_Class.sqlmeta.fromDatabase = True
-	#My_DB_Class.sqlmeta.lazyUpdate = True
+    	try:
+	    class DBProxy(SQLObject):
+	        class sqlmeta:
+		    table = tableName
+		    fromDatabase = True
 
-	# if table is not existing, create it
-        My_DB_Class.createTable(ifNotExists=True)
-	
-	# store the values self.db_values to the database
-	My_DB_Class(**self.db_values)
+	    avail_keys = []
+	    for key in DBProxy.sqlmeta.columns.keys():
+	        avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
+
+	    My_DB_Class = type(tableName, (SQLObject,), db_keys)
+	    My_DB_Class.createTable(ifNotExists=True)	
+
+	    for key in filter(lambda x: x not in avail_keys, db_keys.keys()):
+                if key != "index":
+		    try: DBProxy.sqlmeta.addColumn(db_keys[key].__class__(key), changeSchema=True)
+		    except: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__
+
+        except:
+	    My_DB_Class = type(tableName, (SQLObject,), db_keys)
+	    My_DB_Class.createTable(ifNotExists=True)
+
+        My_DB_Class(**db_values)
 
 	# unlock the database access
 	self.lock.release()
