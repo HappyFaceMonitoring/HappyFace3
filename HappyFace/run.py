@@ -147,7 +147,7 @@ def HappyFace():
             modObj_list[module]._Thread__stop()
             modObj_list[module].error_message += "\nCould not execute module in time, "\
                                                  + modObj_list[module].__module__ \
-                                                 + " abborting ...\n"
+                                                 + " aborting ...\n"
             sys.stdout.write(modObj_list[module].error_message)
 
         # store results (or pre-defined values if timeout) to DB
