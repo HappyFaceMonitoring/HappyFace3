@@ -33,9 +33,13 @@ class PhedexStats(ModuleBase):
             self.error_message +=err
             return -1
 
-        success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-	source_tree,mod_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
-        self.error_message += mod_error
+        dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+        if dl_error != "":
+            self.error_message+= dl_error
+            return
+
+	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        self.error_message += xml_error
 
         ##############################################################################
         # if xml parsing fails, abort the test; 

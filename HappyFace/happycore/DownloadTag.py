@@ -17,15 +17,17 @@ class DownloadTag(Thread):
         self.archive_dir = subdir
 
         self.success = False
+        self.finished = False
+        self.error = "Download not finished in time."
 
         self.dataFetcher = GetData()
         
 
     def download(self):
         if self.program == "wget":
-            self.success,stderr = self.dataFetcher.getDataWget(self.url, self.archive_dir, self.localFile)
+            self.success,self.error = self.dataFetcher.getDataWget(self.url, self.archive_dir, self.localFile)
         elif self.program == "wgetXmlRequest":
-            self.success,stderr = self.dataFetcher.getDataWgetXmlRequest(self.url, self.archive_dir, self.localFile)
+            self.success,self.error = self.dataFetcher.getDataWgetXmlRequest(self.url, self.archive_dir, self.localFile)
         else:
             print "DownloadTag: "+self.program+" currently not supported!"
 
@@ -33,7 +35,7 @@ class DownloadTag(Thread):
 
     def run(self):
         self.download()
-            
+        self.finished = True
 
     def getFilePath(self):
         return './'+self.archive_dir+'/'+self.localFile

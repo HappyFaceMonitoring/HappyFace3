@@ -65,11 +65,6 @@ class DownloadService():
         for i in self.downloadTags.keys():
             os.remove(self.downloadTags[i].getFilePath())
             
-    def getFile(self,downloadstring):
-        if downloadstring in self.downloadTags:
-            return self.downloadTags[downloadstring].success,self.downloadTags[downloadstring].getFilePath()
-        else:
-            return False,""
 
     def getFileType(self,downloadstring):
         if downloadstring in self.downloadTags:
@@ -80,17 +75,38 @@ class DownloadService():
                 return "."+fileType
 
 
-    def copyFile(self,downloadstring,destfile):
-        if downloadstring in self.downloadTags:
-            if self.downloadTags[downloadstring].success:
-                localFile = self.downloadTags[downloadstring].getFilePath()
-                ret = os.system('cp '+localFile+' '+destfile)
-                return True,""
-            else:
-                return False,"Download failed for \'"+downloadstring.replace('&','&amp;').replace('%','%%') +"\'."
-                
-
+    def getFile(self,downloadstring):
+        success,error = self.checkDownload(downloadstring)
+        if success:
+            return error,self.downloadTags[downloadstring].getFilePath()
         else:
-            return False,"Tag \'"+downloadstring+"\' not found."
+            return error,""
 
 
+    def copyFile(self,downloadstring,destfile):
+        success,error = self.checkDownload(downloadstring)
+        if success:
+            localFile = self.downloadTags[downloadstring].getFilePath()
+            ret = os.system('cp '+localFile+' '+destfile)
+            return True,""
+        else:
+            return success,error
+
+
+    def checkDownload(self,downloadstring):
+        success = True
+        error = ""
+        if downloadstring in self.downloadTags:
+            if not self.downloadTags[downloadstring].finished:
+                success = False
+                error = "Download has not finished in time."
+                
+            elif not self.downloadTags[downloadstring].success:
+                success = False
+                error = "Download failed."
+            
+        else:
+            success = False
+            error = "Tag \'"+downloadstring+"\' not found."
+
+        return success,error

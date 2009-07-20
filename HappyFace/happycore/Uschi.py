@@ -43,9 +43,13 @@ class Uschi(ModuleBase):
             self.error_message +=err
             return -1
 
-        success,uschiFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-	uschi_dom_object,mod_error = XMLParsing().parse_xmlfile_minidom(uschiFile)
-        self.error_message += mod_error
+        dl_error,uschiFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+        if dl_error != "":
+            self.error_message+= dl_error
+            return
+
+	uschi_dom_object,xml_error = XMLParsing().parse_xmlfile_minidom(uschiFile)
+        self.error_message += xml_error
         
         ##############################################################################
         # if xml parsing fails, abort the test; 

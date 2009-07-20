@@ -18,7 +18,7 @@ class GetData():
             stderr = ""
 
         else:
-            stderr = '\nCould not download ' + url + ', abborting ...\n'
+            stderr = '\nCould not download ' + url + ', aborting ...\n'
             sys.stdout.write(stderr)
             success = False
         return success,stderr
@@ -35,7 +35,7 @@ class GetData():
             stderr = ""
 
         else:
-            stderr = '\nCould not download ' + url + ', abborting ...\n'
+            stderr = '\nCould not download ' + url + ', aborting ...\n'
             sys.stdout.write(stderr)
             success = False
         return success,stderr
