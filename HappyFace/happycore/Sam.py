@@ -76,7 +76,12 @@ class Sam(ModuleBase):
 
 
 	success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-	source_tree = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        if not success:
+            self.error_message+= "Download failed ..."
+            return
+
+	source_tree,mod_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        self.error_message += mod_error
 
         ##############################################################################
         # if xml parsing fails, abort the test; 

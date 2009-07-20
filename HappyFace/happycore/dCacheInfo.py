@@ -24,7 +24,8 @@ class dCacheInfo(ModuleBase):
             return -1
 
         success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-	source_tree = XMLParsing().parse_xmlfile_minidom(sourceFile)
+	source_tree,mod_error = XMLParsing().parse_xmlfile_minidom(sourceFile)
+        self.error_message += mod_error
 
         ##############################################################################
         # if xml parsing fails, abort the test; 
