@@ -1,0 +1,33 @@
+/* CSS file for the HappyFace module: CMSPhedexPhysicsGroups */
+
+.PhysGroupsTable,.PhysGroupsTableDetails {
+	border: solid 1px #999;
+	width: 800px;
+}
+
+.PhysGroupsTable td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.PhysGroupsTableDetails td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.PhysGroupsDetailedInfo {
+	font-family: monospace;
+	line-height: 14px;
+}
+
+
+
+tr.success {
+	background-color:  #AAFFAA;
+}
+
+tr.fail {
+	background-color: #FF6464;
+}
