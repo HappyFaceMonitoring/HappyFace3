@@ -193,13 +193,13 @@ class CMSPhedexAgents(ModuleBase):
 
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-            if ($info["agent_status"] == 1){
+            if ($info["agent_status"] == 1.){
                   $service_status_color_flag = "up";
         }
              else if ($info["agent_status"] == 0.5){
                   $service_status_color_flag = "warning";
         }
-             else if ($info["agent_status"] == 0){
+             else if ($info["agent_status"] == 0.){
                   $service_status_color_flag = "critical";
         }
              else $service_status_color_flag = "undef";
@@ -221,13 +221,13 @@ class CMSPhedexAgents(ModuleBase):
 
          foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-            if ($info["agent_status"] == 1){
+            if ($info["agent_status"] == 1.){
                   $service_status_color_flag = "up";
         }
              else if ($info["agent_status"] == 0.5){
                   $service_status_color_flag = "warning";
         }
-             else if ($info["agent_status"] == 0){
+             else if ($info["agent_status"] == 0.){
                   $service_status_color_flag = "critical";
         }
              else $service_status_color_flag = "undef";
@@ -258,21 +258,21 @@ class CMSPhedexAgents(ModuleBase):
             if not self.critical:
                 print "Warning: critical status not defined in config file."
                 print "setting it to 2 hours."
-                self.critical = 2
+                self.critical = 2.
 
             if not self.warning:
                 print "Warning: warning status not defined in config file."
                 print "setting it to 1 hour."
-                self.warning = 1
+                self.warning = 1.
 
-            if time > self.critical:
-                status = 0
+            if time > float(self.critical):
+                status = 0.
 
-            elif time > self.warning:
+            elif time > float(self.warning):
                 status = 0.5
 
             else:
-                status = 1
+                status = 1.
 
         return status
 
