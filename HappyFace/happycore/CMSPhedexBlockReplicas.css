@@ -1,0 +1,37 @@
+/* CSS file for the HappyFace module: CMSPhedexBlockReplicas */
+
+.BlockReplicasTable,.BlockReplicasTableDetails {
+	border: solid 1px #999;
+	width: 800px;
+}
+
+.BlockReplicasTable td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.BlockReplicasTableDetails td {
+	padding: 5px;
+	border: solid 1px #999;
+	text-align: left;
+}
+
+.BlockReplicasDetailedInfo {
+	font-family: monospace;
+	line-height: 14px;
+}
+
+
+
+tr.writing {
+	background-color: #96C8FF;
+}
+
+tr.critical {
+	background-color: #FF6464;
+}
+
+tr.undef {
+	background-color: #C0C0C0;
+}

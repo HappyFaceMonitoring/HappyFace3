@@ -1,0 +1,351 @@
+from ModuleBase import *
+from XMLParsing import *
+
+#
+# Friederike Nowak
+# University of Hamburg
+# 2009/06/22
+#
+
+######################################################
+#                                                    #
+# Uses the informations about the block replicas     #
+# on a site provided by the phedex API. Informations #
+# about resident blocks are displayed only if        #
+# they are in the transfer phase or if there is a    #
+# mismatch between block size and resident size.     #
+#                                                    #
+######################################################
+
+class CMSPhedexBlockReplicas(ModuleBase):
+
+    def __init__(self,category,timestamp,storage_dir):
+
+
+        # inherits from the ModuleBase Class
+        ModuleBase.__init__(self,category,timestamp,storage_dir)
+
+        config = self.readConfigFile('./happycore/CMSPhedexBlockReplicas')
+	self.addCssFile(config,'./happycore/CMSPhedexBlockReplicas')
+
+        ## the url of the Phedex Agents Api
+        self.base_url = self.mod_config.get('setup','base_url')
+        self.phpArgs = {}
+
+        ## needed arguments: node = ARG
+        self.getPhpArgs(self.mod_config)
+
+        ## get the instance
+        self.instance = self.mod_config.get('setup','instance')
+
+        # definition of the database table keys and pre-defined values
+	self.db_keys["details_database"] = StringCol()
+        self.db_values["details_database"] = ""
+
+        self.dsTag = 'cmsPhedexBlockReplicas_xml_source'
+        self.fileType = 'xml'
+
+        self.makeUrl()
+
+    def getPhpArgs(self, config):
+        for i in config.items('phpArgs'):
+            self.phpArgs[i[0]] = i[1]
+
+    def makeUrl(self):
+        if len(self.phpArgs) == 0:
+            print "Php Error: makeUrl called without phpArgs"
+            sys.exit()
+        if self.base_url == "":
+            print "Php Error: makeUrl called without base_url"
+            sys.exit()
+
+        ## if last char of url is "/", remove it
+        if self.base_url[-1] == "/":
+            self.base_url = self.base_url[:-1]
+            
+
+        argList = []
+        for i in self.phpArgs:
+	    for j in self.phpArgs[i].split(","):
+		argList.append(i+'='+j)
+
+        self.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+'/'+self.instance+'/blockreplicas'+"?"+"&".join(argList)
+
+
+    def run(self):
+
+        # run the test
+
+        if not self.dsTag in self.downloadRequest:
+            err = 'Error: Could not find required tag: '+self.dsTag+'\n'
+            sys.stdout.write(err)
+            self.error_message +=err
+            return -1
+
+        success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+	source_tree = XMLParsing().parse_xmlfile_lxml(sourceFile)
+
+        ##############################################################################
+        # if xml parsing fails, abort the test; 
+	# self.status will be pre-defined -1
+        if source_tree == "": return
+
+        # parse the details and store it in a special database table
+	details_database = self.__module__ + "_table_details"
+	
+	self.db_values["details_database"] = details_database
+
+	details_db_keys = {}
+	details_db_values = {}
+
+        details_db_keys['block_bytes'] = IntCol()
+        details_db_keys['block_files'] = IntCol()
+        details_db_keys['block_name'] = StringCol()
+        details_db_keys['rep_bytes'] = IntCol()
+        details_db_keys['rep_files'] = IntCol()
+        details_db_keys['rep_group'] = StringCol()
+        details_db_keys['block_status'] = FloatCol()
+        details_db_keys['dataset_name'] = StringCol()
+
+        ## write global after which the query will work
+	details_db_keys["timestamp"] = IntCol()
+	details_db_values["timestamp"] = self.timestamp
+
+	## create index for timestamp
+	details_db_keys["index"] = DatabaseIndex('timestamp')
+
+	## lock object enables exclusive access to the database
+	self.lock.acquire()
+
+        Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
+
+        Details_DB_Class.sqlmeta.cacheValues = False
+	Details_DB_Class.sqlmeta.fromDatabase = True
+	#Details_DB_Class.sqlmeta.lazyUpdate = True
+
+        ## if table is not existing, create it
+        Details_DB_Class.createTable(ifNotExists=True)
+
+
+        ## now start parsing the xml tree
+	root = source_tree.getroot()
+        entry = False
+
+        self.status = 1
+
+        for block in root:
+            if block.tag == "block":
+
+                dataset_name,block_number = block.get('name').split('#')
+
+                current_block = self.Block()
+                current_block.block_bytes = int(block.get('bytes'))
+                current_block.block_files = int(block.get('files'))
+                current_block.block_name = block_number
+                current_block.dataset_name = dataset_name
+                current_block.open = self.isOpen(str(block.get('is_open')))
+
+                ## for one node in the cfg, there can be only one replica
+                ## per block
+                for replica in block:
+                    if replica.tag == "replica":
+
+                        current_block.rep_bytes = int(replica.get('bytes'))
+                        current_block.rep_files = int(replica.get('files'))
+                        current_block.rep_group = str(replica.get('group'))
+
+                ## if block is not alright, make an entry in the database
+                current_block.checkBlock()
+
+
+                if not current_block.ok:
+                    
+                    details_db_values['dataset_name'] = current_block.dataset_name
+                    details_db_values['block_name'] = current_block.block_name
+                    details_db_values['block_bytes'] = current_block.block_bytes
+                    details_db_values['block_files'] = current_block.block_files
+                    details_db_values['block_status'] = current_block.block_status
+                    details_db_values['rep_bytes'] = current_block.rep_bytes
+                    details_db_values['rep_files'] = current_block.rep_files
+                    details_db_values['rep_group'] = current_block.rep_group
+
+                    Details_DB_Class(**details_db_values)
+
+                    entry = True
+
+                    ## if there is a brocken block, set global status to critical
+                    if not current_block.block_status == 2:
+                        self.status = 0
+
+                    del current_block
+                    
+
+
+        ## if everything is ok, fill in a dummy block for technical reasons
+        if not entry:
+            
+            dummy_block = self.Block()
+            dummy_block.block_name = 'dummy'
+            
+            details_db_values['dataset_name'] = dummy_block.dataset_name
+            details_db_values['block_name'] = dummy_block.block_name
+            details_db_values['block_bytes'] = dummy_block.block_bytes
+            details_db_values['block_files'] = dummy_block.block_files
+            details_db_values['block_status'] = dummy_block.block_status
+            details_db_values['rep_bytes'] = dummy_block.rep_bytes
+            details_db_values['rep_files'] = dummy_block.rep_files
+            details_db_values['rep_group'] = dummy_block.rep_group
+
+            
+            
+            Details_DB_Class(**details_db_values)
+            
+                       
+
+        # unlock the database access
+	self.lock.release()
+
+
+    def output(self):
+
+        module_content = """
+        <?php
+        $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
+
+        $dummy = false;
+        foreach ($dbh->query($details_db_sqlquery) as $info){
+          if ($info["block_name"] == "dummy"){
+            $dummy = true;
+          }
+        }
+
+        if(!$dummy){
+          printf('<table class="BlockReplicasTable">');
+          printf('<tr><td>dataset</td><td>block</td><td>resident size [MB]</td></tr>');
+
+          foreach ($dbh->query($details_db_sqlquery) as $info)
+       	  {
+               if ($info["block_status"] == 2){
+                    $service_status_color_flag = "writing";
+          }  
+               else if ($info["block_status"] == 0){
+                    $service_status_color_flag = "critical";
+          }
+               else $service_status_color_flag = "undef";
+
+          $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
+
+          printf('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$rep_size.'</td></tr>');
+          }
+          
+          printf('</table><br/>');
+
+          
+          printf('<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
+          <div class="BlockReplicasDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">');
+
+          printf('<table class="BlockReplicasTableDetails">');
+          printf('<tr><td>dataset</td><td>block</td><td>block files</td><td>resident files</td><td>block size [MB]</td><td>resident size [MB]</td><td>group</td></tr>');
+
+          foreach ($dbh->query($details_db_sqlquery) as $info)
+          {
+               if ($info["block_status"] == 2){
+                  $service_status_color_flag = "writing";
+          }
+               else if ($info["block_status"] == 0){
+                  $service_status_color_flag = "critical";
+          }
+               else $service_status_color_flag = "undef";
+
+          $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
+          $block_size = round($info["block_bytes"]/(1024*1024*1024),2);
+
+          printf('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$info["block_files"].'</td><td>'.$info["rep_files"].'</td><td>' .$block_size . '</td><td>'.$rep_size.'</td><td>'.$info["rep_group"].'</td></tr>');
+          }
+          printf('</table>');
+        
+    
+        printf('</div><br/>');
+        }
+        else{
+          printf('All is fine.');
+        }
+        
+        ?>
+        """
+
+        return self.PHPOutput(module_content)
+
+    def determineBlockStatus(self,block_bytes,rep_bytes,open):
+        status = -1.
+
+        if not open:
+            if block_bytes == rep_bytes:
+                status = 1.
+            else:
+                status = 0.
+            
+        ## still writing data => status == 2.
+        else:
+            status = 2.
+            
+        return status
+
+    def determineStatus(self,blockStatusList):
+
+        status = 1.
+        undefCounter = 0.
+
+        for blockStatus in blockStatusList:
+            if blockStatus == -1.:
+                undefCounter += 1
+            else:
+                ## status begins with 1., so the 'writing'
+                ## status (2.) will not taken into acount
+                if blockStatus < status:
+                    status = blockStatus
+
+        if undefCounter == len(blockStatusList):
+            status = -1.
+
+        return status
+
+
+    class Block:
+
+        block_files = 0
+        block_bytes = 0
+        block_name = ''
+        dataset_name = ''
+        rep_files = 0
+        rep_bytes = 0
+        rep_group = ''
+        open = False
+        ok = True
+        block_status = -1
+        
+        def checkBlock(self):
+            
+            ## if the block is still in transfer phase, it's
+            ## fine, but it should be displayed
+            if self.open:
+                self.ok = False
+                self.block_status = 2
+
+            ## if the block is not in transfer phase
+            ## but misses bytes, than it should also appear
+            elif not self.block_bytes == self.rep_bytes:
+                    self.ok = False
+                    self.block_status = 0
+
+            else:
+                self.block_status = 1
+
+    def isOpen(self,string):
+        open = False
+        if string == 'y':
+            open = True
+
+        return open
+            
+
