@@ -143,13 +143,13 @@ class CMSPhedexBlockReplicas(ModuleBase):
                 current_block.block_files = int(block.get('files'))
                 current_block.block_name = block_number
                 current_block.dataset_name = dataset_name
-                current_block.open = self.isOpen(str(block.get('is_open')))
 
                 ## for one node in the cfg, there can be only one replica
                 ## per block
                 for replica in block:
                     if replica.tag == "replica":
 
+                        current_block.complete = self.isComplete(str(replica.get('complete')))
                         current_block.rep_bytes = int(replica.get('bytes'))
                         current_block.rep_files = int(replica.get('files'))
                         current_block.rep_group = str(replica.get('group'))
@@ -157,7 +157,7 @@ class CMSPhedexBlockReplicas(ModuleBase):
                 ## if block is not alright, make an entry in the database
                 current_block.checkBlock()
 
-
+                ## "not alright" means not complete
                 if not current_block.ok:
                     
                     details_db_values['dataset_name'] = current_block.dataset_name
@@ -172,10 +172,6 @@ class CMSPhedexBlockReplicas(ModuleBase):
                     Details_DB_Class(**details_db_values)
 
                     entry = True
-
-                    ## if there is a brocken block, set global status to critical
-                    if not current_block.block_status == 2:
-                        self.status = 0
 
                     del current_block
                     
@@ -196,14 +192,17 @@ class CMSPhedexBlockReplicas(ModuleBase):
             details_db_values['rep_files'] = dummy_block.rep_files
             details_db_values['rep_group'] = dummy_block.rep_group
 
-            
-            
-            Details_DB_Class(**details_db_values)
-            
                        
+            Details_DB_Class(**details_db_values)
 
+            del dummy_block
+            
         # unlock the database access
 	self.lock.release()
+
+        ## status is always happy, because for no there is no
+        ## critical /warnig block_status
+        self.status = 1.
 
 
     def output(self):
@@ -276,40 +275,6 @@ class CMSPhedexBlockReplicas(ModuleBase):
 
         return self.PHPOutput(module_content)
 
-    def determineBlockStatus(self,block_bytes,rep_bytes,open):
-        status = -1.
-
-        if not open:
-            if block_bytes == rep_bytes:
-                status = 1.
-            else:
-                status = 0.
-            
-        ## still writing data => status == 2.
-        else:
-            status = 2.
-            
-        return status
-
-    def determineStatus(self,blockStatusList):
-
-        status = 1.
-        undefCounter = 0.
-
-        for blockStatus in blockStatusList:
-            if blockStatus == -1.:
-                undefCounter += 1
-            else:
-                ## status begins with 1., so the 'writing'
-                ## status (2.) will not taken into acount
-                if blockStatus < status:
-                    status = blockStatus
-
-        if undefCounter == len(blockStatusList):
-            status = -1.
-
-        return status
-
 
     class Block:
 
@@ -320,32 +285,27 @@ class CMSPhedexBlockReplicas(ModuleBase):
         rep_files = 0
         rep_bytes = 0
         rep_group = ''
-        open = False
         ok = True
         block_status = -1
+        complete = True
         
         def checkBlock(self):
             
-            ## if the block is still in transfer phase, it's
-            ## fine, but it should be displayed
-            if self.open:
+            ## if a block is not complete, than it could be either in
+            ## the transfer phase or it could be broken 
+            if not self.complete:
                 self.ok = False
                 self.block_status = 2
-
-            ## if the block is not in transfer phase
-            ## but misses bytes, than it should also appear
-            elif not self.block_bytes == self.rep_bytes:
-                    self.ok = False
-                    self.block_status = 0
 
             else:
                 self.block_status = 1
 
-    def isOpen(self,string):
-        open = False
-        if string == 'y':
-            open = True
 
-        return open
+    def isComplete(self,string):
+        complete = False
+        if string == 'y':
+            complete = True
+
+        return complete
             
 
