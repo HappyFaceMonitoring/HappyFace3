@@ -138,7 +138,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_values['weight']	= self.weight
 	self.db_values['definition']	= self.definition
 	self.db_values['instruction']	= self.instruction
-
+		
 	db_keys = self.db_keys
 	db_values = self.db_values
 	tableName = self.database_table
@@ -146,22 +146,23 @@ class ModuleBase(Thread,DataBaseLock,object):
 	# lock object enables exclusive access to the database
 	self.lock.acquire()
 	
-    	try:
-	    class DBProxy(SQLObject):
-	        class sqlmeta:
-		    table = tableName
-		    fromDatabase = True
+	try:
+	    class sqlmeta:
+	        table = tableName
+	        fromDatabase = True
 
+	    DBProxy = type(self.__module__ + "_dbclass",(SQLObject,),dict(sqlmeta = sqlmeta))
+		    
 	    avail_keys = []
 	    for key in DBProxy.sqlmeta.columns.keys():
 	        avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
-
+	    
 	    My_DB_Class = type(tableName, (SQLObject,), db_keys)
 	    My_DB_Class.createTable(ifNotExists=True)	
 
 	    for key in filter(lambda x: x not in avail_keys, db_keys.keys()):
                 if key != "index":
-		    try: DBProxy.sqlmeta.addColumn(db_keys[key].__class__(key), changeSchema=True)
+	            try: DBProxy.sqlmeta.addColumn(db_keys[key].__class__(key), changeSchema=True)
 		    except: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__
 
         except:
