@@ -1,6 +1,8 @@
 from ModuleBase import *
 from XMLParsing import *
 
+from time import strftime
+
 #
 # Friederike Nowak
 # University of Hamburg
@@ -112,7 +114,8 @@ class CMSPhedexAgents(ModuleBase):
         details_db_keys["version"] = StringCol()
         details_db_keys["host"] = StringCol()
         details_db_keys["dir"] = StringCol()
-        details_db_keys["time"] = FloatCol()
+        #details_db_keys["time"] = FloatCol()
+        details_db_keys["time"] = StringCol()
         details_db_keys['agent_status'] = FloatCol()
 
         ## write global after which the query will work
@@ -161,15 +164,16 @@ class CMSPhedexAgents(ModuleBase):
                     details_db_values['label'] = label
 
                     ## store the time the agent has answered the last time
-                    ## time in hours
-                    time = (request_time - time_update)/3600
+                    ## time in seconds
+                    time = (request_time - time_update)
 
-                    details_db_values['time'] = time
-
-                    agent_status = self.determineAgentStatus(time, label)
+                    agent_status = self.determineAgentStatus(time/3600, label)
                     agentStatusList.append(agent_status)
 
                     details_db_values['agent_status'] = agent_status
+
+                    time_format = self.formatTime(time, agent_status)
+                    details_db_values['time'] = time_format
                     
                     # store the values to the database
                     Details_DB_Class(**details_db_values)
@@ -188,7 +192,7 @@ class CMSPhedexAgents(ModuleBase):
         $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
         printf('<table class="AgentsTable">');
-        printf('<tr><td>agent</td><td>label</td><td>time [hours]</td></tr>');
+        printf('<tr><td>agent</td><td>label</td><td>last report</td></tr>');
 
 
         foreach ($dbh->query($details_db_sqlquery) as $info)
@@ -204,7 +208,7 @@ class CMSPhedexAgents(ModuleBase):
         }
              else $service_status_color_flag = "undef";
 
-        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>'.$info["label"].'</td><td>' .round($info["time"],1) . '</td></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>'.$info["label"].'</td><td>' .$info["time"] . '</td></tr>');
         
         }
 
@@ -295,3 +299,21 @@ class CMSPhedexAgents(ModuleBase):
             status = -1
 
         return status
+
+    def formatTime(self,time_diff, agent_status):
+
+        time_string = ""
+
+        #if not agent_status == 1.:
+        d,s = divmod(time_diff,(3600*24))
+        h,s = divmod(s,3600)
+        m,s = divmod(s,60)
+        
+        time_string = "%02.fd:%02.fh:%02.fm" % (d, h, m)
+
+        #else:
+            #time_string = "up"
+
+
+        return time_string
+        
