@@ -278,16 +278,17 @@ class CMSPhedexBlockReplicas(ModuleBase):
 
     class Block:
 
-        block_files = 0
-        block_bytes = 0
-        block_name = ''
-        dataset_name = ''
-        rep_files = 0
-        rep_bytes = 0
-        rep_group = ''
-        ok = True
-        block_status = -1
-        complete = True
+        def __init__(self):
+            self.block_files = 0
+            self.block_bytes = 0
+            self.block_name = ''
+            self.dataset_name = ''
+            self.rep_files = 0
+            self.rep_bytes = 0
+            self.rep_group = ''
+            self.ok = True
+            self.block_status = -1
+            self.complete = True
         
         def checkBlock(self):
             
