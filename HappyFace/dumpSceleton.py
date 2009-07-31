@@ -173,7 +173,7 @@ def dumpHappycorePy(name,xml):
         init += "\t\t\tfor i in self.phpArgs:\n"
         init += "\t\t\t\tfor j in self.phpArgs[i].split(\",\"):\n"
         init += "\t\t\t\t\targList.append(i+'='+j)\n\n"
-        init += "\t\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+'/'+self.instance+'/agents'+\"?\"+\"&\".join(argList)\n\n"
+        init += "\t\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+\"?\"+\"&\".join(argList)\n\n"
 
     run = '\tdef run(self):\n'
     run += '\t\t# run the test\n\n'
@@ -184,7 +184,10 @@ def dumpHappycorePy(name,xml):
         run += '\t\t\tself.error_message +=err\n'
         run += '\t\t\treturn -1\n\n'
         run += '\t\tsuccess,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])\n'
-        run += '\t\tsource_tree = XMLParsing().parse_xmlfile_lxml(sourceFile)\n\n'
+        run += '\t\tsource_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile)\n\n'
+        run += '\t\tif not error_message == "":\n'
+        run += '\t\t\tself.error_message += error_message\n'
+        run += '\t\t\treturn -1\n\n'
         run += '\t\t##############################################################################\n'
         run += '\t\t# if xml parsing fails, abort the test;\n'
         run += '\t\t# self.status will be pre-defined -1\n'

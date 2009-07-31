@@ -103,7 +103,10 @@ class CMSPhedexPhysicsGroups(ModuleBase):
             return -1
 
         success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-	source_tree = XMLParsing().parse_xmlfile_lxml(sourceFile)
+	source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        if not error_message == '':
+            self.error_message += error_message
+            return -1
 
         ##############################################################################
         # if xml parsing fails, abort the test; 
