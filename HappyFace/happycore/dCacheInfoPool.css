@@ -40,3 +40,19 @@
 	font-family: monospace;
 	line-height: 14px;
 }
+
+tr.ok {
+	background-color:  #AAFFAA;
+}
+
+tr.warning {
+	background-color: #FFAA46;
+}
+
+tr.critical {
+	background-color: #FF6464;
+}
+
+tr.poolwarning {
+	background-color: #96C8FF;
+}
