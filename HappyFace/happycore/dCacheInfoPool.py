@@ -14,12 +14,26 @@ class dCacheInfoPool(dCacheInfo):
 
         self.poolType = self.mod_config.get('setup','pooltype')
 
+        ## space can be shown in GB or in TB
+        try:
+            self.unit = self.mod_config.get('setup','unit')
+        except:
+            self.unit = 'GB'
+
+        if self.unit == 'GB':
+            self.fromByteToUnit = 1024*1024*1024
+        elif self.unit == 'TB':
+            self.fromByteToUnit = 1024*1024*1024*1024
+        else:
+            print 'Warning: unknown unit in '+self.__module__+'. Must be "GB" or "TB". Using "GB" ...'
+            self.fromByteToUnit = 1024*1024*1024
+
         self.poolAttribs = []
-        self.poolAttribs.append({'id':'total' , 'name':'Total Space [GB]'})
-        self.poolAttribs.append({'id':'free' , 'name':'Free Space [GB]'})
-        self.poolAttribs.append({'id':'used' , 'name':'Used Space [GB]'})
-        self.poolAttribs.append({'id':'precious' , 'name':'Precious Space [GB]'})
-        self.poolAttribs.append({'id':'removable' , 'name':'Removable Space [GB]'})
+        self.poolAttribs.append({'id':'total' , 'name':'Total Space [' + self.unit + ']'})
+        self.poolAttribs.append({'id':'free' , 'name':'Free Space ['+self.unit+']'})
+        self.poolAttribs.append({'id':'used' , 'name':'Used Space ['+self.unit+']'})
+        self.poolAttribs.append({'id':'precious' , 'name':'Precious Space ['+self.unit+']'})
+        self.poolAttribs.append({'id':'removable' , 'name':'Removable Space ['+self.unit+']'})
 
 
         
@@ -28,7 +42,7 @@ class dCacheInfoPool(dCacheInfo):
 
         self.sumInfo = {}
         for att in self.poolAttribs:
-            self.db_keys[ att['id'] ] = IntCol()
+            self.db_keys[ att['id'] ] = FloatCol()
             self.db_values[ att['id'] ] = None
             self.sumInfo[ att['id'] ] = 0
 
@@ -37,10 +51,6 @@ class dCacheInfoPool(dCacheInfo):
             self.db_values[val] = None
             self.sumInfo[val] = 0
             
-
-
-        self.fromBytetToGb = 1024*1024*1024
-
 
 
         self.thresholds = {}
@@ -71,7 +81,6 @@ class dCacheInfoPool(dCacheInfo):
         for check in theThresholds.keys():
             checkList = check.split("/")
 
-            
             for val in checkList:
                 if not val in thePoolInfo:
                     print "Warning: No such variable for limit check in "+self.__module__+": "+val
@@ -112,12 +121,12 @@ class dCacheInfoPool(dCacheInfo):
         thePoolInfo = self.getPoolInfo(self.poolType)
         
         
-        # make poolAttrib as GB
+        # make poolAttrib as GB or TB
         for pool in thePoolInfo.keys():
             for att in self.poolAttribs:
                 theId = att['id']
                 if theId in thePoolInfo[pool]:
-                    thePoolInfo[pool][theId] = float(thePoolInfo[pool][theId]) / self.fromBytetToGb
+                    thePoolInfo[pool][theId] = float(thePoolInfo[pool][theId]) / self.fromByteToUnit
 
 
 
@@ -139,8 +148,9 @@ class dCacheInfoPool(dCacheInfo):
 	# create index for timestamp
 	details_db_keys["index"] = DatabaseIndex('timestamp')
 
+
         for att in self.poolAttribs:
-            details_db_keys[ att['id'] ] = IntCol()
+            details_db_keys[ att['id'] ] = FloatCol()
 
         # lock object enables exclusive access to the database
 	self.lock.acquire()
@@ -158,15 +168,15 @@ class dCacheInfoPool(dCacheInfo):
             self.sumInfo['poolnumber'] +=1
             details_db_values["poolname"] = pool
 
-            if self.limitExceeded(thePoolInfo[pool],'limit_local_critical') == False:
-                # Set 1.0 for Pool is OK
-                details_db_values["poolstatus"] = 1.
-            elif self.limitExceeded(thePoolInfo[pool],'limit_local_warning') == False:
+            if self.limitExceeded(thePoolInfo[pool],'limit_local_critical') == True:
+                # Set 0.0 for Pool is Critical
+                details_db_values["poolstatus"] = 0.
+            elif self.limitExceeded(thePoolInfo[pool],'limit_local_warning') == True:
                 # Set 0.5 for Pool for Warning
                 details_db_values["poolstatus"] = 0.5
             else:
-                # Set 0.0 for Pool is Critical
-                details_db_values["poolstatus"] = 0.
+                # Set 1.0 for Pool is OK
+                details_db_values["poolstatus"] = 1.
 
 
             for att in self.poolAttribs:
@@ -174,7 +184,10 @@ class dCacheInfoPool(dCacheInfo):
                 if theId in thePoolInfo[pool]:
                     theVal = thePoolInfo[pool][theId]
                     self.sumInfo[theId] += theVal
-                    details_db_values[theId] = int(round(theVal))
+                    if self.unit == 'GB':
+                        details_db_values[theId] = float(round(theVal))
+                    else:
+                        details_db_values[theId] = float(round(theVal,2))
                 else:
                     details_db_values[theId] = -1
                     details_db_values["poolstatus"] = 0.
@@ -237,6 +250,16 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("<?php")
         # Define sub_table for this module
         mc.append('$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];')
+
+        mc.append('if($data["status"] == 1.){')
+        mc.append('$c_flag = "ok";')
+        mc.append('}')
+        mc.append('elseif($data["status"] == 0.5){')
+        mc.append('$c_flag = "warning";')
+        mc.append('}')
+        mc.append('else{')
+        mc.append('$c_flag = "critical";')
+        mc.append('}')
       
         #Start with module output
         mc.append("printf('")
@@ -255,6 +278,12 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("    <td>Number of pools with status critical</td>")
         mc.append("""    <td>'.$data["poolcritical"].'</td>""")
         mc.append("   </tr>")
+        mc.append("   <tr></tr>")
+        mc.append("   <tr class=\"'.$c_flag.'\">")
+        mc.append("     <td>Space usage in percent</td>")
+        mc.append("""     <td>'.round(($data['used']/$data['total'])*100,1).'</td>""")
+        mc.append("   </tr>")
+        mc.append("   <tr></tr>")
 
         for att in self.poolAttribs:
             mc.append("  <tr>")
@@ -275,6 +304,7 @@ class dCacheInfoPool(dCacheInfo):
         mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolname</td>')
         for att in self.poolAttribs:
             mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+att["name"]+'</td>')
+        mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Space usage [%%]</td>')
         mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolstatus</td>')
         mc.append("  </tr>")
      
@@ -282,11 +312,20 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("');") 
         mc.append("foreach ($dbh->query($details_db_sqlquery) as $sub_data)")
         mc.append(" {")
+
+        mc.append('  if($sub_data["poolstatus"] == 1.){')
+        mc.append('    $c_flag = "ok";')
+        mc.append('  }')
+        mc.append('  else{')
+        mc.append('    $c_flag = "poolwarning";')
+        mc.append('  }')
+
         mc.append("  printf('")
-        mc.append("   <tr>")
+        mc.append("   <tr class=\"'.$c_flag.'\">")
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
         for att in self.poolAttribs:
             mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.$sub_data["""+'"'+ att['id'] +'"'+ """].'</td>""")
+        mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.round(($sub_data["used"]/$sub_data["total"])*100,1).'</td>""")
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolstatus"].'</td>""")
         mc.append("   </tr>")
         mc.append("  ');")
