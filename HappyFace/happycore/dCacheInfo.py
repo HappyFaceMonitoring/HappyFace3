@@ -36,7 +36,7 @@ class dCacheInfo(ModuleBase):
 	# self.status will be pre-defined -1
         if source_tree == "": return
 
-        poolref = 'cms-write-tape-pools'
+#        poolref = 'cms-write-tape-pools'
 
         poolInfo = {}
 

@@ -28,12 +28,66 @@ class dCacheInfoPool(dCacheInfo):
             print 'Warning: unknown unit in '+self.__module__+'. Must be "GB" or "TB". Using "GB" ...'
             self.fromByteToUnit = 1024*1024*1024
 
-        self.poolAttribs = []
-        self.poolAttribs.append({'id':'total' , 'name':'Total Space [' + self.unit + ']'})
-        self.poolAttribs.append({'id':'free' , 'name':'Free Space ['+self.unit+']'})
-        self.poolAttribs.append({'id':'used' , 'name':'Used Space ['+self.unit+']'})
-        self.poolAttribs.append({'id':'precious' , 'name':'Precious Space ['+self.unit+']'})
-        self.poolAttribs.append({'id':'removable' , 'name':'Removable Space ['+self.unit+']'})
+
+
+        self.poolAttribNames = {}
+        self.poolAttribNames['total'] = {'name':'Total Space' , 'unit':self.unit }
+        self.poolAttribNames['free'] = {'name':'Free Space'                , 'unit':self.unit}
+        self.poolAttribNames['used'] = {'name':'Used Space'                 , 'unit':self.unit}
+        self.poolAttribNames['precious'] = {'name':'Precious Space'             , 'unit':self.unit}
+        self.poolAttribNames['removable'] = {'name':'Removable Space'            , 'unit':self.unit}
+        self.poolAttribNames['poolnumber'] = {'name':'Pools'                      , 'unit':''}
+        self.poolAttribNames['poolcritical'] = {'name':'Pools with status warning ' , 'unit':''}
+        self.poolAttribNames['poolwarning'] = {'name':'Pools with status critical' , 'unit':''}
+
+
+        
+        self.thresholds = {}
+        self.thresholds['limit_global_critical'] = {}
+        self.thresholds['limit_local_critical'] = {}
+        self.thresholds['limit_global_warning'] = {}
+        self.thresholds['limit_local_warning'] = {}
+
+        self.getThresholds(config)
+        self.getThresholds(self.mod_config)
+
+
+        for entry in self.getRatioVar(''):
+            att = entry.split("/")
+            name = self.poolAttribNames[att[0]]['name']+" / "+ self.poolAttribNames[att[1]]['name']
+            self.poolAttribNames[entry] =  {'name':name , 'unit':'%%'}
+
+
+        for entry in self.poolAttribNames:
+            if self.poolAttribNames[entry]['unit'] != '':
+                self.poolAttribNames[entry]['webname'] = self.poolAttribNames[entry]['name']+" ["+self.poolAttribNames[entry]['unit']+"]"
+            else:
+                self.poolAttribNames[entry]['webname'] = self.poolAttribNames[entry]['name']
+            
+
+
+        # List of Local Pool Attributes
+        self.localAttribs = []
+        self.localAttribs.append('total') 
+        self.localAttribs.append('free') 
+        self.localAttribs.append('used') 
+        self.localAttribs.append('precious') 
+        self.localAttribs.append('removable') 
+ 
+
+        # List of Pool Summary Attributes
+        self.globalSummary = []
+        self.globalSummary.append('poolnumber')
+        self.globalSummary.append('poolcritical')
+        self.globalSummary.append('poolwarning')
+        for val in self.localAttribs:
+            self.globalSummary.append(val)
+
+
+
+        self.globalRatios =  self.getRatioVar('global')
+        self.localRatios =  self.getRatioVar('local')
+        
 
 
         
@@ -41,29 +95,24 @@ class dCacheInfoPool(dCacheInfo):
         self.db_values["details_database"] = ""
 
         self.sumInfo = {}
-        for att in self.poolAttribs:
-            self.db_keys[ att['id'] ] = FloatCol()
-            self.db_values[ att['id'] ] = None
-            self.sumInfo[ att['id'] ] = 0
-
-        for val in ['poolnumber','poolcritical','poolwarning']:
-            self.db_keys[val] = IntCol()
-            self.db_values[val] = None
-            self.sumInfo[val] = 0
-            
-
-
-        self.thresholds = {}
-        self.thresholds['limit_global_critical'] = {}
-        self.thresholds['limit_local_critical'] = {}
-        self.thresholds['limit_global_warning'] = {}
-        self.thresholds['limit_local_warning'] = {}
+        for att in self.globalSummary:
+            self.db_keys[ att ] = FloatCol()
+            self.db_values[ att ] = None
+            self.sumInfo[  att ] = 0
 
 
 
-        self.getThresholds(config)
-        self.getThresholds(self.mod_config)
 
+
+    def getRatioVar(self,ident):
+        poolAttribsRatios = {}
+        for cutType in self.thresholds.keys():
+            if cutType.count(ident) > 0:
+                for cut in self.thresholds[cutType]:
+                    if cut.count('/') > 0:
+                        if not cut in poolAttribsRatios:
+                            poolAttribsRatios[cut] = {}
+        return poolAttribsRatios.keys()
 
 
 
@@ -123,10 +172,9 @@ class dCacheInfoPool(dCacheInfo):
         
         # make poolAttrib as GB or TB
         for pool in thePoolInfo.keys():
-            for att in self.poolAttribs:
-                theId = att['id']
-                if theId in thePoolInfo[pool]:
-                    thePoolInfo[pool][theId] = float(thePoolInfo[pool][theId]) / self.fromByteToUnit
+            for att in self.localAttribs:
+                if att in thePoolInfo[pool]:
+                    thePoolInfo[pool][att] = float(thePoolInfo[pool][att]) / self.fromByteToUnit
 
 
 
@@ -149,8 +197,8 @@ class dCacheInfoPool(dCacheInfo):
 	details_db_keys["index"] = DatabaseIndex('timestamp')
 
 
-        for att in self.poolAttribs:
-            details_db_keys[ att['id'] ] = FloatCol()
+        for att in self.localAttribs:
+            details_db_keys[ att ] = FloatCol()
 
         # lock object enables exclusive access to the database
 	self.lock.acquire()
@@ -179,8 +227,8 @@ class dCacheInfoPool(dCacheInfo):
                 details_db_values["poolstatus"] = 1.
 
 
-            for att in self.poolAttribs:
-                theId = att['id']
+            for att in self.localAttribs:
+                theId = att
                 if theId in thePoolInfo[pool]:
                     theVal = thePoolInfo[pool][theId]
                     self.sumInfo[theId] += theVal
@@ -266,31 +314,22 @@ class dCacheInfoPool(dCacheInfo):
         mc.append(' <table class="dCacheInfoPoolTable">')
 
         #Summary table
-        mc.append("  <tr>")
-        mc.append("    <td>Number of pools</td>")
-        mc.append("""    <td>'.$data["poolnumber"].'</td>""")
-        mc.append("   </tr>")
-        mc.append("  <tr>")
-        mc.append("    <td>Number of pools with status warning </td>")
-        mc.append("""    <td>'.$data["poolwarning"].'</td>""")
-        mc.append("   </tr>")
-        mc.append("  <tr>")
-        mc.append("    <td>Number of pools with status critical</td>")
-        mc.append("""    <td>'.$data["poolcritical"].'</td>""")
-        mc.append("   </tr>")
-        mc.append("   <tr></tr>")
-        mc.append("   <tr class=\"'.$c_flag.'\">")
-        mc.append("     <td>Space usage in percent</td>")
-        mc.append("""     <td>'.round(($data['used']/$data['total'])*100,1).'</td>""")
-        mc.append("   </tr>")
-        mc.append("   <tr></tr>")
-
-        for att in self.poolAttribs:
+    
+        for att in self.globalSummary:
             mc.append("  <tr>")
-            mc.append("    <td>"+att['name']+"</td>")
-            mc.append("""    <td>'.$data["""+'"'+ att['id'] +'"'+ """].'</td>""")
+            mc.append("    <td>"+self.poolAttribNames[att]['webname']+"</td>")
+            mc.append("""    <td>'.$data["""+'"'+ att +'"'+ """].'</td>""")
             mc.append("   </tr>")
+
+        for att in self.globalRatios:
+            entry = att.split("/")
+            mc.append("  <tr>")
+            mc.append("    <td>"+self.poolAttribNames[att]['webname']+"</td>")
+            mc.append("""    <td>'.round(($data["""+'"'+ entry[0] +'"'+ """]/$data["""+'"'+ entry[1] +'"'+ """])*100,1).'</td>""")
+            mc.append("   </tr>")
+
             
+        
         mc.append("  </table>")
         mc.append(" <br/>")
 
@@ -302,10 +341,11 @@ class dCacheInfoPool(dCacheInfo):
         mc.append(' <table class="dCacheInfoPoolTableDetails">')
         mc.append("  <tr>")
         mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolname</td>')
-        for att in self.poolAttribs:
-            mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+att["name"]+'</td>')
-        mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Space usage [%%]</td>')
-        mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolstatus</td>')
+        for att in self.localAttribs:
+            mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+self.poolAttribNames[att]["webname"]+"</td>")
+        for att in self.localRatios:
+            mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+self.poolAttribNames[att]["webname"]+"</td>")
+
         mc.append("  </tr>")
      
 
@@ -323,10 +363,12 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("  printf('")
         mc.append("   <tr class=\"'.$c_flag.'\">")
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
-        for att in self.poolAttribs:
-            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.$sub_data["""+'"'+ att['id'] +'"'+ """].'</td>""")
-        mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.round(($sub_data["used"]/$sub_data["total"])*100,1).'</td>""")
-        mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolstatus"].'</td>""")
+        for att in self.localAttribs:
+            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.$sub_data["""+'"'+ att +'"'+ """].'</td>""")
+        for entry in self.localRatios:
+            att = entry.split("/")
+            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att[0] +'"'+ """]/$sub_data["""+'"'+ att[1] +'"'+ """])*100,1).'</td>""")
+            
         mc.append("   </tr>")
         mc.append("  ');")
         mc.append(" }")
