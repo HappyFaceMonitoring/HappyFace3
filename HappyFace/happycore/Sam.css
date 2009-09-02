@@ -28,6 +28,10 @@ tr.success {
 	background-color:  #66FF66;
 }
 
+tr.warning {
+	background-color:  #FFAA46;
+}
+
 tr.fail {
 	background-color: #FF0000;
 }
