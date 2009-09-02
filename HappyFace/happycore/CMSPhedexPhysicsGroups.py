@@ -201,10 +201,13 @@ class CMSPhedexPhysicsGroups(ModuleBase):
         
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-        if ($info["group_status"] == 1){
-             $service_status_color_flag = "success";
+        if ($info["group_status"] == 0.){
+             $service_status_color_flag = "fail";
         }
-        else $service_status_color_flag = "fail";
+        elseif ($info["node_files"] != $info["dest_files"]){
+             $service_status_color_flag = "warning";
+        }
+        else $service_status_color_flag = "success";
         
         $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
         $resident_data_percent = round(($info["node_bytes"]/$info["dest_bytes"])*100,1);
@@ -223,19 +226,22 @@ class CMSPhedexPhysicsGroups(ModuleBase):
         ');
 
         
-        foreach ($dbh->query($details_db_sqlquery) as $info)
+        foreach ($dbh->query($details_db_sqlquery) as $info2)
        	{
-        if ($info["group_status"] == 1){
-             $service_status_color_flag = "success";
+        if ($info2["group_status"] == 0.){
+             $service_status_color_flag = "fail";
         }
-        else $service_status_color_flag = "fail";
+        elseif ($info2["node_files"] != $info2["dest_files"]){
+             $service_status_color_flag = "warning";
+        }
+        else $service_status_color_flag = "success";
         
-        $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
-        $subscribed_data_TB = round($info["dest_bytes"]/(1024*1024*1024*1024),2);
-        $resident_files_Nb = $info["node_files"];
-        $subscribed_files_Nb = $info["dest_files"];
+        $resident_data_TB = round($info2["node_bytes"]/(1024*1024*1024*1024),2);
+        $subscribed_data_TB = round($info2["dest_bytes"]/(1024*1024*1024*1024),2);
+        $resident_files_Nb = $info2["node_files"];
+        $subscribed_files_Nb = $info2["dest_files"];
 
-        printf('<tr class="' .$service_status_color_flag . '"><td>'.$info["phys_group"].'</td><td>'.$resident_data_TB.'</td><td>'.$subscribed_data_TB.'</td><td>'.$resident_files_Nb.'</td><td>'.$subscribed_files_Nb.'</td></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>'.$info2["phys_group"].'</td><td>'.$resident_data_TB.'</td><td>'.$subscribed_data_TB.'</td><td>'.$resident_files_Nb.'</td><td>'.$subscribed_files_Nb.'</td></tr>');
 
         }
 
