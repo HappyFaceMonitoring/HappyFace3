@@ -25,7 +25,7 @@
 
 
 tr.success {
-	background-color:  #66FF66;
+	background-color:  #AAFFAA;
 }
 
 tr.warning {
@@ -33,5 +33,5 @@ tr.warning {
 }
 
 tr.fail {
-	background-color: #FF0000;
+	background-color: #FF6464;
 }
