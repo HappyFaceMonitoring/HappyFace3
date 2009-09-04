@@ -166,10 +166,11 @@ class Sam(ModuleBase):
 			    if sn_prop.tag == "ServiceStatus":
 			        ServiceStatus = sn_prop.text
 
-                        if ServiceStatus == 'ok': service_status = 1.
-                        elif ServiceStatus == 'warn': service_status = 0.5
-                        else : service_status = 1.
-                        
+                        if ServiceStatus == str(1): service_status = 1.
+                        elif ServiceStatus == str(-1) : service_status = 0.
+                        else : service_status = 0.5
+
+                       
                         details_db_values["service_type"] = ServiceType
                         details_db_values["service_name"] = ServiceName
                         details_db_values["service_status"] = service_status
