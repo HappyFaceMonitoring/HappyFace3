@@ -27,7 +27,6 @@ class ConfigService():
 
     def readParameter(self):
         for pfile in self.configFiles:
-            print "Processing file: "+pfile
 	    self.readConfigFile(pfile)
             
 
