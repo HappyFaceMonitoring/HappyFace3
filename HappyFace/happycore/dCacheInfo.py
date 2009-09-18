@@ -8,7 +8,7 @@ class dCacheInfo(ModuleBase):
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
         
-        self.dsTag = 'dcach_poolinfo_xml'
+        self.dsTag = self.configService.get('setup','xmltag')
 
                       
     def getPoolInfo(self,poolgroupname):
