@@ -7,11 +7,7 @@ class dCacheInfo(ModuleBase):
 
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
-
-	config = self.readConfigFile('./happycore/dCacheInfo')
-        self.readDownloadRequests(config)
-	self.addCssFile(config,'./happycore/dCacheInfo')
-
+        
         self.dsTag = 'dcach_poolinfo_xml'
 
                       

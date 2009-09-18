@@ -11,9 +11,6 @@ class Plot(ModuleBase):
     
     def __init__(self, category, timestamp, archive_dir):
         ModuleBase.__init__(self, category, timestamp, archive_dir)
-        
-        # read class config file
-	config = self.readConfigFile('./happycore/Plot') # empty
 
 
         # definition of the database table keys and pre-defined values

@@ -8,9 +8,6 @@ class PhedexStats(ModuleBase):
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
 
-	config = self.readConfigFile('./happycore/PhedexStats')
-	self.addCssFile(config,'./happycore/PhedexStats')
-
 	self.db_keys["startlocaltime"] = StringCol()
 	self.db_keys["endlocaltime"] = StringCol()
 	self.db_keys["total_transfers"] = IntCol()

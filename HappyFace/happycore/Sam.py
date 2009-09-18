@@ -1,16 +1,14 @@
 from ModuleBase import *
 from DownloadTag import *
 from XMLParsing import *
+from PhpDownload import *
 
-class Sam(ModuleBase):
+
+class Sam(ModuleBase,PhpDownload):
 
     def __init__(self, category, timestamp, archive_dir):
         ModuleBase.__init__(self, category, timestamp, archive_dir)
-
-        # read class config file
-	config = self.readConfigFile('./happycore/Sam') # empty
-
-	self.addCssFile(config,'./happycore/Sam')
+        PhpDownload.__init__(self)
 
         # definition of the database table keys and pre-defined values
 
@@ -21,42 +19,13 @@ class Sam(ModuleBase):
 	self.db_values["site"] = ""
 	
 	
-	self.base_url = self.mod_config.get('setup','base_url')
-	self.report_url	= self.mod_config.get('setup','report_url')
-        self.phpArgs = {}
-        self.fileType = ""
-	
-        if self.mod_config.has_option('setup','fileextension'):
-            self.fileType = self.mod_config.get('setup','fileextension')
-
-
-        # read module specific phpArgs from modul config file
-        self.getPhpArgs(self.mod_config)	
+	self.report_url	= self.configService.get('setup','report_url')
 	
         self.dsTag = 'sam_xml_source'
 
-        self.makeUrl()
-
-    def getPhpArgs(self, config):
-        for i in config.items('phpArgs'):
-            self.phpArgs[i[0]] = i[1]
-	
-    def makeUrl(self):
-        if len(self.phpArgs) == 0:
-            print "PhpPlot Error: makeUrl called without phpArgs"
-            sys.exit()
-        if self.base_url == "":
-            print "PhpPlot Error: makeUrl called without base_url"
-            sys.exit()
+        self.downloadRequest[self.dsTag] = 'wgetXmlRequest:'+self.makeUrl()
 
 
-        argList = []
-        for i in self.phpArgs:
-	    for j in self.phpArgs[i].split(","):
-		argList.append(i+'='+j)
-
-        #argList.sort()
-        self.downloadRequest[self.dsTag] = 'wgetXmlRequest:'+self.fileType+':'+self.base_url+"?"+"&".join(argList)
 
 	
     def run(self):

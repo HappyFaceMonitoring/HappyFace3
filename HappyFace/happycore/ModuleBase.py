@@ -4,6 +4,8 @@ import ConfigParser
 from sqlobject import *		# for SQL database functionality
 from threading import Thread	# for threading functionality
 from DataBaseLock import *
+from ConfigService import *
+
 import re
 
 #########################################################
@@ -13,16 +15,36 @@ class ModuleBase(Thread,DataBaseLock,object):
 
     def __init__(self, category, timestamp, archive_dir):
 
+
+
+        # Configuration Service to read in all config parameters
+        self.configService = ConfigService()
+
+        allSubClasses = []
+        self.getSubRec([self.__class__],allSubClasses)
+        for i in allSubClasses:
+            self.configService.addModule(i)
+
+        self.configService.readParameter()
+
+
+        self.mod_title	 = self.configService.getDefault('setup','mod_title',self.__module__)
+	self.mod_type	 = self.configService.getDefault('setup','mod_type','rated')
+	self.weight	 = float(self.configService.getDefault('setup','weight',1.0))
+	self.definition	 = self.configService.getDefault('setup','definition','')
+	self.instruction = self.configService.getDefault('setup','instruction','')
+
+
+        # Container for download requests
+        self.downloadRequest = {}
+
+
+
 	Thread.__init__(self)
 
 	lock_obj = DataBaseLock()
 	self.lock = lock_obj.lock
 	
-        # read class config file
-        config = self.readConfigFile('./happycore/ModuleBase') # empty
-        self.cssFiles = {}
-        self.addCssFile(config,'./happycore/ModuleBase')
-        
         self.category = category
 	self.timestamp = timestamp
         self.archive_dir = archive_dir
@@ -31,22 +53,6 @@ class ModuleBase(Thread,DataBaseLock,object):
         self.status = -1
         self.error_message = ""
 
-	# read module specific config file, check where the module is stored
-        module_path = ""
-	if os.path.isfile('./modules/' + self.__module__ + '.py') == True:
-	    module_path = './modules/'
-	if os.path.isfile('./modules.local/' + self.__module__ + '.py') == True:
-	    module_path = './modules.local/' 
-        
-        module_config_file = module_path+self.__module__
-        self.mod_config = self.readConfigFile(module_config_file)
-        self.addCssFile(self.mod_config,module_config_file)
-        
-	self.mod_title		= self.mod_config.get('setup','mod_title',self.__module__)
-	self.mod_type		= self.mod_config.get('setup','mod_type',"rated")
-	self.weight		= float(self.mod_config.get('setup','weight',1.0))
-	self.definition		= self.mod_config.get('setup','definition',"")
-	self.instruction	= self.mod_config.get('setup','instruction',"")
 
         # definitions for the database table
 	self.database_table = self.__module__ + '_table'
@@ -68,57 +74,41 @@ class ModuleBase(Thread,DataBaseLock,object):
 	# create an index for the timestap column for faster access
 	self.db_keys["index"] = DatabaseIndex('timestamp')
 
+
+
 	
-        self.downloadRequest = {}
-        # Read download requests from module config
-        self.readDownloadRequests(self.mod_config)
 
-##        print self.__class__
-##        print self.listClasses(self.__class__)
-##        print __file__
-##        print "---------------"
-        
-    def listClasses(self,b):
-        a = []
-        for i in b.__bases__:
-            a.append(str(i))
-            for j in self.listClasses(i):
-                a.append(str(j))
-        return a
 
-    def addCssFile(self,config,cssfile):
-        use_css = True
-        if config.has_option('setup','css'):
-            use_css = config.getboolean('setup','css')
-            
-        if use_css == True:
-            cssfile+=".css"
-            if os.path.isfile(cssfile):
-                self.cssFiles[os.path.basename(cssfile)] = cssfile
+    def getSubRec(self,theClasses,allSubClasses):
+        p = re.compile("<class '(\w*).\w*'>")
+        subClasses = []
+        for c in theClasses:
+            theClassMatch = p.match(str(c))
+            if theClassMatch:
+                theClassName = theClassMatch.group(1)
+                if theClassName not in allSubClasses: allSubClasses.insert(0,theClassName)
+            if str(c) == "<class 'ModuleBase.ModuleBase'>": continue
+            for entry in c.__bases__:
+                if c not in subClasses: subClasses.append(entry)
+
+        if len(subClasses) == 0: return 
+
+        else:
+            return self.getSubRec(subClasses,allSubClasses)
 
 
     def getCssRequests(self):
-        return self.cssFiles
-
-
-    def readDownloadRequests(self,config):
-        if config.has_section('downloadservice'):
-            for i in config.items('downloadservice'):
-                self.downloadRequest[i[0]] = i[1]
-                        
+        return self.configService.getCssRequests()
 
     def setDownloadService(self,downloadService):
         self.downloadService = downloadService
         
 
     def getDownloadRequests(self):
-        downloadList = []
-        for downloadTag in self.downloadRequest:
-            downloadRequest.append(self.downloadRequest[downloadTag])
-        return downloadList
-
-
-    def getDownloadRequests(self):
+        configDownloadRequests = self.configService.getDownloadRequests()
+        for tag in configDownloadRequests.keys():
+            self.downloadRequest[tag] = configDownloadRequests[tag]
+        
         downloadList = []
         for downloadTag in self.downloadRequest:
             downloadList.append(self.downloadRequest[downloadTag])
@@ -133,11 +123,16 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_values['timestamp']	= self.timestamp
 	self.db_values['status']	= self.status
 	self.db_values['error_message'] = self.error_message
-	self.db_values['mod_title']	= self.mod_title
-	self.db_values['mod_type']	= self.mod_type
-	self.db_values['weight']	= self.weight
-	self.db_values['definition']	= self.definition
-	self.db_values['instruction']	= self.instruction
+        self.db_values['mod_title']     = self.mod_title
+        self.db_values['mod_type']      = self.mod_type
+        self.db_values['weight']        = self.weight
+        self.db_values['definition']    = self.definition
+        self.db_values['instruction']   = self.instruction
+
+     
+
+
+
 		
 	db_keys = self.db_keys
 	db_values = self.db_values

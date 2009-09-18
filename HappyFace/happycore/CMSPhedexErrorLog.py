@@ -1,11 +1,20 @@
 from ModuleBase import *
 from XMLParsing import *
+from PhpDownload import *
 
 #
 # Friederike Nowak
 # University of Hamburg
 # 2009/06/30
 #
+# 2009/09/18, Volker Buege:
+#             Module ported to new config service
+#             Php functionality now inherited from PhpDownload to avoid code doubling
+#
+# ToDo:
+
+
+
 
 #####################################################
 #                                                   #
@@ -17,38 +26,31 @@ from XMLParsing import *
 #####################################################
 
 
-class CMSPhedexErrorLog(ModuleBase):
+class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
     def __init__(self,category,timestamp,storage_dir):
 
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
+	PhpDownload.__init__(self)
 
-        config = self.readConfigFile('./happycore/CMSPhedexErrorLog')
-	self.addCssFile(config,'./happycore/CMSPhedexErrorLog')
 
-        ## the url of the Phedex Agents Api
-        self.base_url = self.mod_config.get('setup','base_url')
-        self.phpArgs = {}
-
-        ## needed arguments: DIRECTION = NODE
-        self.getPhpArgs(self.mod_config)
 
         ## to,from
         self.getInverseDirection()
 
         ## get the instance
-        self.instance = self.mod_config.get('setup','instance')
+        self.instance = self.configService.get('setup','instance')
 
         ## get the definitions for the warning/critical status
         self.getThresholds()
 
         ## get the age threshold for the oldest errorlogs
-        self.timeThreshold = self.mod_config.get('setup', 'time_threshold')
+        self.timeThreshold = self.configService.get('setup', 'time_threshold')
 
         ## if number of errors falls under threshold, status stays happy.
         try:
-            self.errorThreshold = self.mod_config.get('setup','error_threshold')
+            self.errorThreshold = self.configService.get('setup','error_threshold')
         except:
             self.errorThreshold = 10
 
@@ -59,15 +61,17 @@ class CMSPhedexErrorLog(ModuleBase):
         self.db_values["details_database"] = ""
 
         self.dsTag = 'cmsPhedexErrorLog_xml_source'
-        self.fileType = 'xml'
+	
+        self.base_url += '/'+self.instance+'/errorlog'
+        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
 
-        self.makeUrl()
 
-    def getPhpArgs(self, config):
+
+    def getPhpArgs_old(self, config):
         for i in config.items('phpArgs'):
             self.phpArgs[i[0]] = i[1]
 
-    def makeUrl(self):
+    def makeUrl_old(self):
         if len(self.phpArgs) == 0:
             print "Php Error: makeUrl called without phpArgs"
             sys.exit()
@@ -386,7 +390,7 @@ class CMSPhedexErrorLog(ModuleBase):
     def getThresholds(self):
 
         try:
-            self.destCritical = float(self.mod_config.get("setup","destCritical"))
+            self.destCritical = float(self.configService.get("setup","destCritical"))
 
         except:
             ## if the data is transfered to the node, 10 percent of destination
@@ -398,7 +402,7 @@ class CMSPhedexErrorLog(ModuleBase):
                 self.destCritical = 100.
 
         try:
-            self.destWarning = float(self.mod_config.get("setup","destWarning"))
+            self.destWarning = float(self.configService.get("setup","destWarning"))
 
         except:
             ## if the data is transfered to the node, 5 percent of destination
@@ -409,7 +413,7 @@ class CMSPhedexErrorLog(ModuleBase):
                 self.destWarning = 40.
 
         try:
-            self.sourceCritical = float(self.mod_config.get("setup","sourceCritical"))
+            self.sourceCritical = float(self.configService.get("setup","sourceCritical"))
 
         except:
             ## if the data is transfered from the node, 10 percent of destination
@@ -421,7 +425,7 @@ class CMSPhedexErrorLog(ModuleBase):
                 self.sourceCritical = 100.
 
         try:
-            self.sourceWarning = float(self.mod_config.get("setup","sourceWarning"))
+            self.sourceWarning = float(self.configService.get("setup","sourceWarning"))
             
         except:
             ## if the data is transfered from the node, 5 percent of source

@@ -1,11 +1,18 @@
 from ModuleBase import *
 from XMLParsing import *
+from PhpDownload import *
 
 #
 # Friederike Nowak
 # University of Hamburg
 # 2009/06/21
 #
+# 2009/09/18, Volker Buege:
+#             Module ported to new config service
+#             Module now inhertis from PhpDownload to avoid code doubling
+#
+# ToDo:
+
 
 ###################################################
 #                                                 #
@@ -18,28 +25,19 @@ from XMLParsing import *
 ###################################################
 
 
-class CMSPhedexPhysicsGroups(ModuleBase):
+class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
     def __init__(self,category,timestamp,storage_dir):
 
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
-
-        config = self.readConfigFile('./happycore/CMSPhedexPhysicsGroups')
-	self.addCssFile(config,'./happycore/CMSPhedexPhysicsGroups')
-
-        ## the url of the Phedex Group Usage Api
-        self.base_url = self.mod_config.get('setup','base_url')
-        self.phpArgs = {}
-
-        ## needed arguments: node = ARG
-        self.getPhpArgs(self.mod_config)
-
+	PhpDownload.__init__(self)
+ 
         ## get the instance
-        self.instance = self.mod_config.get('setup','instance')
+        self.instance = self.configService.get('setup','instance')
 
         ## read in how much space is entitled to the groups (in TB)
-        self.maxSpace = self.mod_config.get('setup', 'maxSpace')
+        self.maxSpace = self.configService.get('setup', 'maxSpace')
 
         ## now read in individual space permissions
         self.allowedSpace = self.getAllowedSpace()
@@ -49,15 +47,16 @@ class CMSPhedexPhysicsGroups(ModuleBase):
         self.db_values["details_database"] = ""
 
         self.dsTag = 'cmsPhedexGroupUsage_xml_source'
-        self.fileType = 'xml'
 
-        self.makeUrl()
+        self.base_url += '/'+self.instance+'/agents'
+        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
 
-    def getPhpArgs(self, config):
+
+    def getPhpArgs_old(self, config):
         for i in config.items('phpArgs'):
             self.phpArgs[i[0]] = i[1]
 
-    def makeUrl(self):
+    def makeUrl_old(self):
         if len(self.phpArgs) == 0:
             print "Php Error: makeUrl called without phpArgs"
             sys.exit()
@@ -82,7 +81,7 @@ class CMSPhedexPhysicsGroups(ModuleBase):
         restrictions = {}
 
         try:
-            for entry in self.mod_config.get('setup', 'allowedSpace').split(','):
+            for entry in self.configService.get('setup', 'allowedSpace').split(','):
                 physGroup,rest = entry.split(':')
                 restrictions[physGroup] = rest
 

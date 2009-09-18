@@ -1,28 +1,14 @@
-from PhpPlot import *
+from Plot import *
+from PhpDownload import *
 
 #############################################
 # class to donwload plots (via WGET command)
 #############################################
-class PhpPlotGridKa(PhpPlot):
+class PhpPlotGridKa(Plot,PhpDownload):
 
     def __init__(self, category, timestamp, archive_dir):
 
-        PhpPlot.__init__(self, category, timestamp, archive_dir)
-	
-        # read class config file
-	config = self.readConfigFile('./happycore/PhpPlotGridKa')
-	self.base_url = config.get('setup','base_url')
+        Plot.__init__(self, category, timestamp, archive_dir)
+        PhpDownload.__init__(self)
 
-        if config.has_option('setup','fileextension'):
-            self.fileType = config.get('setup','fileextension')
-
-        self.getPhpArgs(config)
-
-
-
-        # read module specific phpArgs from modul config file
-        self.getPhpArgs(self.mod_config)
-
-        # Create URL from base_url and phpArgs
-        self.makeUrl()
-
+        self.downloadRequest['plot'] = 'wget:'+self.makeUrl()

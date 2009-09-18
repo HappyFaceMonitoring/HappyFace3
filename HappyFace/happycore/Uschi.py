@@ -10,14 +10,6 @@ class Uschi(ModuleBase):
     def __init__(self, category, timestamp, storage_dir):
 	ModuleBase.__init__(self, category, timestamp, storage_dir)
 
-	# read class config file
-	config = self.readConfigFile('./happycore/Uschi')
-        self.readDownloadRequests(config)
-	self.addCssFile(config,'./happycore/Uschi')
-
-	# from module specifig config file
-	self.testname_string = self.mod_config.get('setup','testname_string')
-
 	# definition of the database table keys and pre-defined values
 	self.db_keys['uschi_timestamp'] = StringCol()
 	self.db_keys['result'] = IntCol()
@@ -32,6 +24,9 @@ class Uschi(ModuleBase):
         self.dsTag = 'uschi_xml'
                 
     def run(self):
+
+	self.testname_string = self.configService.get('setup','testname_string')
+
 
         ##############################################################################
         # run the test

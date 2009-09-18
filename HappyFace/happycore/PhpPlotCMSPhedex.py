@@ -1,38 +1,22 @@
-from PhpPlot import *
+from Plot import *
+from PhpDownload import *
 
 
-class PhpPlotCMSPhedex(PhpPlot):
+class PhpPlotCMSPhedex(Plot,PhpDownload):
 
     def __init__(self, category, timestamp, archive_dir):
 
-        PhpPlot.__init__(self, category, timestamp, archive_dir)
-	
-        # read class config file
-	config = self.readConfigFile('./happycore/PhpPlotCMSPhedex')
-        if config.has_option('setup','fileextension'):
-            self.fileType = config.get('setup','fileextension')
+        Plot.__init__(self, category, timestamp, archive_dir)
+        PhpDownload.__init__(self)
         
-	self.base_url = config.get('setup','base_url')
-        
-        if config.has_option('setup','fileextension'):
-            self.fileType = config.get('setup','fileextension')
-            
-
-
-        self.getPhpArgs(config)
-
 
         globalVars = {}
-	globalVars['localsitename'] = config.get('setup','localsitename')
+	globalVars['localsitename'] = self.configService.get('setup','localsitename')
         
+        globalVars['plot_type'] = self.configService.get('setup','plot_type')
+        globalVars['instance'] = self.configService.get('setup','instance')
 
 
-        globalVars['plot_type'] = self.mod_config.get('setup','plot_type')
-        globalVars['instance'] = self.mod_config.get('setup','instance')
-
-
-        # read module specific phpArgs from modul config file
-        self.getPhpArgs(self.mod_config)
 
         for phparg in self.phpArgs:
             for glob in globalVars:
@@ -43,7 +27,7 @@ class PhpPlotCMSPhedex(PhpPlot):
 
         # Create URL from base_url and phpArgs
         self.base_url = self.base_url+"/"+globalVars['plot_type']
-        self.makeUrl()
+        self.downloadRequest['plot'] = 'wget:'+self.makeUrl()
 
         if self.mod_title == 'auto':
             title = ""

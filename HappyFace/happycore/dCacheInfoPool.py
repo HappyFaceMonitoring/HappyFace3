@@ -7,18 +7,19 @@ class dCacheInfoPool(dCacheInfo):
         # inherits from the ModuleBase Class
         dCacheInfo.__init__(self,category,timestamp,storage_dir)
 
-	config = self.readConfigFile('./happycore/dCacheInfoPool')
-        self.readDownloadRequests(config)
-	self.addCssFile(config,'./happycore/dCacheInfoPool')
+        self.thresholds = {}
+        self.thresholds['limit_global_critical'] = {}
+        self.thresholds['limit_local_critical'] = {}
+        self.thresholds['limit_global_warning'] = {}
+        self.thresholds['limit_local_warning'] = {}
 
 
-        self.poolType = self.mod_config.get('setup','pooltype')
 
-        ## space can be shown in GB or in TB
-        try:
-            self.unit = self.mod_config.get('setup','unit')
-        except:
-            self.unit = 'GB'
+    def run(self):
+
+
+        self.poolType = self.configService.get('setup','pooltype')
+        self.unit     = self.configService.get('setup','unit')
 
         if self.unit == 'GB':
             self.fromByteToUnit = 1024*1024*1024
@@ -41,15 +42,10 @@ class dCacheInfoPool(dCacheInfo):
         self.poolAttribNames['poolwarning'] = {'name':'Pools with status critical' , 'unit':''}
 
 
-        
-        self.thresholds = {}
-        self.thresholds['limit_global_critical'] = {}
-        self.thresholds['limit_local_critical'] = {}
-        self.thresholds['limit_global_warning'] = {}
-        self.thresholds['limit_local_warning'] = {}
+        # Get thresholds from configuration
+        for sec in self.thresholds.keys():
+            self.thresholds[sec] = self.configService.getSection(sec)
 
-        self.getThresholds(config)
-        self.getThresholds(self.mod_config)
 
 
         for entry in self.getRatioVar(''):
@@ -103,69 +99,6 @@ class dCacheInfoPool(dCacheInfo):
 
 
 
-
-    def getRatioVar(self,ident):
-        poolAttribsRatios = {}
-        for cutType in self.thresholds.keys():
-            if cutType.count(ident) > 0:
-                for cut in self.thresholds[cutType]:
-                    if cut.count('/') > 0:
-                        if not cut in poolAttribsRatios:
-                            poolAttribsRatios[cut] = {}
-        return poolAttribsRatios.keys()
-
-
-
-    def getThresholds(self,config):
-        for sec in self.thresholds.keys():
-            if  config.has_section(sec):
-                for i in config.items(sec):
-                    self.thresholds[sec][i[0]] = i[1]
-
-
-
-    def limitExceeded(self,thePoolInfo,cat):
-        exceeded = False
-        theThresholds = self.thresholds[cat]
-        for check in theThresholds.keys():
-            checkList = check.split("/")
-
-            for val in checkList:
-                if not val in thePoolInfo:
-                    print "Warning: No such variable for limit check in "+self.__module__+": "+val
-                    print "         Return that limit is exceeded."
-                    return True
-
-
-            theRelVal = 0.
-            if len(checkList) == 1:
-                theRelVal = float(thePoolInfo[checkList[0]])
-            elif len(checkList) == 2:
-                theRelVal = float(thePoolInfo[checkList[0]])/float(thePoolInfo[checkList[1]])
-
-
-            theCond = str(theThresholds[check])[:1]
-            theRef = float(str(theThresholds[check])[1:])
-
-
-            if theCond == ">":
-                if theRelVal > theRef:
-                    exceeded = True
-            elif theCond == "<":
-                if theRelVal < theRef:
-                    exceeded = True
-            else:
-                print "Warning: No such condition "+check+" "+theThresholds[check]
-
-#            print checkList
-#            print str(theRelVal)+theCond+str(theRef)+" --> "+str(exceeded)
-
-
-        return exceeded
-
-
-
-    def run(self):
 
         thePoolInfo = self.getPoolInfo(self.poolType)
         
@@ -267,8 +200,66 @@ class dCacheInfoPool(dCacheInfo):
         else:
             self.status = 1.0
             
-        self.definition+= "Poolgroup: "+self.poolType+"<br/>"
-        self.definition+= self.formatLimits()
+        self.configService.addToParameter('setup','definition',"Poolgroup: "+self.poolType+"<br/>"+self.formatLimits())
+
+
+
+
+
+
+
+
+    def getRatioVar(self,ident):
+        poolAttribsRatios = {}
+        for cutType in self.thresholds.keys():
+            if cutType.count(ident) > 0:
+                for cut in self.thresholds[cutType]:
+                    if cut.count('/') > 0:
+                        if not cut in poolAttribsRatios:
+                            poolAttribsRatios[cut] = {}
+        return poolAttribsRatios.keys()
+
+
+
+
+
+    def limitExceeded(self,thePoolInfo,cat):
+        exceeded = False
+        theThresholds = self.thresholds[cat]
+        for check in theThresholds.keys():
+            checkList = check.split("/")
+
+            for val in checkList:
+                if not val in thePoolInfo:
+                    print "Warning: No such variable for limit check in "+self.__module__+": "+val
+                    print "         Return that limit is exceeded."
+                    return True
+
+
+            theRelVal = 0.
+            if len(checkList) == 1:
+                theRelVal = float(thePoolInfo[checkList[0]])
+            elif len(checkList) == 2:
+                theRelVal = float(thePoolInfo[checkList[0]])/float(thePoolInfo[checkList[1]])
+
+
+            theCond = str(theThresholds[check])[:1]
+            theRef = float(str(theThresholds[check])[1:])
+
+
+            if theCond == ">":
+                if theRelVal > theRef:
+                    exceeded = True
+            elif theCond == "<":
+                if theRelVal < theRef:
+                    exceeded = True
+            else:
+                print "Warning: No such condition "+check+" "+theThresholds[check]
+
+        return exceeded
+
+
+
 
 
     def formatLimits(self):

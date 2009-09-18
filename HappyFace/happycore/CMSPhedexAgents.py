@@ -1,5 +1,6 @@
 from ModuleBase import *
 from XMLParsing import *
+from PhpDownload import *
 
 from time import strftime
 
@@ -8,6 +9,12 @@ from time import strftime
 # University of Hamburg
 # 2009/06/20
 #
+# 2009/09/18, Volker Buege:
+#             Module ported to new config service
+#	      Module now inhertis from PhpDownload to avoid code doubling
+#
+# ToDo:
+
 
 #################################################
 #                                               #
@@ -19,29 +26,20 @@ from time import strftime
 #                                               #
 #################################################
 
-class CMSPhedexAgents(ModuleBase):
+class CMSPhedexAgents(ModuleBase,PhpDownload):
 
     def __init__(self,category,timestamp,storage_dir):
         
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
-
-        config = self.readConfigFile('./happycore/CMSPhedexAgents')
-	self.addCssFile(config,'./happycore/CMSPhedexAgents')
-
-        ## the url of the Phedex Agents Api
-        self.base_url = self.mod_config.get('setup','base_url')
-        self.phpArgs = {}
-
-        ## needed arguments: node = ARG
-        self.getPhpArgs(self.mod_config)
+        PhpDownload.__init__(self)
 
         ## define how long an agent is allowed not to answer
-        self.critical = self.mod_config.get('setup','critical')
-        self.warning = self.mod_config.get('setup','warning')
+        self.critical = self.configService.get('setup','critical')
+        self.warning = self.configService.get('setup','warning')
 
         ## get the instance
-        self.instance = self.mod_config.get('setup','instance')
+        self.instance = self.configService.get('setup','instance')
 
         ## abort test if no instance is given
         ## self.status will be pre-defined -1
@@ -54,15 +52,16 @@ class CMSPhedexAgents(ModuleBase):
         self.db_values["details_database"] = ""
 
         self.dsTag = 'cmsPhedexAgents_xml_source'
-        self.fileType = 'xml'
 
-        self.makeUrl()
+        self.base_url += '/'+self.instance+'/agents'
+        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
 
-    def getPhpArgs(self, config):
+
+    def getPhpArgs_old(self, config):
         for i in config.items('phpArgs'):
             self.phpArgs[i[0]] = i[1]
 
-    def makeUrl(self):
+    def makeUrl_old(self):
         if len(self.phpArgs) == 0:
             print "Php Error: makeUrl called without phpArgs"
             sys.exit()

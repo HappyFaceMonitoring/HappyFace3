@@ -1,28 +1,17 @@
-from PhpPlot import *
+from Plot import *
+from PhpDownload import *
 
 #############################################
 # class to donwload plots (via WGET command)
 #############################################
-class PhpPlotDashboard(PhpPlot):
+class PhpPlotDashboard(Plot,PhpDownload):
 
     def __init__(self, category, timestamp, archive_dir):
 
-        PhpPlot.__init__(self, category, timestamp, archive_dir)
-	
-        # read class config file
-	config = self.readConfigFile('./happycore/PhpPlotDashboard')
-        if config.has_option('setup','fileextension'):
-            self.fileType = config.get('setup','fileextension')
-        
-	self.base_url = config.get('setup','base_url')
-        self.getPhpArgs(config)
-
+        Plot.__init__(self, category, timestamp, archive_dir)
+        PhpDownload.__init__(self)
    
-        self.base_url = self.base_url+"/"+self.mod_config.get('setup','base_url_add')
+        self.base_url = self.base_url+"/"+self.configService.get('setup','base_url_add')
 
-        # read module specific phpArgs from modul config file
-        self.getPhpArgs(self.mod_config)
-
-        # Create URL from base_url and phpArgs
-        self.makeUrl()
+        self.downloadRequest['plot'] = 'wget:'+self.makeUrl()
 

@@ -1,11 +1,17 @@
 from ModuleBase import *
 from XMLParsing import *
+from PhpDownload import *
 
 #
 # Friederike Nowak
 # University of Hamburg
 # 2009/06/22
 #
+# 2009/09/18, Volker Buege:
+#             Module ported to new config service
+#             Module now inhertis from PhpDownload to avoid code doubling
+#
+# ToDo:
 
 ######################################################
 #                                                    #
@@ -17,41 +23,35 @@ from XMLParsing import *
 #                                                    #
 ######################################################
 
-class CMSPhedexBlockReplicas(ModuleBase):
+class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 
     def __init__(self,category,timestamp,storage_dir):
 
 
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
-
-        config = self.readConfigFile('./happycore/CMSPhedexBlockReplicas')
-	self.addCssFile(config,'./happycore/CMSPhedexBlockReplicas')
-
-        ## the url of the Phedex Agents Api
-        self.base_url = self.mod_config.get('setup','base_url')
-        self.phpArgs = {}
-
-        ## needed arguments: node = ARG
-        self.getPhpArgs(self.mod_config)
+	PhpDownload.__init__(self)
 
         ## get the instance
-        self.instance = self.mod_config.get('setup','instance')
+        self.instance = self.configService.get('setup','instance')
 
         # definition of the database table keys and pre-defined values
 	self.db_keys["details_database"] = StringCol()
         self.db_values["details_database"] = ""
 
         self.dsTag = 'cmsPhedexBlockReplicas_xml_source'
-        self.fileType = 'xml'
 
-        self.makeUrl()
+	self.base_url += '/'+self.instance+'/blockreplicas'
 
-    def getPhpArgs(self, config):
+        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
+
+
+
+    def getPhpArgs_old(self, config):
         for i in config.items('phpArgs'):
             self.phpArgs[i[0]] = i[1]
 
-    def makeUrl(self):
+    def makeUrl_old(self):
         if len(self.phpArgs) == 0:
             print "Php Error: makeUrl called without phpArgs"
             sys.exit()
@@ -72,8 +72,9 @@ class CMSPhedexBlockReplicas(ModuleBase):
         self.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+'/'+self.instance+'/blockreplicas'+"?"+"&".join(argList)
 
 
-    def run(self):
 
+
+    def run(self):
         # run the test
 
         if not self.dsTag in self.downloadRequest:

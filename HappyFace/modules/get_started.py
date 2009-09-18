@@ -15,6 +15,8 @@ class get_started(ModuleBase):
         self.db_keys["message"] = StringCol()
         self.db_values["message"] = ""
 
+       
+
     def run(self):
 
         # run the "test" ;-)

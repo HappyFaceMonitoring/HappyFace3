@@ -1,5 +1,12 @@
 from Plot import *
 
+# 2009/09/18, Volker Buege:
+#             Module ported to new config service
+#
+#
+# ToDo:
+#   Functionality of this class already provided by PhpPlotCmsPhedex?
+
 #############################################
 # class to donwload plots (via WGET command)
 #############################################
@@ -10,12 +17,12 @@ class CMSPhedexPlot(Plot):
         Plot.__init__(self, category, timestamp, archive_dir)
 	
         # read class config file
-	config = self.readConfigFile('./happycore/CMSPhedexPlot')
-	self.site = config.get('setup','site')
+#	config = self.readConfigFile('./happycore/CMSPhedexPlot')
+	self.site = self.configService.get('setup','site')
 
-	graph		= self.mod_config.get('setup','graph')
-	direction	= self.mod_config.get('setup','direction')
-	instance	= self.mod_config.get('setup','instance')
+	graph		= self.configService.get('setup','graph')
+	direction	= self.configService.get('setup','direction')
+	instance	= self.configService.get('setup','instance')
 
 	url	= ""
 	
