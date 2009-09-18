@@ -8,7 +8,7 @@ class get_started(ModuleBase):
         ModuleBase.__init__(self,category,timestamp,storage_dir)
 
         # read additional config settings
-        self.answer = self.mod_config.get('setup','answer')
+        self.answer = self.configService.get('setup','answer')
 
         # definition of the database keys and pre-defined values
         # possible format: StringCol(), IntCol(), FloatCol(), ...
