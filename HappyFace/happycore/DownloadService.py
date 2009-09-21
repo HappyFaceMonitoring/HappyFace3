@@ -82,6 +82,14 @@ class DownloadService():
         else:
             return error,""
 
+    def getUrl(self,downloadstring):
+        return self.downloadTags[downloadstring].getUrl()
+
+    def getUrlAsLink(self,downloadstring):
+        url = self.downloadTags[downloadstring].getUrl()
+        return '<a href="'+url+'">'+url+'<a/>'
+
+
 
     def copyFile(self,downloadstring,destfile):
         success,error = self.checkDownload(downloadstring)

@@ -24,6 +24,10 @@ class dCacheInfo(ModuleBase):
             self.error_message+= dl_error
             return
 
+        self.datasource = self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]) 
+
+        
+
 	source_tree,xml_error = XMLParsing().parse_xmlfile_minidom(sourceFile)
         self.error_message += xml_error
 

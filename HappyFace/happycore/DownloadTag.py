@@ -39,3 +39,6 @@ class DownloadTag(Thread):
 
     def getFilePath(self):
         return './'+self.archive_dir+'/'+self.localFile
+
+    def getUrl(self):
+        return self.url

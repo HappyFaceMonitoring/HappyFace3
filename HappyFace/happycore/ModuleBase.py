@@ -33,6 +33,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.weight	 = float(self.configService.getDefault('setup','weight',1.0))
 	self.definition	 = self.configService.getDefault('setup','definition','')
 	self.instruction = self.configService.getDefault('setup','instruction','')
+        self.datasource      = self.configService.getDefault('setup','source','')
 
 
         # Container for download requests
@@ -70,6 +71,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_keys["weight"]		= FloatCol()
 	self.db_keys["definition"]	= StringCol()
 	self.db_keys["instruction"]	= StringCol()
+	self.db_keys["datasource"]	= StringCol()
 
 	# create an index for the timestap column for faster access
 	self.db_keys["index"] = DatabaseIndex('timestamp')
@@ -128,6 +130,7 @@ class ModuleBase(Thread,DataBaseLock,object):
         self.db_values['weight']        = self.weight
         self.db_values['definition']    = self.definition
         self.db_values['instruction']   = self.instruction
+        self.db_values['datasource']    = self.datasource.replace('%','&#37')
 
      
 
@@ -204,6 +207,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 		<tr><td style="width:20%%">Status Value:</td><td>' . number_format($data["status"],1). '</td></tr>
 		<tr><td style="width:20%%">Weight:</td><td>' . number_format($data["weight"],1) .'</td></tr>
 		<tr><td style="width:20%%">Definition:</td><td>' .$data["definition"]. '</td></tr>
+		<tr><td style="width:20%%">Source:</td><td>' .$data["datasource"]. '</td></tr>
 		<tr><td style="width:20%%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>
 	</table>
 	</div>
