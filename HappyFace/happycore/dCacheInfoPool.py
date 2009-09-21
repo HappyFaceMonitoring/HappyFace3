@@ -15,11 +15,15 @@ class dCacheInfoPool(dCacheInfo):
 
 
 
+
+
     def run(self):
 
 
         self.poolType = self.configService.get('setup','pooltype')
         self.unit     = self.configService.get('setup','unit')
+        self.decs = self.configService.get('setup','decs')
+
 
         if self.unit == 'GB':
             self.fromByteToUnit = 1024*1024*1024
@@ -165,10 +169,8 @@ class dCacheInfoPool(dCacheInfo):
                 if theId in thePoolInfo[pool]:
                     theVal = thePoolInfo[pool][theId]
                     self.sumInfo[theId] += theVal
-                    if self.unit == 'GB':
-                        details_db_values[theId] = float(round(theVal))
-                    else:
-                        details_db_values[theId] = float(round(theVal,2))
+                    details_db_values[theId] = theVal
+
                 else:
                     details_db_values[theId] = -1
                     details_db_values["poolstatus"] = 0.
@@ -190,7 +192,7 @@ class dCacheInfoPool(dCacheInfo):
 
 
         for att in self.sumInfo.keys():
-            self.db_values[ att ] = int(round(self.sumInfo[att]))
+            self.db_values[ att ] = self.sumInfo[att]
 
  
         if self.limitExceeded(self.sumInfo,'limit_global_critical') == True:
@@ -309,7 +311,7 @@ class dCacheInfoPool(dCacheInfo):
         for att in self.globalSummary:
             mc.append("  <tr>")
             mc.append("    <td>"+self.poolAttribNames[att]['webname']+"</td>")
-            mc.append("""    <td>'.$data["""+'"'+ att +'"'+ """].'</td>""")
+            mc.append("""    <td>'.round(($data["""+'"'+ att +'"'+ """]),"""+self.decs+""").'</td>""")
             mc.append("   </tr>")
 
         for att in self.globalRatios:
@@ -355,7 +357,7 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("   <tr class=\"'.$c_flag.'\">")
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
         for att in self.localAttribs:
-            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.$sub_data["""+'"'+ att +'"'+ """].'</td>""")
+            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att +'"'+ """]),"""+self.decs+""").'</td>""")
         for entry in self.localRatios:
             att = entry.split("/")
             mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att[0] +'"'+ """]/$sub_data["""+'"'+ att[1] +'"'+ """])*100,1).'</td>""")
