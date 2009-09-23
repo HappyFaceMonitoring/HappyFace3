@@ -15,9 +15,11 @@ def dumpModuleCfg(name,xml):
     file_cont += 'instruction\t='
     if xml:
         file_cont += "\n\n"
-        file_cont += "base_url\t=\t\n\n"
-        file_cont += "file_type\t=\txml\n\n"
+        file_cont += "base_url\t=\thttps://eine.url.de\n\n"
+        file_cont += "fileextension\t=\txml\n\n"
         file_cont += "[phpArgs]\n"
+        file_cont += "\ng\t=\ta\n"
+        file_cont += "x\t=\ty\n"
 
     file_module_cfg = open(name_module_cfg,"w")
     file_module_cfg.write(file_cont)
@@ -119,12 +121,15 @@ def dumpHappycoreCss(name):
     return name_css
     
 
-def dumpHappycoreCfg(name):
+def dumpHappycoreCfg(name,xml):
 
     name_cfg = "happycore/" + name + ".cfg"
 
     file_cfg = open(name_cfg,"w")
     file_cfg.write("[setup]")
+    if xml:
+        file_cfg.write("\n\nfileextension\t=\txml\n")
+        file_cfg.write("base_url\t=\thttps://eine.url.de\n")
     file_cfg.close()
 
     return name_cfg
@@ -135,45 +140,57 @@ def dumpHappycorePy(name,xml):
     name_py = "happycore/" + name + ".py"
 
     intro = "from ModuleBase import *\n"
-    intro += "from XMLParsing import *\n\n" 
+    intro += "from XMLParsing import *\n"
+    
+    if xml:
+        intro += "from PhpDownload import *\n\n"
+        init = 'class '+name+'(ModuleBase,PhpDownload):\n\n'
+        init += '\tdef __init__(self,category,timestamp,storage_dir):\n\n'
+        #init += '\t\t# inherits from the ModuleBase Class\n'
+        init += '\t\tModuleBase.__init__(self,category,timestamp,storage_dir)\n'
+        init += '\t\tPhpDownload.__init__(self)\n\n'
 
-    init = 'class '+name+'(ModuleBase):\n\n'
-    init += '\tdef __init__(self,category,timestamp,storage_dir):\n\n'
-    init += '\t\t# inherits from the ModuleBase Class\n'
-    init += '\t\tModuleBase.__init__(self,category,timestamp,storage_dir)\n\n'
-    init += "\t\tconfig = self.readConfigFile('./happycore/"+name+"')\n"
-    init += "\t\tself.addCssFile(config,'./happycore/"+name+"')\n\n"
+    else:
+        init = '\nclass '+name+'(ModuleBase):\n\n'
+        init += '\tdef __init__(self,category,timestamp,storage_dir):\n\n'
+        init += '\t\t# inherits from the ModuleBase Class\n'
+        init += '\t\tModuleBase.__init__(self,category,timestamp,storage_dir)\n\n'
+        
+    #init += "\t\tconfig = self.readConfigFile('./happycore/"+name+"')\n"
+    #init += "\t\tself.addCssFile(config,'./happycore/"+name+"')\n\n"
     if xml:
         init += "\t\t## get the url\n"
-        init += "\t\tself.base_url = self.mod_config.get('setup','base_url')\n"
-        init += "\t\tself.phpArgs = {}\n\n"
-        init += "\t\t# read in the php arguments\n"
-        init += "\t\tself.getPhpArgs(self.mod_config)\n\n"
+        init += "\t\tself.base_url = self.configService.get('setup','base_url')\n\n"
+        #init += "\t\tself.phpArgs = {}\n\n"
+        #init += "\t\t# read in the php arguments\n"
+        #init += "\t\tself.getPhpArgs(self.mod_config)\n\n"
+        #init += "\t\tself.makeUrl()"
     init += '\t\t# definition of the database table keys and pre-defined values\n'
     init += '\t\tself.db_keys["details_database"] = StringCol()\n'
     init += '\t\tself.db_values["details_database"] = ""\n\n'
     if xml:
         init += "\t\tself.dsTag = '"+name+"_xml_source'\n"
-        init += "\t\tself.fileType = self.mod_config.get('setup','file_type')\n\n"
-        init += "\t\tself.makeUrl()\n\n"
-        init += "\tdef getPhpArgs(self, config):\n"
-        init += "\t\t\tfor i in config.items('phpArgs'):\n"
-        init += "\t\t\t\tself.phpArgs[i[0]] = i[1]\n\n"
-        init += "\tdef makeUrl(self):\n"
-        init += "\t\t\tif len(self.phpArgs) == 0:\n"
-        init += "\t\t\t\tprint \"Php Error: makeUrl called without phpArgs\"\n"
-        init += "\t\t\t\tsys.exit()\n"
-        init += "\t\t\tif self.base_url == \"\":\n"
-        init += "\t\t\t\tprint \"Php Error: makeUrl called without base_url\"\n"
-        init += "\t\t\t\tsys.exit()\n\n"
-        init += "\t\t\t## if last char of url is \"/\", remove it\n"
-        init += "\t\t\tif self.base_url[-1] == \"/\":\n"
-        init += "\t\t\t\tself.base_url = self.base_url[:-1]\n\n"
-        init += "\t\t\targList = []\n"
-        init += "\t\t\tfor i in self.phpArgs:\n"
-        init += "\t\t\t\tfor j in self.phpArgs[i].split(\",\"):\n"
-        init += "\t\t\t\t\targList.append(i+'='+j)\n\n"
-        init += "\t\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+\"?\"+\"&\".join(argList)\n\n"
+        #init += "\t\tself.fileType = self.configService.get('setup','file_type')\n\n"
+        #init += "\t\tself.makeUrl()\n\n"
+        #init += "\tdef getPhpArgs(self, config):\n"
+        #init += "\t\t\tfor i in config.items('phpArgs'):\n"
+        #init += "\t\t\t\tself.phpArgs[i[0]] = i[1]\n\n"
+        #init += "\tdef makeUrl(self):\n"
+        #init += "\t\t\tif len(self.phpArgs) == 0:\n"
+        #init += "\t\t\t\tprint \"Php Error: makeUrl called without phpArgs\"\n"
+        #init += "\t\t\t\tsys.exit()\n"
+        #init += "\t\t\tif self.base_url == \"\":\n"
+        #init += "\t\t\t\tprint \"Php Error: makeUrl called without base_url\"\n"
+        #init += "\t\t\t\tsys.exit()\n\n"
+        #init += "\t\t\t## if last char of url is \"/\", remove it\n"
+        #init += "\t\t\tif self.base_url[-1] == \"/\":\n"
+        #init += "\t\t\t\tself.base_url = self.base_url[:-1]\n\n"
+        #init += "\t\t\targList = []\n"
+        #init += "\t\t\tfor i in self.phpArgs:\n"
+        #init += "\t\t\t\tfor j in self.phpArgs[i].split(\",\"):\n"
+        #init += "\t\t\t\t\targList.append(i+'='+j)\n\n"
+        #init += "\t\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+\"?\"+\"&\".join(argList)\n\n"
+        init += "\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()\n\n"
 
     run = '\tdef run(self):\n'
     run += '\t\t# run the test\n\n'
@@ -246,7 +263,7 @@ def dumpHappycorePy(name,xml):
 
 def dumpFiles(name,xml):
     name_py = dumpHappycorePy(name,xml)
-    name_cfg = dumpHappycoreCfg(name)
+    name_cfg = dumpHappycoreCfg(name,xml)
     name_css = dumpHappycoreCss(name)
     name_mod_py = dumpModulePy(name)
     name_mod_cfg = dumpModuleCfg(name,xml)

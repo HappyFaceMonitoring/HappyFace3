@@ -80,13 +80,15 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
         restrictions = {}
 
-        try:
-            for entry in self.configService.get('setup', 'allowedSpace').split(','):
+        #try:
+        if not self.configService.get('setup', 'allowedSpace',True) == 0:
+            #for entry in self.configService.get('setup', 'allowedSpace').split(','):
+            for entry in self.configService.get('setup', 'allowedSpace',True).split(','):
                 physGroup,rest = entry.split(':')
                 restrictions[physGroup] = rest
 
-        except:
-            restrictions = {}
+        #except:
+        #    restrictions = {}
 
         return restrictions
 

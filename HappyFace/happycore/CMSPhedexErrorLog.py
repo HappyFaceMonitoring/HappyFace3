@@ -212,38 +212,38 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         else {
         $service_status_color_flag = "report";
         }
-        printf('<table class="ErrorLogTable">');
-        printf('<tr class="'.$service_status_color_flag.'"><td>failed transfers</td><td>'.$info["total_errors"].'</td></tr>');
-        printf('<tr><td colspan="2" class="center">failed transfers details</td></tr>');
+        printf('<table class="ErrorLogTable">\n');
+        printf('<tr class="'.$service_status_color_flag.'"><td>failed transfers</td><td>'.$info["total_errors"].'</td></tr>\n');
+        printf('<tr><td colspan="2" class="center">failed transfers details</td></tr>\n');
         if($info["dest_errors"] == 0){
         $service_status_color_flag = "success";
         }
         else {
         $service_status_color_flag = "report";
         }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to destination</td><td>'.$info["dest_errors"].'</td></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to destination</td><td>'.$info["dest_errors"].'</td></tr>\n');
         if($info["source_errors"] == 0){
         $service_status_color_flag = "success";
         }
         else {
         $service_status_color_flag = "report";
         }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to source</td><td>'.$info["source_errors"].'</td></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to source</td><td>'.$info["source_errors"].'</td></tr>\n');
         if($info["transfer_errors"] == 0){
         $service_status_color_flag = "success";
         }
         else {
         $service_status_color_flag = "report";
         }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to transfer</td><td>'.$info["transfer_errors"].'</td></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to transfer</td><td>'.$info["transfer_errors"].'</td></tr>\n');
         if($info["unknown_errors"] == 0){
         $service_status_color_flag = "success";
         }
         else {
         $service_status_color_flag = "report";
         }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to unknown reasons</td><td>'.$info["unknown_errors"].'</td></tr>');
-        printf('<tr></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to unknown reasons</td><td>'.$info["unknown_errors"].'</td></tr>\n');
+        printf('<tr></tr>\n');
 
         $frac_dest = 0.;
         $frac_source = 0.;
@@ -254,40 +254,40 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
           $frac_trans = $info["transfer_errors"]/$info["total_errors"] *100;
         }
         
-        printf('<tr class="' .$info["dest_errors_status"] . '"><td>fraction of destination errors</td><td>'.round($frac_dest).'%%</td></tr>');
-        printf('<tr class="' .$info["source_errors_status"] . '"><td>fraction of source errors</td><td>'.round($frac_source).'%%</td></tr>');
+        printf('<tr class="' .$info["dest_errors_status"] . '"><td>fraction of destination errors</td><td>'.round($frac_dest).'%%</td></tr>\n');
+        printf('<tr class="' .$info["source_errors_status"] . '"><td>fraction of source errors</td><td>'.round($frac_source).'%%</td></tr>\n');
         if ($frac_trans == 0){
         $service_status_color_flag = "success";
         }
         else {
         $service_status_color_flag = "report";
         }
-        printf('<tr class="' .$service_status_color_flag . '"><td>fraction of transfer errors</td><td>'.round($frac_trans).'%%</td></tr>');
+        printf('<tr class="' .$service_status_color_flag . '"><td>fraction of transfer errors</td><td>'.round($frac_trans).'%%</td></tr>\n');
         
-        printf('</table><br/>');
+        printf('</table><br/>\n');
         }
         $onlyOnce = 1;
         }
 
         if ($onlyOnce == 0){
 
-        printf('<table class="ErrorLogTable"><tr class="success"><td>No errors detected</td></tr></table>');
+        printf('<table class="ErrorLogTable"><tr class="success"><td>No errors detected</td></tr></table>\n');
         
         }
 
         else{
         printf('
-        <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-        <div class="ErrorLogDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">');
-        printf('<table class="ErrorLogTableDetails">');
-        printf('<tr><td>node</td><td>failed transfers</td><td>error content</td></tr>');
+        <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />\n
+        <div class="ErrorLogDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">\n');
+        printf('<table class="ErrorLogTableDetails">\n');
+        printf('<tr><td>node</td><td>failed transfers</td><td>error content</td></tr>\n');
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-                printf('<tr><td>'.$info["link_remote_node"].'</td><td class="center">'.$info["file_detail_log_nb"].'</td><td>'.$info["file_detail_log"].'</td></tr>');
+                printf('<tr><td>'.$info["link_remote_node"].'</td><td class="center">'.$info["file_detail_log_nb"].'</td><td>'.$info["file_detail_log"].'</td></tr>\n');
         
         }
         
-        printf('</div></table><br/>');
+        printf('</div></table><br/>\n');
         }
         
         ?>
