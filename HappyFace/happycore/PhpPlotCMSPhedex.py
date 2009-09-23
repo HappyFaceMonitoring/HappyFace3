@@ -42,13 +42,13 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
 
             
             title +=' of transfers from '
-            if self.phpArgs['from_node'] == '.%2A':
+            if self.phpArgs['from_node'] == '.*':
                 title +='All'
             else:
                 title += self.phpArgs['from_node']
 
             title +=' to '
-            if self.phpArgs['to_node'] == '.%2A':
+            if self.phpArgs['to_node'] == '.*':
                 title +='All'
             else:
                 title +=self.phpArgs['to_node']
