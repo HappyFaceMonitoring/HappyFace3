@@ -2,7 +2,8 @@
 
 import sys, getopt
 
-def dumpModuleCfg(name,xml):
+def dumpInstanceCfg(name,xml):
+    """ dumps a sceleton of instance config file """
 
     name_module_cfg = makeModuleName(name, ".cfg")
 
@@ -27,7 +28,8 @@ def dumpModuleCfg(name,xml):
 
     return name_module_cfg
 
-def dumpModulePy(name):
+def dumpInstancePy(name):
+    """dumps a sceleton of the instance python file"""
 
     name_module_py = makeModuleName(name, ".py")
 
@@ -54,7 +56,12 @@ def dumpModulePy(name):
     return name_module_py
 
 
-def makeModuleName(name, string):
+def makeInstanceName(name, string):
+    """
+    Composes instance name out of capital letter
+    name from the initial name. Has problems with
+    names with neighboring capital letters.
+    """
 
     name_module = ''
 
@@ -80,6 +87,7 @@ def makeModuleName(name, string):
     return name_module
 
 def dumpHappycoreCss(name):
+    """dumps a sceleton for the core module css file"""
 
     name_css = "happycore/" + name + ".css"
 
@@ -122,6 +130,7 @@ def dumpHappycoreCss(name):
     
 
 def dumpHappycoreCfg(name,xml):
+    """dumps a sceleton for the core module config file"""
 
     name_cfg = "happycore/" + name + ".cfg"
 
@@ -136,6 +145,10 @@ def dumpHappycoreCfg(name,xml):
 
 
 def dumpHappycorePy(name,xml):
+    """
+    dumps a sceleton of the main python file of the core
+    module.
+    """
 
     name_py = "happycore/" + name + ".py"
 
@@ -193,6 +206,8 @@ def dumpHappycorePy(name,xml):
         init += "\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()\n\n"
 
     run = '\tdef run(self):\n'
+    run += '\t"""Collects the data from the web source. Stores it then into the\n'
+    run += '\tsqlite data base. The overall status has to be determined here."""\n'
     run += '\t\t# run the test\n\n'
     if xml:
         run += '\t\tif not self.dsTag in self.downloadRequest:\n'
@@ -238,6 +253,8 @@ def dumpHappycorePy(name,xml):
     run += '\t\tself.status = 1.\n\n'
 
     output = '\tdef output(self):\n\n'
+    output += '\t"""Access data from the sqlite database from here and decide how\n'
+    output += '\tto present it"""\n'
     output += '\t\tmodule_content = """\n'
     output += '\t\t<?php\n'
     output += "\t\tprintf('War einmal ein Boomerang,<br>');\n"
@@ -262,18 +279,22 @@ def dumpHappycorePy(name,xml):
     
 
 def dumpFiles(name,xml):
+    """executes all the dump functions"""
     name_py = dumpHappycorePy(name,xml)
     name_cfg = dumpHappycoreCfg(name,xml)
     name_css = dumpHappycoreCss(name)
-    name_mod_py = dumpModulePy(name)
-    name_mod_cfg = dumpModuleCfg(name,xml)
-    return name_py,name_cfg,name_css,name_mod_py,name_mod_cfg
+    name_inst_py = dumpInstancePy(name)
+    name_inst_cfg = dumpInstanceCfg(name,xml)
+    return name_py,name_cfg,name_css,name_inst_py,name_inst_cfg
 
-def printExitMessage(name_py,name_cfg,name_css,name_mod_py,name_mod_cfg):
-    print "wrote the files " + name_py + ", " + name_cfg + ", " + name_css + ", " + name_mod_py + ",and " + name_mod_cfg +"."
+def printExitMessage(name_py,name_cfg,name_css,name_inst_py,name_inst_cfg):
+    """prints the names of the files created"""
+    print "wrote the files " + name_py + ", " + name_cfg + ", " + name_css + ", " + name_inst_py + ",and " + name_inst_cfg +"."
 
 def usage():
+    """usage of this script"""
     print "usage: dumpSceleton [option]"
+    print "be careful! No testing of this script yet!"
     print "options are"
     print
     print "-h,--help:\t\t\tprint this message and exit"
@@ -283,6 +304,7 @@ def usage():
 
 
 def main(argv):
+    """ reads in options"""
 
     ## the name of the test
     name = "RingelnatzPoetry"
