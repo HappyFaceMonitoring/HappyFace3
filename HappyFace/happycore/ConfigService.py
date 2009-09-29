@@ -47,6 +47,8 @@ class ConfigService():
 
 	self.config.set(sec,par,currentValue+add)
 
+    def set(self,sec,par,val):
+        self.config.set(sec,par,val)
 
 
     def configMissingParameter(self,sec,par):

@@ -204,9 +204,7 @@ class dCacheInfoPool(dCacheInfo):
             
         self.configService.addToParameter('setup','definition',"Poolgroup: "+self.poolType+"<br/>"+self.formatLimits())
 
-
-
-
+        
 
 
 
@@ -242,8 +240,8 @@ class dCacheInfoPool(dCacheInfo):
             if len(checkList) == 1:
                 theRelVal = float(thePoolInfo[checkList[0]])
             elif len(checkList) == 2:
-                theRelVal = float(thePoolInfo[checkList[0]])/float(thePoolInfo[checkList[1]])
-
+                try: theRelVal = float(thePoolInfo[checkList[0]])/float(thePoolInfo[checkList[1]])
+                except: theRelVal = 0
 
             theCond = str(theThresholds[check])[:1]
             theRef = float(str(theThresholds[check])[1:])

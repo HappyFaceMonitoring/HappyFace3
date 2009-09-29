@@ -28,14 +28,6 @@ class ModuleBase(Thread,DataBaseLock,object):
         self.configService.readParameter()
 
 
-        self.mod_title	 = self.configService.getDefault('setup','mod_title',self.__module__)
-	self.mod_type	 = self.configService.getDefault('setup','mod_type','rated')
-	self.weight	 = float(self.configService.getDefault('setup','weight',1.0))
-	self.definition	 = self.configService.getDefault('setup','definition','')
-	self.instruction = self.configService.getDefault('setup','instruction','')
-        self.datasource      = self.configService.getDefault('setup','source','')
-
-
         # Container for download requests
         self.downloadRequest = {}
 
@@ -125,15 +117,14 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_values['timestamp']	= self.timestamp
 	self.db_values['status']	= self.status
 	self.db_values['error_message'] = self.error_message
-        self.db_values['mod_title']     = self.mod_title
-        self.db_values['mod_type']      = self.mod_type
-        self.db_values['weight']        = self.weight
-        self.db_values['definition']    = self.definition
-        self.db_values['instruction']   = self.instruction
-        self.db_values['datasource']    = self.datasource.replace('%','&#37')
 
-     
+        self.db_values['mod_title']     =  self.configService.getDefault('setup','mod_title',self.__module__)
+        self.db_values['mod_type']      =  self.configService.getDefault('setup','mod_type','rated')
+        self.db_values['weight']        =  float(self.configService.getDefault('setup','weight',1.0))
+        self.db_values['definition']    =  self.configService.getDefault('setup','definition','')
+        self.db_values['instruction']   = self.configService.getDefault('setup','instruction','')
 
+        self.db_values['datasource']    = self.configService.getDefault('setup','source','').replace('%','&#37')
 
 
 		
