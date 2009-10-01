@@ -2,10 +2,11 @@
 
 import sys, getopt
 
+
 def dumpInstanceCfg(name,xml):
     """ dumps a sceleton of instance config file """
 
-    name_module_cfg = makeModuleName(name, ".cfg")
+    name_module_cfg = makeInstanceName(name, ".cfg")
 
     file_cont = ''
     file_cont += '[setup]\n\n'
@@ -31,7 +32,7 @@ def dumpInstanceCfg(name,xml):
 def dumpInstancePy(name):
     """dumps a sceleton of the instance python file"""
 
-    name_module_py = makeModuleName(name, ".py")
+    name_module_py = makeInstanceName(name, ".py")
 
     ## get rid of ".py"
     name_module = name_module_py.split(".",1)
@@ -333,6 +334,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
+
 
     ## get the command lines
     name, xml = main(sys.argv[1:])
