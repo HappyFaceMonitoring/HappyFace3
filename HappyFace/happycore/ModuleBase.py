@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 import ConfigParser
 
 from sqlobject import *		# for SQL database functionality
@@ -6,7 +6,6 @@ from threading import Thread	# for threading functionality
 from DataBaseLock import *
 from ConfigService import *
 
-import re
 
 #########################################################
 # basic class for all test modules
