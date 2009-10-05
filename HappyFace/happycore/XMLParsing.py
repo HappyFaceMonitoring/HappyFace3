@@ -1,5 +1,6 @@
 from xml.dom.minidom import * # for XML parsing
 from lxml import etree
+import lxml.html # for html parsing
 import sys
 
 #############################################
@@ -21,17 +22,32 @@ class XMLParsing():
 	return dom_object,error_message
 
 
-    def parse_xmlfile_lxml(self,xml_file):
+    def parse_xmlfile_lxml(self,file,option='xml'):
 
         error_message = ""
-	try:
-	    source_file = open(xml_file)
-	    tree = etree.parse(source_file)
+        if option == 'xml':
+            try:
+                source_file = open(file)
+                tree = etree.parse(source_file)
 
-	except:
-            error_message = '\nCould not parse ' + xml_file + ', ' + self.__module__ + ' aborting ...\n'
-            sys.stdout.write(error_message)
+            except:
+                error_message = '\nCould not parse ' + file + ', ' + self.__module__ + ' aborting ...\n'
+                sys.stdout.write(error_message)
+                tree = ""
+
+        elif option == 'html' :
+            try:
+                parser = lxml.html.HTMLParser()
+                tree = lxml.html.parse(file,parser)
+                #tree = lxml.html.fromstring(file)
+            except:
+                error_message = '\nCould not parse ' + file + ', ' + self.__module__ + ' aborting ...\n'
+                sys.stdout.write(error_message)
+                tree = ""
+        else:
+            error_message = '\nParsing option unknown in module ' + self.__module__ + ', aborting ...\n '
             tree = ""
-
-	# usage of the etree object: http://codespeak.net/lxml/
-	return tree,error_message
+                
+        # usage of the etree object: http://codespeak.net/lxml/
+        return tree,error_message
+            
