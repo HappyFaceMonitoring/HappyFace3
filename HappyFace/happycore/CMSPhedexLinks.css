@@ -23,14 +23,14 @@
 
 
 tr.success {
-	background-color:  \#AAFFAA;
+	background-color:  #AAFFAA;
 }
 tr.deactivated {
-	background-color:  \#C896DC;
+	background-color:  #C896DC;
 }
 tr.critical {
-	background-color:  \#FF6464;
+	background-color:  #FF6464;
 }
 tr.undef {
-	background-color:  \#C0C0C0;
+	background-color:  #C0C0C0;
 }
