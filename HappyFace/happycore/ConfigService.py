@@ -62,22 +62,14 @@ class ConfigService():
 
     ## there can be parameters, wich do not always have to be set
     ## like "allowedSpace" in the module CMSPhedexPhysicsGroups
-    def get(self,sec,par,inconstantPar=False):
+    def get(self,sec,par):
 
-        if not inconstantPar:
-            try:
-                return self.config.get(sec,par)
+        try:
+            return self.config.get(sec,par)
 
-            except:
-                self.configMissingParameter(sec,par)
+        except:
+            self.configMissingParameter(sec,par)
                 
-        else:
-            try:
-                return self.config.get(sec,par)
-            
-            except:
-                return 0
-
 
     def getDefault(self,sec,par,default):
         try:
