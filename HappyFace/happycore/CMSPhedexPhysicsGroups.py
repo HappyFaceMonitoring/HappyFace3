@@ -24,10 +24,17 @@ from PhpDownload import *
 #                                                 #
 ###################################################
 
-
 class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
     def __init__(self,category,timestamp,storage_dir):
+
+        """
+        The CMSPhedexPhysicsGroups class uses the
+        informations about the space usage of the physics
+        groups on a T2 provided by the phedex API.
+        It is possible to make individual restrictions for
+        each group, or to use a global one.
+        """
 
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,category,timestamp,storage_dir)
@@ -81,9 +88,9 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         restrictions = {}
 
         #try:
-        if not self.configService.get('setup', 'allowedSpace',True) == 0:
+        if not self.configService.getDefault('setup', 'allowedSpace',0) == 0:
             #for entry in self.configService.get('setup', 'allowedSpace').split(','):
-            for entry in self.configService.get('setup', 'allowedSpace',True).split(','):
+            for entry in self.configService.get('setup', 'allowedSpace').split(','):
                 physGroup,rest = entry.split(':')
                 restrictions[physGroup] = rest
 
