@@ -207,8 +207,8 @@ def dumpHappycorePy(name,xml):
         init += "\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()\n\n"
 
     run = '\tdef run(self):\n'
-    run += '\t\t"""\nCollects the data from the web source. Stores it then into the\n'
-    run += '\tsqlite data base. The overall status has to be determined here.\n"""\n'
+    run += '\t\t"""\n\t\tCollects the data from the web source. Stores it then into the\n'
+    run += '\t\tsqlite data base. The overall status has to be determined here.\n\t\t"""\n'
     run += '\t\t# run the test\n\n'
     if xml:
         run += '\t\tif not self.dsTag in self.downloadRequest:\n'
@@ -254,9 +254,9 @@ def dumpHappycorePy(name,xml):
     run += '\t\tself.status = 1.\n\n'
 
     output = '\tdef output(self):\n\n'
-    output += '\t\t"""\nAccess data from the sqlite database from here and decide how\n'
-    output += '\tto present it'
-    output += '\n"""\n'
+    output += '\t\t"""\n\t\tAccess data from the sqlite database from here and decide how\n'
+    output += '\t\tto present it'
+    output += '\n\t\t"""\n'
     output += '\t\tmodule_content = """\n'
     output += '\t\t<?php\n'
     output += "\t\tprintf('War einmal ein Boomerang,<br>');\n"
