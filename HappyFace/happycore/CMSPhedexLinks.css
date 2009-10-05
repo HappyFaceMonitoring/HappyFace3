@@ -25,8 +25,8 @@
 tr.success {
 	background-color:  \#AAFFAA;
 }
-tr.warning {
-	background-color:  \#FFAA46;
+tr.deactivated {
+	background-color:  \#C896DC;
 }
 tr.critical {
 	background-color:  \#FF6464;
