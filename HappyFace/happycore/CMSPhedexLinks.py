@@ -27,6 +27,8 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 			self.error_message += err
 			return -1
 
+		self.getStatusCriteria()
+
 		# definition of the database table keys and pre-defined values
 		self.db_keys["details_database"] = StringCol()
 		self.db_values["details_database"] = ""
@@ -111,17 +113,6 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		Access data from the sqlite database from here and decide how
 		to present it
 		"""
-		
-		#module_content = """
-		#<?php
-		#printf('War einmal ein Boomerang,<br>');
-		#printf('War um ein Weniges zu lang.<br>');
-		#printf('Boomerang flog ein Stueck<br>');
-		#printf('Und kehrte nie mehr zurueck.<br>');
-		#printf('Publikum noch stundenlang<br>');
-		#printf('Wartete auf Boomerang.<br>');
-		#?>
-		#"""
 
 		module_content = """
 		<?php
@@ -208,7 +199,49 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		determines global status
 		"""
 
+		### if one of the important links is down or
+		### does not exsist, status = 0.
+		for site in self.important_list:
+			try:
+				## color
+				if links[site][0] == 'red':
+					return 0
+			except:
+				return 0
+
+		### check the critical criteria
+		### don't forget to check the exclusion list too
+		for tier in self.critical_dict.keys():
+			tier_counter = 0
+			tier_down_counter = 0
+			for site in links.keys():
+				if not site in self.exclusion_list and re.search(tier, site):
+					tier_counter += 1
+					if links[site][0] == 'red':
+						tier_down_counter += 1
+			if not self.critical_dict[tier] == -1 and  tier_down_counter >= self.critical_dict[tier]:
+				return 0
+			elif self.critical_dict[tier] == -1 and tier_down_counter == tier_counter:
+				return 0
+
+		### check the warning criteria and the exclusion
+		### list
+		for tier in self.warning_dict.keys():
+			tier_counter = 0
+			tier_down_counter = 0
+			for site in links.keys():
+				if not site in self.exclusion_list and re.search(tier,site):
+					tier_counter += 1
+					if links[site][0] == 'red':
+						tier_down_counter += 1
+			if not self.warning_dict[tier] == -1 and tier_down_counter >= self.warning_dict[tier]:
+				return 0.5
+			elif self.warning_dict[tier] == -1 and tier_down_counter == tier_counter:
+				return 0.5
+					
 		return 1
+
+	
 
 	def getLinks(self, root,details_db_values,Details_DB_Class):
 
@@ -276,3 +309,37 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 				Details_DB_Class(**details_db_values)
 								
 		return links
+
+
+	def getStatusCriteria(self):
+
+		"""
+		Reads in the status criteria and refurbishes them
+		"""
+
+		self.critical = self.configService.getDefault('setup','critical','T1:1')
+		self.warning = self.configService.getDefault('setup','warning','T2:1')
+
+		self.exclusion = self.configService.getDefault('setup','exclusion',None)
+		self.important = self.configService.getDefault('setup', 'important',None)
+
+
+		self.critical_dict = {}
+		for entry in self.critical.split(','):
+			tier,number = entry.split(':')
+			self.critical_dict[tier] = number
+
+		self.warning_dict = {}
+		for entry in self.warning.split(','):
+			tier,number = entry.split(':')
+			self.warning_dict[tier] = number
+
+		self.exclusion_list = []
+		if not self.exclusion == None:
+			self.exclusion_list = self.exclusion.split(',')
+			
+		self.important_list = []
+		if not self.important == None:
+			self.important_list = self.important.split(',')
+
+		pass
