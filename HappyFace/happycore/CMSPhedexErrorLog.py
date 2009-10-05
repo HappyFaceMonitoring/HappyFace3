@@ -49,10 +49,12 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         self.timeThreshold = self.configService.get('setup', 'time_threshold')
 
         ## if number of errors falls under threshold, status stays happy.
-        try:
-            self.errorThreshold = self.configService.get('setup','error_threshold')
-        except:
-            self.errorThreshold = 10
+        #try:
+        #    self.errorThreshold = self.configService.get('setup','error_threshold')
+        #except:
+        #    self.errorThreshold = 10
+
+        self.errorThreshold = self.configService.getDefault('setup','error_threshold',10)
 
         self.initiateVariables()
 
@@ -389,10 +391,22 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
             
     def getThresholds(self):
 
-        try:
+        #try:
+        #    self.destCritical = float(self.configService.get("setup","destCritical"))
+
+        #except:
+        #    ## if the data is transfered to the node, 10 percent of destination
+        #    ## problems raises a critical status. Else, there will be no critical
+        #    ## status
+        #    if self.inverseDirection == "from":
+        #        self.destCritical = 10.
+        #    else:
+        #        self.destCritical = 100.
+
+        if not float(self.configService.getDefault("setup","destCritical",0)) == 0.:
             self.destCritical = float(self.configService.get("setup","destCritical"))
 
-        except:
+        else:
             ## if the data is transfered to the node, 10 percent of destination
             ## problems raises a critical status. Else, there will be no critical
             ## status
@@ -401,10 +415,21 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
             else:
                 self.destCritical = 100.
 
-        try:
+        #try:
+        #    self.destWarning = float(self.configService.get("setup","destWarning"))
+
+        #except:
+        #    ## if the data is transfered to the node, 5 percent of destination
+        #    ## problems raises a warning status. Else, 40 percent
+        #    if self.inverseDirection == "from":
+        #        self.destWarning = 5.
+        #    else:
+        #        self.destWarning = 40.
+
+        if not float(self.configService.getDefault("setup","destWarning",0)) == 0.:
             self.destWarning = float(self.configService.get("setup","destWarning"))
 
-        except:
+        else:
             ## if the data is transfered to the node, 5 percent of destination
             ## problems raises a warning status. Else, 40 percent
             if self.inverseDirection == "from":
@@ -412,10 +437,22 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
             else:
                 self.destWarning = 40.
 
-        try:
+        #try:
+        #    self.sourceCritical = float(self.configService.get("setup","sourceCritical"))
+
+        #except:
+        #    ## if the data is transfered from the node, 10 percent of destination
+        #    ## problems raises a critical status. Else, there will be no critical
+        #    ## status
+        #    if self.inverseDirection == "to":
+        #        self.sourceCritical = 10.
+        #    else:
+        #        self.sourceCritical = 100.
+
+        if not float(self.configService.getDefault("setup","sourceCritical",0)) == 0.:
             self.sourceCritical = float(self.configService.get("setup","sourceCritical"))
 
-        except:
+        else:
             ## if the data is transfered from the node, 10 percent of destination
             ## problems raises a critical status. Else, there will be no critical
             ## status
@@ -424,10 +461,21 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
             else:
                 self.sourceCritical = 100.
 
-        try:
+        #try:
+        #    self.sourceWarning = float(self.configService.get("setup","sourceWarning"))
+            
+        #except:
+        #    ## if the data is transfered from the node, 5 percent of source
+        #    ## problems raises a warning status. Else, 40 percent
+        #    if self.inverseDirection == "to":
+        #        self.sourceWarning = 5.
+        #    else:
+        #        self.sourceWarning = 40.
+
+        if not float(self.configService.getDefault("setup","sourceWarning",0)) == 0.:
             self.sourceWarning = float(self.configService.get("setup","sourceWarning"))
             
-        except:
+        else:
             ## if the data is transfered from the node, 5 percent of source
             ## problems raises a warning status. Else, 40 percent
             if self.inverseDirection == "to":
