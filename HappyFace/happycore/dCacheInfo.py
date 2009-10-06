@@ -24,7 +24,7 @@ class dCacheInfo(ModuleBase):
             self.error_message+= dl_error
             return
 
-        self.datasource = self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]) 
+        self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
 
         
 

@@ -37,7 +37,9 @@ class Plot(ModuleBase):
 
 
         fileType = self.downloadService.getFileType(self.downloadRequest[self.plotTag])
-        self.datasource = self.downloadService.getUrlAsLink(self.downloadRequest[self.plotTag])
+
+        self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.downloadRequest[self.plotTag]))
+
 
         filenameFullPath = self.archive_dir +"/" + self.__module__+fileType
         success,stderr = self.downloadService.copyFile(self.downloadRequest[self.plotTag],filenameFullPath)

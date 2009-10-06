@@ -19,7 +19,8 @@ class dCacheInfoPool(dCacheInfo):
 
     def run(self):
 
-
+       
+        
         self.poolType = self.configService.get('setup','pooltype')
         self.unit     = self.configService.get('setup','unit')
         self.decs = self.configService.get('setup','decs')
@@ -42,8 +43,9 @@ class dCacheInfoPool(dCacheInfo):
         self.poolAttribNames['precious'] = {'name':'Precious Space'             , 'unit':self.unit}
         self.poolAttribNames['removable'] = {'name':'Removable Space'            , 'unit':self.unit}
         self.poolAttribNames['poolnumber'] = {'name':'Pools'                      , 'unit':''}
-        self.poolAttribNames['poolcritical'] = {'name':'Pools with status warning ' , 'unit':''}
-        self.poolAttribNames['poolwarning'] = {'name':'Pools with status critical' , 'unit':''}
+        self.poolAttribNames['poolwarning'] = {'name':'Pools with status warning ' , 'unit':''}
+        self.poolAttribNames['poolcritical'] = {'name':'Pools with status critical ' , 'unit':''}
+
 
 
         # Get thresholds from configuration
@@ -78,8 +80,8 @@ class dCacheInfoPool(dCacheInfo):
         # List of Pool Summary Attributes
         self.globalSummary = []
         self.globalSummary.append('poolnumber')
-        self.globalSummary.append('poolcritical')
         self.globalSummary.append('poolwarning')
+        self.globalSummary.append('poolcritical')
         for val in self.localAttribs:
             self.globalSummary.append(val)
 
@@ -181,8 +183,7 @@ class dCacheInfoPool(dCacheInfo):
                 self.sumInfo['poolcritical'] +=1
 
 
-
-
+        
 
             # store the values to the database
             Details_DB_Class(**details_db_values)
@@ -198,6 +199,7 @@ class dCacheInfoPool(dCacheInfo):
         if self.limitExceeded(self.sumInfo,'limit_global_critical') == True:
             self.status = 0.0
         elif self.limitExceeded(self.sumInfo,'limit_global_warning') == True:
+
             self.status = 0.5
         else:
             self.status = 1.0
@@ -246,7 +248,6 @@ class dCacheInfoPool(dCacheInfo):
             theCond = str(theThresholds[check])[:1]
             theRef = float(str(theThresholds[check])[1:])
 
-
             if theCond == ">":
                 if theRelVal > theRef:
                     exceeded = True
@@ -255,7 +256,7 @@ class dCacheInfoPool(dCacheInfo):
                     exceeded = True
             else:
                 print "Warning: No such condition "+check+" "+theThresholds[check]
-
+        
         return exceeded
 
 
@@ -347,10 +348,13 @@ class dCacheInfoPool(dCacheInfo):
         mc.append('  if($sub_data["poolstatus"] == 1.){')
         mc.append('    $c_flag = "ok";')
         mc.append('  }')
-        mc.append('  else{')
-        mc.append('    $c_flag = "poolwarning";')
+        mc.append('  elseif($sub_data["poolstatus"] == 0.5){')
+        mc.append('    $c_flag = "warning";')
         mc.append('  }')
-
+        mc.append('  elseif($sub_data["poolstatus"] == 0.){')
+        mc.append('    $c_flag = "critical";')
+        mc.append('  }')
+        
         mc.append("  printf('")
         mc.append("   <tr class=\"'.$c_flag.'\">")
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
