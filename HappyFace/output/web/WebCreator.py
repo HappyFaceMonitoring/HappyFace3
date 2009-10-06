@@ -9,6 +9,7 @@ from TimeMachineLogic import *
 from TimeMachineController import *
 from SQLCallRoutines import *
 from ModuleResultsArrayBuilder import *
+from GetText4Firefox import *
 
 class WebCreator(object):
     def __init__(self,config,modObj_list,timestamp):
@@ -83,7 +84,10 @@ class WebCreator(object):
 
 	# provides a function for the module status symbol
 	output += ModuleStatusSymbolLogic(self.theme).output
-	
+
+        # provides functions for the firefox plugin
+	output += GetText4Firefox().output
+
 	#######################################################
 
 	# start with HTML output
