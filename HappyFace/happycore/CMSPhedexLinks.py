@@ -303,7 +303,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 					if not re.search("Destination",info_list[3]) == None:
 						details_db_values["update_dest"] = info_list[3]
 					else:
-						details_db_values["update_dest"] = info_list[3]
+						details_db_values["update_source"] = info_list[3]
 
 					
 				Details_DB_Class(**details_db_values)
