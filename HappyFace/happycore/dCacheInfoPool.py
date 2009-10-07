@@ -155,7 +155,9 @@ class dCacheInfoPool(dCacheInfo):
             self.sumInfo['poolnumber'] +=1
             details_db_values["poolname"] = pool
 
-            if self.limitExceeded(thePoolInfo[pool],'limit_local_critical') == True:
+            if  len(thePoolInfo[pool]) == 0:
+                details_db_values["poolstatus"] = 0.
+            elif self.limitExceeded(thePoolInfo[pool],'limit_local_critical') == True:
                 # Set 0.0 for Pool is Critical
                 details_db_values["poolstatus"] = 0.
             elif self.limitExceeded(thePoolInfo[pool],'limit_local_warning') == True:
