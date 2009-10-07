@@ -317,7 +317,19 @@ class dCacheInfoPool(dCacheInfo):
             entry = att.split("/")
             mc.append("  <tr>")
             mc.append("    <td>"+self.poolAttribNames[att]['webname']+"</td>")
+
+            mc.append("');")
+            mc.append('if($data["'+ entry[1] +'"] == 0.){')
+            mc.append("printf('")
+            mc.append("""    <td>--</td>""")
+            mc.append("  ');")
+            mc.append('}else{')
+            mc.append("printf('")
             mc.append("""    <td>'.round(($data["""+'"'+ entry[0] +'"'+ """]/$data["""+'"'+ entry[1] +'"'+ """])*100,1).'</td>""")
+            mc.append("  ');")
+            mc.append('}')
+            mc.append("printf('")
+#            mc.append("""    <td>'.round(($data["""+'"'+ entry[0] +'"'+ """]/$data["""+'"'+ entry[1] +'"'+ """])*100,1).'</td>""")
             mc.append("   </tr>")
 
             
@@ -360,10 +372,25 @@ class dCacheInfoPool(dCacheInfo):
         mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
         for att in self.localAttribs:
             mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att +'"'+ """]),"""+self.decs+""").'</td>""")
+        mc.append("  ');")
+        
         for entry in self.localRatios:
             att = entry.split("/")
-            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att[0] +'"'+ """]/$sub_data["""+'"'+ att[1] +'"'+ """])*100,1).'</td>""")
             
+            
+            mc.append('if($sub_data["'+ att[1] +'"] == 0.){')
+            mc.append("printf('")
+            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'-'</td>""")
+            mc.append("  ');")
+            mc.append('}else{')
+            mc.append("printf('")
+            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att[0] +'"'+ """]/$sub_data["""+'"'+ att[1] +'"'+ """])*100,1).'</td>""")
+            mc.append("  ');")
+            mc.append('}')
+            
+
+
+        mc.append("printf('")
         mc.append("   </tr>")
         mc.append("  ');")
         mc.append(" }")
