@@ -329,7 +329,6 @@ class dCacheInfoPool(dCacheInfo):
             mc.append("  ');")
             mc.append('}')
             mc.append("printf('")
-#            mc.append("""    <td>'.round(($data["""+'"'+ entry[0] +'"'+ """]/$data["""+'"'+ entry[1] +'"'+ """])*100,1).'</td>""")
             mc.append("   </tr>")
 
             
