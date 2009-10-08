@@ -29,6 +29,10 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		
 		self.fileExtension = self.configService.get('setup','fileextension')
 		self.days = int(self.configService.get('setup','days'))
+		#self.critical = self.configService.get('setup','critical')
+		#self.warning = self.configService.get('setup','warning')
+
+		self.getStatusConditions()
 		
 		self.readiness = {}
 		self.key_list = []
@@ -183,7 +187,27 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		"""
 		Determines the status of this module
 		"""
-		
+
+		critical_counter = 0
+		warning_counter = 0
+
+		## look into the last x days
+
+		for entry in self.readiness['Site Readiness Status'][-int(self.critical[0]):]:
+			if entry['color'] == 'red':
+				critical_counter += 1
+			## if you find y critical days in
+			## in the x considered:
+			if critical_counter >= int(self.critical[1]):
+				return 0
+		for entry in self.readiness['Site Readiness Status'][-int(self.warning[0]):]:
+			if entry['color'] == 'yellow':
+				warning_counter += 1
+			## same as critical
+			if warning_counter >= int(self.warning[1]):
+				return 0.5
+			
+			
 		return 1
 
 	def getSiteElements(self, root):
@@ -316,4 +340,47 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 
 					Details_DB_Class(**details_db_values)
 					
+		pass
+
+	def getStatusConditions(self):
+
+		"""
+		Reads in the warning/critical conditions and refurbishes
+		them
+		"""
+
+		try:
+			self.critical = self.configService.get('setup','critical').split(':')
+			self.warning = self.configService.get('setup','warning').split(':')
+
+		except:
+			err = 'Error! Could not read in status conditions in module '+self.__module__+'\n'
+			sys.stdout.write(err)
+			self.error_message +=err
+			return -1
+
+
+		if int(self.critical[0]) > self.days or int(self.warning[0]) > self.days:
+			warn = 'Warning! Number of considered days in status determination is\n'
+			warn += 'greater than total number of days read in. Setting number of\n'
+			warn += 'considered days to number of total days. Occurred in module \n'
+			warn += self.__module__+'\n'
+			if int(self.critical[0]) > self.days:
+				self.critical[0] = self.days
+			if int(self.warning[0]) > self.days:
+				self.warning[0] = self.days
+			sys.stdout.write(warn)
+		
+
+		if int(self.critical[1]) > int(self.critical[0]) or int(self.warning[1]) > int(self.warning[0]):
+			warn = 'Warning! Number of critical/warning days greater than considered\n'
+			warn += 'days. Setting number of w/c days to considered days. Occurred in\n'
+			warn += 'module '+self.__module__+'\n'
+			if int(self.critical[1]) > int(self.critical[0]):
+				self.critical[1] = int(self.critical[0])
+			if int(self.warning[1]) > int(self.warning[0]):
+				self.warning[1] = int(self.warning[0])
+
+			sys.stdout.write(warn)
+		
 		pass
