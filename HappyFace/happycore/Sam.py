@@ -92,16 +92,6 @@ class Sam(ModuleBase,PhpDownload):
 	# if table is not existing, create it
         Details_DB_Class.createTable(ifNotExists=True)
 
-	root = source_tree.getroot()
-	
-	for element in root:
-	    if element.tag == "data": data_branch = element
-
-	for element in data_branch:
-	    for item in element:
-	        if item.tag == "Services": services = item
-		if item.tag == "VOName": self.db_values["site"] = item.text
-
 	sn = {}
 	tests = {}
 	
@@ -115,69 +105,85 @@ class Sam(ModuleBase,PhpDownload):
 
         serviceStatusList = []
 
-        
-	for services_item in services:
-            
-	    for services_prop in services_item:
-		if services_prop.tag == "ServiceType":
-		    ServiceType = services_prop.text
+	root = source_tree.getroot()
+	
+	try:
+	    for element in root:
+		if element.tag == "data": data_branch = element
 
-	    for services_prop in services_item:
-		if services_prop.tag == "ServiceNames":
-		    sn = services_prop
+	    for element in data_branch:
+		for item in element:
+		    if item.tag == "Services": services = item
+		    if item.tag == "VOName": self.db_values["site"] = item.text
 
-                    serviceTestStatusList = []
-                    
-		    for sn_item in sn:
-			
-		        for sn_prop in sn_item:
-			    if sn_prop.tag == "ServiceName":
-			        ServiceName = sn_prop.text
 
-			for sn_prop in sn_item:
-			    if sn_prop.tag == "ServiceStatus":
-			        ServiceStatus = sn_prop.text
 
-                        if ServiceStatus == str(1): service_status = 1.
-                        elif ServiceStatus == str(-1) : service_status = 0.
-                        else : service_status = 0.5
+		
+	    for services_item in services:
+		    
+		for services_prop in services_item:
+		    if services_prop.tag == "ServiceType":
+			ServiceType = services_prop.text
 
-                       
-                        details_db_values["service_type"] = ServiceType
-                        details_db_values["service_name"] = ServiceName
-                        details_db_values["service_status"] = service_status
+		for services_prop in services_item:
+		    if services_prop.tag == "ServiceNames":
+			sn = services_prop
 
-			for sn_prop in sn_item:
-			    if sn_prop.tag == "Tests":
-			        tests = sn_prop
+			serviceTestStatusList = []
+			    
+			for sn_item in sn:
+				
+			    for sn_prop in sn_item:
+				if sn_prop.tag == "ServiceName":
+				    ServiceName = sn_prop.text
 
-			        for tests_item in tests:
-                                    
-			            for tests_prop in tests_item:
+			    for sn_prop in sn_item:
+				if sn_prop.tag == "ServiceStatus":
+				    ServiceStatus = sn_prop.text
 
-				        if tests_prop.tag == "Status": Status = tests_prop.text
-                                        elif tests_prop.tag == "Url": Url = tests_prop.text
-				        elif tests_prop.tag == "Age": Age = tests_prop.text
-				        elif tests_prop.tag == "Type": Type = tests_prop.text
-				        elif tests_prop.tag == "Time": Time = tests_prop.text
+			    if ServiceStatus == str(1): service_status = 1.
+			    elif ServiceStatus == str(-1) : service_status = 0.
+			    else : service_status = 0.5
 
-                                    testStatus = self.determineTestStatus(str(Status))
-                                    serviceTestStatusList.append(testStatus)
-                                    
-				    details_db_values["status"] = Status
-				    details_db_values["url"] = (self.report_url + Url.__str__()).replace('&','&amp;').replace('%','%%')
-				    details_db_values["age"] = Age
-				    details_db_values["type"] = Type
-				    details_db_values["time"] = Time
+			       
+			    details_db_values["service_type"] = ServiceType
+			    details_db_values["service_name"] = ServiceName
+			    details_db_values["service_status"] = service_status
 
-				    # store the values to the database
-				    Details_DB_Class(**details_db_values)
+			    for sn_prop in sn_item:
+				if sn_prop.tag == "Tests":
+				    tests = sn_prop
 
-                    #print ServiceName
-                    #print serviceTestStatusList
-                    serviceStatusGlobal = self.determineServiceStatus(serviceTestStatusList)
-                    serviceStatusList.append(serviceStatusGlobal)              
+				    for tests_item in tests:
+					    
+					for tests_prop in tests_item:
 
+					    if tests_prop.tag == "Status": Status = tests_prop.text
+					    elif tests_prop.tag == "Url": Url = tests_prop.text
+					    elif tests_prop.tag == "Age": Age = tests_prop.text
+					    elif tests_prop.tag == "Type": Type = tests_prop.text
+					    elif tests_prop.tag == "Time": Time = tests_prop.text
+
+					testStatus = self.determineTestStatus(str(Status))
+					serviceTestStatusList.append(testStatus)
+					    
+					details_db_values["status"] = Status
+					details_db_values["url"] = (self.report_url + Url.__str__()).replace('&','&amp;').replace('%','%%')
+					details_db_values["age"] = Age
+					details_db_values["type"] = Type
+					details_db_values["time"] = Time
+
+					# store the values to the database
+					Details_DB_Class(**details_db_values)
+
+			#print ServiceName
+			#print serviceTestStatusList
+			serviceStatusGlobal = self.determineServiceStatus(serviceTestStatusList)
+			serviceStatusList.append(serviceStatusGlobal)              
+	
+	except:
+	    # module status will be -1
+	    self.error_message = "Couldn't extract any usefull data from the XML source code for the status calculation."
 
 
 	# unlock the database access
