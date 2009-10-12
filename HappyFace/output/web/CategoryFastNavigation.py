@@ -24,7 +24,7 @@ class CategoryFastNavigation(object):
 
 	            if ($module["category"] == """ + category + """) {
 
-			$nav_symbol = getModNavSymbol($module["status"], $module["mod_type"]);
+			$nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"]);
 
 		        printf('<li>
 				<table class="HappyFNnaventry">
