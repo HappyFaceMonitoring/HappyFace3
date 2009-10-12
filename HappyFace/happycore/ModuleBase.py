@@ -191,6 +191,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 
         infobox = """
 	<div id=""" + "\\\'" + self.__module__+ "_info\\\'" + """ style="display: none;">
+	
 	<table class="HappyDesc">
 		<tr><td style="width:20%%">Module File:</td><td>""" + self.__module__ + ".py" + """</td></tr>
 		<tr><td style="width:20%%">Module Type:</td><td>' . $data["mod_type"].'</td></tr>
@@ -200,6 +201,40 @@ class ModuleBase(Thread,DataBaseLock,object):
 		<tr><td style="width:20%%">Source:</td><td>' .$data["datasource"]. '</td></tr>
 		<tr><td style="width:20%%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>
 	</table>
+
+	<form name="PlotForm" action="show_plot.php" method="get">
+	<table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: center;" >
+			<tr>
+			<td>
+				Start:
+			</td>
+			<td>
+				<input name="date0" type="text" size="10" style="text-align:center;" value="' . $date_string . '" />
+				<input name="time0" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />
+			</td>
+			<td>
+				End:
+			</td>
+			<td>
+				<input name="date1" type="text" size="10" style="text-align:center;" value="' . $date_string .'" />
+				<input name="time1" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />
+			</td>
+			<td>
+				Variable:
+			</td>
+			<td>
+				<select name="variable">
+					<option value="status">status</option>
+				</select>
+			</td>
+			<td>
+				<input type="hidden" name="module" value="' . $data["module"] . '" />
+		    		<div><button onclick="javascript: submitform()" onfocus="this.blur()">Show Plot</button></div>
+			</td>
+			</tr>
+	</table>
+	</form>
+	
 	</div>
 	<br />
         """
