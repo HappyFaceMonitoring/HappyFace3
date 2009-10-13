@@ -25,7 +25,7 @@ is a way later.
 	font:bold 0.7em sans-serif;
 	overflow-x:hidden;
 	overflow-y:auto;
-	max-height:550px;
+	/*max-height:550px;*/
 }
 .HappyFNnav ul {
 	list-style:none;

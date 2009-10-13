@@ -43,5 +43,6 @@ class CategoryFastNavigation(object):
 	"""
 
 	output += '</div>' + "\n"
+	output += '<script type="text/javascript">getFNSize("HappyFNnav_'+category+'");</script>' + "\n"
 
         self.output = output

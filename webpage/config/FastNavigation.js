@@ -57,3 +57,21 @@ function getBrowser() {
 	}
 	return browser;
 };
+
+/* Calculate size of FastNav bar */
+function getFNSize(fn_id) {
+	var browser = getBrowser();
+	
+	if (browser == "IE7" | browser == "IE8") {
+		var fnSize=document.documentElement.clientHeight-150;
+	} else {	
+		var fnSize=window.innerHeight-150;
+	}
+
+	/* Set a minimum size for the FastNav bar */
+	if (fnSize < 50) {
+		fnSize=50
+	}
+
+	document.getElementById(fn_id).style.height=fnSize+'px';
+}
