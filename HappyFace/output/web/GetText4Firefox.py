@@ -24,7 +24,8 @@ class GetText4Firefox(object):
 <?php
 function getCatStatusText($myModuleResultsArray)
 {
-        # Get different categories with their type from the result Matrix                                                                   
+        # Get different categories with their type from the result Matrix
+  $mycategory = array ();
   foreach ($myModuleResultsArray as $module=>$data) {
     if(array_key_exists($data["category"],$mycategory)){
       $mycategory[$data["category"]]=$mycategory[$data["category"]].";".$module.",".date("Y-m-d",$data["timestamp"])." ".date("H:i",$data["timestamp"]).",".getModStatusText($data["status"],$data["mod_type"]);
