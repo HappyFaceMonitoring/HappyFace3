@@ -149,6 +149,12 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         self.linkList = []
         if not root.get("request_timestamp") == None:
             self.requestTime = float(root.get("request_timestamp"))
+
+        else:
+            err = "Error! Couldn't get the request time in module " + self.__module__+ "\n"
+            sys.stdout.write(err)
+            self.error_message +=err
+            return -1
         
         for link in root:
             if link.tag == "link":
@@ -367,15 +373,8 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
                     self.timeDiff = 0.
 
                 def getTimeDiff(self,requestTime):
-                    if self.requestTime == None:
-                        err = "Error! Couldn't get the request time in module " + self.__module__+ "\n"
-                        sys.stdout.write(err)
-                        self.error_message +=err
-                        return -1
-                        
-                    else:
-                        ## in hours
-                        self.timeDiff = (requestTime - self.timeDone)/3600 
+                    ## in hours
+                    self.timeDiff = (requestTime - self.timeDone)/3600 
                         
         
 
