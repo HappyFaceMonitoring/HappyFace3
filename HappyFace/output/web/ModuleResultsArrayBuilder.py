@@ -21,6 +21,7 @@ class ModuleResultsArrayBuilder(object):
 		$ModuleResultsArray[$module]["mod_type"]	= $data["mod_type"];
 		$ModuleResultsArray[$module]["weight"]		= $data["weight"];
 		$ModuleResultsArray[$module]["category"]	= $data["category"];
+                $ModuleResultsArray[$module]["timestamp"]	= $data["timestamp"];
 	    }
 	}
 	?>
