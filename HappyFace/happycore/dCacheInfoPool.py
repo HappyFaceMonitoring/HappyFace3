@@ -36,12 +36,14 @@ class dCacheInfoPool(dCacheInfo):
 
 
 
+        dbAccessUnit = """'.$data["unit"].'"""
         self.poolAttribNames = {}
-        self.poolAttribNames['total'] = {'name':'Total Space' , 'unit':self.unit }
-        self.poolAttribNames['free'] = {'name':'Free Space'                , 'unit':self.unit}
-        self.poolAttribNames['used'] = {'name':'Used Space'                 , 'unit':self.unit}
-        self.poolAttribNames['precious'] = {'name':'Precious Space'             , 'unit':self.unit}
-        self.poolAttribNames['removable'] = {'name':'Removable Space'            , 'unit':self.unit}
+        
+        self.poolAttribNames['total'] = {'name':'Total Space' , 'unit': dbAccessUnit }
+        self.poolAttribNames['free'] = {'name':'Free Space'                , 'unit':dbAccessUnit}
+        self.poolAttribNames['used'] = {'name':'Used Space'                 , 'unit':dbAccessUnit}
+        self.poolAttribNames['precious'] = {'name':'Precious Space'             , 'unit':dbAccessUnit}
+        self.poolAttribNames['removable'] = {'name':'Removable Space'            , 'unit':dbAccessUnit}
         self.poolAttribNames['poolnumber'] = {'name':'Pools'                      , 'unit':''}
         self.poolAttribNames['poolwarning'] = {'name':'Pools with status warning ' , 'unit':''}
         self.poolAttribNames['poolcritical'] = {'name':'Pools with status critical ' , 'unit':''}
@@ -95,6 +97,9 @@ class dCacheInfoPool(dCacheInfo):
         
 	self.db_keys["details_database"] = StringCol()
         self.db_values["details_database"] = ""
+
+        self.db_keys['unit'] = StringCol()
+        self.db_values['unit'] =  self.unit
 
         self.sumInfo = {}
         for att in self.globalSummary:
