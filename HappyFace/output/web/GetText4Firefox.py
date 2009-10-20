@@ -27,13 +27,16 @@ function getCatStatusText($myModuleResultsArray)
         # Get different categories with their type from the result Matrix
   $mycategory = array ();
   foreach ($myModuleResultsArray as $module=>$data) {
-    if(array_key_exists($data["category"],$mycategory)){
+    if(array_key_exists($data["category"],$mycategory)){ #append sucategory
       $mycategory[$data["category"]]=$mycategory[$data["category"]].";".$module.",".date("Y-m-d",$data["timestamp"])." ".date("H:i",$data["timestamp"]).",".getModStatusText($data["status"],$data["mod_type"]);
       if($data["status"]<$mystatus[$data["category"]]){
 $mystatus[$data["category"]]=$data["status"];
       }
+      if($data["mod_type"] == "rated" && $mytype[$data["category"]] != "rated" ){
+         $mytype[$data["category"]]= "rated";
+      }
     }
-    else{
+    else{ #new category
       $mycategory[$data["category"]]=$module.",".date("Y-m-d",$data["timestamp"])." ".date("H:i",$data["timestamp"]).",".getModStatusText($data["status"],$data["mod_type"]);
       $mytype[$data["category"]]=$data["mod_type"];
       $mystatus[$data["category"]]=$data["status"];
