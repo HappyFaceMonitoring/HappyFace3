@@ -64,22 +64,25 @@
 
 	 // Initialise the graph   
 	 $Test = new pChart(900,350);
+	 $Test->setColorPalette(0,0,0,255); 
 	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",8);
 	 $Test->setGraphArea(85,30,850,250);
 	 $Test->drawFilledRoundedRectangle(7,7,900,350,5,240,240,240);
 	 $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
 	 $Test->drawGraphArea(255,255,255,TRUE);
 	 $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
+	 
+	 // show Grid if there are less than 48 timestamps
 	 if ( count($array["timestamps"]) < 48 ) { $Test->drawGrid(4,TRUE); }
 	 
 	 // Draw the 0 line   
 	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
 	 $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-	  
+	 
 	 // Draw the line graph
 	 $Test->drawLineGraph($DataSet->GetData(),$DataSet->GetDataDescription());
-	 $Test->drawPlotGraph($DataSet->GetData(),$DataSet->GetDataDescription(),3,2,255,255,255);
-	  
+	 $Test->drawPlotGraph($DataSet->GetData(),$DataSet->GetDataDescription(),3,1,255,255,255);
+	 
 	 // Finish the graph
 	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
 	 $Test->drawLegend(90,35,$DataSet->GetDataDescription(),255,255,255);

@@ -207,7 +207,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 		<tr><td style="width:20%%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>
 	</table>
 
-	<form name="PlotForm" action="show_plot.php" method="get">
+	<form name="PlotForm" target="_new" action="plot_generator.php" method="get">
 	<table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: center;" >
 			<tr>
 			<td>
