@@ -219,7 +219,9 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 					tier_counter += 1
 					if links[site][0] == 'red':
 						tier_down_counter += 1
-			if not self.critical_dict[tier] == -1 and  tier_down_counter >= self.critical_dict[tier]:
+
+		
+			if tier_down_counter >= self.critical_dict[tier] and not self.critical_dict[tier] == -1:
 				return 0
 			elif self.critical_dict[tier] == -1 and tier_down_counter == tier_counter:
 				return 0
@@ -327,12 +329,12 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		self.critical_dict = {}
 		for entry in self.critical.split(','):
 			tier,number = entry.split(':')
-			self.critical_dict[tier] = number
+			self.critical_dict[tier] = int(number)
 
 		self.warning_dict = {}
 		for entry in self.warning.split(','):
 			tier,number = entry.split(':')
-			self.warning_dict[tier] = number
+			self.warning_dict[tier] = int(number)
 
 		self.exclusion_list = []
 		if not self.exclusion == None:
