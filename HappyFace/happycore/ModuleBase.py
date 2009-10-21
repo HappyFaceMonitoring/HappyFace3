@@ -189,6 +189,11 @@ class ModuleBase(Thread,DataBaseLock,object):
     # status, error_message, mod_title, mod_type, weight, definition, instruction
     def PHPOutput(self,module_content):
 
+	plot_values = ""
+	for value in self.db_values:
+	    if (type(self.db_values[value]) is int) or (type(self.db_values[value]) is float):
+		plot_values += '<option value="' + value + '">' + value + '</option>'
+    
         infobox = """
 	<div id=""" + "\\\'" + self.__module__+ "_info\\\'" + """ style="display: none;">
 	
@@ -223,9 +228,7 @@ class ModuleBase(Thread,DataBaseLock,object):
 				Variable:
 			</td>
 			<td>
-				<select name="variable">
-					<option value="status">status</option>
-				</select>
+				<select name="variable">""" + plot_values + """</select>
 			</td>
 			<td>
 				<input type="hidden" name="module" value="' . $data["module"] . '" />
