@@ -24,6 +24,31 @@ class CategoryStatusLogic(object):
 
 	    }
 
+	    # "weighted" rating category algorithm, the average of all weighted (weight not "0") mod_status (0.0..1.0) is the cat_status
+	    function weighted($category, $ModuleResultsArray) {
+
+	    	$sum_weighted_status = 0;
+		$sum_weight = 0;
+	    
+	        foreach ($ModuleResultsArray as $module) {
+
+                    if ($module["category"] == $category) {
+
+		        $mod_status = $module["status"];
+			$mod_weight = $module["weight"];
+		    
+			if ($mod_status != -1) {
+			    $sum_weighted_status += $mod_status * $mod_weight;
+			    $sum_weight += $mod_weight;
+			}
+		    }
+	        }
+		
+		if ($sum_weight > 0) {
+		    $this->cat_status = $sum_weighted_status / $sum_weight;
+		}
+	    }
+	    
 	    # "worst" rating category algorithm, the worst mod_status (0.0..1.0) is the cat_status
 	    function worst($category, $ModuleResultsArray) {
 
@@ -33,7 +58,6 @@ class CategoryStatusLogic(object):
 
 		        $mod_status = $module["status"];
 
-			# status logic
 			if ($this->cat_status == -1) { $this->cat_status = $mod_status; }
 			else {
 			    if ($mod_status < $this->cat_status && $mod_status >= 0) {
