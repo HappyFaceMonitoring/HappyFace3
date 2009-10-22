@@ -114,11 +114,16 @@ class ConfigService():
             sys.stdout.write('Could not find configuration file ' + modulename + '.cfg, aborting ...\n')
             sys.exit(-1)
 
-        # try to open local config file if available (standard config settings will be overwritten)
-	try:
-	    self.config.readfp(open(modulename + '.local'))
+        try:
+            self.config.readfp(open('./local/cfg/'+os.path.basename(modulename)+'.local'))
         except IOError:
             pass
+
+        # try to open local config file in the same directory if available (standard config settings will be overwritten)
+#	try:
+#	    self.config.readfp(open(modulename + '.local'))
+#        except IOError:
+#            pass
 	
 
 

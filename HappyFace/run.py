@@ -14,8 +14,8 @@ from sqlobject import *
 # setup search paths for python modules
 sys.path.insert(0, os.path.expandvars('./happycore'))
 sys.path.insert(0, os.path.expandvars('./modules'))
-if os.path.exists('./modules.local'):
-    sys.path.insert(0, os.path.expandvars('./modules.local'))
+if os.path.exists('./local/modules'):
+    sys.path.insert(0, os.path.expandvars('./local/modules'))
 sys.path.insert(0, os.path.expandvars('./output/web'))
 
 # import output module, e.g. website creator
@@ -49,7 +49,7 @@ def HappyFace():
     # try to open local config file if available.
     # default config settings in run.cfg will be overwritten
     try:
-	config.readfp(open('./run.local'))
+	config.readfp(open('./local/cfg/run.local'))
     except IOError:
         pass
 
