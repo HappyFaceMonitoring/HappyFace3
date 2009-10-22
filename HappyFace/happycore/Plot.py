@@ -21,6 +21,9 @@ class Plot(ModuleBase):
         # run the test
 
 
+        self.plotPosition = self.configService.getDefault('setup','position','v')
+
+
         for tag in self.downloadRequest.keys():
             if tag.find('plot') == 0:
                 self.plots[tag] = tag.replace('plot','')
@@ -76,8 +79,10 @@ class Plot(ModuleBase):
             filename = 'filename'+self.plots[tag]
 #            url = 'url'+self.plots[tag]
             mc.append("""
-            <a href="' .$data["""+filename+"""]. '"><img alt="" src="' .$data["""+filename+"""]. '" style="border: 0px solid;" /></a><br>
-            """)
+            <a href="' .$data["""+filename+"""]. '"><img alt="" src="' .$data["""+filename+"""]. '" style="border: 0px solid;" /></a>""")
+            if self.plotPosition == 'v':
+                mc.append('<br>')
+   
         mc.append("');")
         mc.append(' ?>')
             
