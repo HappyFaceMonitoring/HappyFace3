@@ -18,7 +18,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		self.timeLimit  = self.configService.get('setup','stage_max_time')
 		self.retryLimit = int(self.configService.get('setup','stage_max_retry'))
-
+		self.voName = self.configService.getDefault('setup','vo','')
 
 
 	def run(self):
@@ -48,6 +48,16 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 
 		success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+
+		self.configService.addToParameter('setup',
+						  'source',
+						  self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
+
+
+		if self.voName != '':
+			self.configService.addToParameter('setup',
+							  'definition',
+							  'Only '+self.voName+' pools are considered.<br>')
 
 		source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile,'html')
 
@@ -95,6 +105,9 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 					i+=1
 			i+=1
 
+			if self.voName != '':
+				if request['pool'].count(self.voName) == 0: continue
+				
 
 			# Determining waiting time
 			time_tuple_now = gmtime(self.timestamp)
