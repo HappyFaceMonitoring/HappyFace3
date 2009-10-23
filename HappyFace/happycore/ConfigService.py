@@ -55,7 +55,7 @@ class ConfigService():
         print "Parameter Error!"
         print "The following parameter is not set but required: "+sec+","+par
         print "Possible config files [.cfg,.local]: "+",".join(self.configFiles)
-        self.pc()
+
         sys.exit(-1)
 
 
@@ -118,23 +118,3 @@ class ConfigService():
             self.config.readfp(open('./local/cfg/'+os.path.basename(modulename)+'.local'))
         except IOError:
             pass
-
-        # try to open local config file in the same directory if available (standard config settings will be overwritten)
-#	try:
-#	    self.config.readfp(open(modulename + '.local'))
-#        except IOError:
-#            pass
-	
-
-
-    def pc(self):
-        print "Config Files"
-        print self.configFiles
-        print "Parameter"
-        for sec in self.parameter.keys():
-            print sec
-            for i in self.parameter[sec].keys():
-                print " "+i+": "+self.parameter[sec][i]
-
-
-
