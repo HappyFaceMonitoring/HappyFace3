@@ -36,7 +36,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 
 		timeSplit = self.timeLimit.split(":")
-		print timeSplit
 		if len(timeSplit) != 3:
 			err = 'Error: Wrong stage_max_time format\n'
 			sys.stdout.write(err)
@@ -47,7 +46,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		
 		timeLimitSeconds = int(timeSplit[0])*60*60+int(timeSplit[1])*60+int(timeSplit[2])
 
-		print timeLimitSeconds
 
 		success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
 
