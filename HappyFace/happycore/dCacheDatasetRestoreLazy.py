@@ -17,7 +17,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		self.fileExtension = 'html'
 
 		self.timeLimit  = self.configService.get('setup','stage_max_time')
-		self.timeLimitSeconds = int(mktime(strptime(self.timeLimit,"%H:%M:%S")) - mktime(strptime("00:00:00","%H:%M:%S")))
 		self.retryLimit = int(self.configService.get('setup','stage_max_retry'))
 
 
@@ -35,6 +34,21 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 			self.error_message +=err
 			return -1
 
+
+		timeSplit = self.timeLimit.split(":")
+		print timeSplit
+		if len(timeSplit) != 3:
+			err = 'Error: Wrong stage_max_time format\n'
+			sys.stdout.write(err)
+			self.error_message +=err
+			return -1
+
+
+		
+		timeLimitSeconds = int(timeSplit[0])*60*60+int(timeSplit[1])*60+int(timeSplit[2])
+
+		print timeLimitSeconds
+
 		success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
 
 		source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile,'html')
@@ -42,6 +56,11 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		if not error_message == "":
 			self.error_message += error_message
 			return -1
+
+
+
+
+
 
 		##############################################################################
 		# if xml parsing fails, abort the test;
@@ -110,7 +129,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		for reqID in stageRequests.keys():
 			req = stageRequests[reqID]
 			hitLimit = False
-			if int(req['time']) >= self.timeLimitSeconds:
+			if int(req['time']) >= timeLimitSeconds:
 				allRequests['hit_time']+=1
 				hitLimit = True
 			if int(req['retries']) >= self.retryLimit:
