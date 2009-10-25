@@ -54,7 +54,6 @@ class ModuleBase(Thread,DataBaseLock,object):
 
 	self.db_keys["module"]		= StringCol()
 	self.db_keys["category"]	= StringCol()
-	self.db_keys["timestamp"]	= IntCol()
 	self.db_keys["status"]		= FloatCol()
 	self.db_keys["error_message"]	= StringCol()
 	self.db_keys["mod_title"]	= StringCol()
@@ -63,13 +62,6 @@ class ModuleBase(Thread,DataBaseLock,object):
 	self.db_keys["definition"]	= StringCol()
 	self.db_keys["instruction"]	= StringCol()
 	self.db_keys["datasource"]	= StringCol()
-
-	# create an index for the timestap column for faster access
-	self.db_keys["index"] = DatabaseIndex('timestamp')
-
-
-
-	
 
 
     def getSubRec(self,theClasses,allSubClasses):
@@ -108,12 +100,61 @@ class ModuleBase(Thread,DataBaseLock,object):
         return downloadList
 
 
+    def table_init(self,tableName,table_keys):
+
+	# timestamp will always be saved
+    	table_keys["timestamp"] = IntCol()
+
+	# create an index for the timestap column for faster access
+	table_keys["index"] = DatabaseIndex('timestamp')
+	
+	# lock object enables exclusive access to the database
+	self.lock.acquire()
+	
+	try:
+	    class sqlmeta:
+	        table = tableName
+	        fromDatabase = True
+
+	    DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
+		    
+	    avail_keys = []
+	    for key in DBProxy.sqlmeta.columns.keys():
+	        avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
+	    
+	    My_DB_Class = type(tableName, (SQLObject,), table_keys)
+	    My_DB_Class.createTable(ifNotExists=True)	
+
+	    for key in filter(lambda x: x not in avail_keys, table_keys.keys()):
+                if key != "index":
+	            try: DBProxy.sqlmeta.addColumn(table_keys[key].__class__(key), changeSchema=True)
+		    except: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__
+
+        except:
+	    My_DB_Class = type(tableName, (SQLObject,), table_keys)
+	    My_DB_Class.createTable(ifNotExists=True)
+
+	# unlock the database access
+	self.lock.release()
+	
+	return My_DB_Class
+
+    def table_fill(self,My_DB_Class,table_values):
+	table_values["timestamp"] = self.timestamp
+
+	# lock object enables exclusive access to the database
+	self.lock.acquire()
+
+	My_DB_Class(**table_values)
+	
+	# unlock the database access
+	self.lock.release()
+	
     def storeToDB(self):
 
 	# definition of the databases values which should be stored
 	self.db_values['module']	= self.__module__
 	self.db_values['category']	= self.category
-	self.db_values['timestamp']	= self.timestamp
 	self.db_values['status']	= self.status
 	self.db_values['error_message'] = self.error_message
 
@@ -124,44 +165,11 @@ class ModuleBase(Thread,DataBaseLock,object):
         self.db_values['instruction']   = self.configService.getDefault('setup','instruction','')
 
         self.db_values['datasource']    = self.configService.getDefault('setup','source','').replace('%','&#37')
-
-
-		
-	db_keys = self.db_keys
-	db_values = self.db_values
-	tableName = self.database_table
-
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
 	
-	try:
-	    class sqlmeta:
-	        table = tableName
-	        fromDatabase = True
-
-	    DBProxy = type(self.__module__ + "_dbclass",(SQLObject,),dict(sqlmeta = sqlmeta))
-		    
-	    avail_keys = []
-	    for key in DBProxy.sqlmeta.columns.keys():
-	        avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
-	    
-	    My_DB_Class = type(tableName, (SQLObject,), db_keys)
-	    My_DB_Class.createTable(ifNotExists=True)	
-
-	    for key in filter(lambda x: x not in avail_keys, db_keys.keys()):
-                if key != "index":
-	            try: DBProxy.sqlmeta.addColumn(db_keys[key].__class__(key), changeSchema=True)
-		    except: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__
-
-        except:
-	    My_DB_Class = type(tableName, (SQLObject,), db_keys)
-	    My_DB_Class.createTable(ifNotExists=True)
-
-        My_DB_Class(**db_values)
-
-	# unlock the database access
-	self.lock.release()
-
+	# init and storage the module specific information into the module table
+	module_table_class = self.table_init( self.database_table, self.db_keys )
+	self.table_fill( module_table_class, self.db_values )
+	
 
     # reading config files and return the corresponding directory structure
     def readConfigFile(self,config_file):
