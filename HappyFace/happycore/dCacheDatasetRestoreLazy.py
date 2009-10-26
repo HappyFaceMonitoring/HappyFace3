@@ -125,6 +125,8 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 			
 			request['time'] = int(time_diff)
 			request['started_full'] = strftime("%d/%m/%Y %H:%M:%S",time_tuple_req)
+			request['status_short'] = request['status'].split(" ")[0]
+			
 			stageRequests[request['pnfs']] = request
 
 
@@ -134,33 +136,59 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		allRequests['hit_retry'] = 0
 		allRequests['hit_time']  = 0
 
+		self.statusTags = ['Pool2Pool','Staging','Waiting','Unknown']
+		for tag in self.statusTags:
+			allRequests['status_'+tag.lower()]  = 0
+			
+
 		
 		problemRequests = []
 
 		for reqID in stageRequests.keys():
 			req = stageRequests[reqID]
-			hitLimit = False
+			problemRequest = False
 			if int(req['time']) >= timeLimitSeconds:
 				allRequests['hit_time']+=1
-				hitLimit = True
+				problemRequest = True
 			if int(req['retries']) >= self.retryLimit:
 				allRequests['hit_retry']+=1
-				hitLimit = True
+				problemRequest = True
 
-			if hitLimit == True:
+
+
+			status_found = False
+			for status in self.statusTags:
+				if req['status_short'] == status:
+					allRequests['status_'+status.lower()]+=1
+					status_found = True
+
+			if status_found == False:
+				allRequests['status_unknown']+=1
+				problemRequest = True
+								
+
+			if problemRequest == True:
 				problemRequests.append(reqID)
 				allRequests['total_problem'] +=1
 
 
+
 		for key in allRequests:
+			key = key.lower()
 			self.db_keys[key] = IntCol()
 			self.db_values[key] = allRequests[key]
+
 
 
 		details_database = self.__module__ + "_table_details"
 	
 		self.db_keys["details_database"] = StringCol()
 		self.db_values["details_database"] = details_database
+
+
+
+
+
 
 		self.db_keys["retrylimit"] = IntCol()
 		self.db_values["retrylimit"] = self.retryLimit
@@ -173,6 +201,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		details_db_keys = {}
 		details_db_values = {}
+
 		
 		# write global after which the query will work
 		details_db_keys["timestamp"] = IntCol()
@@ -184,6 +213,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		details_db_keys["path"] = StringCol()
 		details_db_keys["started_full"] = StringCol()
 		details_db_keys["retries"] = StringCol()
+		details_db_keys["status_short"] = StringCol()
 
 		
 		# create index for timestamp
@@ -191,33 +221,17 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 
 
-		
-       		# lock object enables exclusive access to the database
-		self.lock.acquire()
-		Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
-		
-		Details_DB_Class.sqlmeta.cacheValues = False
-		Details_DB_Class.sqlmeta.fromDatabase = True
-	        #Details_DB_Class.sqlmeta.lazyUpdate = True
-	
-	        # if table is not existing, create it
-		Details_DB_Class.createTable(ifNotExists=True)
 
 
+
+
+
+		subtable_problems = self.table_init( self.db_values["details_database"], details_db_keys )
 
 		for req in problemRequests:
-			for val in ['pnfs','path','started_full','retries']:
+			for val in ['pnfs','path','started_full','retries','status_short']:
 				details_db_values[val] = stageRequests[req][val]
-			Details_DB_Class(**details_db_values)
-
-
-
-
-
-
-
-		# unlock the database access
-		self.lock.release()
+			self.table_fill( subtable_problems, details_db_values )
 
 		# always happy for the moment
 		self.status = 1
@@ -241,19 +255,27 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc.append("printf('")
 		mc.append(' <table class="DcacheDatarestoreLazyTable">')
 		mc.append("  <tr>")
-		mc.append("    <td>Total Number of stage requests</td>")
+		mc.append("    <td>Total number of stage requests</td>")
 		mc.append("""    <td>'.$data["total"].'</td>""")
 		mc.append("   </tr>")
+
+		for tag in self.statusTags:
+			mc.append("  <tr>")
+			mc.append("    <td> ...  with status "+tag+":</td>")
+			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
+			mc.append("   </tr>")
+
+
 		mc.append("  <tr>")
 		mc.append("    <td>Stage request with problems</td>")
 		mc.append("""    <td>'.$data["total_problem"].'</td>""")
 		mc.append("   </tr>")
 		mc.append("  <tr>")
-		mc.append("    <td>Time limit hit ('.$data[timelimit].')</td>")
+		mc.append("    <td>... time limit hit ('.$data[timelimit].')</td>")
 		mc.append("""    <td>'.$data["hit_time"].'</td>""")
 		mc.append("   </tr>")
 		mc.append("  <tr>")
-		mc.append("""    <td>Retry limit hit ('.$data[retrylimit].')</td>""")
+		mc.append("""    <td>... retry limit hit ('.$data[retrylimit].')</td>""")
 		mc.append("""    <td>'.$data["hit_retry"].'</td>""")
 		mc.append("   </tr>")
 		
@@ -269,6 +291,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc.append("  <td>pnfsID</td>")
 		mc.append("  <td>Start</td>")
 		mc.append("  <td>Retries</td>")
+		mc.append("  <td>Status</td>")
 		mc.append("  </tr>")
 
 		mc.append("');") 
@@ -280,12 +303,13 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc.append("""  <td>'.$sub_data["pnfs"].'</td>""")
 		mc.append("""  <td>'.$sub_data["started_full"].'</td>""")
 		mc.append("""  <td>'.$sub_data["retries"].'</td>""")
+		mc.append("""  <td>'.$sub_data["status_short"].'</td>""")
 		mc.append("  </tr>")
 		mc.append("  <tr>")
-		mc.append("""  <td colspan="3">'.$sub_data["path"].'</td>""")
+		mc.append("""  <td colspan="4">'.$sub_data["path"].'</td>""")
 		mc.append("  </tr>")		
 		mc.append("  <tr>")
-		mc.append("""  <td colspan="3">--</td>""")
+		mc.append("""  <td colspan="4">--</td>""")
 		mc.append("  </tr>")
 		mc.append("');")
 		mc.append('}')
