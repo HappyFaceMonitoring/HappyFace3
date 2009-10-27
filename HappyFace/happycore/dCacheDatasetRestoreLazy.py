@@ -136,8 +136,14 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		allRequests['hit_retry'] = 0
 		allRequests['hit_time']  = 0
 
-		self.statusTags = ['Pool2Pool','Staging','Waiting','Unknown']
-		for tag in self.statusTags:
+		self.statusTagsOk   = ['Pool2Pool','Staging']
+		self.statusTagsFail = ['Waiting','Unknown']
+
+		
+
+		for tag in self.statusTagsOk:
+			allRequests['status_'+tag.lower()]  = 0
+		for tag in self.statusTagsFail:
 			allRequests['status_'+tag.lower()]  = 0
 			
 
@@ -157,10 +163,17 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 
 			status_found = False
-			for status in self.statusTags:
+			for status in self.statusTagsOk:
 				if req['status_short'] == status:
 					allRequests['status_'+status.lower()]+=1
 					status_found = True
+
+			for status in self.statusTagsFail:
+				if req['status_short'] == status:
+					allRequests['status_'+status.lower()]+=1
+					status_found = True
+					problemRequest = True
+									
 
 			if status_found == False:
 				allRequests['status_unknown']+=1
@@ -233,11 +246,22 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 				details_db_values[val] = stageRequests[req][val]
 			self.table_fill( subtable_problems, details_db_values )
 
-		# always happy for the moment
-		self.status = 1
 
 
+		
+		self.limitCritical = self.configService.get('setup','limit_critical')
+		self.limitWarning = self.configService.get('setup','limit_warning')
+		
 
+		self.configService.addToParameter('setup',
+						  'definition',
+						  'Warning level depending on number of requests with problems: <br/> Warning: >= '+self.limitWarning+'<br/> Critical: >= '+self.limitCritical)
+		
+
+
+		if len(problemRequests) >= int(self.limitCritical): self.status = 0
+		elif len(problemRequests) >= int(self.limitWarning): self.status = 0.5
+		else: self.status = 1
 
 
 
@@ -259,7 +283,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc.append("""    <td>'.$data["total"].'</td>""")
 		mc.append("   </tr>")
 
-		for tag in self.statusTags:
+		for tag in self.statusTagsOk:
 			mc.append("  <tr>")
 			mc.append("    <td> ...  with status "+tag+":</td>")
 			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
@@ -270,6 +294,14 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc.append("    <td>Stage request with problems</td>")
 		mc.append("""    <td>'.$data["total_problem"].'</td>""")
 		mc.append("   </tr>")
+
+		for tag in self.statusTagsFail:
+			mc.append("  <tr>")
+			mc.append("    <td> ...  with status "+tag+":</td>")
+			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
+			mc.append("   </tr>")
+
+
 		mc.append("  <tr>")
 		mc.append("    <td>... time limit hit ('.$data[timelimit].')</td>")
 		mc.append("""    <td>'.$data["hit_time"].'</td>""")
