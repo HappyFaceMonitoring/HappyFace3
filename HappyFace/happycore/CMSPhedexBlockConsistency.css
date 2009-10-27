@@ -1,0 +1,38 @@
+/* CSS file for the HappyFace module: phedex_block_consistency */
+
+.CMSPhedexBlockConsistencyTable {
+	border: 1px solid  #999;
+	width: 400px;
+}
+.CMSPhedexBlockConsistencyTableDetails {
+	border: 1px solid  #999;
+	width: 800px;
+}
+.CMSPhedexBlockConsistencyTable td {
+	padding: 5px;
+	border: 1px solid  #999;
+	text-align: left;
+	width:25%;
+}
+.CMSPhedexBlockConsistencyTableDetails td {
+	padding: 5px;
+	border: 1px solid  #999;
+	text-align: center;
+}
+.CMSPhedexBlockConsistencyDetailedInfo {
+	font-family: monospace;
+	line-height: 14px;
+}
+tr.CMSPhedexBlockConsistencyTableHeader {
+	font-weight: bold;
+        background-color:  #CCCCCC;
+}
+tr.CMSPhedexBlockConsistencySuccess {
+        background-color:  #B0FFB0;
+}
+tr.CMSPhedexBlockConsistencyWarning {
+        background-color:  #FFFFB0;
+}
+tr.CMSPhedexBlockConsistencyFail {
+        background-color:  #FFB0B0;
+}
