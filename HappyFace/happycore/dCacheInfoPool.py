@@ -108,11 +108,14 @@ class dCacheInfoPool(dCacheInfo):
             self.sumInfo[  att ] = 0
 
 
-
-
-
         thePoolInfo = self.getPoolInfo(self.poolType)
-        
+
+        if thePoolInfo == None:
+            err = "Error! No valid pool type in module "+self.__module__+"\n"
+            sys.stdout.write(err)
+            self.error_message +=err
+            return -1
+   
         
         # make poolAttrib as GB or TB
         for pool in thePoolInfo.keys():
