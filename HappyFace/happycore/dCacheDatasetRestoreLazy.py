@@ -20,6 +20,9 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		self.retryLimit = int(self.configService.get('setup','stage_max_retry'))
 		self.voName = self.configService.getDefault('setup','vo','')
 
+		self.detailsTableCutOff = self.configService.getDefault('setup','details_cutoff','')
+
+
 
 	def run(self):
 
@@ -52,6 +55,11 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		self.configService.addToParameter('setup',
 						  'source',
 						  self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
+
+		if self.detailsTableCutOff != '':
+			self.configService.addToParameter('setup',
+							  'source',
+							  'Only '+self.detailsTableCutOff+' files listed in details table.')
 
 
 		if self.voName != '':
@@ -241,11 +249,14 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		subtable_problems = self.table_init( self.db_values["details_database"], details_db_keys )
 
+		count = 0
 		for req in problemRequests:
 			for val in ['pnfs','path','started_full','retries','status_short']:
 				details_db_values[val] = stageRequests[req][val]
 			self.table_fill( subtable_problems, details_db_values )
-
+			if self.detailsTableCutOff != '':
+				if count > int(self.detailsTableCutOff): break
+			count+=1
 
 
 		
