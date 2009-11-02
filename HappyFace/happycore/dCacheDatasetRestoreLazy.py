@@ -249,13 +249,13 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		subtable_problems = self.table_init( self.db_values["details_database"], details_db_keys )
 
-		count = 0
+		count = 1
 		for req in problemRequests:
 			for val in ['pnfs','path','started_full','retries','status_short']:
 				details_db_values[val] = stageRequests[req][val]
 			self.table_fill( subtable_problems, details_db_values )
 			if self.detailsTableCutOff != '':
-				if count > int(self.detailsTableCutOff): break
+				if count >= int(self.detailsTableCutOff): break
 			count+=1
 
 
