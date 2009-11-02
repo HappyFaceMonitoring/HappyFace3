@@ -58,8 +58,8 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		if self.detailsTableCutOff != '':
 			self.configService.addToParameter('setup',
-							  'source',
-							  'Only '+self.detailsTableCutOff+' files listed in details table.')
+							  'definition',
+							  'Only '+self.detailsTableCutOff+' files listed in details table.<br>')
 
 
 		if self.voName != '':
