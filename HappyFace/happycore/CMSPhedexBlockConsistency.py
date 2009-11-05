@@ -17,6 +17,8 @@ class CMSPhedexBlockConsistency(ModuleBase):
         ModuleBase.__init__(self,category,timestamp,storage_dir)
         self.warning_limit = float(self.configService.get("setup",
                                                           "warning_limit"))
+        self.old_result_warning_limit = float(self.configService.get("setup",
+                                                          "old_result_warning_limit"))
         self.dsTag = 'consistency_xml_source'
         # Module table description:
         self.db_keys["buffer"] = StringCol(default=None)
@@ -46,6 +48,13 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	# Dump detailed information about files into details table
 	self.details_database = self.__module__ + "_table_details"
 
+    def __old_result__(self):
+        # Get starttime in unix format from the name of the dumpfile:
+        tmp=os.path.basename(self.db_values["dumpfile"])
+        # Convert result age into hours:
+        result_age = (float(self.timestamp) - float(tmp.split('.')[0]))/3600.0
+        if (result_age > self.old_result_warning_limit):
+            return self.old_result_warning_limit
 
     def run(self):
         """
@@ -151,14 +160,21 @@ class CMSPhedexBlockConsistency(ModuleBase):
         
 
         ################################
-        # rating algorithm
-        # Warning if duration of test (in hours)
-        # is bigger than a configured limit. 
-        # Error if at least one dataset failed. 
+        # Rating algorithm
+        # Status legend:
+        #  1.0  = success
+        #  0.5  = warning # duration and/or result age exceed warning limit
+        #  0.0  = error   # at least one dataset failed
         self.status = 1.0
+        #------------------------------
+        # Warning conditions definition:
         duration=float(self.db_values["duration"])
         if duration > self.warning_limit:
             self.status = 0.5
+        if (self. __old_result__()):
+            self.status = 0.5
+        #------------------------------
+        # Error condition definition:
         failed_datasets=int(self.db_values["failed_datasets"])
         if failed_datasets > 0:
             self.status = 0.0
@@ -167,6 +183,11 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	""" Creates module contents for the web page, filling in
         the data from the database.
         """
+        # Predefine warnings to be inserted in output:
+        warning_color=""
+        if (self.__old_result__()):
+            warning_message="<p class=WarningMessage> WARNING: Result is older than " + str(self.__old_result__()) + " hours</p>"
+            warning_color=" class=CMSPhedexBlockConsistencyWarning"
 	module_content = """
 	<?php
         if ($data["status"] == "1.0"){
@@ -177,8 +198,9 @@ class CMSPhedexBlockConsistency(ModuleBase):
         if ($data["duration"] >= $data["warning_limit"]){
         $duration_color="CMSPhedexBlockConsistencyWarning";
         }
-	printf('        
 
+	printf('"""+warning_message+"""
+        
 	<table class="CMSPhedexBlockConsistencyTable">
 		<tr class=\"CMSPhedexBlockConsistencyTableHeader\">
                   <td>Buffer:</td>
@@ -192,7 +214,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
                   <td>Test:</td>
                   <td>'.$data["test"].'</td>
                 </tr>
-		<tr>
+		<tr"""+warning_color+""">
                   <td>Started:</td>
                   <td>'.$data["starttime"].'</td>
                 </tr>
