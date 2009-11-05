@@ -186,7 +186,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
         # Predefine warnings to be inserted in output:
         warning_color=""
         if (self.__old_result__()):
-            warning_message="<p class=WarningMessage> WARNING: Result is older than " + str(self.__old_result__()) + " hours</p>"
+            warning_message="<p class=CMSPhedexBlockConsistencyWarningMessage> WARNING: Result is older than " + str(self.__old_result__()) + " hours</p>"
             warning_color=" class=CMSPhedexBlockConsistencyWarning"
 	module_content = """
 	<?php

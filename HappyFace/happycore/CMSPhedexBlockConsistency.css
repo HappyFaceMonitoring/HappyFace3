@@ -36,7 +36,7 @@ tr.CMSPhedexBlockConsistencyWarning {
 tr.CMSPhedexBlockConsistencyFail {
         background-color:  #FFB0B0;
 }
-p.WarningMessage { 
+p.CMSPhedexBlockConsistencyWarningMessage { 
   font-weight: bold; 
   color:#ff0000
 }
