@@ -145,7 +145,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		allRequests['hit_time']  = 0
 
 		self.statusTagsOk   = ['Pool2Pool','Staging']
-		self.statusTagsFail = ['Waiting','Unknown']
+		self.statusTagsFail = ['Waiting','Suspended','Unknown']
 
 		
 
