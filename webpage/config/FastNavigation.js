@@ -24,6 +24,14 @@ function movenav(navid) {
  * layer to the proper position.
  */
 function goto(target) {
+	var i;
+	for(i = 0; i < document.images.length; i++) {
+		if (document.images[i].height == 0 && !document.images[i].complete) {
+			setTimeout("goto(\"" + target + "\")", 100);
+			return;
+		}
+	}
+
 	var browser = getBrowser();
 	if (browser == "FF") {
 		var targetY = document.getElementById(target).offsetTop+15;
