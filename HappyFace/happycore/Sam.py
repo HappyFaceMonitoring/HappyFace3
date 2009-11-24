@@ -17,7 +17,12 @@ class Sam(ModuleBase,PhpDownload):
 	
 	self.db_values["details_database"] = ""
 	self.db_values["site"] = ""
-	
+
+
+        self.db_keys["details_database_summary"] = StringCol()
+	self.db_values["details_database_summary"] = ""
+
+
 	
 	self.report_url	= self.configService.get('setup','report_url')
 	
@@ -57,8 +62,10 @@ class Sam(ModuleBase,PhpDownload):
 
 	# parse the details and store it in a special database table
 	details_database = self.__module__ + "_table_details"
-	
 	self.db_values["details_database"] = details_database
+
+	details_database_summary = self.__module__ + "_table_details_summary"
+	self.db_values["details_database_summary"] = details_database_summary
 
 	details_db_keys = {}
 	details_db_values = {}
@@ -76,21 +83,26 @@ class Sam(ModuleBase,PhpDownload):
 	details_db_keys["timestamp"] = IntCol()
 	details_db_values["timestamp"] = self.timestamp
 
+	details_summary_db_keys = {}
+	details_summary_db_values = {}
+
+        details_summary_db_keys["name"] = StringCol()
+        details_summary_db_keys["nodes"] = StringCol()
+        details_summary_db_keys["status"] = FloatCol()
+
+
+	# write global after which the query will work
+	details_summary_db_keys["timestamp"] = IntCol()
+	details_summary_db_values["timestamp"] = self.timestamp
+
+
+
 	# create index for timestamp
 	details_db_keys["index"] = DatabaseIndex('timestamp')
+	details_summary_db_keys["index"] = DatabaseIndex('timestamp')
 
-
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
-
-	Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
-
-	Details_DB_Class.sqlmeta.cacheValues = False
-	Details_DB_Class.sqlmeta.fromDatabase = True
-	#Details_DB_Class.sqlmeta.lazyUpdate = True
-
-	# if table is not existing, create it
-        Details_DB_Class.createTable(ifNotExists=True)
+        subtable_details = self.table_init( self.db_values["details_database"], details_db_keys )
+        subtable_summary = self.table_init( self.db_values["details_database_summary"], details_summary_db_keys )
 
 	sn = {}
 	tests = {}
@@ -103,9 +115,11 @@ class Sam(ModuleBase,PhpDownload):
 	Type = ""
 	Time = ""
 
-        serviceStatusList = []
+
 
 	root = source_tree.getroot()
+
+        self.SamResults = {}
 	
 	try:
 	    for element in root:
@@ -117,20 +131,15 @@ class Sam(ModuleBase,PhpDownload):
 		    if item.tag == "VOName": self.db_values["site"] = item.text
 
 
-
-		
 	    for services_item in services:
-		    
+
 		for services_prop in services_item:
 		    if services_prop.tag == "ServiceType":
 			ServiceType = services_prop.text
 
-		for services_prop in services_item:
 		    if services_prop.tag == "ServiceNames":
 			sn = services_prop
 
-			serviceTestStatusList = []
-			    
 			for sn_item in sn:
 				
 			    for sn_prop in sn_item:
@@ -145,10 +154,12 @@ class Sam(ModuleBase,PhpDownload):
 			    elif ServiceStatus == str(-1) : service_status = 0.
 			    else : service_status = 0.5
 
-			       
-			    details_db_values["service_type"] = ServiceType
-			    details_db_values["service_name"] = ServiceName
-			    details_db_values["service_status"] = service_status
+                            self.SamResults[ServiceName] = {}
+                            self.SamResults[ServiceName]["name"] = ServiceName
+                            self.SamResults[ServiceName]["type"] = ServiceType
+                            self.SamResults[ServiceName]["status"] = service_status
+                            self.SamResults[ServiceName]["tests"] = []
+                            
 
 			    for sn_prop in sn_item:
 				if sn_prop.tag == "Tests":
@@ -164,34 +175,143 @@ class Sam(ModuleBase,PhpDownload):
 					    elif tests_prop.tag == "Type": Type = tests_prop.text
 					    elif tests_prop.tag == "Time": Time = tests_prop.text
 
-					testStatus = self.determineTestStatus(str(Status))
-					serviceTestStatusList.append(testStatus)
-					    
-					details_db_values["status"] = Status
-					details_db_values["url"] = (self.report_url + Url.__str__()).replace('&','&amp;').replace('%','%%')
-					details_db_values["age"] = Age
-					details_db_values["type"] = Type
-					details_db_values["time"] = Time
+                                        details = {}
+                                        details["status"] = Status
+                                        details["url"] = (self.report_url + Url.__str__()).replace('&','&amp;').replace('%','%%')
+                                        details["age"] = Age
+                                        details["type"] = Type
+                                        details["time"] = Time
+                                        self.SamResults[ServiceName]["tests"].append(details)
 
-					# store the values to the database
-					Details_DB_Class(**details_db_values)
-
-			#print ServiceName
-			#print serviceTestStatusList
-			serviceStatusGlobal = self.determineServiceStatus(serviceTestStatusList)
-			serviceStatusList.append(serviceStatusGlobal)              
-	
 	except:
 	    # module status will be -1
 	    self.error_message = "Couldn't extract any usefull data from the XML source code for the status calculation."
 
 
-	# unlock the database access
-	self.lock.release()
 
-        # at the moment always happy
-        self.status = self.determineStatus(serviceStatusList)
+        samGroups = {}
+   
+        self.configService.addToParameter('setup','definition','Definition of Service Groups:'+'<br>')
+        groupConfig = self.configService.getSection('SamGroups')
+        for group in groupConfig.keys():
 
+            self.configService.addToParameter('setup','definition','*  '+group+': '+groupConfig[group]+'<br>')
+
+            samGroups[group] = {}
+            samGroups[group]['ident'] = groupConfig[group]
+            samGroups[group]['nodes'] =[]
+            samGroups[group]['NumWarning'] = 0
+            samGroups[group]['NumError'] = 0
+            samGroups[group]['NumOk'] = 0
+            samGroups[group]['NumTotal'] = 0
+            samGroups[group]['status'] = -1
+            
+            
+            if samGroups[group]['ident'].find('Type:') == 0:
+                nodeclass =  samGroups[group]['ident'].replace('Type:','')
+                for service in  self.SamResults.keys():
+                    if  self.SamResults[service]['type'] == nodeclass:
+                        samGroups[group]['nodes'].append(service)
+            else:
+                samGroups[group]['nodes'] = samGroups[group]['ident'].split(',')
+            samGroups[group]['nodes'].sort()
+
+        self.configService.addToParameter('setup','definition','Thresholds:'+'<br>')
+        groupThresholds = self.configService.getSection('SamGroupsThresholds')
+        for val in groupThresholds.keys():
+            self.configService.addToParameter('setup','definition','* '+val+': '+groupThresholds[val]+'<br>')
+            tmp = val.split('_')
+            if len(tmp) != 3: self.error_message += "Config parameter "+val+" does not match group_Error/Warning."
+            testCat = tmp[1]
+            testValue = tmp[2]
+            testRef = groupThresholds[val]
+
+            if not samGroups.has_key(tmp[0]): next
+            if not samGroups[ tmp[0] ].has_key(testCat): samGroups[ tmp[0] ][testCat] = []
+
+            tmpThreshold = {}
+            tmpThreshold['value'] = testValue
+            tmpThreshold['condition'] =  str( testRef )[:1]
+            tmpThreshold['threshold'] = float(str(testRef)[1:])
+            samGroups[ tmp[0] ][testCat].append(tmpThreshold)
+
+
+
+
+
+                     
+        for group in samGroups:
+            theGroup = samGroups[group]
+            for service in theGroup['nodes']:
+                if self.SamResults[service]['status'] == 1.0:  theGroup['NumOk'] = theGroup['NumOk']+1
+                elif self.SamResults[service]['status'] == 0.5:  theGroup['NumWarning'] =theGroup['NumWarning']+1
+                elif self.SamResults[service]['status'] == 0.0: theGroup['NumError'] =theGroup['NumError']+1
+            theGroup['NumTotal'] = len( theGroup['nodes'] )
+                
+
+            if self.getGroupStatus(theGroup,'Error') == True: theGroup['status'] = 0.0
+            elif self.getGroupStatus(theGroup,'Warning') == True: theGroup['status'] = 0.5
+            else: theGroup['status'] = 1.0
+
+            
+
+        theNodes = self.SamResults.keys()
+        theNodes.sort()
+        for service in theNodes:
+            serviceInfo =  self.SamResults[service]
+
+            details_db_values["service_type"] = serviceInfo['type'] 
+            details_db_values["service_name"] = serviceInfo['name']
+            details_db_values["service_status"] = serviceInfo['status']
+            for test in  serviceInfo['tests']:
+                for i in test.keys():
+                    details_db_values[i] = test[i]
+                self.table_fill( subtable_details , details_db_values )
+
+
+        worstGroupStatus = 99.0
+        if len(samGroups) > 0:
+            for group in samGroups:
+                theGroup = samGroups[group]
+                details_summary_db_values["name"] = group
+                details_summary_db_values["nodes"] = ', '.join(theGroup['nodes'])
+                details_summary_db_values["status"] = theGroup['status']
+                self.table_fill( subtable_summary , details_summary_db_values )
+                
+                if theGroup['status'] >= 0:
+                    if theGroup['status'] < worstGroupStatus: worstGroupStatus = theGroup['status']
+            
+                
+
+        else:
+            for service in theNodes:
+                 serviceInfo =  self.SamResults[service]
+                 if serviceInfo['status'] >= 0:
+                     if serviceInfo['status'] < worstGroupStatus: worstGroupStatus = serviceInfo['status']
+
+        if worstGroupStatus != 99.0: self.status = worstGroupStatus
+        else: self.status = -1
+             
+
+    def getGroupStatus(self,theGroup,type):
+          if not theGroup.has_key(type): return False
+          for check in theGroup[type]:
+              if not theGroup.has_key(check['value']): next
+              if check['condition'] == ">":
+                  if theGroup[check['value']] > check['threshold']: return True
+              if check['condition'] == "<":
+                  if theGroup[check['value']] < check['threshold']: return True
+          return False
+
+
+    def printInfo(self):
+        for service in self.SamResults.keys():
+
+            serviceInfo =  self.SamResults[service]
+            print serviceInfo['type']+" "+ serviceInfo['name'] +" "+str(serviceInfo['status'])
+            for i in  serviceInfo['tests']:
+                print i
+            print '  '
 
     def output(self):
 
@@ -200,8 +320,43 @@ class Sam(ModuleBase,PhpDownload):
         module_content = """
         <?php
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
+	$details_summary_db_sqlquery = "SELECT * FROM " . $data["details_database_summary"] . " WHERE timestamp = " . $data["timestamp"];
 	$temp_element = "";
 		
+
+        $GroupCount=0;
+        foreach ($dbh->query($details_summary_db_sqlquery) as $info)   
+        {
+        $GroupCount=$GroupCount+1;
+        }
+        if ($GroupCount != 0){
+        printf('<strong>Group status:</strong><br>');   
+
+
+	printf('<table class="SamTable">');
+	
+	foreach ($dbh->query($details_summary_db_sqlquery) as $info)
+       	{
+
+	   if ($info["status"] == "1.") {
+	       $service_status_color_flag = "success";
+	    }
+            elseif ($info["status"] == "0.5") {
+	       $service_status_color_flag = "warning";
+	    } else {
+		$service_status_color_flag = "fail";
+	    }
+		
+#	    printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
+	    printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>' . $info["nodes"] . '</td></tr>');
+	}
+	
+	printf('</table><br/>');
+	}
+
+
+        printf('<strong>Individual service status:</strong><br>');
+
 	printf('<table class="SamTable">');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $info)
@@ -217,13 +372,16 @@ class Sam(ModuleBase,PhpDownload):
 		    $service_status_color_flag = "fail";
 		}
 		
-		printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
+#		printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
+		printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["service_type"] . '</td><td>' . $info["service_name"] . '</td></tr>');
 	    }
 	    $temp_element = $info["service_name"];
 	}
 	
 	printf('</table><br/>');
 	
+
+
 	printf('
 		<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
 		<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_success_result\\\'" + """);" />
