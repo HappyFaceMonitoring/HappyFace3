@@ -4,7 +4,7 @@ import sys,os
 #############################################
 # class to donwload external data
 #############################################
-class GetData():
+class GetData(object):
 
     # execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
     def getDataWget(self, url, path, file):

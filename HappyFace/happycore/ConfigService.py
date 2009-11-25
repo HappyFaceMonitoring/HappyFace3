@@ -3,7 +3,7 @@ import sys,os,re
 
 
 
-class ConfigService():
+class ConfigService(object):
 
     def __init__(self):
 

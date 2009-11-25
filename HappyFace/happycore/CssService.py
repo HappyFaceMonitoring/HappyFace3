@@ -3,7 +3,7 @@ import os
 import filecmp
 
 
-class CssService():
+class CssService(object):
 
     def __init__(self, webDir, subDir):
         self.webDir = webDir

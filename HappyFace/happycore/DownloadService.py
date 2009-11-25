@@ -5,7 +5,7 @@ import os
 from time import time, localtime, mktime
 from DownloadTag import *
 
-class DownloadService():
+class DownloadService(object):
 
     def __init__(self, subdir):
         self.subdir = subdir

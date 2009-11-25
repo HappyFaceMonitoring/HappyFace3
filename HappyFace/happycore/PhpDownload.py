@@ -3,7 +3,7 @@ import sys
 #############################################
 # class to donwload plots (via WGET command)
 #############################################
-class PhpDownload():
+class PhpDownload(object):
 
     def __init__(self):
 
