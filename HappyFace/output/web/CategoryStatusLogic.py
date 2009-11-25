@@ -36,8 +36,9 @@ class CategoryStatusLogic(object):
 
 		        $mod_status = $module["status"];
 			$mod_weight = $module["weight"];
+			$mod_type = $module["mod_type"];
 		    
-			if ($mod_status != -1) {
+			if ($mod_status != -1 && $mod_type != "unrated") {
 			    $sum_weighted_status += $mod_status * $mod_weight;
 			    $sum_weight += $mod_weight;
 			}
@@ -57,10 +58,11 @@ class CategoryStatusLogic(object):
 	            if ($module["category"] == $category) {
 
 		        $mod_status = $module["status"];
+			$mod_type = $module["mod_type"];
 
 			if ($this->cat_status == -1) { $this->cat_status = $mod_status; }
 			else {
-			    if ($mod_status < $this->cat_status && $mod_status >= 0) {
+			    if ($mod_status < $this->cat_status && $mod_status >= 0 && $mod_type != "unrated") {
 				$this->cat_status = $mod_status;
 			    }
 			}
