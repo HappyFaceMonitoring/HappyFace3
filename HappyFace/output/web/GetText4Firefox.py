@@ -12,7 +12,7 @@ class GetText4Firefox(object):
     if ($status == 1) { return "available" ; }
     else if ($status == -1) { return "unavailable" ; }
   }
-  else if ($mod_type == "rated") {
+  else if ($mod_type == "rated" || $mod_type == "unrated") {
     if ($status > 0.66 && $status <= 1.0) { return "happy"; }
     else if ($status > 0.33 && $status <= 0.66) { return "neutral"; }
     else if ($status >= 0.0 && $status <= 0.33) { return "unhappy"; }
