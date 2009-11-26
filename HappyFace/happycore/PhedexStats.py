@@ -79,29 +79,14 @@ class PhedexStats(ModuleBase):
 	details_db_keys = {}
 	details_db_values = {}
 
-	# write global after which the query will work
-	details_db_keys["timestamp"] = IntCol()
-	details_db_values["timestamp"] = self.timestamp
-
-	# create index for timestamp
-	details_db_keys["index"] = DatabaseIndex('timestamp')
-
 	details_db_keys["site_name"] = StringCol()
 	details_db_keys["number"] = IntCol()
 	details_db_keys["origin"] = StringCol()
 	details_db_keys["error_message"] = StringCol()
 	
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
 
-	Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
 
-	Details_DB_Class.sqlmeta.cacheValues = False
-	Details_DB_Class.sqlmeta.fromDatabase = True
-	#Details_DB_Class.sqlmeta.lazyUpdate = True
-		
-	# if table is not existing, create it
-        Details_DB_Class.createTable(ifNotExists=True)
+	my_subtable_class = self.table_init( details_database, details_db_keys )
 
 	failed_transfers = 0
 
@@ -122,10 +107,8 @@ class PhedexStats(ModuleBase):
 			failed_transfers = failed_transfers + int(reason.attrib["n"])
 			
 			# store the values to the database
-			Details_DB_Class(**details_db_values)
+			self.table_fill( my_subtable_class, details_db_values )
 	
-	# unlock the database access
-	self.lock.release()
 
 	self.db_values["failed_transfers"] = failed_transfers
 

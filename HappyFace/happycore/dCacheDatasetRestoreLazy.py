@@ -224,11 +224,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		details_db_values = {}
 
 		
-		# write global after which the query will work
-		details_db_keys["timestamp"] = IntCol()
-		details_db_values["timestamp"] = self.timestamp
-
-
 		# table keys
 		details_db_keys["pnfs"] = StringCol()
 		details_db_keys["path"] = StringCol()
@@ -237,16 +232,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		details_db_keys["status_short"] = StringCol()
 
 		
-		# create index for timestamp
-		details_db_keys["index"] = DatabaseIndex('timestamp')
-
-
-
-
-
-
-
-
 		subtable_problems = self.table_init( self.db_values["details_database"], details_db_keys )
 
 		count = 1

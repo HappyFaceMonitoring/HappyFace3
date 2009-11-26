@@ -79,27 +79,12 @@ class Sam(ModuleBase,PhpDownload):
 	details_db_keys["type"] = StringCol()
 	details_db_keys["time"] = StringCol()
 
-	# write global after which the query will work
-	details_db_keys["timestamp"] = IntCol()
-	details_db_values["timestamp"] = self.timestamp
-
 	details_summary_db_keys = {}
 	details_summary_db_values = {}
 
         details_summary_db_keys["name"] = StringCol()
         details_summary_db_keys["nodes"] = StringCol()
         details_summary_db_keys["status"] = FloatCol()
-
-
-	# write global after which the query will work
-	details_summary_db_keys["timestamp"] = IntCol()
-	details_summary_db_values["timestamp"] = self.timestamp
-
-
-
-	# create index for timestamp
-	details_db_keys["index"] = DatabaseIndex('timestamp')
-	details_summary_db_keys["index"] = DatabaseIndex('timestamp')
 
         subtable_details = self.table_init( self.db_values["details_database"], details_db_keys )
         subtable_summary = self.table_init( self.db_values["details_database_summary"], details_summary_db_keys )

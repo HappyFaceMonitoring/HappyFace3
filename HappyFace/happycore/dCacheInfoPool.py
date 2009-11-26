@@ -136,28 +136,13 @@ class dCacheInfoPool(dCacheInfo):
         details_db_keys["poolname"] = StringCol()
         details_db_keys["poolstatus"] = FloatCol()
 	
-	# write global after which the query will work
-	details_db_keys["timestamp"] = IntCol()
-	details_db_values["timestamp"] = self.timestamp
-
-	# create index for timestamp
-	details_db_keys["index"] = DatabaseIndex('timestamp')
-
 
         for att in self.localAttribs:
             details_db_keys[ att ] = FloatCol()
 
-        # lock object enables exclusive access to the database
-	self.lock.acquire()
 
-	Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
 
-	Details_DB_Class.sqlmeta.cacheValues = False
-	Details_DB_Class.sqlmeta.fromDatabase = True
-		
-	# if table is not existing, create it
-        Details_DB_Class.createTable(ifNotExists=True)
-
+	my_subtable_class = self.table_init( details_database, details_db_keys )
         
         for pool in thePoolInfo.keys():
             self.sumInfo['poolnumber'] +=1
@@ -196,11 +181,7 @@ class dCacheInfoPool(dCacheInfo):
         
 
             # store the values to the database
-            Details_DB_Class(**details_db_values)
-
-	# unlock the database access
-	self.lock.release()
-
+            self.table_fill( my_subtable_class, details_db_values )
 
         for att in self.sumInfo.keys():
             self.db_values[ att ] = self.sumInfo[att]

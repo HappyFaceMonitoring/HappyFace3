@@ -78,27 +78,11 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		details_db_keys = {}
 		details_db_values = {}
 
-		## write global after which the query will work
-		details_db_keys["timestamp"] = IntCol()
-		details_db_values["timestamp"] = self.timestamp
-
 		details_db_keys['readiness_cond'] = StringCol()
 		details_db_keys['cond_color'] = StringCol()
 		details_db_keys['cond_value'] = StringCol()
 
-		## create index for timestamp
-		details_db_keys["index"] = DatabaseIndex('timestamp')
-
-		## lock object enables exclusive access to the database
-		self.lock.acquire()
-
-		Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
-
-		Details_DB_Class.sqlmeta.cacheValues = False
-		Details_DB_Class.sqlmeta.fromDatabase = True
-
-		## if table is not existing, create it
-		Details_DB_Class.createTable(ifNotExists=True)
+		my_subtable_class = self.table_init( details_database, details_db_keys )
 
 		## now start parsing the xml tree
 		root = source_tree.getroot()
@@ -112,10 +96,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		#	self.getReadinessT2(siteTable)
 
 		self.getReadiness(siteTable)
-		self.makeDatabaseEntries(details_db_keys,details_db_values,Details_DB_Class)
-
-		# unlock the database access
-		self.lock.release()
+		self.makeDatabaseEntries(details_db_keys,details_db_values,my_subtable_class)
 
 		# always happy for the moment
 		self.status = self.determineStatus()
@@ -315,7 +296,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		#print self.readiness
 		pass
 
-	def makeDatabaseEntries(self,details_db_keys,details_db_values,Details_DB_Class):
+	def makeDatabaseEntries(self,details_db_keys,details_db_values,my_subtable_class):
 
 		"""
 		Makes the database entries from the readiness dictionary made
@@ -338,7 +319,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 					else:
 						details_db_values['cond_value'] = re.sub('%','%%',entry['value'])
 
-					Details_DB_Class(**details_db_values)
+					self.table_fill( my_subtable_class, details_db_values )
 					
 		pass
 

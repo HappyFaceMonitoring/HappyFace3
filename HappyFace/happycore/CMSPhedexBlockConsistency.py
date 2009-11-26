@@ -117,33 +117,17 @@ class CMSPhedexBlockConsistency(ModuleBase):
 
         # Details table description:
 	details_db_keys = {}
-        details_db_keys["timestamp"] = IntCol()
-
-	# create index for timestamp
-        details_db_keys["index"] = DatabaseIndex("timestamp")
 
         details_db_keys["lfn"] = StringCol()
         details_db_keys["status"] = StringCol()
         details_db_keys["dataset"] = StringCol()
         details_db_keys["block"] = StringCol()
 
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
-
-	Details_DB_Class = type(self.details_database, (SQLObject,), details_db_keys )
-
-	Details_DB_Class.sqlmeta.cacheValues = False
-	Details_DB_Class.sqlmeta.fromDatabase = True
-	#Details_DB_Class.sqlmeta.lazyUpdate = True
-		
-	# if table is not existing, create it
-        Details_DB_Class.createTable(ifNotExists=True)
-        # unlock the database access
-        self.lock.release()
+	my_subtable_class = self.table_init( self.details_database, details_db_keys )
 
         # Fill in the values:
 	details_db_values = {}
-	details_db_values["timestamp"] = self.timestamp
+
         for data in root:
             if data.tag == "details":
                 for element in data.iter():
@@ -154,9 +138,9 @@ class CMSPhedexBlockConsistency(ModuleBase):
                         details_db_values["dataset"] =  element_attrib["dataset"]
                         details_db_values["block"] =  element_attrib["block"]
                         # write details to databse
-                        self.lock.acquire()
-                        Details_DB_Class(**details_db_values)
-                        self.lock.release()
+
+                        self.table_fill( my_subtable_class, details_db_values )
+
         
 
         ################################

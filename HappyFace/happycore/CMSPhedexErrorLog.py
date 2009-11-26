@@ -136,13 +136,6 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         details_db_keys["dest_errors_status"] = StringCol()
         details_db_keys["source_errors_status"] = StringCol()
 
-        ## write global after which the query will work
-	details_db_keys["timestamp"] = IntCol()
-	details_db_values["timestamp"] = self.timestamp
-
-	## create index for timestamp
-	details_db_keys["index"] = DatabaseIndex('timestamp')
-
         ## now start parsing the xml tree
 	root = source_tree.getroot()
 
@@ -532,17 +525,8 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
     def fillDatabase(self,details_database,details_db_keys,details_db_values):
 
-	## lock object enables exclusive access to the database
-	self.lock.acquire()
 
-        Details_DB_Class = type(details_database, (SQLObject,), details_db_keys )
-
-        Details_DB_Class.sqlmeta.cacheValues = False
-	Details_DB_Class.sqlmeta.fromDatabase = True
-	#Details_DB_Class.sqlmeta.lazyUpdate = True
-
-        ## if table is not existing, create it
-        Details_DB_Class.createTable(ifNotExists=True)
+	my_subtable_class = self.table_init( details_database, details_db_keys )
 
         details_db_values['total_errors'] = self.globalTotalErrors
         details_db_values['dest_errors'] = self.globalDestErrors
@@ -591,8 +575,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
                 details_db_values['file_detail_log_nb'] = self.globalDict[node][error]
 
                 # store the values to the database
-                Details_DB_Class(**details_db_values)
+                self.table_fill( my_subtable_class, details_db_values )
 
 
-        # unlock the database access
-	self.lock.release()
+
