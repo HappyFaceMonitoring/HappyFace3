@@ -29,7 +29,9 @@ class Sam(ModuleBase,PhpDownload):
         self.dsTag = 'sam_xml_source'
 
         self.downloadRequest[self.dsTag] = 'wgetXmlRequest:'+self.makeUrl()
+        self.blacklist = self.configService.getDefault('setup','blacklist',"").split(",")
 
+        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br>')
 
 
 	
@@ -131,9 +133,15 @@ class Sam(ModuleBase,PhpDownload):
 				if sn_prop.tag == "ServiceName":
 				    ServiceName = sn_prop.text
 
+
+                            if ServiceName in self.blacklist: continue
+
+
 			    for sn_prop in sn_item:
 				if sn_prop.tag == "ServiceStatus":
 				    ServiceStatus = sn_prop.text
+
+
 
 			    if ServiceStatus == str(1): service_status = 1.
 			    elif ServiceStatus == str(-1) : service_status = 0.
