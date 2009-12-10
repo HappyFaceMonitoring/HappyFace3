@@ -5,25 +5,45 @@
 	width: 800px;
 }
 
-.UschiTable td {
-	padding: 5px;
+.UschiTable th{
+	font-weight: bold;
 	border: solid 1px #999;
-	text-align: left;
-	width: 80%;
 }
 
-.UschiTable th {
-	border: solid 1px #999;
-	text-align: center;
-	font-weight: bold;
-	font-variant: small-caps;
+.UschiSubTable {
+        border: solid 0px #999;
+        width: 100%;
 }
 
 .UschiTableHeader {
+	border: solid 1px #999;
+	text-align: center;
+	width: 80%;
+	font-variant: small-caps;
+}
+
+.UschiSubTableHeaderLeft {
+	padding: 5px;
+	border: solid 0px #999;
+	text-align: left;
+	width: 70%;
+	font-style: normal;
+}
+
+.UschiSubTableHeaderRight {
+	padding: 5px;
+	border: solid 0px #999;
+	font-weight: bold;
+	text-align: right;
+	color: #FF9900;
+	width: 30%;
 	font-style: normal;
 }
 
 .UschiTableInfo {
+        padding: 5px;
+        border: solid 1px #999;
+        text-align: left;
 	font-style: oblique;
 }
 

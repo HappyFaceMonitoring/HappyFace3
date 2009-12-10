@@ -12,11 +12,17 @@ class Uschi(ModuleBase):
 
 	# definition of the database table keys and pre-defined values
 	self.db_keys['uschi_timestamp'] = StringCol()
+	self.db_keys['uschi_timestamp_module'] = StringCol()
+	self.db_keys['frequency'] = IntCol()
+	self.db_keys['frequency_module'] = IntCol()
 	self.db_keys['result'] = IntCol()
 	self.db_keys['log'] = StringCol()
 	self.db_keys['about'] = StringCol()
 	
 	self.db_values['uschi_timestamp'] = ""
+	self.db_values['uschi_timestamp_module'] = ""
+	self.db_values['frequency'] = -1
+	self.db_values['frequency_module'] = -1
 	self.db_values['result'] = -1
 	self.db_values['log'] = ""
 	self.db_values['about'] = ""
@@ -56,6 +62,9 @@ class Uschi(ModuleBase):
 	root = uschi_dom_object.documentElement
 	self.uschi_timestamp = root.getAttribute('time')
 
+	# get the execution frequency of USCHI (in minutes)
+	self.frequency = int(root.getAttribute('frequency'))
+
 	self.log = ""
 	self.about = ""
 
@@ -69,6 +78,12 @@ class Uschi(ModuleBase):
 		if (self.result == 0): self.status = 1.0 # happy
 		elif (self.result == 1): self.status = 0.5 # neutral
 		elif (self.result == 2): self.status = 0.0 # unhappy
+
+		# get the last test execution time of the module
+		self.uschi_timestamp_module = sec.getAttribute('time')
+
+		# get frequency of the module (in minutes)
+		self.frequency_module = int(sec.getAttribute('frequency'))
 
                 # get the "log" and "about" information of the test
 		log_data = sec.getElementsByTagName('log')
@@ -88,6 +103,9 @@ class Uschi(ModuleBase):
 	
 	# definition fo the database table values
 	self.db_values['uschi_timestamp'] = self.uschi_timestamp
+	self.db_values['uschi_timestamp_module'] = self.uschi_timestamp_module
+	self.db_values['frequency'] = self.frequency
+	self.db_values['frequency_module'] = self.frequency_module
 	self.db_values['result'] = self.result
 	self.db_values['log'] = self.log
 	self.db_values['about'] = self.about
@@ -102,8 +120,11 @@ class Uschi(ModuleBase):
         printf('
             <table class="UschiTable">
                 <tr>
-                    <td class="UschiTableHeader">Last USCHI execution: <span style="color:#FF9900"><b>'.$data["uschi_timestamp"].'</b></span></td>
-                    <th rowspan="2">error code: '.$data["result"].'</th>
+                    <td class="UschiTableHeader"><table class="UschiSubTable"><tr><td class="UschiSubTableHeaderLeft">Last USCHI execution (every '.$data["frequency"].' minutes):</td><td class="UschiSubTableHeaderRight">'.$data["uschi_timestamp"].'</td></tr></table></td>
+                    <th rowspan="3">error code: '.$data["result"].'</th>
+                </tr>
+                <tr>
+                    <td class="UschiTableHeader"><table class="UschiSubTable"><tr><td class="UschiSubTableHeaderLeft">Last Module execution (every '.$data["frequency_module"].' minutes):</td><td class="UschiSubTableHeaderRight">'.$data["uschi_timestamp_module"].'</td></tr></table></td>
                 </tr>
                 <tr>
                     <td class="UschiTableInfo">'.$data["about"].'</td>
