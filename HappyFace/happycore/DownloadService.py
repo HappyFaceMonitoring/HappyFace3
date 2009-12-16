@@ -5,7 +5,6 @@ import os
 from time import time, localtime, mktime
 from DownloadTag import *
 
-
 class DownloadService(object):
 
     def __init__(self, subdir):
@@ -27,7 +26,7 @@ class DownloadService(object):
         prog = tmpString.pop(0)
         filetype = tmpString.pop(0)
         args= tmpString.pop(0)
-	url = "|".join(tmpString)
+        url = "|".join(tmpString)
 
         if not downloadstring in self.downloadTags:
             self.downloadTags[downloadstring] = DownloadTag(prog,filetype,args,url,self.subdir)
@@ -67,11 +66,6 @@ class DownloadService(object):
         for i in self.downloadTags.keys():
             os.remove(self.downloadTags[i].getFilePath())
             
-    def getFile(self,downloadstring):
-        if downloadstring in self.downloadTags:
-            return self.downloadTags[downloadstring].success,self.downloadTags[downloadstring].getFilePath()
-        else:
-            return False,""
 
     def getFileType(self,downloadstring):
         if downloadstring in self.downloadTags:
@@ -82,17 +76,46 @@ class DownloadService(object):
                 return "."+fileType
 
 
-    def copyFile(self,downloadstring,destfile):
-        if downloadstring in self.downloadTags:
-            if self.downloadTags[downloadstring].success:
-                localFile = self.downloadTags[downloadstring].getFilePath()
-                ret = os.system('cp '+localFile+' '+destfile)
-                return True,""
-            else:
-                return False,"Download failed for \'"+downloadstring.replace('&','&amp;').replace('%','%%') +"\'."
-                
-
+    def getFile(self,downloadstring):
+        success,error = self.checkDownload(downloadstring)
+        if success:
+            return error,self.downloadTags[downloadstring].getFilePath()
         else:
-            return False,"Tag \'"+downloadstring+"\' not found."
+            return error,""
+
+    def getUrl(self,downloadstring):
+        return self.downloadTags[downloadstring].getUrl()
+
+    def getUrlAsLink(self,downloadstring):
+        url = self.downloadTags[downloadstring].getUrl()
+        return '<a href="'+url+'">'+url+'<a/>'
 
 
+
+    def copyFile(self,downloadstring,destfile):
+        success,error = self.checkDownload(downloadstring)
+        if success:
+            localFile = self.downloadTags[downloadstring].getFilePath()
+            ret = os.system('cp '+localFile+' '+destfile)
+            return True,""
+        else:
+            return success,error
+
+
+    def checkDownload(self,downloadstring):
+        success = True
+        error = ""
+        if downloadstring in self.downloadTags:
+            if not self.downloadTags[downloadstring].finished:
+                success = False
+                error = "Download has not finished in time."
+                
+            elif not self.downloadTags[downloadstring].success:
+                success = False
+                error = "Download failed."
+            
+        else:
+            success = False
+            error = "Tag \'"+downloadstring+"\' not found."
+
+        return success,error
