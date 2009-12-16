@@ -56,7 +56,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         self.dsTag = 'cmsPhedexGroupUsage_xml_source'
 
         self.base_url += '/'+self.instance+'/agents'
-        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
+        self.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()
 
 
     def getPhpArgs_old(self, config):
@@ -80,7 +80,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
             for j in self.phpArgs[i].split(","):
                 argList.append(i+'='+j)
 
-        self.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+'/'+self.instance+'/agents'+"?"+"&".join(argList)
+        self.downloadRequest[self.dsTag] = 'wget|'+self.fileType+'||'+self.base_url+'/'+self.instance+'/agents'+"?"+"&".join(argList)
 
 
     def getAllowedSpace(self):

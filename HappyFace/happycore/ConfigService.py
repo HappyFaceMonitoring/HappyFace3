@@ -69,6 +69,14 @@ class ConfigService(object):
 
         except:
             self.configMissingParameter(sec,par)
+
+    def options(self,section):
+
+        try:
+            return self.config.options(section)
+
+        except:
+            self.configMissingSection(section)
                 
 
     def getDefault(self,sec,par,default):

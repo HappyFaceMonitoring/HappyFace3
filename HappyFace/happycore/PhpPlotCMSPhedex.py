@@ -27,7 +27,7 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
 
         # Create URL from base_url and phpArgs
         self.base_url = self.base_url+"/"+globalVars['plot_type']
-        self.downloadRequest['plot'] = 'wget:'+self.makeUrl()
+        self.downloadRequest['plot'] = 'wget|'+self.makeUrl()
 
         if self.configService.get('setup','mod_title') == 'auto':
             title = ""

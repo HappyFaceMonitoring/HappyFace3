@@ -42,8 +42,8 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		self.db_values["details_database"] = ""
 
 		self.dsTag = 'CMSSiteReadiness_xml_source'
-		#self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
-		self.downloadRequest[self.dsTag] = 'wget:'+ self.fileExtension + ':' + self.base_url
+		#self.downloadRequest[self.dsTag] = 'wge|:'+self.makeUrl()
+		self.downloadRequest[self.dsTag] = 'wget|'+ self.fileExtension + '||' + self.base_url
 
 	def run(self):
 		"""

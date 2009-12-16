@@ -51,7 +51,7 @@ class PhpDownload(object):
 
 
         argList.sort()
-        downloadString = self.fileType+':'+self.base_url+"?"+"&".join(argList)
+        downloadString = self.fileType+'||'+self.base_url+"?"+"&".join(argList)
 
         return downloadString
 

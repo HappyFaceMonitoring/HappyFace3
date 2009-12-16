@@ -34,7 +34,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		self.db_values["details_database"] = ""
 
 		self.dsTag = 'CMSPhedexLinks_xml_source'
-		self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
+		self.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()
 
 	def run(self):
 		

@@ -43,7 +43,7 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 
 	self.base_url += '/'+self.instance+'/blockreplicas'
 
-        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
+        self.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()
 
 
 
@@ -69,7 +69,7 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 	    for j in self.phpArgs[i].split(","):
 		argList.append(i+'='+j)
 
-        self.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+'/'+self.instance+'/blockreplicas'+"?"+"&".join(argList)
+        self.downloadRequest[self.dsTag] = 'wget|'+self.fileType+'||'+self.base_url+'/'+self.instance+'/blockreplicas'+"?"+"&".join(argList)
 
 
 

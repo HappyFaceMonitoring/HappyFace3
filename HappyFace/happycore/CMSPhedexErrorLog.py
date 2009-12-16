@@ -65,7 +65,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         self.dsTag = 'cmsPhedexErrorLog_xml_source'
 	
         self.base_url += '/'+self.instance+'/errorlog'
-        self.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()
+        self.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()
 
 
 
@@ -90,7 +90,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 	    for j in self.phpArgs[i].split(","):
 		argList.append(i+'='+j)
 
-        self.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+'/'+self.instance+'/errorlog'+"?"+"&".join(argList)
+        self.downloadRequest[self.dsTag] = 'wget|'+self.fileType+'||'+self.base_url+'/'+self.instance+'/errorlog'+"?"+"&".join(argList)
 
 
     def run(self):

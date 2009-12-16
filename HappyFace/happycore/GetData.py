@@ -6,10 +6,10 @@ import sys,os
 #############################################
 class GetData(object):
 
-    # execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
-    def getDataWget(self, url, path, file):
+# execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
+    def getDataWget(self, args, url, path, file):
 
-	retcode = os.system('wget -q --output-document=' + path + "/" + file + " " + "\'"+url+"\'")
+	retcode = os.system('wget -q --output-document=' + path + "/" + file + " " + args + " "  + "\'"+url+"\'")
         success = False
         stderr = ""
 
@@ -18,15 +18,15 @@ class GetData(object):
             stderr = ""
 
         else:
-            stderr = '\nCould not download ' + url + ', aborting ...\n'
+            stderr = '\nCould not download ' + url + ', abborting ...\n'
             sys.stdout.write(stderr)
             success = False
         return success,stderr
 
-    # execute the Wget with special parameters to load and XML file
-    def getDataWgetXmlRequest(self,url,path,file):
+# execute the Wget with special parameters to load and XML file
+    def getDataWgetXmlRequest(self,args,url,path,file):
 
-	retcode = os.system('wget -q --header="Accept: text/xml" --output-document=' + path + "/" + file + " " + "\'"+url+"\'")
+	retcode = os.system('wget -q --header="Accept: text/xml" --output-document=' + path + "/" + file + " " + args +" " +  "\'"+url+"\'")
         success = False
         stderr = ""
 
@@ -35,7 +35,7 @@ class GetData(object):
             stderr = ""
 
         else:
-            stderr = '\nCould not download ' + url + ', aborting ...\n'
+            stderr = '\nCould not download ' + url + ', abborting ...\n'
             sys.stdout.write(stderr)
             success = False
         return success,stderr

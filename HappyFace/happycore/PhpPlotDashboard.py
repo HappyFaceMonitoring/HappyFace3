@@ -13,5 +13,5 @@ class PhpPlotDashboard(Plot,PhpDownload):
    
         self.base_url = self.base_url+"/"+self.configService.get('setup','base_url_add')
 
-        self.downloadRequest['plot'] = 'wget:'+self.makeUrl()
+        self.downloadRequest['plot'] = 'wget|'+self.makeUrl()
 

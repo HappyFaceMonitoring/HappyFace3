@@ -11,4 +11,4 @@ class PhpPlotGridKa(Plot,PhpDownload):
         Plot.__init__(self, category, timestamp, archive_dir)
         PhpDownload.__init__(self)
 
-        self.downloadRequest['plot'] = 'wget:'+self.makeUrl()
+        self.downloadRequest['plot'] = 'wget|'+self.makeUrl()

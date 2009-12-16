@@ -204,7 +204,7 @@ def dumpHappycorePy(name,xml):
         #init += "\t\t\t\tfor j in self.phpArgs[i].split(\",\"):\n"
         #init += "\t\t\t\t\targList.append(i+'='+j)\n\n"
         #init += "\t\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+\"?\"+\"&\".join(argList)\n\n"
-        init += "\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.makeUrl()\n\n"
+        init += "\t\tself.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()\n\n"
 
     run = '\tdef run(self):\n'
     run += '\t\t"""\n\t\tCollects the data from the web source. Stores it then into the\n'
