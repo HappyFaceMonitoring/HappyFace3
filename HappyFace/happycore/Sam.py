@@ -28,7 +28,7 @@ class Sam(ModuleBase,PhpDownload):
 	
         self.dsTag = 'sam_xml_source'
 
-        self.downloadRequest[self.dsTag] = 'wgetXmlRequest:'+self.makeUrl()
+        self.downloadRequest[self.dsTag] = 'wgetXmlRequest|'+self.makeUrl()
         self.blacklist = self.configService.getDefault('setup','blacklist',"").split(",")
 
         self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br>')
