@@ -29,7 +29,9 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
         self.base_url = self.base_url+"/"+globalVars['plot_type']
         self.downloadRequest['plot'] = 'wget|'+self.makeUrl()
 
-        if self.configService.get('setup','mod_title') == 'auto':
+        self.mod_title = self.configService.get('setup', 'mod_title')
+
+        if self.mod_title == 'auto':
             title = ""
             title += 'CMS PhEDEx summary: '
 
@@ -42,13 +44,13 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
 
             
             title +=' of transfers from '
-            if self.phpArgs['from_node'] == '.*':
+            if self.phpArgs['from_node'] == '.%2A':
                 title +='All'
             else:
                 title += self.phpArgs['from_node']
 
             title +=' to '
-            if self.phpArgs['to_node'] == '.*':
+            if self.phpArgs['to_node'] == '.%2A':
                 title +='All'
             else:
                 title +=self.phpArgs['to_node']
@@ -63,4 +65,4 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
                 title +='not defined - '+globalVars['instance']
             title +=')'
 
-            self.configService.set('setup','mod_title', title)
+            self.mod_title = title
