@@ -332,12 +332,12 @@ class Sam(ModuleBase,PhpDownload):
        	{
 
 	   if ($info["status"] == "1.") {
-	       $service_status_color_flag = "success";
+	       $service_status_color_flag = "ok";
 	    }
             elseif ($info["status"] == "0.5") {
 	       $service_status_color_flag = "warning";
 	    } else {
-		$service_status_color_flag = "fail";
+		$service_status_color_flag = "critical";
 	    }
 		
 #	    printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');

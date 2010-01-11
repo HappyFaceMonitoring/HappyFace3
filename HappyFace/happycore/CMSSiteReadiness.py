@@ -130,7 +130,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
                 foreach ($dbh->query($details_db_sqlquery) as $info)
                 {
                     if ($info["cond_color"] == "green"){
-                    $service_status_color_flag = "up";
+                    $service_status_color_flag = "ok";
                 }
                     else if ($info["cond_color"] == "red"){
                     $service_status_color_flag = "critical";
@@ -139,9 +139,9 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
                     $service_status_color_flag = "warning";
                 }
 		    else if ($info["cond_color"] == "lightgrey"){
-		    $service_status_color_flag = "weekend";
+		    $service_status_color_flag = "CMSSiteReadinessWeekend";
 	        }
-                    else $service_status_color_flag = "undef";
+                    else $service_status_color_flag = "undefined";
 
 		if($info["readiness_cond"] != $condition){
 		    if($condition != "start"){

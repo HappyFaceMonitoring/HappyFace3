@@ -171,16 +171,16 @@ class CMSPhedexBlockConsistency(ModuleBase):
         warning_color=""
         if (self.__old_result__()):
             warning_message="<p class=CMSPhedexBlockConsistencyWarningMessage> WARNING: Result is older than " + str(self.__old_result__()) + " hours</p>"
-            warning_color=" class=CMSPhedexBlockConsistencyWarning"
+            warning_color=" class=warning"
 	module_content = """
 	<?php
         if ($data["status"] == "1.0"){
-        $status_color="CMSPhedexBlockConsistencySuccess";
+        $status_color="ok";
         }elseif ($data["status"] == "0.0"){
-        $status_color="CMSPhedexBlockConsistencyFail";
+        $status_color="critical";
         }
         if ($data["duration"] >= $data["warning_limit"]){
-        $duration_color="CMSPhedexBlockConsistencyWarning";
+        $duration_color="warning";
         }
 
 	printf('"""+warning_message+"""

@@ -21,19 +21,12 @@
 	line-height: 14px;
 }
 
-
-td.up {
-	background-color:  #AAFFAA;
-}
-td.warning {
-	background-color:  #FFFF96;
-}
-td.critical {
-	background-color:  #FF6464;
-}
-td.weekend {
+td.CMSSiteReadinessWeekend {
 	background-color:  #D2D2D2;
 }
-td.undef {
+
+/* Not yet used, as the code does not yet make a differentiation between
+ * undefined and weekday: */
+td.CMSSiteReadinessWeekday {
 	background-color:  #C0C0C0;
 }

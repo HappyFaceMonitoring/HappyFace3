@@ -230,12 +230,12 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
           foreach ($dbh->query($details_db_sqlquery) as $info)
        	  {
                if ($info["block_status"] == 2){
-                    $service_status_color_flag = "writing";
+                    $service_status_color_flag = "report";
           }  
                else if ($info["block_status"] == 0){
                     $service_status_color_flag = "critical";
           }
-               else $service_status_color_flag = "undef";
+               else $service_status_color_flag = "undefined";
 
           $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
 
@@ -254,12 +254,12 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
           foreach ($dbh->query($details_db_sqlquery) as $info)
           {
                if ($info["block_status"] == 2){
-                  $service_status_color_flag = "writing";
+                  $service_status_color_flag = "report";
           }
                else if ($info["block_status"] == 0){
                   $service_status_color_flag = "critical";
           }
-               else $service_status_color_flag = "undef";
+               else $service_status_color_flag = "undefined";
 
           $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
           $block_size = round($info["block_bytes"]/(1024*1024*1024),2);

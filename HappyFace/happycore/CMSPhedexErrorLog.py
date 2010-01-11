@@ -544,7 +544,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
             elif (self.destErrorFraction*100) > 0. :
                 details_db_values['dest_errors_status'] = 'report'
             else:
-                details_db_values['dest_errors_status'] = 'success'
+                details_db_values['dest_errors_status'] = 'ok'
 
         
             if (self.sourceErrorFraction*100) > self.sourceCritical:
@@ -554,18 +554,18 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
             elif (self.sourceErrorFraction*100) > 0. :
                 details_db_values['source_errors_status'] = 'report'
             else:
-                details_db_values['source_errors_status'] = 'success'
+                details_db_values['source_errors_status'] = 'ok'
 
         else:
             if (self.destErrorFraction*100) > 0. :
                 details_db_values['dest_errors_status'] = 'report'
             else:
-                details_db_values['dest_errors_status'] = 'success'
+                details_db_values['dest_errors_status'] = 'ok'
 
             if (self.sourceErrorFraction*100) > 0. :
                 details_db_values['source_errors_status'] = 'report'
             else:
-                details_db_values['source_errors_status'] = 'success'
+                details_db_values['source_errors_status'] = 'ok'
             
 
         for node in self.globalDict.keys():

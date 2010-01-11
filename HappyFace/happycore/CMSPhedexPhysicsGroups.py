@@ -210,12 +210,12 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
         if ($info["group_status"] == 0.){
-             $service_status_color_flag = "fail";
+             $service_status_color_flag = "critical";
         }
         elseif ($info["node_files"] != $info["dest_files"]){
              $service_status_color_flag = "warning";
         }
-        else $service_status_color_flag = "success";
+        else $service_status_color_flag = "ok";
         
         $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
         $resident_data_percent = round(($info["node_bytes"]/$info["dest_bytes"])*100,1);
@@ -237,12 +237,12 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         foreach ($dbh->query($details_db_sqlquery) as $info2)
        	{
         if ($info2["group_status"] == 0.){
-             $service_status_color_flag = "fail";
+             $service_status_color_flag = "critical";
         }
         elseif ($info2["node_files"] != $info2["dest_files"]){
              $service_status_color_flag = "warning";
         }
-        else $service_status_color_flag = "success";
+        else $service_status_color_flag = "ok";
         
         $resident_data_TB = round($info2["node_bytes"]/(1024*1024*1024*1024),2);
         $subscribed_data_TB = round($info2["dest_bytes"]/(1024*1024*1024*1024),2);

@@ -1,0 +1,34 @@
+/* CSS file available to all HappyFace modules */
+
+/* Global status colors */
+
+/* Success, service is up and running */
+.ok {
+	background-color:  #AAFFAA;
+}
+
+/* Warning */
+.warning {
+	background-color: #FFFF96;
+}
+
+/* Service reports failure */
+.critical {
+	background-color: #FF6464;
+}
+
+/* Operation in question has a report to make; not important enough for a
+   warning though, or operation is still in progress */
+.report {
+    background-color: #96C8FF;
+}
+
+/* not applicable or no status value available */
+.undefined {
+    background-color: #C0C0C0;
+}
+
+/* Service is not active */
+.deactivated {
+    background-color:  #C896DC;
+}

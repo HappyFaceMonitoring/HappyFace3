@@ -21,17 +21,3 @@
 	font-family: monospace;
 	line-height: 14px;
 }
-
-
-
-tr.success {
-	background-color:  #AAFFAA;
-}
-
-tr.warning {
-	background-color: #FFAA46;
-}
-
-tr.fail {
-	background-color: #FF6464;
-}

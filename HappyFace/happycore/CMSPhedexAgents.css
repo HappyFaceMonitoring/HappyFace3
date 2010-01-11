@@ -21,21 +21,3 @@
 	font-family: monospace;
 	line-height: 14px;
 }
-
-
-
-tr.up {
-	background-color:  #AAFFAA;
-}
-
-tr.warning {
-	background-color: #FFAA46;
-}
-
-tr.critical {
-	background-color: #FF6464;
-}
-
-tr.undef {
-	background-color: #C0C0C0;
-}
