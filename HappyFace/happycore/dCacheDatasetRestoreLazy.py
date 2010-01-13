@@ -22,6 +22,8 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		self.detailsTableCutOff = self.configService.getDefault('setup','details_cutoff','')
 
+		self.statusTagsOk   = ['Pool2Pool','Staging']
+		self.statusTagsFail = ['Waiting','Suspended','Unknown']
 
 
 	def run(self):
@@ -143,9 +145,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		allRequests['total_problem'] = 0
 		allRequests['hit_retry'] = 0
 		allRequests['hit_time']  = 0
-
-		self.statusTagsOk   = ['Pool2Pool','Staging']
-		self.statusTagsFail = ['Waiting','Suspended','Unknown']
 
 		
 
