@@ -357,12 +357,12 @@ class Sam(ModuleBase,PhpDownload):
 	    if ($temp_element != $info["service_name"]) {
 
 		if ($info["service_status"] == "1.") {
-		    $service_status_color_flag = "success";
+		    $service_status_color_flag = "ok";
 		}
                 elseif ($info["service_status"] == "0.5") {
 		    $service_status_color_flag = "warning";
 		} else {
-		    $service_status_color_flag = "fail";
+		    $service_status_color_flag = "critical";
 		}
 		
 #		printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');

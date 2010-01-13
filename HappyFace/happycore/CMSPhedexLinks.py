@@ -170,7 +170,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		foreach ($dbh->query($details_db_sqlquery) as $info)
 		{
 		    if ($info["color"] == "green"){
-		       $service_status_color_flag = "up";
+		       $service_status_color_flag = "ok";
 		}
 	            else if ($info["color"] == "purple"){
 		       $service_status_color_flag = "deactivated";
@@ -178,7 +178,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		    else if ($info["color"] == "red"){
 		       $service_status_color_flag = "critical";
 		}
-		    else $service_status_color_flag = "undef";
+		    else $service_status_color_flag = "undefined";
 
 	        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["linked_site"] . '</td><td>'.$info["link_status"].'</td><td>' .$info["update_source"] . '</td><td>'.$info["update_dest"].'</td></tr>');
         

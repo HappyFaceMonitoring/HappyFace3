@@ -209,7 +209,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         if ($onlyOnce == 0) {
 
         if($info["total_errors"] == 0){
-        $service_status_color_flag = "success";
+        $service_status_color_flag = "ok";
         }
         else {
         $service_status_color_flag = "report";
@@ -218,28 +218,28 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         printf('<tr class="'.$service_status_color_flag.'"><td>failed transfers</td><td>'.$info["total_errors"].'</td></tr>\n');
         printf('<tr><td colspan="2" class="center">failed transfers details</td></tr>\n');
         if($info["dest_errors"] == 0){
-        $service_status_color_flag = "success";
+        $service_status_color_flag = "ok";
         }
         else {
         $service_status_color_flag = "report";
         }
         printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to destination</td><td>'.$info["dest_errors"].'</td></tr>\n');
         if($info["source_errors"] == 0){
-        $service_status_color_flag = "success";
+        $service_status_color_flag = "ok";
         }
         else {
         $service_status_color_flag = "report";
         }
         printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to source</td><td>'.$info["source_errors"].'</td></tr>\n');
         if($info["transfer_errors"] == 0){
-        $service_status_color_flag = "success";
+        $service_status_color_flag = "ok";
         }
         else {
         $service_status_color_flag = "report";
         }
         printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to transfer</td><td>'.$info["transfer_errors"].'</td></tr>\n');
         if($info["unknown_errors"] == 0){
-        $service_status_color_flag = "success";
+        $service_status_color_flag = "ok";
         }
         else {
         $service_status_color_flag = "report";
@@ -259,7 +259,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         printf('<tr class="' .$info["dest_errors_status"] . '"><td>fraction of destination errors</td><td>'.round($frac_dest).'%%</td></tr>\n');
         printf('<tr class="' .$info["source_errors_status"] . '"><td>fraction of source errors</td><td>'.round($frac_source).'%%</td></tr>\n');
         if ($frac_trans == 0){
-        $service_status_color_flag = "success";
+        $service_status_color_flag = "ok";
         }
         else {
         $service_status_color_flag = "report";
@@ -273,7 +273,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
         if ($onlyOnce == 0){
 
-        printf('<table class="ErrorLogTable"><tr class="success"><td>No errors detected</td></tr></table>\n');
+        printf('<table class="ErrorLogTable"><tr class="ok"><td>No errors detected</td></tr></table>\n');
         
         }
 

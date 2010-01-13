@@ -208,7 +208,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
          foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
             if ($info["agent_status"] == 1.){
-                  $service_status_color_flag = "up";
+                  $service_status_color_flag = "ok";
         }
              else if ($info["agent_status"] == 0.5){
                   $service_status_color_flag = "warning";
@@ -216,7 +216,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
              else if ($info["agent_status"] == 0.){
                   $service_status_color_flag = "critical";
         }
-             else $service_status_color_flag = "undef";
+             else $service_status_color_flag = "undefined";
 
         printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>'.$info["label"].'</td><td>' .$info["host"] . '</td><td>'.$info["dir"].'</td><td>'.$info["version"].'</td></tr>');
         
