@@ -150,13 +150,13 @@ class PhedexStats(ModuleBase):
 	<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
 	<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
 	<table class="TableDetails">
-		<tr class="TableHeader"><td>Site Name</td><td>Failed Transfers</td><td>Origin</td><td>Error Message<td></tr>
+		<tr class="TableHeader"><td>Site Name</td><td>Failed Transfers</td><td>Origin</td><td>Error Message</td></tr>
 	');
 	
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-		printf('<tr><td>'.$info["site_name"].'</td><td>'.$info["number"].'</td><td>'.$info["origin"].'</td><td>'.$info["error_message"].'</td></tr>');
+		printf('<tr class="report"><td>'.$info["site_name"].'</td><td>'.$info["number"].'</td><td>'.$info["origin"].'</td><td>'.$info["error_message"].'</td></tr>');
 	}
 	printf('</table></div><br/>')
 	?>

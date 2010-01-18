@@ -385,13 +385,18 @@ class Sam(ModuleBase,PhpDownload):
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
 	    if ($results["status"] != "ok" && $results["status"] != "")
-		printf('<tr>
-			<td>'.$results["service_type"].'</td>
-			<td>'.$results["service_name"].'</td>
-			<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong></a></td>
-			<td>'.$results["type"].'</td>
-			<td>'.$results["time"].'</td>
-		</tr>');
+        {
+			$color = "critical";
+			if($results["$service_status"] == "0.5") $color="warning";
+
+			printf('<tr class="'.$color.'">
+				<td>'.$results["service_type"].'</td>
+				<td>'.$results["service_name"].'</td>
+				<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong>'.$results["$service_status"].'</a></td>
+				<td>'.$results["type"].'</td>
+				<td>'.$results["time"].'</td>
+			</tr>');
+		}
 	}
 	printf('</table></div><br />');
 
@@ -405,7 +410,7 @@ class Sam(ModuleBase,PhpDownload):
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
 	    if ($results["status"] == "ok")
-		printf('<tr>
+		printf('<tr class="ok">
 			<td>'.$results["service_type"].'</td>
 			<td>'.$results["service_name"].'</td>
 			<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong></a></td>
