@@ -326,7 +326,7 @@ class Sam(ModuleBase,PhpDownload):
         printf('<strong>Group status:</strong><br>');   
 
 
-	printf('<table class="SamTable">');
+	printf('<table class="TableData">');
 	
 	foreach ($dbh->query($details_summary_db_sqlquery) as $info)
        	{
@@ -350,7 +350,7 @@ class Sam(ModuleBase,PhpDownload):
 
         printf('<strong>Individual service status:</strong><br>');
 
-	printf('<table class="SamTable">');
+	printf('<table class="TableData">');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
@@ -377,10 +377,9 @@ class Sam(ModuleBase,PhpDownload):
 
 	printf('
 		<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-		<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_success_result\\\'" + """);" />
-		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
-		<table class="SamTableDetails">
-			<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
+		<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
+		<table class="TableDetails">
+			<tr class="TableHeader"><td>Element Type</td><td>Element Name</td><td>Status</td><td>Test Name</td><td>Test Time</td></tr>
 	    ');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $results)
@@ -394,12 +393,13 @@ class Sam(ModuleBase,PhpDownload):
 			<td>'.$results["time"].'</td>
 		</tr>');
 	}
-	printf('</table></div>');
+	printf('</table></div><br />');
 
 	printf('
-		<div class="SamDetailedInfo" id=""" + "\\\'" + self.__module__+ "_success_result\\\'" + """ style="display:none;">
-		<table class="SamTableDetails">
-		<tr><td><strong>Element Type</strong></td><td><strong>Element Name</strong></td><td><strong>Status</strong></td><td><strong>Test Name</strong></td><td><strong>Test Time</strong></td></tr>
+		<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_success_result\\\'" + """);" />
+		<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_success_result\\\'" + """ style="display:none;">
+		<table class="TableDetails">
+		<tr class="TableHeader"><td>Element Type</td><td>Element Name</td><td>Status</td><td>Test Name</td><td>Test Time</td></tr>
 	    ');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $results)

@@ -1,26 +1,5 @@
 /* CSS file for the HappyFace module: dcache_datarestore_lazy */
 
-.DcacheDatarestoreLazyTable,.DcacheDatarestoreLazyTableDetails {
-	border: solid 1px #999;
-	width: 800px;
+.dCacheDatarestoreLazyFirstCol {
+        width:65%;
 }
-
-.DcacheDatarestoreLazyTable td {
-	padding: 5px;
-	border: solid 1px #999;
-	text-align: left;
-	width:65%;
-}
-
-
-.DcacheDatarestoreLazyTableDetails td {
-	padding: 5px;
-	border: solid 1px #999;
-	text-align: left;
-}
-
-
-.DcacheDatarestoreLazyTableDetails odd {
-        font-size:0.7em;
-}
-

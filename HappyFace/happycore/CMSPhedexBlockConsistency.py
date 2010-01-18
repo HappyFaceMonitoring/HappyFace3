@@ -185,8 +185,8 @@ class CMSPhedexBlockConsistency(ModuleBase):
 
 	printf('"""+warning_message+"""
         
-	<table class="CMSPhedexBlockConsistencyTable">
-		<tr class=\"CMSPhedexBlockConsistencyTableHeader\">
+	<table class="TableDataSmall">
+		<tr class=\"TableHeader\">
                   <td>Buffer:</td>
                   <td>'.$data["buffer"].'</td>
                 </tr>
@@ -229,8 +229,9 @@ class CMSPhedexBlockConsistency(ModuleBase):
                 </tr>
 -->
 	</table>
-	<table class="CMSPhedexBlockConsistencyTable">
-                <tr class=\"CMSPhedexBlockConsistencyTableHeader\">
+    <br />
+	<table class="TableDataSmall">
+                <tr class=\"TableHeader\">
                   <td> Tested:</td>
                   <td> Datasets:</td>
                   <td> Blocks:</td>
@@ -252,10 +253,10 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	<br/>
 
 	<input type="button" value="show/hide Failed Datasets" onfocus="this.blur()" onclick="show_hide(\\\'datasets_details\\\');" />
-	<div class="CMSPhedexBlockConsistencyDetailedInfo" id=\\\'datasets_details\\\' style="display:none;">
+	<div class="DetailedInfo" id=\\\'datasets_details\\\' style="display:none;">
 
-	<table class="CMSPhedexBlockConsistencyTableDetails">
-            <tr class=\"CMSPhedexBlockConsistencyTableHeader\">
+	<table class="TableDetails">
+            <tr class=\"TableHeader\">
 		<td>Dataset</td>
 		<td>Failed Blocks</td>
 		<td>Failed Files</td>
@@ -278,10 +279,10 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	printf('</table></div><br/>
 
 	<input type="button" value="show/hide Inconsistent Files" onfocus="this.blur()" onclick="show_hide(\\\'files_details\\\');" />
-	<div class="CMSPhedexBlockConsistencyDetailedInfo" id=\\\'files_details\\\' style="display:none;">
+	<div class="DetailedInfo" id=\\\'files_details\\\' style="display:none;">
 
-	<table class="CMSPhedexBlockConsistencyTableDetails">
-            <tr class=\"CMSPhedexBlockConsistencyTableHeader\">
+	<table class="TableDetails">
+            <tr class=\"TableHeader\">
 		<td>Logical File Name</td>
 		<td>Status</td>
 		</tr>

@@ -214,7 +214,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         else {
         $service_status_color_flag = "report";
         }
-        printf('<table class="ErrorLogTable">\n');
+        printf('<table class="TableData">\n');
         printf('<tr class="'.$service_status_color_flag.'"><td>failed transfers</td><td>'.$info["total_errors"].'</td></tr>\n');
         printf('<tr><td colspan="2" class="center">failed transfers details</td></tr>\n');
         if($info["dest_errors"] == 0){
@@ -273,16 +273,16 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
         if ($onlyOnce == 0){
 
-        printf('<table class="ErrorLogTable"><tr class="ok"><td>No errors detected</td></tr></table>\n');
+        printf('<table class="TableData"><tr class="ok"><td>No errors detected</td></tr></table>\n');
         
         }
 
         else{
         printf('
         <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />\n
-        <div class="ErrorLogDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">\n');
-        printf('<table class="ErrorLogTableDetails">\n');
-        printf('<tr><td>node</td><td>failed transfers</td><td>error content</td></tr>\n');
+        <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">\n');
+        printf('<table class="TableDetails">\n');
+        printf('<tr class="TableHeader"><td>node</td><td>failed transfers</td><td>error content</td></tr>\n');
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
                 printf('<tr><td>'.$info["link_remote_node"].'</td><td class="center">'.$info["file_detail_log_nb"].'</td><td>'.$info["file_detail_log"].'</td></tr>\n');

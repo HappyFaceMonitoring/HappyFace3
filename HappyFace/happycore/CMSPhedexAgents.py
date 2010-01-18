@@ -173,8 +173,8 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 
         $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-        printf('<table class="AgentsTable">');
-        printf('<tr><td>agent</td><td>label</td><td>last report</td></tr>');
+        printf('<table class="TableData">');
+        printf('<tr class="TableHeader"><td>agent</td><td>label</td><td>last report</td></tr>');
 
 
         foreach ($dbh->query($details_db_sqlquery) as $info)
@@ -198,10 +198,10 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 
         printf('
         <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-        <div class="AgentsDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
-        <table class="AgentsTableDetails">
+        <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
+        <table class="TableDetails">
 
-        <tr><td>agent</td><td>label</td><td>host</td><td>directory</td><td>version</td></tr>
+        <tr class="TableHeader"><td>agent</td><td>label</td><td>host</td><td>directory</td><td>version</td></tr>
         
         ');
 

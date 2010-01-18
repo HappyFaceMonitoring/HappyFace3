@@ -1,53 +1,36 @@
 /* CSS file for the HappyFace module: Uschi */
 
-.UschiTable {
-	border: solid 1px #999;
-	width: 800px;
-}
-
-.UschiTable th{
-	font-weight: bold;
-	border: solid 1px #999;
-}
-
-.UschiSubTable {
-        border: solid 0px #999;
-        width: 100%;
-}
-
 .UschiTableHeader {
-	border: solid 1px #999;
 	text-align: center;
 	width: 80%;
 	font-variant: small-caps;
 }
 
-.UschiSubTableHeaderLeft {
-	padding: 5px;
-	border: solid 0px #999;
+.UschiTableInfo {
+	font-style: oblique;
+}
+
+table.UschiSubTable {
+    border: none;
+    width: 100%;
+}
+
+/* need to specify parent table explicitely, otherwise .TableData td { }
+ * (defined in ModuleBase.css) is overwriting these attributes. */
+table.UschiSubTable td.UschiSubTableHeaderLeft {
+	padding: 0px;
+	border: none;
 	text-align: left;
 	width: 70%;
 	font-style: normal;
 }
 
-.UschiSubTableHeaderRight {
-	padding: 5px;
-	border: solid 0px #999;
+table.UschiSubTable td.UschiSubTableHeaderRight {
+	padding: 0px;
+	border: none;
 	font-weight: bold;
 	text-align: right;
 	color: #FF9900;
 	width: 30%;
 	font-style: normal;
-}
-
-.UschiTableInfo {
-        padding: 5px;
-        border: solid 1px #999;
-        text-align: left;
-	font-style: oblique;
-}
-
-.UschiDetailedInfo {
-	font-family: monospace;
-	line-height: 14px;
 }

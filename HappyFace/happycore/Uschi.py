@@ -118,7 +118,7 @@ class Uschi(ModuleBase):
         module_content = """
         <?php
         printf('
-            <table class="UschiTable">
+            <table class="TableData">
                 <tr>
                     <td class="UschiTableHeader"><table class="UschiSubTable"><tr><td class="UschiSubTableHeaderLeft">Last USCHI execution (every '.$data["frequency"].' minutes):</td><td class="UschiSubTableHeaderRight">'.$data["uschi_timestamp"].'</td></tr></table></td>
                     <th rowspan="3">error code: '.$data["result"].'</th>
@@ -132,7 +132,7 @@ class Uschi(ModuleBase):
             </table>
             <br />
             <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-            <div class="UschiDetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>
+            <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>
             <br />
             ');
             ?>

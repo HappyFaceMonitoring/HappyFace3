@@ -272,37 +272,37 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc.append('$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];')
 
 		mc.append("printf('")
-		mc.append(' <table class="DcacheDatarestoreLazyTable">')
+		mc.append(' <table class="TableData">')
 		mc.append("  <tr>")
-		mc.append("    <td>Total number of stage requests</td>")
+		mc.append('    <td class="dCacheDatarestoreLazyFirstCol">Total number of stage requests</td>')
 		mc.append("""    <td>'.$data["total"].'</td>""")
 		mc.append("   </tr>")
 
 		for tag in self.statusTagsOk:
 			mc.append("  <tr>")
-			mc.append("    <td> ...  with status "+tag+":</td>")
+			mc.append('    <td class="dCacheDatarestoreLazyFirstCol"> ...  with status '+tag+':</td>')
 			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
 			mc.append("   </tr>")
 
 
 		mc.append("  <tr>")
-		mc.append("    <td>Stage request with problems</td>")
+		mc.append('    <td class="dCacheDatarestoreLazyFirstCol">Stage request with problems</td>')
 		mc.append("""    <td>'.$data["total_problem"].'</td>""")
 		mc.append("   </tr>")
 
 		for tag in self.statusTagsFail:
 			mc.append("  <tr>")
-			mc.append("    <td> ...  with status "+tag+":</td>")
+			mc.append('    <td class="dCacheDatarestoreLazyFirstCol"> ...  with status '+tag+':</td>')
 			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
 			mc.append("   </tr>")
 
 
 		mc.append("  <tr>")
-		mc.append("    <td>... time limit hit ('.$data[timelimit].')</td>")
+		mc.append("""    <td class="dCacheDatarestoreLazyFirstCol">... time limit hit ('.$data[timelimit].')</td>""")
 		mc.append("""    <td>'.$data["hit_time"].'</td>""")
 		mc.append("   </tr>")
 		mc.append("  <tr>")
-		mc.append("""    <td>... retry limit hit ('.$data[retrylimit].')</td>""")
+		mc.append("""    <td class="dCacheDatarestoreLazyFirstCol">... retry limit hit ('.$data[retrylimit].')</td>""")
 		mc.append("""    <td>'.$data["hit_retry"].'</td>""")
 		mc.append("   </tr>")
 		
@@ -311,10 +311,10 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		# Show/Hide details table
 		mc.append(""" <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />""")
-		mc.append(""" <div class="DcacheDatarestoreLazyTableDetails" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">""")
+		mc.append(""" <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">""")
 		
-		mc.append(' <table class="DcacheDatarestoreLazyTableDetails">')
-		mc.append("  <tr>")
+		mc.append(' <table class="TableDetails">')
+		mc.append('  <tr class="TableHeader">')
 		mc.append("  <td>pnfsID</td>")
 		mc.append("  <td>Start</td>")
 		mc.append("  <td>Retries</td>")

@@ -123,7 +123,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 
                 $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-                printf('<table class="CMSSiteReadinessTable">');
+                printf('<table class="TableData">');
 
 		$condition = "start";
 

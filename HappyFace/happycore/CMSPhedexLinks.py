@@ -119,8 +119,8 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 
 		$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 		
-		printf('<table class="CMSPhedexLinksTable">');
-		printf('<tr><td>site</td><td>status</td></tr>');
+		printf('<table class="TableData">');
+		printf('<tr class="TableHeader"><td>site</td><td>status</td></tr>');
 
 		$tier = 1;
 
@@ -160,10 +160,10 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 
 		printf('
 		<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-		<div class="CMSPhedexLinksDetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
-		<table class="CMSPhedexLinksTableDetails">
+		<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
+		<table class="TableDetails">
 
-		<tr><td>site</td><td>link_status</td><td>source update</td><td>dest update</td></tr>
+		<tr class="TableHeader"><td>site</td><td>link_status</td><td>source update</td><td>dest update</td></tr>
         
 		');
 

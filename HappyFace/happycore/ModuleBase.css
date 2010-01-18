@@ -32,3 +32,48 @@
 .deactivated {
     background-color:  #C896DC;
 }
+
+/* Table containing service data */
+
+table.TableData {
+    border: solid 1px #999;
+    width: 800px;
+}
+
+table.TableDataSmall {
+    border: solid 1px #999;
+    width: 400px;
+}
+
+table.TableData td, table.TableDataSmall td {
+    padding: 5px;
+    border: solid 1px #999;
+}
+
+table.TableData th, table.TableDataSmall th {
+    padding: 5px;
+    border: solid 1px #999;
+    font-weight: bold;
+}
+
+/* Service details */
+div.DetailedInfo {
+    font-family: monospace;
+    line-height: 14px;
+}
+
+table.TableDetails {
+    border: solid 1px #999;
+    width: 800px;
+}
+
+table.TableDetails td {
+    padding: 5px;
+    border: solid 1px #999;
+}
+
+/* Common to all tables */
+tr.TableHeader {
+    font-weight: bold;
+    background-color: #CCCCCC;
+}

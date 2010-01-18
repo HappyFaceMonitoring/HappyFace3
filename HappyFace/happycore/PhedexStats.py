@@ -127,30 +127,30 @@ class PhedexStats(ModuleBase):
 	}
 	
 	printf('
-	<table class="PhedexStatsTable">
+	<table class="TableData">
 		<tr>
-			<td>Start Time</td><td>'.$data["startlocaltime"].'</td>
+			<td class="PhedexStatsTableFirstCol">Start Time</td><td>'.$data["startlocaltime"].'</td>
 		</tr>
                	<tr>
-			<td>End Time</td><td>'.$data["endlocaltime"].'</td>
+			<td class="PhedexStatsTableFirstCol">End Time</td><td>'.$data["endlocaltime"].'</td>
 		</tr>
 	</table>
 	<br/>
 
-	<table class="PhedexStatsTable">
+	<table class="TableData">
 		<tr>
-			<td>Total Transfers</td><td>'.$data["total_transfers"].'</td>
+			<td class="PhedexStatsTableFirstCol">Total Transfers</td><td>'.$data["total_transfers"].'</td>
 		</tr>
                	<tr>
-			<td>Failed Tranfers</td><td>'.$data["failed_transfers"].'</td>
+			<td class="PhedexStatsTableFirstCol">Failed Transfers</td><td>'.$data["failed_transfers"].'</td>
 		</tr>
 	</table>
 	<br />
 
 	<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-	<div class="PhedexStatsDetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
-	<table class="PhedexStatsTableDetails">
-		<tr><td><strong>Site Name</strong></td><td><strong>Failed Transfers</strong></td><td><strong>Origin</strong></td><td><strong>Error Message</strong></td></tr>
+	<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
+	<table class="TableDetails">
+		<tr class="TableHeader"><td>Site Name</td><td>Failed Transfers</td><td>Origin</td><td>Error Message<td></tr>
 	');
 	
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];

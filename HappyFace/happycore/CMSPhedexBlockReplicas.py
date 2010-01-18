@@ -224,8 +224,8 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
         }
 
         if(!$dummy){
-          printf('<table class="BlockReplicasTable">');
-          printf('<tr><td>dataset</td><td>block</td><td>resident size [MB]</td></tr>');
+          printf('<table class="TableData">');
+          printf('<tr="TableHeader"><td>dataset</td><td>block</td><td>resident size [MB]</td></tr>');
 
           foreach ($dbh->query($details_db_sqlquery) as $info)
        	  {
@@ -246,10 +246,10 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 
           
           printf('<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-          <div class="BlockReplicasDetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">');
+          <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">');
 
-          printf('<table class="BlockReplicasTableDetails">');
-          printf('<tr><td>dataset</td><td>block</td><td>block files</td><td>resident files</td><td>block size [MB]</td><td>resident size [MB]</td><td>group</td></tr>');
+          printf('<table class="TableDetails">');
+          printf('<tr class="TableHeader"><td>dataset</td><td>block</td><td>block files</td><td>resident files</td><td>block size [MB]</td><td>resident size [MB]</td><td>group</td></tr>');
 
           foreach ($dbh->query($details_db_sqlquery) as $info)
           {

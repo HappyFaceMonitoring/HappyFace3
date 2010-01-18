@@ -1,27 +1,5 @@
 /* CSS file for the HappyFace module: CMSPhedexErrorLog */
 
-.ErrorLogTable,.ErrorLogTableDetails {
-	border: solid 1px #999;
-	width: 800px;
-}
-
-.ErrorLogTable td {
-	padding: 5px;
-	border: solid 1px #999;
-	text-align: left;
-}
-
-.ErrorLogTableDetails td {
-	padding: 5px;
-	border: solid 1px #999;
-	text-align: left;
-}
-
-.ErrorLogDetailedInfo {
-	font-family: monospace;
-	line-height: 14px;
-}
-
 td.center{
 	text-align: center
 }

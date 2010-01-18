@@ -294,7 +294,7 @@ class dCacheInfoPool(dCacheInfo):
       
         #Start with module output
         mc.append("printf('")
-        mc.append(' <table class="dCacheInfoPoolTable">')
+        mc.append(' <table class="TableData">')
 
         #Summary table
     
@@ -330,11 +330,11 @@ class dCacheInfoPool(dCacheInfo):
 
         # Show/Hide details table
         mc.append(""" <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />""")
-        mc.append(""" <div class="dCacheInfoPoolDetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">""")
+        mc.append(""" <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">""")
 
-        mc.append(' <table class="dCacheInfoPoolTableDetails">')
-        mc.append("  <tr>")
-        mc.append('   <td class="dCacheInfoPoolTableDetails1RowHead">Poolname</td>')
+        mc.append(' <table class="TableDetails">')
+        mc.append('  <tr class="TableHeader">')
+        mc.append('   <td>Poolname</td>')
         for att in self.localAttribs:
             mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+self.poolAttribNames[att]["webname"]+"</td>")
         for att in self.localRatios:
@@ -359,7 +359,7 @@ class dCacheInfoPool(dCacheInfo):
         
         mc.append("  printf('")
         mc.append("   <tr class=\"'.$c_flag.'\">")
-        mc.append("""    <td class="dCacheInfoPoolTableDetails1Row">'.$sub_data["poolname"].'</td>""")
+        mc.append("""    <td>'.$sub_data["poolname"].'</td>""")
         for att in self.localAttribs:
             mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att +'"'+ """]),"""+self.decs+""").'</td>""")
         mc.append("  ');")

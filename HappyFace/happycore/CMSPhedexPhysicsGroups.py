@@ -204,8 +204,8 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         <?php
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	
-	printf('<table class="PhysGroupsTable">');
-        printf('<tr><td>Group</td><td>resident data [TB]</td><td>percent of subscribed data</td></tr>');
+	printf('<table class="TableData">');
+        printf('<tr class="TableHeader"><td>Group</td><td>resident data [TB]</td><td>percent of subscribed data</td></tr>');
         
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
@@ -228,9 +228,9 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
         printf('
         <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_details\\\'" + """);" />\n
-        <div class="PhysGroupsDetailedInfo" id=""" + "\\\'" + self.__module__+ "_details\\\'" + """ style="display:none;">
-        <table class="PhysGroupsTableDetails">\n
-        <tr><td>Group</td><td>resident data [TB]</td><td>subscribed data [TB]</td><td>resident files</td><td>subscribed files</td></tr>
+        <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_details\\\'" + """ style="display:none;">
+        <table class="TableDetails">\n
+        <tr class="TableHeader"><td>Group</td><td>resident data [TB]</td><td>subscribed data [TB]</td><td>resident files</td><td>subscribed files</td></tr>
         ');
 
         
