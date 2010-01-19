@@ -9,3 +9,13 @@ td.CMSSiteReadinessWeekend {
 td.CMSSiteReadinessWeekday {
 	background-color:  #C0C0C0;
 }
+
+a.CMSSiteReadinessLink:link {
+	color: #000000;
+	text-decoration : none;
+}
+
+a.CMSSiteReadinessLink:hover {
+	color: #008040;
+	text-decoration : none;
+}
