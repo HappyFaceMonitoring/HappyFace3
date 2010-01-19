@@ -172,49 +172,51 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		critical_counter = 0
 		warning_counter = 0
 
+		if self.readiness == -1.:
+			return -1
+		
+		else:
 		## look into the last x days
 
-		for entry in self.readiness['Site Readiness Status'][-int(self.critical[0]):]:
-			if entry['color'] == 'red':
-				critical_counter += 1
-			## if you find y critical days in
-			## in the x considered:
-			if critical_counter >= int(self.critical[1]):
-				return 0
-		for entry in self.readiness['Site Readiness Status'][-int(self.warning[0]):]:
-			if entry['color'] == 'yellow':
-				warning_counter += 1
-			## same as critical
-			if warning_counter >= int(self.warning[1]):
-				return 0.5
+			for entry in self.readiness['Site Readiness Status'][-int(self.critical[0]):]:
+				if entry['color'] == 'red':
+					critical_counter += 1
+			                ## if you find y critical days in
+			                ## in the x considered:
+				if critical_counter >= int(self.critical[1]):
+					return 0
+			for entry in self.readiness['Site Readiness Status'][-int(self.warning[0]):]:
+				if entry['color'] == 'yellow':
+					warning_counter += 1
+			       ## same as critical
+				if warning_counter >= int(self.warning[1]):
+					return 0.5
 			
 			
 		return 1
 
+
 	def getSiteElements(self, root):
+
 		"""
 		Finds the relevant elements in the html tree for the
 		given site.
 		"""
 
-
 		for root_el in root:
 			if root_el.tag == 'body':
 				for body_el in root_el:
-					for center_el in body_el:
-						if center_el.tag == 'table':
-							SiteTable = center_el
-							for table_el in center_el:
-								if table_el.tag == 'tr':
-									for tr_el in table_el:
-										if tr_el.tag == 'td':
-											for td_el in tr_el:
-												if td_el.tag == 'div':
-													if td_el.get('id').encode('utf-8') == 'site' and td_el.text_content().encode('utf-8') == self.site:
-														#print td_el.text_content().encode('utf-8')
-														return SiteTable
+					if body_el.tag == 'center':
+						for center_el in body_el:
+							if center_el.tag == 'div' and \
+							       re.search(self.site, center_el.get('id').encode('utf-8')):
+								#return center_el
+								for div_el in center_el:
+									if div_el.tag == 'table':
+										return div_el
 
-		return 0
+		return []
+
 
 	def getReadiness(self,siteTable):
 		
@@ -224,76 +226,84 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 
 
 		readiness = {}
-		for table_el in siteTable:
-			if table_el.tag == 'tr':
-				key = None
-				entry = {}
-				entry_list = []
-				for tr_el in table_el:
-					if tr_el.tag == 'td':
-						for td_el in tr_el:
-							if td_el.get('id') == 'daily-metric-header' or \
-							       td_el.get('id') == 'metrics-header':
-								#print td_el.text_content().encode('utf-8')
-								key = td_el.text_content().encode('utf-8').rstrip().rstrip(":")
-								entry = {}
-								entry_list = []
+		try:
+			for table_el in siteTable:
+				if table_el.tag == 'tr':
+					key = None
+					entry = {}
+					entry_list = []
+					for tr_el in table_el:
+						if tr_el.tag == 'td':
+							for td_el in tr_el:
+								if td_el.get('id') == 'daily-metric-header' or \
+								       td_el.get('id') == 'metrics-header':
+								       #print td_el.text_content().encode('utf-8')
+								       key = td_el.text_content().encode('utf-8').rstrip().rstrip(":")
+								       entry = {}
+								       entry_list = []
 
+								       
+								if key == None:
+									if td_el.get('id') == 'date':
+										key = 'date'
+										entry = {}
+										entry_list = []
 
-							if key == None:
-								if td_el.get('id') == 'date':
-									key = 'date'
-									entry = {}
-									entry_list = []
+									elif td_el.get('id') == 'month':
+										key = 'month'
+										entry = {}
+										entry_list = []
 
-								elif td_el.get('id') == 'month':
-									key = 'month'
-									entry = {}
-									entry_list = []
+							if not key == None:
 
-						if not key == None:
+								if not key == 'month':
 
-							if not key == 'month':
+									try:
+										entry = {}
+										entry['color'] = tr_el.get('bgcolor').encode('utf-8')
+										for td_el in tr_el:
+											entry['value'] = td_el.text_content().encode('utf-8')
 
-								try:
-									entry = {}
-									entry['color'] = tr_el.get('bgcolor').encode('utf-8')
-									for td_el in tr_el:
-										entry['value'] = td_el.text_content().encode('utf-8')
+									except:
+										pass
 
-								except:
-									pass
-
-							elif key == 'month':
+								elif key == 'month':
 								
-								try:
-									entry = {}
-									entry['color'] = ''
-									entry['value'] = ''
-									for td_el in tr_el:
-										entry['value'] = td_el.text_content().encode('utf-8')
+									try:
+										entry = {}
+										entry['color'] = ''
+										entry['value'] = ''
+										for td_el in tr_el:
+											entry['value'] = td_el.text_content().encode('utf-8')
 
-								except:
-									pass
+									except:
+										pass
 
-						try:
-							if not entry['color'] == None and not entry['value'] == None:
-								entry_list.append(entry)
+							try:
+								if not entry['color'] == None and not entry['value'] == None:
+									entry_list.append(entry)
 
-						except:
-							pass
+							except:
+								pass
 
-						## will be overwritten as long as end of
-						## list is not reached
-						readiness[key] = entry_list
-			## dictionarys do not store the order of
-			## things, therefore use a list
-			self.key_list.append(key)
+						        ## will be overwritten as long as end of
+						        ## list is not reached
+							readiness[key] = entry_list
+			        ## dictionarys do not store the order of
+			        ## things, therefore use a list
+				self.key_list.append(key)
 										
 								
 								
-		self.readiness = readiness
-		#print self.readiness
+			self.readiness = readiness
+		        #print self.readiness
+
+		except:
+			err = 'Error! Site table is not a list in '+self.__module__+'\n'
+			sys.stdout.write(err)
+			self.error_message +=err
+			self.readiness = -1
+			return -1	
 		pass
 
 	def makeDatabaseEntries(self,details_db_keys,details_db_values,my_subtable_class):
