@@ -81,6 +81,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		details_db_keys['readiness_cond'] = StringCol()
 		details_db_keys['cond_color'] = StringCol()
 		details_db_keys['cond_value'] = StringCol()
+		details_db_keys['cond_link'] = StringCol()
 
 		my_subtable_class = self.table_init( details_database, details_db_keys )
 
@@ -151,8 +152,12 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		    $condition = $info["readiness_cond"];
 		}
 
-		printf('<td class="' .$service_status_color_flag . '">' . $info["cond_value"] . '</td>');
-		
+		if( $info["cond_link"] == "noLink" ){
+		    printf('<td class="' .$service_status_color_flag . '">' . $info["cond_value"] . '</td>');
+		    }
+		else {
+		    printf('<td class="' .$service_status_color_flag . '"><a class="CMSSiteReadinessLink" href="'. $info["cond_link"] .'">' . $info["cond_value"] . '</a></td>');
+		    }
 	        }
 
 		printf('</tr>');
@@ -263,7 +268,9 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 										entry['color'] = tr_el.get('bgcolor').encode('utf-8')
 										for td_el in tr_el:
 											entry['value'] = td_el.text_content().encode('utf-8')
-
+											if td_el.tag == 'a':
+												entry['link'] = td_el.get('href').encode('utf-8')										
+												
 									except:
 										pass
 
@@ -328,6 +335,13 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 						details_db_values['cond_value'] = entry['value']
 					else:
 						details_db_values['cond_value'] = re.sub('%','%%',entry['value'])
+					try:
+						if not re.search('%',entry['link']):
+							details_db_values['cond_link'] = entry['link']
+						else:
+							details_db_values['cond_link'] = re.sub('%','%%', entry['link'])
+					except:
+						details_db_values['cond_link'] = 'noLink'
 
 					self.table_fill( my_subtable_class, details_db_values )
 					
