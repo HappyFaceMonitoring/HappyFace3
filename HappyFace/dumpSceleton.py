@@ -95,36 +95,39 @@ def dumpHappycoreCss(name):
     file_css = open(name_css,"w")
     
     file_css.write(str("/*CSS file for the HappyFace module: " + name + " */\n"))
-    file_css.write(str("." + name + "Table,." + name + "TableDetails {\n"))
-    file_css.write("        border: solid 1px #999;\n")
-    file_css.write("        width: 800px;\n")
-    file_css.write("}\n\n")
-    file_css.write(str("." + name + "Table td {\n"))
-    file_css.write("	padding: 5px;\n")
-    file_css.write("	border: solid 1px #999;\n")
-    file_css.write("	text-align: left;\n")
-    file_css.write("}\n\n")
-    file_css.write(str("." + name + "TableDetails td {\n"))
-    file_css.write("	padding: 5px;\n")
-    file_css.write("	border: solid 1px #999;\n")
-    file_css.write("	text-align: left;\n")
-    file_css.write("}\n\n")
-    file_css.write(str("." + name + "DetailedInfo { \n"))
-    file_css.write("	font-family: monospace;\n")
-    file_css.write("	line-height: 14px;\n")
-    file_css.write("}\n\n\n")
-    file_css.write("tr.success {\n")
-    file_css.write("	background-color:  #AAFFAA;\n")
-    file_css.write("}\n")
-    file_css.write("tr.warning {\n")
-    file_css.write("	background-color:  #FFAA46;\n")
-    file_css.write("}\n")
-    file_css.write("tr.critical {\n")
-    file_css.write("	background-color:  #FF6464;\n")
-    file_css.write("}\n")
-    file_css.write("tr.undef {\n")
-    file_css.write("	background-color:  #C0C0C0;\n")
-    file_css.write("}\n")
+
+    ### no longer needed
+    ### but still print out empty file
+    #file_css.write(str("." + name + "Table,." + name + "TableDetails {\n"))
+    #file_css.write("        border: solid 1px #999;\n")
+    #file_css.write("        width: 800px;\n")
+    #file_css.write("}\n\n")
+    #file_css.write(str("." + name + "Table td {\n"))
+    #file_css.write("	padding: 5px;\n")
+    #file_css.write("	border: solid 1px #999;\n")
+    #file_css.write("	text-align: left;\n")
+    #file_css.write("}\n\n")
+    #file_css.write(str("." + name + "TableDetails td {\n"))
+    #file_css.write("	padding: 5px;\n")
+    #file_css.write("	border: solid 1px #999;\n")
+    #file_css.write("	text-align: left;\n")
+    #file_css.write("}\n\n")
+    #file_css.write(str("." + name + "DetailedInfo { \n"))
+    #file_css.write("	font-family: monospace;\n")
+    #file_css.write("	line-height: 14px;\n")
+    #file_css.write("}\n\n\n")
+    #file_css.write("tr.success {\n")
+    #file_css.write("	background-color:  #AAFFAA;\n")
+    #file_css.write("}\n")
+    #file_css.write("tr.warning {\n")
+    #file_css.write("	background-color:  #FFAA46;\n")
+    #file_css.write("}\n")
+    #file_css.write("tr.critical {\n")
+    #file_css.write("	background-color:  #FF6464;\n")
+    #file_css.write("}\n")
+    #file_css.write("tr.undef {\n")
+    #file_css.write("	background-color:  #C0C0C0;\n")
+    #file_css.write("}\n")
         
     file_css.close()
     return name_css
@@ -170,40 +173,14 @@ def dumpHappycorePy(name,xml):
         init += '\t\t# inherits from the ModuleBase Class\n'
         init += '\t\tModuleBase.__init__(self,category,timestamp,storage_dir)\n\n'
         
-    #init += "\t\tconfig = self.readConfigFile('./happycore/"+name+"')\n"
-    #init += "\t\tself.addCssFile(config,'./happycore/"+name+"')\n\n"
     if xml:
         init += "\t\t## get the url\n"
         init += "\t\tself.base_url = self.configService.get('setup','base_url')\n\n"
-        #init += "\t\tself.phpArgs = {}\n\n"
-        #init += "\t\t# read in the php arguments\n"
-        #init += "\t\tself.getPhpArgs(self.mod_config)\n\n"
-        #init += "\t\tself.makeUrl()"
     init += '\t\t# definition of the database table keys and pre-defined values\n'
     init += '\t\tself.db_keys["details_database"] = StringCol()\n'
     init += '\t\tself.db_values["details_database"] = ""\n\n'
     if xml:
         init += "\t\tself.dsTag = '"+name+"_xml_source'\n"
-        #init += "\t\tself.fileType = self.configService.get('setup','file_type')\n\n"
-        #init += "\t\tself.makeUrl()\n\n"
-        #init += "\tdef getPhpArgs(self, config):\n"
-        #init += "\t\t\tfor i in config.items('phpArgs'):\n"
-        #init += "\t\t\t\tself.phpArgs[i[0]] = i[1]\n\n"
-        #init += "\tdef makeUrl(self):\n"
-        #init += "\t\t\tif len(self.phpArgs) == 0:\n"
-        #init += "\t\t\t\tprint \"Php Error: makeUrl called without phpArgs\"\n"
-        #init += "\t\t\t\tsys.exit()\n"
-        #init += "\t\t\tif self.base_url == \"\":\n"
-        #init += "\t\t\t\tprint \"Php Error: makeUrl called without base_url\"\n"
-        #init += "\t\t\t\tsys.exit()\n\n"
-        #init += "\t\t\t## if last char of url is \"/\", remove it\n"
-        #init += "\t\t\tif self.base_url[-1] == \"/\":\n"
-        #init += "\t\t\t\tself.base_url = self.base_url[:-1]\n\n"
-        #init += "\t\t\targList = []\n"
-        #init += "\t\t\tfor i in self.phpArgs:\n"
-        #init += "\t\t\t\tfor j in self.phpArgs[i].split(\",\"):\n"
-        #init += "\t\t\t\t\targList.append(i+'='+j)\n\n"
-        #init += "\t\t\tself.downloadRequest[self.dsTag] = 'wget:'+self.fileType+':'+self.base_url+\"?\"+\"&\".join(argList)\n\n"
         init += "\t\tself.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()\n\n"
 
     run = '\tdef run(self):\n'
@@ -230,26 +207,28 @@ def dumpHappycorePy(name,xml):
     run += '\t\tself.db_values["details_database"] = details_database\n\n'
     run += '\t\tdetails_db_keys = {}\n'
     run += '\t\tdetails_db_values = {}\n\n'
-    run += '\t\t## write global after which the query will work\n'
-    run += '\t\tdetails_db_keys["timestamp"] = IntCol()\n'
-    run += '\t\tdetails_db_values["timestamp"] = self.timestamp\n\n'
-    run += '\t\t## create index for timestamp\n'
-    run += '\t\tdetails_db_keys["index"] = DatabaseIndex(\'timestamp\')\n\n'
-    run += '\t\t## lock object enables exclusive access to the database\n'
-    run += '\t\tself.lock.acquire()\n\n'
-    run += '\t\tDetails_DB_Class = type(details_database, (SQLObject,), details_db_keys )\n\n'
-    run += '\t\tDetails_DB_Class.sqlmeta.cacheValues = False\n'
-    run += '\t\tDetails_DB_Class.sqlmeta.fromDatabase = True\n\n'
-    run += '\t\t## if table is not existing, create it\n'
-    run += '\t\tDetails_DB_Class.createTable(ifNotExists=True)\n\n'
+    run += '\t\t## define details_deb_keys here\n\n\n'
+    #run += '\t\t## write global after which the query will work\n'
+    #run += '\t\tdetails_db_keys["timestamp"] = IntCol()\n'
+    #run += '\t\tdetails_db_values["timestamp"] = self.timestamp\n\n'
+    run += '\t\tmy_subtable_class = self.table_init( details_database, details_db_keys )\n\n'
+    #run += '\t\t## create index for timestamp\n'
+    #run += '\t\tdetails_db_keys["index"] = DatabaseIndex(\'timestamp\')\n\n'
+    #run += '\t\t## lock object enables exclusive access to the database\n'
+    #run += '\t\tself.lock.acquire()\n\n'
+    #run += '\t\tDetails_DB_Class = type(details_database, (SQLObject,), details_db_keys )\n\n'
+    #run += '\t\tDetails_DB_Class.sqlmeta.cacheValues = False\n'
+    #run += '\t\tDetails_DB_Class.sqlmeta.fromDatabase = True\n\n'
+    #run += '\t\t## if table is not existing, create it\n'
+    #run += '\t\tDetails_DB_Class.createTable(ifNotExists=True)\n\n'
     if not xml:
         run += '\t\t### now do something\n\n'
     else:
         run += '\t\t## now start parsing the xml tree\n'
         run += '\t\troot = source_tree.getroot()\n\n'
         run += '\t\t### now do something\n\n'
-    run += '\t\t# unlock the database access\n'
-    run += '\t\tself.lock.release()\n\n'
+    #run += '\t\t# unlock the database access\n'
+    #run += '\t\tself.lock.release()\n\n'
     run += '\t\t# always happy for the moment\n'
     run += '\t\tself.status = 1.\n\n'
 
