@@ -222,8 +222,8 @@ class ModuleBase(Thread,DataBaseLock,object):
 				Start:
 			</td>
 			<td>
-				<input name="date0" type="text" size="10" style="text-align:center;" value="' . $date_string . '" />
-				<input name="time0" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />
+				<input name="date0" type="text" size="10" style="text-align:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />
+				<input name="time0" type="text" size="5" style="text-align:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />
 			</td>
 			<td>
 				End:
