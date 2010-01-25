@@ -191,6 +191,16 @@ class WebCreator(object):
 	output += '		document.getElementById(me).style.display="none";' + "\n"
 	output += '	}' + "\n"
 	output += '}' + "\n"
+
+	# Function to always open a form in a new tab or window (depending on the browser's settings)
+	output += 'var plotCounter = 0;' + "\n"
+	output += 'function submitFormToWindow(myForm) {' + "\n"
+	output += "	window.open('about:blank','PlotWindow_' + plotCounter);" + "\n"
+	output += "	myForm.target = 'PlotWindow_' + plotCounter;" + "\n"
+	output += '	++plotCounter;' + "\n"
+	output += '	return true;' + "\n"
+	output += '}' + "\n"
+
 	output += '//-->' + "\n"
 	output += '</script>' + "\n"
 
