@@ -157,12 +157,12 @@ class CMSPhedexDeletionRequest(ModuleBase,PhpDownload):
 		"""
 		#module_content = """
 		#<?php
-		#printf('War einmal ein Boomerang,<br>');
-		#printf('War um ein Weniges zu lang.<br>');
-		#printf('Boomerang flog ein Stueck<br>');
-		#printf('Und kehrte nie mehr zurueck.<br>');
-		#printf('Publikum noch stundenlang<br>');
-		#printf('Wartete auf Boomerang.<br>');
+		#printf('War einmal ein Boomerang,<br />');
+		#printf('War um ein Weniges zu lang.<br />');
+		#printf('Boomerang flog ein Stueck<br />');
+		#printf('Und kehrte nie mehr zurueck.<br />');
+		#printf('Publikum noch stundenlang<br />');
+		#printf('Wartete auf Boomerang.<br />');
 		#?>
 		#"""
 

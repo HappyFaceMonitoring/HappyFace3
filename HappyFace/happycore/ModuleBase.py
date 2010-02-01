@@ -164,7 +164,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         self.db_values['definition']    =  self.configService.getDefault('setup','definition','')
         self.db_values['instruction']   = self.configService.getDefault('setup','instruction','')
 
-        self.db_values['datasource']    = self.configService.getDefault('setup','source','').replace('%','&#37')
+        self.db_values['datasource']    = self.configService.getDefault('setup','source','').replace('%','&#37;')
 	
 	# init and storage the module specific information into the module table
 	module_table_class = self.table_init( self.database_table, self.db_keys )
@@ -209,7 +209,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	html_begin.append(  '  <td style="width:64px;">')
 	html_begin.append("""   <button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_info\\\');">' .$status_symbol. '</button>""")
 	html_begin.append(  '  </td>')
-	html_begin.append("""  <td><strong><a href="?date='.$date_string.'&amp;time='.$time_string.'&amp;t='.$category_id.'&amp;m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' .$data['mod_title']. '</a><br />' . $mod_time_message . '</strong></td>""")
+	html_begin.append("""  <td><strong><a href="?date='.$date_string.'&amp;time='.$time_string.'&amp;t='.$category_id.'&amp;m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' . htmlentities($data['mod_title']) . '</a><br />' . $mod_time_message . '</strong></td>""")
 	html_begin.append(""" </tr>'.$error_message.'""")
 	html_begin.append(  ' <tr>')
 	html_begin.append(  '  <td>')
@@ -228,7 +228,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	infobox.append(   """     <tr><td style="width:20%%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>""")
 	infobox.append(     '    </table>')
 
-	infobox.append(     '    <form name="PlotForm" action="plot_generator.php" method="get" onSubmit="javascript: submitFormToWindow(this)">')
+	infobox.append(     '    <form id="' + self.__module__ + '_PlotForm" action="plot_generator.php" method="get" onsubmit="javascript: submitFormToWindow(this)">')
 	infobox.append(     '     <table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: center;">')
 	infobox.append(     '      <tr>')
 	infobox.append(     '       <td>Start:</td>')
@@ -286,7 +286,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    $error_message = "";
 	    if ( $data['error_message'] != "" )
 	    {
-	        $error_message = '\n <tr><td></td><td><h4 style="color:red;">'. $data["error_message"] .'</h4></td></tr>';
+	        $error_message = '\n <tr><td></td><td><h4 style="color:red;">' . htmlentities($data["error_message"]) .'</h4></td></tr>';
 	    }
 	    if ($server_time - $data["timestamp"] < 1800)
 	    {

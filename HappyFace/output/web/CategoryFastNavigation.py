@@ -33,7 +33,7 @@ class CategoryFastNavigation(HTMLOutput):
 	list_item.append(   '   <table class="HappyFNnaventry">')
 	list_item.append(   '    <tr style="border-bottom:1px solid #FFF;">')
 	list_item.append(   '     <td style="width:200px;" align="left">')
-	list_item.append( """      <a href="javascript:goto(\\\'' . $module["module"] . '\\\')" onfocus="this.blur()">'. $module["mod_title"] . '</a>""")
+	list_item.append( """      <a href="javascript:goto(\\\'' . $module["module"] . '\\\')" onfocus="this.blur()">'. htmlentities($module["mod_title"]) . '</a>""")
 	list_item.append(   '     </td>')
 	list_item.append(   '     <td style="width:40px;" align="left">')
 	list_item.append(   '      <div class="HappyFNnavimg">')

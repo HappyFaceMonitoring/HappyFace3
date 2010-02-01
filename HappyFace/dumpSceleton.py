@@ -238,12 +238,12 @@ def dumpHappycorePy(name,xml):
     output += '\n\t\t"""\n'
     output += '\t\tmodule_content = """\n'
     output += '\t\t<?php\n'
-    output += "\t\tprintf('War einmal ein Boomerang,<br>');\n"
-    output += "\t\tprintf('War um ein Weniges zu lang.<br>');\n"
-    output += "\t\tprintf('Boomerang flog ein Stueck<br>');\n"
-    output += "\t\tprintf('Und kehrte nie mehr zurueck.<br>');\n"
-    output += "\t\tprintf('Publikum noch stundenlang<br>');\n"
-    output += "\t\tprintf('Wartete auf Boomerang.<br>');\n"
+    output += "\t\tprintf('War einmal ein Boomerang,<br />');\n"
+    output += "\t\tprintf('War um ein Weniges zu lang.<br />');\n"
+    output += "\t\tprintf('Boomerang flog ein Stueck<br />');\n"
+    output += "\t\tprintf('Und kehrte nie mehr zurueck.<br />');\n"
+    output += "\t\tprintf('Publikum noch stundenlang<br />');\n"
+    output += "\t\tprintf('Wartete auf Boomerang.<br />');\n"
     output += '\t\t?>\n'
     output += '\t\t"""\n\n'
     output += '\t\treturn self.PHPOutput(module_content)\n'

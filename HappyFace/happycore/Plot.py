@@ -47,7 +47,7 @@ class Plot(ModuleBase):
 
             fileType = self.downloadService.getFileType(self.downloadRequest[tag])
 
-            self.configService.addToParameter('setup','source',tag+": "+self.downloadService.getUrlAsLink(self.downloadRequest[tag])+"<br>")
+            self.configService.addToParameter('setup','source',tag+": "+self.downloadService.getUrlAsLink(self.downloadRequest[tag])+"<br />")
 
 
             filenameFullPath = self.archive_dir +"/" + self.__module__+ident+fileType
@@ -76,8 +76,8 @@ class Plot(ModuleBase):
         for tag in plotsList:
             filename = 'filename'+self.plots[tag]
 #            url = 'url'+self.plots[tag]
-            mc.append("""<a href="' .$data["""+filename+"""]. '">""")
-	    mc.append(""" <img alt="" src="' .$data["""+filename+"""]. '" style="border: none;" />""")
+            mc.append("""<a href="' . htmlentities($data["""+filename+"""]) . '">""")
+	    mc.append(""" <img alt="" src="' . htmlentities($data["""+filename+"""]) . '" style="border: none;" />""")
 	    mc.append(  '</a>')
             if self.plotPosition == 'v':
                 mc.append('<br />')

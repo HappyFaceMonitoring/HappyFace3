@@ -208,7 +208,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
                 </tr>
                	<tr class=\"'.$duration_color.'\">
                   <td>Duration:</td>
-                  <td>'.$data["duration"].' hours <br>warning limit: '.$data["warning_limit"].'</td>
+                  <td>'.$data["duration"].' hours <br />warning limit: '.$data["warning_limit"].'</td>
                 </tr>
                 <tr>
                   <td>Total size:</td>

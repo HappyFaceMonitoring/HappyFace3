@@ -257,7 +257,7 @@ class dCacheInfoPool(dCacheInfo):
     def formatLimits(self):
         theLines = []
         for i in ['limit_global_critical','limit_local_critical','limit_global_warning','limit_local_warning']:
-            theLines.append(i+": "+self.getLimitVals(i))
+            theLines.append(i+": "+self.EscapeHTMLEntities(self.getLimitVals(i)))
 
 
         var = ""

@@ -221,7 +221,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         mc_error.append(  '  <td>failed transfers due to unknown reasons</td>')
         mc_error.append("""  <td>'.$info["unknown_errors"].'</td>""")
         mc_error.append(  ' </tr>')
-        mc_error.append(  ' <tr></tr>')
+        mc_error.append(  ' <tr><td colspan="2" class="CMSPhedexErrorLogSeparator"></td></tr>')
         mc_error.append(""" <tr class="' .$info["dest_errors_status"] . '">""")
         mc_error.append(  '  <td>fraction of destination errors</td>')
         mc_error.append("""  <td>'.round($frac_dest).'%%</td>""")

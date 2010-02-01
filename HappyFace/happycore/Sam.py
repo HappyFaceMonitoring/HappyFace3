@@ -31,7 +31,7 @@ class Sam(ModuleBase,PhpDownload):
         self.downloadRequest[self.dsTag] = 'wgetXmlRequest|'+self.makeUrl()
         self.blacklist = self.configService.getDefault('setup','blacklist',"").split(",")
 
-        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br>')
+        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br />')
 
 
 	
@@ -184,11 +184,11 @@ class Sam(ModuleBase,PhpDownload):
 
         samGroups = {}
    
-        self.configService.addToParameter('setup','definition','Definition of Service Groups:'+'<br>')
+        self.configService.addToParameter('setup','definition','Definition of Service Groups:'+'<br />')
         groupConfig = self.configService.getSection('SamGroups')
         for group in groupConfig.keys():
 
-            self.configService.addToParameter('setup','definition','*  '+group+': '+groupConfig[group]+'<br>')
+            self.configService.addToParameter('setup','definition','*  '+group+': '+self.EscapeHTMLEntities(groupConfig[group])+'<br />')
 
             samGroups[group] = {}
             samGroups[group]['ident'] = groupConfig[group]
@@ -209,10 +209,10 @@ class Sam(ModuleBase,PhpDownload):
                 samGroups[group]['nodes'] = samGroups[group]['ident'].split(',')
             samGroups[group]['nodes'].sort()
 
-        self.configService.addToParameter('setup','definition','Thresholds:'+'<br>')
+        self.configService.addToParameter('setup','definition','Thresholds:'+'<br />')
         groupThresholds = self.configService.getSection('SamGroupsThresholds')
         for val in groupThresholds.keys():
-            self.configService.addToParameter('setup','definition','* '+val+': '+groupThresholds[val]+'<br>')
+            self.configService.addToParameter('setup','definition','* '+val+': '+self.EscapeHTMLEntities(groupThresholds[val])+'<br />')
             tmp = val.split('_')
             if len(tmp) != 3: self.error_message += "Config parameter "+val+" does not match group_Error/Warning."
             testCat = tmp[1]

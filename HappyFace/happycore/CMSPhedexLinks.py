@@ -122,7 +122,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		mc_begin.append(' </tr>')
 
 		row_sep = []
-		row_sep.append(' <tr></tr>')
+		row_sep.append(' <tr><td colspan="2" class="CMSPhedexLinksSeparator"></td></tr>')
 
 		table_row = []
 		table_row.append(""" <tr class="' .$service_status_color_flag . '">""")

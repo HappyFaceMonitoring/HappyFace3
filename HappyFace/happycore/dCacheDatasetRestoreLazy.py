@@ -61,13 +61,13 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		if self.detailsTableCutOff != '':
 			self.configService.addToParameter('setup',
 							  'definition',
-							  'Only '+self.detailsTableCutOff+' files listed in details table.<br>')
+							  'Only '+self.detailsTableCutOff+' files listed in details table.<br />')
 
 
 		if self.voName != '':
 			self.configService.addToParameter('setup',
 							  'definition',
-							  'Only '+self.voName+' pools are considered.<br>')
+							  'Only '+self.voName+' pools are considered.<br />')
 
 		source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile,'html')
 
@@ -299,7 +299,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		mc_begin.append(  '<br />')
 
 		# Show/Hide details table
-		mc_begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\'");" />""")
+		mc_begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
 		mc_begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
 		mc_begin.append(  ' <table class="TableDetails dCacheDatarestoreLazyTableDetails">')
 		mc_begin.append(  '  <tr class="TableHeader">')

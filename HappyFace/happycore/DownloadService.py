@@ -4,13 +4,16 @@ import sys
 import os
 from time import time, localtime, mktime
 from DownloadTag import *
+from HTMLOutput import *
 
-class DownloadService(object):
+class DownloadService(HTMLOutput):
 
     def __init__(self, subdir):
+        HTMLOutput.__init__(self)
+
         self.subdir = subdir
         self.downloadTags = {}
-        
+
         if not os.path.exists(subdir):
             os.mkdir(subdir)
 
@@ -88,7 +91,7 @@ class DownloadService(object):
 
     def getUrlAsLink(self,downloadstring):
         url = self.downloadTags[downloadstring].getUrl()
-        return '<a href="'+url+'">'+url+'<a/>'
+        return '<a href="' + self.EscapeHTMLEntities(url) + '">' + self.EscapeHTMLEntities(url) + '</a>'
 
 
 

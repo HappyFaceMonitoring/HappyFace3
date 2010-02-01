@@ -3,3 +3,8 @@
 td.center{
 	text-align: center
 }
+
+table.TableData td.CMSPhedexErrorLogSeparator {
+	padding: 0px;
+	border: none;
+}

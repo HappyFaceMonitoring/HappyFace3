@@ -110,12 +110,12 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		"""
 		#module_content = """
 		#<?php
-		#printf('War einmal ein Boomerang,<br>');
-		#printf('War um ein Weniges zu lang.<br>');
-		#printf('Boomerang flog ein Stueck<br>');
-		#printf('Und kehrte nie mehr zurueck.<br>');
-		#printf('Publikum noch stundenlang<br>');
-		#printf('Wartete auf Boomerang.<br>');
+		#printf('War einmal ein Boomerang,<br />');
+		#printf('War um ein Weniges zu lang.<br />');
+		#printf('Boomerang flog ein Stueck<br />');
+		#printf('Und kehrte nie mehr zurueck.<br />');
+		#printf('Publikum noch stundenlang<br />');
+		#printf('Wartete auf Boomerang.<br />');
 		#?>
 		#"""
 
@@ -130,7 +130,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		mc_cell_nolink.append("""  <td class="' .$service_status_color_flag . '">' . $info["cond_value"] . '</td>""")
 
 		mc_cell_link = []
-		mc_cell_link.append(  """  <td class="' .$service_status_color_flag . '"><a class="CMSSiteReadinessLink" href="'. trim($info["cond_link"]) .'">' . $info["cond_value"] . '</a></td>""")
+		mc_cell_link.append(  """  <td class="' .$service_status_color_flag . '"><a class="CMSSiteReadinessLink" href="'. htmlentities(trim($info["cond_link"])) .'">' . htmlentities($info["cond_value"]) . '</a></td>""")
 
 		mc_row_end = []
 		mc_row_end.append(      ' </tr>')
