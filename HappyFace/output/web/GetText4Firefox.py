@@ -42,7 +42,7 @@ class GetText4Firefox(object):
 	    }
 	    # Loop over categories to get the status their status
 	    foreach ($mycategory as $categoryname=>$categoryvalue) {
-	        echo getModStatusText($mystatus[$categoryname],$mytype[$categoryname]).";".$categoryvalue."\\\n";
+	        echo getModStatusText($mystatus[$categoryname],$mytype[$categoryname]).";".$categoryvalue."\n";
 	    }
 	    exit;
 	}
