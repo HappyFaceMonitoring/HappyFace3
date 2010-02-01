@@ -114,81 +114,103 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		to present it
 		"""
 
-		module_content = """
-		<?php
+		mc_begin = []
+		mc_begin.append('<table class="TableData">')
+		mc_begin.append(' <tr class="TableHeader">')
+		mc_begin.append('  <td>site</td>')
+		mc_begin.append('  <td>status</td>')
+		mc_begin.append(' </tr>')
+
+		row_sep = []
+		row_sep.append(' <tr></tr>')
+
+		table_row = []
+		table_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+		table_row.append("""  <td>' . $info["linked_site"] . '</td>""")
+		table_row.append("""  <td>' . $info["link_status"] . '</td>""")
+		table_row.append(  ' </tr>');
+
+		mc_mid = []
+		mc_mid.append(  '</table>')
+		mc_mid.append(  '<br />')
+		mc_mid.append("""<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
+		mc_mid.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
+		mc_mid.append(  ' <table class="TableDetails">')
+		mc_mid.append(  '  <tr class="TableHeader">')
+		mc_mid.append(  '   <td>site</td>')
+		mc_mid.append(  '   <td>link_status</td>')
+		mc_mid.append(  '   <td>source update</td>')
+		mc_mid.append(  '   <td>dest update</td>')
+		mc_mid.append(  '  </tr>')
+
+		detailed_row = []
+		detailed_row.append("""  <tr class="' .$service_status_color_flag . '">""")
+		detailed_row.append("""   <td>' . $info["linked_site"] . '</td>""")
+		detailed_row.append("""   <td>' . $info["link_status"] . '</td>""")
+		detailed_row.append("""   <td>' . $info["update_source"] . '</td>""")
+		detailed_row.append("""   <td>' . $info["update_dest"] . '</td>""")
+		detailed_row.append(  '  </tr>');
+
+		mc_end = []
+		mc_end.append(' </table>');
+		mc_end.append('</div>');
+
+		module_content = """<?php
 
 		$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
-		
-		printf('<table class="TableData">');
-		printf('<tr class="TableHeader"><td>site</td><td>status</td></tr>');
+
+		printf('""" + self.PHPArrayToString(mc_begin) + """');
 
 		$tier = 1;
 
 		foreach ($dbh->query($details_db_sqlquery) as $info)
 		{
-		    if ($info["color"] == "green"){
-		    $service_status_color_flag = "ok";
-		}
-		    else if ($info["color"] == "red"){
-		    $service_status_color_flag = "critical";
-		}
-		    else if ($info["color"] == "purple"){
-		    $service_status_color_flag = "deactivated";
-		}
-		    else $service_status_color_flag = "undefined";
+		    if ($info["color"] == "green")
+		        $service_status_color_flag = "ok";
+		    else if ($info["color"] == "red")
+		        $service_status_color_flag = "critical";
+		    else if ($info["color"] == "purple")
+		        $service_status_color_flag = "deactivated";
+		    else
+		        $service_status_color_flag = "undefined";
 
-	        if($tier == 1){
-	           $match = preg_match("/T1/",$info["linked_site"]);
-		   if (!$match){
-		      $tier = 2;
-		      printf('<tr></tr>');
-		   }
-		}
-		if($tier == 2){
-		   $match = preg_match("/T2/",$info["linked_site"]);
-		   if (!$match){
-		      $tier = 3;
-		      printf('<tr></tr>');
-		   }
-		}
+		    if($tier == 1) {
+		        $match = preg_match("/T1/",$info["linked_site"]);
+		        if (!$match) {
+		            $tier = 2;
+		            printf('""" + self.PHPArrayToString(row_sep) + """');
+		        }
+		    }
+		    if($tier == 2) {
+		        $match = preg_match("/T2/",$info["linked_site"]);
+		        if (!$match) {
+		            $tier = 3;
+		            printf('""" + self.PHPArrayToString(row_sep) + """');
+		        }
+		    }
 
-	        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["linked_site"] . '</td><td>'.$info["link_status"].'</td></tr>');
-        
+		    printf('""" + self.PHPArrayToString(table_row) + """');
 		}
 
-		printf('</table><br/>');
-
-		printf('
-		<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-		<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">
-		<table class="TableDetails">
-
-		<tr class="TableHeader"><td>site</td><td>link_status</td><td>source update</td><td>dest update</td></tr>
-        
-		');
+		printf('""" + self.PHPArrayToString(mc_mid) + """');
 
 		foreach ($dbh->query($details_db_sqlquery) as $info)
 		{
-		    if ($info["color"] == "green"){
-		       $service_status_color_flag = "ok";
-		}
-	            else if ($info["color"] == "purple"){
-		       $service_status_color_flag = "deactivated";
-		}
-		    else if ($info["color"] == "red"){
-		       $service_status_color_flag = "critical";
-		}
-		    else $service_status_color_flag = "undefined";
+		    if ($info["color"] == "green")
+		        $service_status_color_flag = "ok";
+	            else if ($info["color"] == "purple")
+		        $service_status_color_flag = "deactivated";
+		    else if ($info["color"] == "red")
+		        $service_status_color_flag = "critical";
+		    else
+		        $service_status_color_flag = "undefined";
 
-	        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["linked_site"] . '</td><td>'.$info["link_status"].'</td><td>' .$info["update_source"] . '</td><td>'.$info["update_dest"].'</td></tr>');
-        
-		}       
+	            printf('""" + self.PHPArrayToString(detailed_row) + """');
+		}
 
-		printf('</table></div>');
-		
-	        ?>
+		printf('""" + self.PHPArrayToString(mc_end) + """');
 
-		"""
+	        ?>"""
 
 		return self.PHPOutput(module_content)
 

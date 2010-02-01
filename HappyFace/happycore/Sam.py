@@ -310,117 +310,167 @@ class Sam(ModuleBase,PhpDownload):
 
         # this module_content string will be executed by a printf('') PHP command
         # all information in the database are available via a $data["key"] call
-        module_content = """
-        <?php
+	mc_group_begin = []
+        mc_group_begin.append('<strong>Group status:</strong>')
+	mc_group_begin.append('<br />')
+        mc_group_begin.append('<table class="TableData">');
+
+	mc_group_row = []
+	mc_group_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+	mc_group_row.append("""  <td>' . $info["name"] . '</td>""")
+	mc_group_row.append("""  <td>' . $info["nodes"] . '</td>""")
+	mc_group_row.append(  ' </tr>')
+
+	mc_group_end = []
+	mc_group_end.append(  '</table>')
+	mc_group_end.append(  '<br />')
+
+	mc_service_begin = []
+	mc_service_begin.append('<strong>Individual service status:</strong>')
+	mc_service_begin.append('<br />')
+	mc_service_begin.append('<table class="TableData">');
+
+	mc_service_row = []
+	mc_service_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+	mc_service_row.append("""  <td>' . $info["service_type"] . '</td>""")
+	mc_service_row.append("""  <td>' . $info["service_name"] . '</td>""")
+	mc_service_row.append(  ' </tr>')
+
+	mc_service_end = []
+	mc_service_end.append('</table>')
+	mc_service_end.append('<br />')
+
+	mc_details_begin = []
+	mc_details_begin.append( """<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_failed_result\\\');" />""")
+	mc_details_begin.append(   '<div class="DetailedInfo" id="' + self.__module__+ '_failed_result" style="display:none;">')
+	mc_details_begin.append(   ' <table class="TableDetails">')
+	mc_details_begin.append(   '  <tr class="TableHeader">')
+	mc_details_begin.append(   '   <td>Element Type</td>')
+	mc_details_begin.append(   '   <td>Element Name</td>')
+	mc_details_begin.append(   '   <td>Status</td>')
+	mc_details_begin.append(   '   <td>Test Name</td>')
+	mc_details_begin.append(   '   <td>Test Time</td>')
+	mc_details_begin.append(   '  </tr>')
+
+	mc_details_row_fail = []
+	mc_details_row_fail.append("""<tr class="' . $color . '">""")
+	mc_details_row_fail.append(""" <td>' . $results["service_type"] . '</td>""")
+	mc_details_row_fail.append(""" <td>' . $results["service_name"] . '</td>""")
+	mc_details_row_fail.append(""" <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong>' . $results["$service_status"] . '</a></td>""")
+	mc_details_row_fail.append(""" <td>' . $results["type"] . '</td>""")
+	mc_details_row_fail.append("""   <td>' . $results["time"] . '</td>""")
+	mc_details_row_fail.append('  </tr>');
+
+	mc_details_mid = []
+	mc_details_mid.append(     ' </table>')
+	mc_details_mid.append(     '</div>')
+	mc_details_mid.append(     '<br />')
+
+	mc_details_mid.append(   """<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__ + """_success_result\\\');" />""")
+	mc_details_mid.append(     '<div class="DetailedInfo" id="' + self.__module__+ '_success_result" style="display:none;">')
+	mc_details_mid.append(     ' <table class="TableDetails">')
+	mc_details_mid.append(     '  <tr class="TableHeader">')
+	mc_details_mid.append(     '   <td>Element Type</td>')
+	mc_details_mid.append(     '   <td>Element Name</td>')
+	mc_details_mid.append(     '   <td>Status</td>')
+	mc_details_mid.append(     '   <td>Test Name</td>')
+	mc_details_mid.append(     '   <td>Test Time</td>')
+	mc_details_mid.append(     '  </tr>')
+
+	mc_details_row_ok = []
+	mc_details_row_ok.append(  '  <tr class="ok">')
+	mc_details_row_ok.append("""   <td>' . $results["service_type"] . '</td>""")
+	mc_details_row_ok.append("""   <td>' . $results["service_name"] . '</td>""")
+	mc_details_row_ok.append("""   <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong></a></td>""")
+	mc_details_row_ok.append("""   <td>' . $results["type"] . '</td>""")
+	mc_details_row_ok.append("""   <td>' . $results["time"] . '</td>""")
+	mc_details_row_ok.append(  '  </tr>')
+
+	mc_details_end = []
+	mc_details_end.append(' </table>')
+	mc_details_end.append('</div>')
+	mc_details_end.append('<br />');
+
+        module_content = """<?php
+
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	$details_summary_db_sqlquery = "SELECT * FROM " . $data["details_database_summary"] . " WHERE timestamp = " . $data["timestamp"];
 	$temp_element = "";
-		
 
         $GroupCount=0;
-        foreach ($dbh->query($details_summary_db_sqlquery) as $info)   
+        foreach($dbh->query($details_summary_db_sqlquery) as $info)   
         {
-        $GroupCount=$GroupCount+1;
+            $GroupCount=$GroupCount+1;
         }
-        if ($GroupCount != 0){
-        printf('<strong>Group status:</strong><br>');   
 
-
-	printf('<table class="TableData">');
+        if ($GroupCount != 0)
+	{
+	    printf('""" + self.PHPArrayToString(mc_group_begin) + """');
 	
-	foreach ($dbh->query($details_summary_db_sqlquery) as $info)
-       	{
+	    foreach ($dbh->query($details_summary_db_sqlquery) as $info)
+       	    {
+	        if ($info["status"] == "1.")
+	            $service_status_color_flag = "ok";
+                elseif ($info["status"] == "0.5")
+	            $service_status_color_flag = "warning";
+	        else
+		    $service_status_color_flag = "critical";
 
-	   if ($info["status"] == "1.") {
-	       $service_status_color_flag = "ok";
+#	        printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
+	        printf('""" + self.PHPArrayToString(mc_group_row) + """');
 	    }
-            elseif ($info["status"] == "0.5") {
-	       $service_status_color_flag = "warning";
-	    } else {
-		$service_status_color_flag = "critical";
-	    }
-		
-#	    printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
-	    printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>' . $info["nodes"] . '</td></tr>');
-	}
-	
-	printf('</table><br/>');
+
+	    printf('""" + self.PHPArrayToString(mc_group_end) + """');
 	}
 
-
-        printf('<strong>Individual service status:</strong><br>');
-
-	printf('<table class="TableData">');
+        printf('""" + self.PHPArrayToString(mc_service_begin) + """');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-	    if ($temp_element != $info["service_name"]) {
-
-		if ($info["service_status"] == "1.") {
+	    if ($temp_element != $info["service_name"])
+	    {
+		if ($info["service_status"] == "1.")
 		    $service_status_color_flag = "ok";
-		}
-                elseif ($info["service_status"] == "0.5") {
+                elseif ($info["service_status"] == "0.5")
 		    $service_status_color_flag = "warning";
-		} else {
+		else
 		    $service_status_color_flag = "critical";
-		}
-		
+
 #		printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
-		printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["service_type"] . '</td><td>' . $info["service_name"] . '</td></tr>');
+
+		printf('""" + self.PHPArrayToString(mc_service_row) + """');
 	    }
 	    $temp_element = $info["service_name"];
 	}
-	
-	printf('</table><br/>');
-	
 
+	printf('""" + self.PHPArrayToString(mc_service_end) + """');
 
-	printf('
-		<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-		<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
-		<table class="TableDetails">
-			<tr class="TableHeader"><td>Element Type</td><td>Element Name</td><td>Status</td><td>Test Name</td><td>Test Time</td></tr>
-	    ');
+	printf('""" + self.PHPArrayToString(mc_details_begin) + """');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
 	    if ($results["status"] != "ok" && $results["status"] != "")
-        {
+            {
 			$color = "critical";
 			if($results["$service_status"] == "0.5") $color="warning";
 
-			printf('<tr class="'.$color.'">
-				<td>'.$results["service_type"].'</td>
-				<td>'.$results["service_name"].'</td>
-				<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong>'.$results["$service_status"].'</a></td>
-				<td>'.$results["type"].'</td>
-				<td>'.$results["time"].'</td>
-			</tr>');
-		}
+			printf('""" + self.PHPArrayToString(mc_details_row_fail) + """');
+	    }
 	}
-	printf('</table></div><br />');
 
-	printf('
-		<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_success_result\\\'" + """);" />
-		<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_success_result\\\'" + """ style="display:none;">
-		<table class="TableDetails">
-		<tr class="TableHeader"><td>Element Type</td><td>Element Name</td><td>Status</td><td>Test Name</td><td>Test Time</td></tr>
-	    ');
-	
+	printf('""" + self.PHPArrayToString(mc_details_mid) + """');
+
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
 	    if ($results["status"] == "ok")
-		printf('<tr class="ok">
-			<td>'.$results["service_type"].'</td>
-			<td>'.$results["service_name"].'</td>
-			<td><a href="'.$results["url"].'"><strong>'.$results["status"].'</strong></a></td>
-			<td>'.$results["type"].'</td>
-			<td>'.$results["time"].'</td>
-		</tr>');
+	    {
+		printf('""" + self.PHPArrayToString(mc_details_row_ok) + """');
+	    }
 	}
-	printf('</table></div><br/>');
-	?>
-	"""
+
+	printf('""" + self.PHPArrayToString(mc_details_end) + """');
+
+	?>"""
 
         return self.PHPOutput(module_content)
 

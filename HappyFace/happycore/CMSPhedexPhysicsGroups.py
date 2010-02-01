@@ -198,65 +198,96 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
     def output(self):
 
+	mc_begin = []
+	mc_begin.append('<table class="TableData">')
+        mc_begin.append(' <tr class="TableHeader">')
+	mc_begin.append('  <td>Group</td>')
+	mc_begin.append('  <td>resident data [TB]</td>')
+	mc_begin.append('  <td>percent of subscribed data</td>')
+	mc_begin.append(' </tr>');
+
+	mc_row = []
+        mc_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+	mc_row.append("""  <td>' . $info["phys_group"] . '</td>""")
+	mc_row.append("""  <td>' . $resident_data_TB . '</td>""")
+	mc_row.append("""  <td>' . $resident_data_percent. ' </td>""")
+	mc_row.append(  ' </tr>');
+
+	mc_mid = []
+	mc_mid.append('</table>')
+	mc_mid.append('<br />');
+
+        mc_mid.append("""<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_details\\\');" />""")
+	mc_mid.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_details" style="display:none;">')
+	mc_mid.append(  ' <table class="TableDetails">')
+	mc_mid.append(  '  <tr class="TableHeader">')
+	mc_mid.append(  '   <td>Group</td>')
+	mc_mid.append(  '   <td>resident data [TB]</td>')
+	mc_mid.append(  '   <td>subscribed data [TB]</td>')
+	mc_mid.append(  '   <td>resident files</td>')
+	mc_mid.append(  '   <td>subscribed files</td>')
+	mc_mid.append(  '  </tr>')
+
+	detailed_row = []
+	detailed_row.append("""  <tr class="' .$service_status_color_flag . '">""")
+	detailed_row.append("""   <td>' . $info2["phys_group"] . '</td>""")
+	detailed_row.append("""   <td>' . $resident_data_TB . '</td>""")
+	detailed_row.append("""   <td>' . $subscribed_data_TB . '</td>""")
+	detailed_row.append("""   <td>' . $resident_files_Nb . '</td>""")
+	detailed_row.append("""   <td>' . $subscribed_files_Nb . '</td>""")
+	detailed_row.append(  '  </tr>')
+
+	mc_end = []
+	mc_end.append(' </table>')
+	mc_end.append('</div>')
+	mc_end.append('<br />');
+
         # this module_content string will be executed by a printf('') PHP command
         # all information in the database are available via a $data["key"] call
-        module_content = """
-        <?php
+        module_content = """<?php
+
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
-	
-	printf('<table class="TableData">');
-        printf('<tr class="TableHeader"><td>Group</td><td>resident data [TB]</td><td>percent of subscribed data</td></tr>');
-        
+
+	printf('""" + self.PHPArrayToString(mc_begin) + """');
+
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-        if ($info["group_status"] == 0.){
-             $service_status_color_flag = "critical";
-        }
-        elseif ($info["node_files"] != $info["dest_files"]){
-             $service_status_color_flag = "warning";
-        }
-        else $service_status_color_flag = "ok";
+            if ($info["group_status"] == 0.)
+                $service_status_color_flag = "critical";
+            elseif ($info["node_files"] != $info["dest_files"])
+                $service_status_color_flag = "warning";
+            else
+                $service_status_color_flag = "ok";
         
-        $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
-        $resident_data_percent = round(($info["node_bytes"]/$info["dest_bytes"])*100,1);
+            $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
+            $resident_data_percent = round(($info["node_bytes"]/$info["dest_bytes"])*100,1);
 
-        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["phys_group"] . '</td><td>' . $resident_data_TB . '</td><td>'.$resident_data_percent.'</td></tr>');
-
+            printf('""" + self.PHPArrayToString(mc_row) + """');
         }
 
-        printf('</table><br/>');
+        printf('""" + self.PHPArrayToString(mc_mid) + """');
 
-        printf('
-        <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_details\\\'" + """);" />\n
-        <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_details\\\'" + """ style="display:none;">
-        <table class="TableDetails">\n
-        <tr class="TableHeader"><td>Group</td><td>resident data [TB]</td><td>subscribed data [TB]</td><td>resident files</td><td>subscribed files</td></tr>
-        ');
-
-        
         foreach ($dbh->query($details_db_sqlquery) as $info2)
        	{
-        if ($info2["group_status"] == 0.){
-             $service_status_color_flag = "critical";
-        }
-        elseif ($info2["node_files"] != $info2["dest_files"]){
-             $service_status_color_flag = "warning";
-        }
-        else $service_status_color_flag = "ok";
+            if ($info2["group_status"] == 0.)
+                $service_status_color_flag = "critical";
+            elseif ($info2["node_files"] != $info2["dest_files"])
+                $service_status_color_flag = "warning";
+            else
+                $service_status_color_flag = "ok";
         
-        $resident_data_TB = round($info2["node_bytes"]/(1024*1024*1024*1024),2);
-        $subscribed_data_TB = round($info2["dest_bytes"]/(1024*1024*1024*1024),2);
-        $resident_files_Nb = $info2["node_files"];
-        $subscribed_files_Nb = $info2["dest_files"];
+            $resident_data_TB = round($info2["node_bytes"]/(1024*1024*1024*1024),2);
+            $subscribed_data_TB = round($info2["dest_bytes"]/(1024*1024*1024*1024),2);
+            $resident_files_Nb = $info2["node_files"];
+            $subscribed_files_Nb = $info2["dest_files"];
 
-        printf('<tr class="' .$service_status_color_flag . '"><td>'.$info2["phys_group"].'</td><td>'.$resident_data_TB.'</td><td>'.$subscribed_data_TB.'</td><td>'.$resident_files_Nb.'</td><td>'.$subscribed_files_Nb.'</td></tr>');
-
+            printf('""" + self.PHPArrayToString(detailed_row) + """');
         }
 
-        printf('</table></div><br/>');
+        printf('""" + self.PHPArrayToString(mc_end) + """');
 
-        ?>
-        """
+        ?>"""
+
         return self.PHPOutput(module_content)
 
 

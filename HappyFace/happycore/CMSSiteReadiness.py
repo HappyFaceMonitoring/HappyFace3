@@ -119,52 +119,67 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		#?>
 		#"""
 
-		module_content = """
-		<?php
+		mc_begin = []
+                mc_begin.append(        '<table class="TableData">');
+
+		mc_row_begin = []
+		mc_row_begin.append(    ' <tr>')
+		mc_row_begin.append(  """  <td>' . $info["readiness_cond"] . '</td>""")
+
+		mc_cell_nolink = []
+		mc_cell_nolink.append("""  <td class="' .$service_status_color_flag . '">' . $info["cond_value"] . '</td>""")
+
+		mc_cell_link = []
+		mc_cell_link.append(  """  <td class="' .$service_status_color_flag . '"><a class="CMSSiteReadinessLink" href="'. trim($info["cond_link"]) .'">' . $info["cond_value"] . '</a></td>""")
+
+		mc_row_end = []
+		mc_row_end.append(      ' </tr>')
+
+		mc_end = []
+		mc_end.append(' </tr>')
+		mc_end.append('</table>')
+		mc_end.append('<br />')
+
+		module_content = """<?php
 
                 $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-                printf('<table class="TableData">');
+                printf('""" + self.PHPArrayToString(mc_begin) + """');
 
 		$condition = "start";
 
                 foreach ($dbh->query($details_db_sqlquery) as $info)
                 {
-                    if ($info["cond_color"] == "green"){
-                    $service_status_color_flag = "ok";
-                }
-                    else if ($info["cond_color"] == "red"){
-                    $service_status_color_flag = "critical";
-                }
-                    else if ($info["cond_color"] == "yellow"){
-                    $service_status_color_flag = "warning";
-                }
-		    else if ($info["cond_color"] == "lightgrey"){
-		    $service_status_color_flag = "CMSSiteReadinessWeekend";
-	        }
-                    else $service_status_color_flag = "undefined";
+                    if ($info["cond_color"] == "green")
+                        $service_status_color_flag = "ok";
+                    else if ($info["cond_color"] == "red")
+                        $service_status_color_flag = "critical";
+                    else if ($info["cond_color"] == "yellow")
+                        $service_status_color_flag = "warning";
+		    else if ($info["cond_color"] == "lightgrey")
+		        $service_status_color_flag = "CMSSiteReadinessWeekend";
+                    else
+                        $service_status_color_flag = "undefined";
 
-		if($info["readiness_cond"] != $condition){
-		    if($condition != "start"){
-		        printf('</tr>');
+		    if($info["readiness_cond"] != $condition) {
+		        if($condition != "start") {
+		            printf('""" + self.PHPArrayToString(mc_row_end) + """');
+		        }
+		        printf('""" + self.PHPArrayToString(mc_row_begin) + """');
+		        $condition = $info["readiness_cond"];
 		    }
-                    printf('<tr><td>' . $info["readiness_cond"] . '</td>');
-		    $condition = $info["readiness_cond"];
-		}
 
-		if( $info["cond_link"] == "noLink" ){
-		    printf('<td class="' .$service_status_color_flag . '">' . $info["cond_value"] . '</td>');
+		    if( $info["cond_link"] == "noLink" ){
+		        printf('""" + self.PHPArrayToString(mc_cell_nolink) + """');
 		    }
-		else {
-		    printf('<td class="' .$service_status_color_flag . '"><a class="CMSSiteReadinessLink" href="'. $info["cond_link"] .'">' . $info["cond_value"] . '</a></td>');
+		    else {
+		        printf('""" + self.PHPArrayToString(mc_cell_link) + """');
 		    }
 	        }
 
-		printf('</tr>');
-		printf('</table><br/>');    
+                printf('""" + self.PHPArrayToString(mc_end) + """');
 
-		?>
-		"""
+		?>"""
 
 		return self.PHPOutput(module_content)
 

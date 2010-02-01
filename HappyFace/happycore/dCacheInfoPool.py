@@ -277,125 +277,76 @@ class dCacheInfoPool(dCacheInfo):
         # create output sting, will be executed by a printf('') PHP command
         # all data stored in DB is available via a $data[key] call
 
-        mc = []
-        mc.append("<?php")
-        # Define sub_table for this module
-        mc.append('$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];')
-
-        mc.append('if($data["status"] == 1.){')
-        mc.append('$c_flag = "ok";')
-        mc.append('}')
-        mc.append('elseif($data["status"] == 0.5){')
-        mc.append('$c_flag = "warning";')
-        mc.append('}')
-        mc.append('else{')
-        mc.append('$c_flag = "critical";')
-        mc.append('}')
-      
-        #Start with module output
-        mc.append("printf('")
-        mc.append(' <table class="TableData">')
-
-        #Summary table
-    
+	mc_begin = []
+        mc_begin.append('<table class="TableData">')
         for att in self.globalSummary:
-            mc.append("  <tr>")
-            mc.append("    <td>"+self.poolAttribNames[att]['webname']+"</td>")
-            mc.append("""    <td>'.round(($data["""+'"'+ att +'"'+ """]),"""+self.decs+""").'</td>""")
-            mc.append("   </tr>")
+            mc_begin.append(' <tr>')
+            mc_begin.append('  <td>' + self.poolAttribNames[att]['webname'] + '</td>')
+            mc_begin.append("  <td>' . round(($data['" + att + "'])," + self.decs + ") . '</td>")
+            mc_begin.append(' </tr>')
 
         for att in self.globalRatios:
             entry = att.split("/")
-            mc.append("  <tr>")
-            mc.append("    <td>"+self.poolAttribNames[att]['webname']+"</td>")
+            mc_begin.append(" <tr>")
+            mc_begin.append("  <td>" + self.poolAttribNames[att]['webname'] + "</td>")
+            mc_begin.append("  <td>' . (($data['" + entry[1] + "'] == 0.) ? '--' : round(($data['" + entry[0] + "']/$data['" + entry[1] + "'])*100,1)) . '</td>")
+            mc_begin.append(" </tr>")
+        mc_begin.append(  "</table>")
+        mc_begin.append(  "<br />")
 
-            mc.append("');")
-            mc.append('if($data["'+ entry[1] +'"] == 0.){')
-            mc.append("printf('")
-            mc.append("""    <td>--</td>""")
-            mc.append("  ');")
-            mc.append('}else{')
-            mc.append("printf('")
-            mc.append("""    <td>'.round(($data["""+'"'+ entry[0] +'"'+ """]/$data["""+'"'+ entry[1] +'"'+ """])*100,1).'</td>""")
-            mc.append("  ');")
-            mc.append('}')
-            mc.append("printf('")
-            mc.append("   </tr>")
-
-            
-        
-        mc.append("  </table>")
-        mc.append(" <br/>")
-
-
-        # Show/Hide details table
-        mc.append(""" <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />""")
-        mc.append(""" <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">""")
-
-        mc.append(' <table class="TableDetails">')
-        mc.append('  <tr class="TableHeader">')
-        mc.append('   <td>Poolname</td>')
+        mc_begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
+        mc_begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
+        mc_begin.append(  ' <table class="TableDetails">')
+        mc_begin.append(  '  <tr class="TableHeader">')
+        mc_begin.append(  '   <td>Poolname</td>')
         for att in self.localAttribs:
-            mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+self.poolAttribNames[att]["webname"]+"</td>")
+            mc_begin.append(  '   <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
         for att in self.localRatios:
-            mc.append('   <td class="dCacheInfoPoolTableDetailsRestRowHead">'+self.poolAttribNames[att]["webname"]+"</td>")
+            mc_begin.append(  '   <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
+        mc_begin.append('  </tr>')
 
-        mc.append("  </tr>")
-     
-
-        mc.append("');") 
-        mc.append("foreach ($dbh->query($details_db_sqlquery) as $sub_data)")
-        mc.append(" {")
-
-        mc.append('  if($sub_data["poolstatus"] == 1.){')
-        mc.append('    $c_flag = "ok";')
-        mc.append('  }')
-        mc.append('  elseif($sub_data["poolstatus"] == 0.5){')
-        mc.append('    $c_flag = "warning";')
-        mc.append('  }')
-        mc.append('  elseif($sub_data["poolstatus"] == 0.){')
-        mc.append('    $c_flag = "critical";')
-        mc.append('  }')
-        
-        mc.append("  printf('")
-        mc.append("   <tr class=\"'.$c_flag.'\">")
-        mc.append("""    <td>'.$sub_data["poolname"].'</td>""")
+	mc_detailed_row = []
+        mc_detailed_row.append("""  <tr class="' . $c_flag . '">""")
+        mc_detailed_row.append("""   <td>' . $sub_data["poolname"] . '</td>""")
         for att in self.localAttribs:
-            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att +'"'+ """]),"""+self.decs+""").'</td>""")
-        mc.append("  ');")
-        
+            mc_detailed_row.append("""   <td class="dCacheInfoPoolTableDetailsRestRow">' . round(($sub_data['""" + att + """']),""" + self.decs + """) . '</td>""")
+
         for entry in self.localRatios:
             att = entry.split("/")
-            
-            
-            mc.append('if($sub_data["'+ att[1] +'"] == 0.){')
-            mc.append("printf('")
-            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'-'</td>""")
-            mc.append("  ');")
-            mc.append('}else{')
-            mc.append("printf('")
-            mc.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">'.round(($sub_data["""+'"'+ att[0] +'"'+ """]/$sub_data["""+'"'+ att[1] +'"'+ """])*100,1).'</td>""")
-            mc.append("  ');")
-            mc.append('}')
-            
+	    mc_detailed_row.append("""   <td class="dCacheInfoPoolTableDetailsRestRow">' . (($sub_data['""" + att[1] + """'] == 0.) ? '--' : round(($sub_data['""" + att[0] +"""']/$sub_data['""" + att[1] + """'])*100,1)) . '</td>""")
+	mc_detailed_row.append(  '  </tr>')
 
+	mc_end = []
+        mc_end.append(' </table>')
+        mc_end.append('</div>')
 
-        mc.append("printf('")
-        mc.append("   </tr>")
-        mc.append("  ');")
-        mc.append(" }")
+	module_content = """<?php
 
-        mc.append("printf('")
-        mc.append(" </table>")
-        mc.append(" </div>")
-        mc.append("');")
-        mc.append("?>")
+        $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
+        if($data["status"] == 1.)
+            $c_flag = "ok";
+        elseif($data["status"] == 0.5)
+            $c_flag = "warning";
+        else
+            $c_flag = "critical";
 
-        
-        # export content string
-        module_content = ""
-        for i in mc:
-            module_content +=i+"\n"
+	printf('""" + self.PHPArrayToString(mc_begin) + """');
+
+        foreach ($dbh->query($details_db_sqlquery) as $sub_data)
+        {
+            if($sub_data["poolstatus"] == 1.)
+                $c_flag = "ok";
+            elseif($sub_data["poolstatus"] == 0.5)
+                $c_flag = "warning";
+            elseif($sub_data["poolstatus"] == 0.)
+                $c_flag = "critical";
+
+            printf('""" + self.PHPArrayToString(mc_detailed_row) + """');
+	}
+
+        printf('""" + self.PHPArrayToString(mc_end) + """');
+
+	?>"""
 
         return self.PHPOutput(module_content)

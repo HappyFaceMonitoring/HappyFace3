@@ -196,104 +196,141 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
     def output(self):
 
-        module_content = """
-        <?php
+        mc_error = []
+        mc_error.append(  '<table class="TableData">');
+        mc_error.append(""" <tr class="'.$service_status_color_flag_total.'">""")
+        mc_error.append(  '  <td>failed transfers</td>')
+        mc_error.append("""  <td>'.$info["total_errors"].'</td>""")
+        mc_error.append(  ' </tr>');
+        mc_error.append(  ' <tr>')
+        mc_error.append(  '  <td colspan="2" class="center">failed transfers details</td>')
+        mc_error.append(  ' </tr>');
+        mc_error.append(""" <tr class="' .$service_status_color_flag_dest . '">""")
+        mc_error.append(  '  <td>failed transfers due to destination</td>')
+        mc_error.append("""  <td>'.$info["dest_errors"].'</td>""")
+        mc_error.append(  ' </tr>');
+        mc_error.append(""" <tr class="' .$service_status_color_flag_source . '">""")
+        mc_error.append(  '  <td>failed transfers due to source</td>')
+        mc_error.append("""  <td>'.$info["source_errors"].'</td>""")
+        mc_error.append(  ' </tr>');
+        mc_error.append(""" <tr class="' .$service_status_color_flag_transfer . '">""")
+        mc_error.append(  '  <td>failed transfers due to transfer</td>')
+        mc_error.append("""  <td>'.$info["transfer_errors"].'</td>""")
+        mc_error.append(  ' </tr>')
+        mc_error.append(""" <tr class="' .$service_status_color_flag_unknown . '">""")
+        mc_error.append(  '  <td>failed transfers due to unknown reasons</td>')
+        mc_error.append("""  <td>'.$info["unknown_errors"].'</td>""")
+        mc_error.append(  ' </tr>')
+        mc_error.append(  ' <tr></tr>')
+        mc_error.append(""" <tr class="' .$info["dest_errors_status"] . '">""")
+        mc_error.append(  '  <td>fraction of destination errors</td>')
+        mc_error.append("""  <td>'.round($frac_dest).'%%</td>""")
+        mc_error.append(  ' </tr>')
+        mc_error.append(""" <tr class="' .$info["source_errors_status"] . '">""")
+        mc_error.append(  '  <td>fraction of source errors</td>')
+        mc_error.append("""  <td>'.round($frac_source).'%%</td>""")
+        mc_error.append(  ' </tr>');
+        mc_error.append(""" <tr class="' .$service_status_color_flag_frac . '">""")
+        mc_error.append(  '  <td>fraction of transfer errors</td>')
+        mc_error.append("""  <td>'.round($frac_trans).'%%</td>""")
+        mc_error.append(  ' </tr>');
+        mc_error.append(  '</table>')
+        mc_error.append(  '<br />');
 
+        mc_noerror = []
+        mc_noerror.append('<table class="TableData">')
+        mc_noerror.append(' <tr class="ok">')
+        mc_noerror.append('  <td>No errors detected</td>')
+        mc_noerror.append(' </tr>')
+        mc_noerror.append('</table>');
+
+        detailed_begin = []
+        detailed_begin.append("""<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_failed_result\\\');" />""")
+        detailed_begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_failed_result" style="display:none;">');
+        detailed_begin.append(  ' <table class="TableDetails">');
+        detailed_begin.append(  '  <tr class="TableHeader">')
+        detailed_begin.append(  '   <td>node</td>')
+        detailed_begin.append(  '   <td>failed transfers</td>')
+        detailed_begin.append(  '   <td>error content</td>')
+        detailed_begin.append(  '  </tr>');
+
+        detailed_row = []
+        detailed_row.append(  '  <tr>')
+        detailed_row.append("""   <td>'.$info["link_remote_node"].'</td>""")
+        detailed_row.append("""   <td class="center">'.$info["file_detail_log_nb"].'</td>""")
+        detailed_row.append("""   <td>'.$info["file_detail_log"].'</td>""")
+        detailed_row.append(  '  </tr>');
+
+        detailed_end = []
+        detailed_end.append(' </table>')
+        detailed_end.append('</div>')
+        detailed_end.append('<br />');
+
+        module_content = """<?php
 
         $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
-
 
         $onlyOnce = 0;
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
+            if ($onlyOnce == 0) {
+                if($info["total_errors"] == 0)
+                    $service_status_color_flag_total = "ok";
+                else
+                    $service_status_color_flag_total = "report";
+
+                if($info["dest_errors"] == 0)
+                    $service_status_color_flag_dest = "ok";
+                else
+                    $service_status_color_flag_dest = "report";
+
+                if($info["source_errors"] == 0)
+                    $service_status_color_flag_source = "ok";
+                else
+                    $service_status_color_flag_source = "report";
+
+                if($info["transfer_errors"] == 0)
+                    $service_status_color_flag_transfer = "ok";
+                else
+                    $service_status_color_flag_transfer = "report";
+
+                if($info["unknown_errors"] == 0)
+                    $service_status_color_flag_unknown = "ok";
+                else
+                    $service_status_color_flag_unknown = "report";
+
+                $frac_dest = 0.;
+                $frac_source = 0.;
+                $frac_trans = 0.;
+                if ($info["total_errors"] != 0) {
+                    $frac_dest = $info["dest_errors"]/$info["total_errors"] *100;
+                    $frac_source = $info["source_errors"]/$info["total_errors"] *100;
+                    $frac_trans = $info["transfer_errors"]/$info["total_errors"] *100;
+                }
+
+                if ($frac_trans == 0)
+                    $service_status_color_flag_frac = "ok";
+                else
+                    $service_status_color_flag_frac = "report";
+
+                printf('""" + self.PHPArrayToString(mc_error) + """');
+            }
+            $onlyOnce = 1;
+        }
+
         if ($onlyOnce == 0) {
-
-        if($info["total_errors"] == 0){
-        $service_status_color_flag = "ok";
+            printf('""" + self.PHPArrayToString(mc_noerror) + """');
         }
         else {
-        $service_status_color_flag = "report";
-        }
-        printf('<table class="TableData">\n');
-        printf('<tr class="'.$service_status_color_flag.'"><td>failed transfers</td><td>'.$info["total_errors"].'</td></tr>\n');
-        printf('<tr><td colspan="2" class="center">failed transfers details</td></tr>\n');
-        if($info["dest_errors"] == 0){
-        $service_status_color_flag = "ok";
-        }
-        else {
-        $service_status_color_flag = "report";
-        }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to destination</td><td>'.$info["dest_errors"].'</td></tr>\n');
-        if($info["source_errors"] == 0){
-        $service_status_color_flag = "ok";
-        }
-        else {
-        $service_status_color_flag = "report";
-        }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to source</td><td>'.$info["source_errors"].'</td></tr>\n');
-        if($info["transfer_errors"] == 0){
-        $service_status_color_flag = "ok";
-        }
-        else {
-        $service_status_color_flag = "report";
-        }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to transfer</td><td>'.$info["transfer_errors"].'</td></tr>\n');
-        if($info["unknown_errors"] == 0){
-        $service_status_color_flag = "ok";
-        }
-        else {
-        $service_status_color_flag = "report";
-        }
-        printf('<tr class="' .$service_status_color_flag . '"><td>failed transfers due to unknown reasons</td><td>'.$info["unknown_errors"].'</td></tr>\n');
-        printf('<tr></tr>\n');
-
-        $frac_dest = 0.;
-        $frac_source = 0.;
-        $frac_trans = 0.;
-        if ($info["total_errors"] != 0){
-          $frac_dest = $info["dest_errors"]/$info["total_errors"] *100;
-          $frac_source = $info["source_errors"]/$info["total_errors"] *100;
-          $frac_trans = $info["transfer_errors"]/$info["total_errors"] *100;
-        }
-        
-        printf('<tr class="' .$info["dest_errors_status"] . '"><td>fraction of destination errors</td><td>'.round($frac_dest).'%%</td></tr>\n');
-        printf('<tr class="' .$info["source_errors_status"] . '"><td>fraction of source errors</td><td>'.round($frac_source).'%%</td></tr>\n');
-        if ($frac_trans == 0){
-        $service_status_color_flag = "ok";
-        }
-        else {
-        $service_status_color_flag = "report";
-        }
-        printf('<tr class="' .$service_status_color_flag . '"><td>fraction of transfer errors</td><td>'.round($frac_trans).'%%</td></tr>\n');
-        
-        printf('</table><br/>\n');
-        }
-        $onlyOnce = 1;
+            printf('""" + self.PHPArrayToString(detailed_begin) + """');
+            foreach ($dbh->query($details_db_sqlquery) as $info)
+            {
+                printf('""" + self.PHPArrayToString(detailed_row) + """');
+            }
+            printf('""" + self.PHPArrayToString(detailed_end) + """');
         }
 
-        if ($onlyOnce == 0){
-
-        printf('<table class="TableData"><tr class="ok"><td>No errors detected</td></tr></table>\n');
-        
-        }
-
-        else{
-        printf('
-        <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />\n
-        <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">\n');
-        printf('<table class="TableDetails">\n');
-        printf('<tr class="TableHeader"><td>node</td><td>failed transfers</td><td>error content</td></tr>\n');
-        foreach ($dbh->query($details_db_sqlquery) as $info)
-       	{
-                printf('<tr><td>'.$info["link_remote_node"].'</td><td class="center">'.$info["file_detail_log_nb"].'</td><td>'.$info["file_detail_log"].'</td></tr>\n');
-        
-        }
-        
-        printf('</div></table><br/>\n');
-        }
-        
-        ?>
-        """
+        ?>"""
 
         return self.PHPOutput(module_content)
 

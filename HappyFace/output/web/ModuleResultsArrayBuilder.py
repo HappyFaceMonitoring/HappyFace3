@@ -4,8 +4,8 @@ class ModuleResultsArrayBuilder(object):
 	
     def __init__(self):
 
-	self.output = """
-	<?php
+	self.output = """<?php
+
 	# $sql_command_strings[] are available from the SQLCallRoutines
 	foreach ($sql_command_strings as $module=>$sql_command) {
 	    $sql_queries[$module] = $dbh->query($sql_command);
@@ -24,5 +24,5 @@ class ModuleResultsArrayBuilder(object):
                 $ModuleResultsArray[$module]["timestamp"]	= $data["timestamp"];
 	    }
 	}
-	?>
-	"""
+
+	?>"""

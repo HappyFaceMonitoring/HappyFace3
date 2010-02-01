@@ -168,65 +168,85 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 
     def output(self):
 
-        module_content = """
-        <?php
+	begin = []
+	begin.append('<table class="TableData">')
+	begin.append(' <tr class="TableHeader">')
+	begin.append('  <td>agent</td>')
+	begin.append('  <td>label</td>')
+	begin.append('  <td>last report</td>')
+	begin.append(' </tr>')
+
+	info_row = []
+	info_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+	info_row.append("""  <td>' . $info["name"] . '</td>""")
+	info_row.append("""  <td>' . $info["label"]. '</td>""")
+	info_row.append("""  <td>' . $info["time"] . '</td>""")
+	info_row.append(  ' </tr>')
+
+	mid = []
+	mid.append(  '</table>')
+	mid.append(  '<br />');
+	mid.append("""<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ "_failed_result" + """\\\');" />""")
+	mid.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_failed_result" style="display:none;">')
+	mid.append(  ' <table class="TableDetails">')
+	mid.append(  '  <tr class="TableHeader">')
+	mid.append(  '   <td>agent</td>')
+	mid.append(  '   <td>label</td>')
+	mid.append(  '   <td>host</td>')
+	mid.append(  '   <td>directory</td>')
+	mid.append(  '   <td>version</td>')
+	mid.append(  '  </tr>')
+ 
+	detailed_row = []
+	detailed_row.append("""  <tr class="' .$service_status_color_flag . '">""")
+	detailed_row.append("""   <td>' . $info["name"]   . '</td>""")
+	detailed_row.append("""   <td>' . $info["label"]  . '</td>""")
+	detailed_row.append("""   <td>' . $info["host"]   . '</td>""")
+	detailed_row.append("""   <td>' . $info["dir"]    . '</td>""")
+	detailed_row.append("""   <td>' . $info["version"]. '</td>""")
+	detailed_row.append(  '  </tr>');
+
+	end = []
+	end.append(' </table>')
+	end.append('</div>')
+
+        module_content = self.PHPArrayToString(begin) + """<?php
 
         $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-        printf('<table class="TableData">');
-        printf('<tr class="TableHeader"><td>agent</td><td>label</td><td>last report</td></tr>');
+        foreach ($dbh->query($details_db_sqlquery) as $info)
+       	{
+             if ($info["agent_status"] == 1.)
+                 $service_status_color_flag = "ok";
+             else if ($info["agent_status"] == 0.5)
+                 $service_status_color_flag = "warning";
+             else if ($info["agent_status"] == 0.)
+                 $service_status_color_flag = "critical";
+             else
+	         $service_status_color_flag = "undefined";
 
+	     printf('""" + self.PHPArrayToString(info_row) + """');
+        }
+
+	printf('""" + self.PHPArrayToString(mid) + """');
 
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-            if ($info["agent_status"] == 1.){
-                  $service_status_color_flag = "ok";
-        }
-             else if ($info["agent_status"] == 0.5){
-                  $service_status_color_flag = "warning";
-        }
-             else if ($info["agent_status"] == 0.){
-                  $service_status_color_flag = "critical";
-        }
-             else $service_status_color_flag = "undefined";
+            if ($info["agent_status"] == 1.)
+                $service_status_color_flag = "ok";
+            else if ($info["agent_status"] == 0.5)
+                $service_status_color_flag = "warning";
+            else if ($info["agent_status"] == 0.)
+                $service_status_color_flag = "critical";
+            else
+	        $service_status_color_flag = "undefined";
 
-        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>'.$info["label"].'</td><td>' .$info["time"] . '</td></tr>');
-        
+            printf('""" + self.PHPArrayToString(detailed_row) + """');
         }
 
-        printf('</table><br/>');
-
-        printf('
-        <input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-        <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">
-        <table class="TableDetails">
-
-        <tr class="TableHeader"><td>agent</td><td>label</td><td>host</td><td>directory</td><td>version</td></tr>
-        
-        ');
-
-         foreach ($dbh->query($details_db_sqlquery) as $info)
-       	{
-            if ($info["agent_status"] == 1.){
-                  $service_status_color_flag = "ok";
-        }
-             else if ($info["agent_status"] == 0.5){
-                  $service_status_color_flag = "warning";
-        }
-             else if ($info["agent_status"] == 0.){
-                  $service_status_color_flag = "critical";
-        }
-             else $service_status_color_flag = "undefined";
-
-        printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["name"] . '</td><td>'.$info["label"].'</td><td>' .$info["host"] . '</td><td>'.$info["dir"].'</td><td>'.$info["version"].'</td></tr>');
-        
-        }       
-
-        printf('</table></div>');
+        printf('""" + self.PHPArrayToString(end) + """');
                 
-        ?>
-
-        """
+        ?>"""
 
         return self.PHPOutput(module_content)
 

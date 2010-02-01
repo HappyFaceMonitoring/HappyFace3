@@ -64,7 +64,7 @@ class WebCreator(object):
 	output += '<?php' + "\n"
 	output += '    /*** connect to SQLite database ***/' + "\n"
 	output += '    $dbh = new PDO("sqlite:HappyFace.db");' + "\n"
-	output += '?>' + "\n"
+	output += '?>'
 
 	# provides the logic for the timestamp definition
 	output += TimeMachineLogic(histo_step).output
@@ -95,124 +95,117 @@ class WebCreator(object):
 	output += '<html xmlns="http://www.w3.org/1999/xhtml">' + "\n"
 	
 	# header
-	output += '<head>' + "\n"
-	output += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />' + "\n"
-	output += '<title>The HappyFace Project - ' + web_title + ' </title>' + "\n"
-	output += '<script src="config/TabNavigation.js" type="text/javascript"></script>' + "\n"
-	output += '<link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
-	output += '<script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
-	output += '<link href="config/FastNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
+	output += ' <head>' + "\n"
+	output += '  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />' + "\n"
+	output += '  <title>The HappyFace Project - ' + web_title + ' </title>' + "\n"
+	output += '  <script src="config/TabNavigation.js" type="text/javascript"></script>' + "\n"
+	output += '  <link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
+	output += '  <script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
+	output += '  <link href="config/FastNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
         for css in self.cssList:
-            output += '<link href="'+css+'" rel="stylesheet" type="text/css" />' + "\n"
+            output += '  <link href="'+css+'" rel="stylesheet" type="text/css" />' + "\n"
         
-	output += '</head>' + "\n"
+	output += ' </head>' + "\n"
 	
 	# body
-	output += '<body onload="javascript:HappyReload(300)">' + "\n"
+	output += ' <body onload="javascript:HappyReload(300)">' + "\n"
 
 	# logic to memorize selected tab on auto reload part 1
-	output += """
-		<?php
+	output += """<?php
 			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
 			else { $selectedTab = "0"; }
-			printf('
-				<script type="text/javascript">
-				<!-- 
-				var selectedTab='.$selectedTab.'; 
-				//-->
-				</script>
-			');
+			printf('  <script type="text/javascript">\n');
+			printf('  <!--\n');
+			printf('  var selectedTab='.$selectedTab.';\n');
+			printf('  //-->\n');
+			printf('  </script>\n');
 			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
-		?>
-		"""
-	output += '<form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get"><div>' + "\n"
-	output += ' <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
-	output += ' <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
-	output += '</div></form>' + "\n"
+		?>"""
+	output += '  <form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get">' + "\n"
+	output += '   <div>' + "\n"
+	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
+	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
+	output += '   </div>' + "\n"
+	output += '  </form>' + "\n"
 
 	# time bar on the top of the website, input forms for time control
 	output += TimeMachineController(logo_image).output
 
-	output += '<div id="HappyPanels1" class="HappyPanels">' + "\n"
+	output += '  <div id="HappyPanels1" class="HappyPanels">' + "\n"
 
 	# input navigation
-	output += '  <ul class="HappyPanelsTabGroup">' + "\n"
+	output += '   <ul class="HappyPanelsTabGroup">' + "\n"
 	output += navigation
-	output += '  </ul>' + "\n"
+	output += '   </ul>' + "\n"
 
 	# input content
-	output += '  <div class="HappyPanelsContentGroup">' + "\n"
+	output += '   <div class="HappyPanelsContentGroup">' + "\n"
 
-	output += content + "\n"
+	output += content
+	output += '   </div>' + "\n"
+
 	output += '  </div>' + "\n"
 
-	output += '</div>' + "\n"
-
 	# include layer to hide content when scrolling
-	output += '<div class="HappySolidLayer"></div>' + "\n"
+	output += '  <div class="HappySolidLayer">' + "\n"
+	output += '  </div>' + "\n"
 
 	# logic to memorize selected tab on auto reload part 2
-	output += """
-		<?php
-			if ($selectedMod != "") {
-				printf('
-					<script type="text/javascript">
-					<!-- 
-					goto("'.$selectedMod.'"); 
-					//-->
-					</script>	
-				');
-			}
-			if ($historyview) {
-				printf('
-					<script type="text/javascript">
-					<!-- 
-					AutoReload=false; 
-					//-->
-					</script>	
-				');
-			}
-		?>
-		"""
+	output += '<?php if ($selectedMod != "") { ?>'
+
+	output += '  <script type="text/javascript">' + "\n"
+	output += '  <!--' + "\n"
+	output += """  goto("'.$selectedMod.'");""" + "\n"
+	output += '  //-->' + "\n"
+	output += '  </script>' + "\n"
+
+	output += '<?php } if($historyview) { ?>'
+	output += '  <script type="text/javascript">' + "\n"
+	output += '  <!--' + "\n"
+	output += '  AutoReload=false;' + "\n"
+	output += '  //-->' + "\n"
+	output += '  </script>' + "\n"
+
+	output += '<?php } ?>'
 
 	# some javascripts for website navigation
-	output += '<script type="text/javascript">' + "\n"
-	output += '<!--' + "\n"
-	output += 'var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab);' + "\n"
-	output += '//-->' + "\n"
-	output += '</script>' + "\n"
+	output += '  <script type="text/javascript">' + "\n"
+	output += '  <!--' + "\n"
+	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab);' + "\n"
+	output += '  //-->' + "\n"
+	output += '  </script>' + "\n"
 	
-	output += '<script type="text/javascript">' + "\n"
-	output += '<!--' + "\n"
-	output += 'function show_hide(me) {' + "\n"
-	output += '	if (document.getElementById(me).style.display=="none") {' + "\n"
-	output += '		document.getElementById(me).style.display="block";' + "\n"
-	output += '	} else {' + "\n"
-	output += '		document.getElementById(me).style.display="none";' + "\n"
-	output += '	}' + "\n"
-	output += '}' + "\n"
+	output += '  <script type="text/javascript">' + "\n"
+	output += '  <!--' + "\n"
+	output += '  function show_hide(me) {' + "\n"
+	output += '    if (document.getElementById(me).style.display=="none") {' + "\n"
+	output += '      document.getElementById(me).style.display="block";' + "\n"
+	output += '    } else {' + "\n"
+	output += '      document.getElementById(me).style.display="none";' + "\n"
+	output += '    }' + "\n"
+	output += '  }' + "\n"
 
 	# Function to always open a form in a new tab or window (depending on the browser's settings)
-	output += 'var plotCounter = 0;' + "\n"
-	output += 'function submitFormToWindow(myForm) {' + "\n"
-	output += "	window.open('about:blank','PlotWindow_' + plotCounter);" + "\n"
-	output += "	myForm.target = 'PlotWindow_' + plotCounter;" + "\n"
-	output += '	++plotCounter;' + "\n"
-	output += '	return true;' + "\n"
-	output += '}' + "\n"
+	output += '  var plotCounter = 0;' + "\n"
+	output += '  function submitFormToWindow(myForm) {' + "\n"
+	output += "    window.open('about:blank','PlotWindow_' + plotCounter);" + "\n"
+	output += "    myForm.target = 'PlotWindow_' + plotCounter;" + "\n"
+	output += '    ++plotCounter;' + "\n"
+	output += '    return true;' + "\n"
+	output += '  }' + "\n"
 
-	output += '//-->' + "\n"
-	output += '</script>' + "\n"
+	output += '  //-->' + "\n"
+	output += '  </script>' + "\n"
 
 	# end of html output
-	output += '</body>' + "\n"
+	output += ' </body>' + "\n"
 	output += '</html>' + "\n"
 	
 	# close the database
 	output += '<?php' + "\n"
 	output += '    /*** close the database connection ***/' + "\n"
 	output += '    $dbh = null;' + "\n"
-	output += '?>' + "\n"
+	output += '?>'
 	
 	#######################################################
 	

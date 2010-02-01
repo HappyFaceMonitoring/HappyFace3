@@ -1,88 +1,130 @@
 import sys, os, popen2
 
-class TimeMachineController(object):
+from HTMLOutput import *
+
+class TimeMachineController(HTMLOutput):
 	
     def __init__(self, logo_image):
+	HTMLOutput.__init__(self, 2)
 
-	self.output = """	
-	<div class="HappyTitleBar">
-	    <div class="HappyTitleBarElement">
-		<table border="0" class="HappyTitleBarElementTable">
-			<tr><td>
-				<img style="border:solid 1px #000;height:35px;" alt="" src='""" + logo_image + """' />
-			</td></tr>
-		</table>
-	    </div>
-	    <div class="HappyTitleBarElement">
-		<table border="0" class="HappyTitleBarElementTable">
-			<tr><td colspan="2" style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face</td></tr>
-			<tr><td style="color:#FF9900;vertical-align:middle;text-align:left;">Project</td>
-			    <td style="font-size:0.7em;color:#FFFFFF;vertical-align:middle;text-align:right;">Rev.%s</td>
-			</tr>
-		</table>
-	    </div>
-	    <div class="HappyTitleBarElement">
-		<table border="0" class="HappyTitleBarElementTable">
-			<tr><td><?php printf($time_message); ?></td></tr>
-		</table>
-	    </div>
-	    <div class="HappyTitleBarElement">
-		<form id="HistoForm1" class="HappyTitleBarForm" action="<?php echo $PHP_SELF; ?>" method="get">
-		<table border="0" class="HappyTitleBarElementTable">
-			<tr><td>
-	    			<div><button onclick="javascript:HappyHistoNav('back','<?php echo $timestamp; ?>')" onfocus="this.blur()">&lt;--</button></div>
-			</td><td>
-				<input type="text" id="HistoStep" name="s" size="5" style="text-align:center;" value="<?php echo $histo_step; ?>" />
-                                <input type="hidden" id="HistoNavDate" name="date" value="<?php echo $date_string; ?>" />
-                                <input type="hidden" id="HistoNavTime" name="time" value="<?php echo $time_string; ?>" />
-                                <input type="hidden" id="HistoReloadTab1" name="t" value="<?php echo $selectedTab; ?>" />
-                                <input type="hidden" id="HistoReloadMod1" name="m" value="<?php echo $selectedMod; ?>" />
-			</td><td>
-	    			<div><button onclick="javascript:HappyHistoNav('fwd','<?php echo $timestamp; ?>')" onfocus="this.blur()">--&gt;</button></div>
-			</td></tr>
-		</table>
-		</form>
-	    </div>
-	    <div class="HappyTitleBarElement">
-		<form id="HistoForm2" class="HappyTitleBarForm" action="<?php echo $PHP_SELF; ?>" method="get">
-		<table border="0" class="HappyTitleBarElementTable">
-	    		<tr><td>
-	    			<div>
-					 <input name="date" type="text" size="10" style="text-align:center;" value="<?php echo $date_string; ?>" />
-					 - <input name="time" type="text" size="5" style="text-align:center;" value="<?php echo $time_string; ?>" />
-                                         <input type="hidden" id="HistoReloadTab2" name="t" value="<?php echo $selectedTab; ?>" />
-                                         <input type="hidden" id="HistoReloadMod2" name="m" value="<?php echo $selectedMod; ?>" />
-			  	         <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
-		  		</div>
-	    		</td></tr>
-		</table>
-		</form>
-	    </div>
-	    <div class="HappyTitleBarElement">
-		<form class="HappyTitleBarForm" action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
-		<table border="0" class="HappyTitleBarElementTable">
-			<tr><td>
-		    		<div>
-		 			<button onclick="javascript:document.getElementById('ReloadForm').submit()" onfocus="this.blur()">Reset</button>
-	    			</div>
-			</td></tr>
-		</table>
-		</form>
-	    </div>
-            <?php
-		if($time_error_message != "") {
-			printf('
-			    <div class="HappyTitleBarElement">
-				<table border="0" class="HappyTitleBarElementTable">
-					<tr><td>
-						</div>
-	    						'.$time_error_message.'
-						<div>
-					</td></tr>
-				</table>
-	    		    </div>
-			');
-		};
-	    ?>
-	</div>
-	""" % popen2.popen2('svnversion %s' % "../")[0].read().strip()
+	rev = popen2.popen2('svnversion %s' % "../")[0].read().strip()
+
+	output = []
+	output.append(   '<div class="HappyTitleBar">')
+	output.append(   ' <div class="HappyTitleBarElement">')
+	output.append(   '  <table border="0" class="HappyTitleBarElementTable">')
+	output.append(   '   <tr>')
+	output.append(   '    <td>')
+	output.append(   '     <img style="border:solid 1px #000;height:35px;" alt="" src="' + logo_image + '" />')
+	output.append(   '    </td>')
+	output.append(   '   </tr>')
+	output.append(   '  </table>')
+	output.append(   ' </div>')
+	output.append(   ' <div class="HappyTitleBarElement">')
+	output.append(   '  <table border="0" class="HappyTitleBarElementTable">')
+	output.append(   '   <tr>')
+	output.append(   '    <td colspan="2" style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face</td>')
+	output.append(   '   </tr>')
+	output.append(   '   <tr>')
+	output.append(   '    <td style="color:#FF9900;vertical-align:middle;text-align:left;">Project</td>')
+	output.append( """    <td style="font-size:0.7em;color:#FFFFFF;vertical-align:middle;text-align:right;">Rev.""" + rev + """</td>""")
+	output.append(   '   </tr>')
+	output.append(   '  </table>')
+	output.append(   ' </div>')
+	output.append(   ' <div class="HappyTitleBarElement">')
+	output.append(   '  <table border="0" class="HappyTitleBarElementTable">')
+	output.append(   '   <tr>')
+	output.append(   "    <td>' . $time_message . '</td>")
+	output.append(   '   </tr>')
+	output.append(   '  </table>')
+	output.append(   ' </div>')
+	output.append(   ' <div class="HappyTitleBarElement">')
+	output.append( """  <form id="HistoForm1" class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
+	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
+	output.append(   '    <tr>')
+	output.append(   '     <td>')
+	output.append(   '      <div>')
+	output.append( """       <button onclick="javascript:HappyHistoNav(\\\'back\\\',\\\'' . $timestamp . '\\\')" onfocus="this.blur()">&lt;--</button>""")
+	output.append(   '      </div>')
+	output.append(   '     </td>')
+	output.append(   '     <td>')
+	output.append(   '      <div>')
+	output.append( """       <input type="text" id="HistoStep" name="s" size="5" style="text-align:center;" value="' . $histo_step . '" />""")
+	output.append( """       <input type="hidden" id="HistoNavDate" name="date" value="' . $date_string . '" />""")
+	output.append( """       <input type="hidden" id="HistoNavTime" name="time" value="' . $time_string . '" />""")
+	output.append( """       <input type="hidden" id="HistoReloadTab1" name="t" value="' . $selectedTab . '" />""")
+	output.append( """       <input type="hidden" id="HistoReloadMod1" name="m" value="' . $selectedMod . '" />""")
+	output.append(   '      </div>')
+	output.append(   '     </td>')
+	output.append(   '     <td>')
+	output.append(   '      <div>')
+	output.append( """       <button onclick="javascript:HappyHistoNav(\\\'fwd\\\',\\\'' .$timestamp . '\\\')" onfocus="this.blur()">--&gt;</button>""")
+	output.append(   '      </div>')
+	output.append(   '     </td>')
+	output.append(   '    </tr>')
+	output.append(   '   </table>')
+	output.append(   '  </form>')
+	output.append(   ' </div>')
+	output.append(   '')
+	output.append(   ' <div class="HappyTitleBarElement">')
+	output.append( """  <form id="HistoForm2" class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
+	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
+	output.append(   '    <tr>')
+	output.append(   '     <td>')
+	output.append(   '      <div>')
+	output.append( """       <input name="date" type="text" size="10" style="text-align:center;" value="' . $date_string . '" />""")
+	output.append(  '       -')
+	output.append( """       <input name="time" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />""")
+	output.append( """       <input type="hidden" id="HistoReloadTab2" name="t" value="' . $selectedTab . '" />""")
+	output.append( """       <input type="hidden" id="HistoReloadMod2" name="m" value="' . $selectedMod . '" />""")
+	output.append(   '       <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>')
+	output.append(   '      </div>')
+	output.append(   '     </td>')
+	output.append(   '    </tr>')
+	output.append(   '   </table>')
+	output.append(   '  </form>')
+	output.append(   ' </div>')
+	output.append(   ' <div class="HappyTitleBarElement">')
+	output.append( """  <form class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
+#	output.append( """  <form class="HappyTitleBarForm" action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
+	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
+	output.append(   '    <tr>')
+	output.append(   '     <td>')
+	output.append(   '      <div>')
+	output.append( """       <button onclick="javascript:document.getElementById(\\\'ReloadForm\\\').submit()" onfocus="this.blur()">Reset</button>""")
+	output.append(   '      </div>')
+	output.append(   '     </td>')
+	output.append(   '    </tr>')
+	output.append(   '   </table>')
+	output.append(   '  </form>')
+	output.append(   ' </div>')
+
+	error_msg = []
+	error_msg.append(' <div class="HappyTitleBarElement">')
+	error_msg.append('  <table border="0" class="HappyTitleBarElementTable">')
+	error_msg.append('   <tr>')
+	error_msg.append('    <td>')
+	error_msg.append('     <div>')
+	error_msg.append("      ' . $time_error_message . '")
+	error_msg.append('     </div>')
+	error_msg.append('    </td>')
+	error_msg.append('   </tr>')
+	error_msg.append('  </table>')
+	error_msg.append(' </div>')
+
+	end = []
+	end.append(      '</div>')
+
+	out = """<?php
+
+	printf('""" + self.PHPArrayToString(output) + """');
+	reset_time();
+
+	if($time_error_message != "")
+	    printf('""" + self.PHPArrayToString(error_msg) + """');
+
+	printf('""" + self.PHPArrayToString(end) + """');
+
+	?>"""
+
+	self.output = out

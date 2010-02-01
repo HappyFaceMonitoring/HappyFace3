@@ -115,28 +115,45 @@ class Uschi(ModuleBase):
         # the module_content string will be executed by a printf('') PHP command
 	# all information in the database are available via a $data["key"] call
 
-        module_content = """
-        <?php
-        printf('
-            <table class="TableData">
-                <tr>
-                    <td class="UschiTableHeader"><table class="UschiSubTable"><tr><td class="UschiSubTableHeaderLeft">Last USCHI execution (every '.$data["frequency"].' minutes):</td><td class="UschiSubTableHeaderRight">'.$data["uschi_timestamp"].'</td></tr></table></td>
-                    <th rowspan="3">error code: '.$data["result"].'</th>
-                </tr>
-                <tr>
-                    <td class="UschiTableHeader"><table class="UschiSubTable"><tr><td class="UschiSubTableHeaderLeft">Last Module execution (every '.$data["frequency_module"].' minutes):</td><td class="UschiSubTableHeaderRight">'.$data["uschi_timestamp_module"].'</td></tr></table></td>
-                </tr>
-                <tr>
-                    <td class="UschiTableInfo">'.$data["about"].'</td>
-                </tr>
-            </table>
-            <br />
-            <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />
-            <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>
-            <br />
-            ');
-            ?>
+        mc = []
+        mc.append(  '<table class="TableData">')
+        mc.append(  ' <tr>')
+        mc.append(  '  <td class="UschiTableHeader">')
+        mc.append(  '   <table class="UschiSubTable">')
+        mc.append(  '    <tr>')
+        mc.append(  '     <td class="UschiSubTableHeaderLeft">')
+        mc.append("""      Last USCHI execution (every '.$data["frequency"].' minutes):""")
+        mc.append(  '     </td>')
+        mc.append(  '     <td class="UschiSubTableHeaderRight">')
+        mc.append("""      '.$data["uschi_timestamp"].'""")
+        mc.append(  '     </td>')
+        mc.append(  '    </tr>')
+        mc.append(  '   </table>')
+        mc.append(  '  </td>')
+        mc.append("""  <th rowspan="3">error code: '.$data["result"].'</th>""")
+        mc.append(  ' </tr>')
+        mc.append(  ' <tr>')
+        mc.append(  '  <td class="UschiTableHeader">')
+        mc.append(  '   <table class="UschiSubTable">')
+        mc.append(  '    <tr>')
+        mc.append(  '     <td class="UschiSubTableHeaderLeft">')
+        mc.append("""      Last Module execution (every '.$data["frequency_module"].' minutes):""")
+        mc.append(  '     </td>')
+        mc.append(  '     <td class="UschiSubTableHeaderRight">')
+        mc.append("""      '.$data["uschi_timestamp_module"].'""")
+        mc.append(  '     </td>')
+        mc.append(  '    </tr>')
+        mc.append(  '   </table>')
+        mc.append(  '  </td>')
+        mc.append(  ' </tr>')
+        mc.append(  ' <tr>')
+        mc.append("""  <td class="UschiTableInfo">'.$data["about"].'</td>""")
+        mc.append(  ' </tr>')
+        mc.append(  '</table>')
+        mc.append(  '<br />')
+        mc.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />""")
+        mc.append("""<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>""")
+        mc.append(  '<br />')
 
-	"""
- 
+        module_content = "<?php printf('" + self.PHPArrayToString(mc) + "'); ?>"
 	return self.PHPOutput(module_content)

@@ -71,24 +71,16 @@ class Plot(ModuleBase):
         # this module_content string will be executed by a printf('') PHP command
         # all information in the database are available via a $data["key"] call
         mc = []
-        mc.append("<?php")
-        mc.append("printf('")
         plotsList =  self.plots.keys()
         plotsList.sort()
         for tag in plotsList:
             filename = 'filename'+self.plots[tag]
 #            url = 'url'+self.plots[tag]
-            mc.append("""
-            <a href="' .$data["""+filename+"""]. '"><img alt="" src="' .$data["""+filename+"""]. '" style="border: 0px solid;" /></a>""")
+            mc.append("""<a href="' .$data["""+filename+"""]. '">""")
+	    mc.append(""" <img alt="" src="' .$data["""+filename+"""]. '" style="border: none;" />""")
+	    mc.append(  '</a>')
             if self.plotPosition == 'v':
-                mc.append('<br>')
+                mc.append('<br />')
    
-        mc.append("');")
-        mc.append(' ?>')
-            
-        module_content = ""
-        for i in mc:
-            module_content +=i+"\n"
-
-        
+	module_content = "<?php printf('" + self.PHPArrayToString(mc) + "'); ?>";
         return self.PHPOutput(module_content)

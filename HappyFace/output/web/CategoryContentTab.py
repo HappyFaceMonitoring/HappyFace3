@@ -1,9 +1,11 @@
 import sys, os
 
+from HTMLOutput import *
 from CategoryFastNavigation import *
 
-class CategoryContentTab(object):
+class CategoryContentTab(HTMLOutput):
     def __init__(self,cat_content,config,category,cat_id,timestamp):
+	HTMLOutput.__init__(self, 4)
 
 	fast_nav = CategoryFastNavigation(category).output
 
@@ -24,21 +26,24 @@ class CategoryContentTab(object):
 	<a href="http://php.net"><img style="border:0;vertical-align: middle;" src="config/images/php_logo_mini.png" alt="PHP" /></a>
 	"""
 
-	output = ""
-	
-        output += '<?php $category_id=' + str(cat_id) + ' ?>' + "\n"
-	
-        output += '<div class="HappyPanelsContent">' + "\n"
+	mc_begin = []
+	mc_begin.append('<div class="HappyPanelsContent">')
 
-        output += fast_nav + "\n"
+	mc_end = []
+	mc_end.append(' <div>')
+	mc_end.append('  ' + valid_xhtml11.strip())
+	mc_end.append('  ' + valid_css.strip())
+	mc_end.append('  ' + python.strip())
+	mc_end.append('  ' + sqlite.strip())
+	mc_end.append('  ' + php.strip())
+	mc_end.append(' </div>')
+	mc_end.append('</div>')
 
-        output += cat_content + "\n"
+	output = "<?php $category_id='" + str(cat_id) + "';?>"
 
-        output += ' <div>' + "\n"
-        output += valid_xhtml11 + valid_css + python + sqlite + php + "\n"
-
-        output += ' </div>' + "\n"
-
-	output += '</div>' + "\n"
+	output += self.PHPArrayToString(mc_begin)
+	output += fast_nav + "\n"
+	output += cat_content + "\n"
+	output += self.PHPArrayToString(mc_end)
 
         self.output = output

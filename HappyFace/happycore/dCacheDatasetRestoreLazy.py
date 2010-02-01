@@ -266,99 +266,87 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		Access data from the sqlite database from here and decide how
 		to present it
 		"""
-		mc = []
-		mc.append("<?php")
-		# Define sub_table for this module
-		mc.append('$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];')
 
-		mc.append("printf('")
-		mc.append(' <table class="TableData">')
-		mc.append("  <tr>")
-		mc.append('    <td class="dCacheDatarestoreLazyFirstCol">Total number of stage requests</td>')
-		mc.append("""    <td>'.$data["total"].'</td>""")
-		mc.append("   </tr>")
-
+		mc_begin = []
+		mc_begin.append(  '<table class="TableData">')
+		mc_begin.append(  " <tr>")
+		mc_begin.append(  '  <td class="dCacheDatarestoreLazyFirstCol">Total number of stage requests</td>')
+		mc_begin.append("""  <td>' . $data["total"] . '</td>""")
+		mc_begin.append(  ' </tr>')
 		for tag in self.statusTagsOk:
-			mc.append("  <tr>")
-			mc.append('    <td class="dCacheDatarestoreLazyFirstCol"> ...  with status '+tag+':</td>')
-			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
-			mc.append("   </tr>")
-
-
-		mc.append("  <tr>")
-		mc.append('    <td class="dCacheDatarestoreLazyFirstCol">Stage request with problems</td>')
-		mc.append("""    <td>'.$data["total_problem"].'</td>""")
-		mc.append("   </tr>")
-
+			mc_begin.append(  " <tr>")
+			mc_begin.append(  '  <td class="dCacheDatarestoreLazyFirstCol"> ...  with status '+tag+':</td>')
+			mc_begin.append("""  <td>' . $data["status_"""+tag.lower()+""""] . '</td>""")
+			mc_begin.append(  ' </tr>')
+		mc_begin.append(  ' <tr>')
+		mc_begin.append(  '  <td class="dCacheDatarestoreLazyFirstCol">Stage request with problems</td>')
+		mc_begin.append("""  <td>' . $data["total_problem"] . '</td>""")
+		mc_begin.append(  ' </tr>')
 		for tag in self.statusTagsFail:
-			mc.append("  <tr>")
-			mc.append('    <td class="dCacheDatarestoreLazyFirstCol"> ...  with status '+tag+':</td>')
-			mc.append("""    <td>'.$data["status_"""+tag.lower()+""""].'</td>""")
-			mc.append("   </tr>")
-
-
-		mc.append("  <tr>")
-		mc.append("""    <td class="dCacheDatarestoreLazyFirstCol">... time limit hit ('.$data[timelimit].')</td>""")
-		mc.append("""    <td>'.$data["hit_time"].'</td>""")
-		mc.append("   </tr>")
-		mc.append("  <tr>")
-		mc.append("""    <td class="dCacheDatarestoreLazyFirstCol">... retry limit hit ('.$data[retrylimit].')</td>""")
-		mc.append("""    <td>'.$data["hit_retry"].'</td>""")
-		mc.append("   </tr>")
-		
-		mc.append("  </table>")
-		mc.append("   <br>")
-
-
+			mc_begin.append(  ' <tr>')
+			mc_begin.append(  '  <td class="dCacheDatarestoreLazyFirstCol"> ...  with status '+tag+':</td>')
+			mc_begin.append("""  <td>' . $data["status_"""+tag.lower()+""""] . '</td>""")
+			mc_begin.append(  ' </tr>')
+		mc_begin.append(  ' <tr>')
+		mc_begin.append("""  <td class="dCacheDatarestoreLazyFirstCol">... time limit hit ('.$data[timelimit].')</td>""")
+		mc_begin.append("""  <td>' . $data["hit_time"] . '</td>""")
+		mc_begin.append(  ' </tr>')
+		mc_begin.append(  ' <tr>')
+		mc_begin.append("""  <td class="dCacheDatarestoreLazyFirstCol">... retry limit hit ('.$data[retrylimit].')</td>""")
+		mc_begin.append("""  <td>' . $data["hit_retry"] . '</td>""")
+		mc_begin.append(  ' </tr>')
+		mc_begin.append(  '</table>')
+		mc_begin.append(  '<br />')
 
 		# Show/Hide details table
-		mc.append(""" <input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_result\\\'" + """);" />""")
-		mc.append(""" <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">""")
+		mc_begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\'");" />""")
+		mc_begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
+		mc_begin.append(  ' <table class="TableDetails dCacheDatarestoreLazyTableDetails">')
+		mc_begin.append(  '  <tr class="TableHeader">')
+		mc_begin.append(  '   <td>pnfsID</td>')
+		mc_begin.append(  '   <td>Start</td>')
+		mc_begin.append(  '   <td>Retries</td>')
+		mc_begin.append(  '   <td>Status</td>')
+		mc_begin.append(  '  </tr>')
 
-		mc.append(' <table class="TableDetails dCacheDatarestoreLazyTableDetails">')
-		mc.append('  <tr class="TableHeader">')
-		mc.append("   <td>pnfsID</td>")
-		mc.append("   <td>Start</td>")
-		mc.append("   <td>Retries</td>")
-		mc.append("   <td>Status</td>")
-		mc.append("  </tr>")
+		mc_detailed_separator = []
+		mc_detailed_separator.append('  <tr>')
+		mc_detailed_separator.append('   <td class="dCacheDatarestoreLazyRowSeparator" colspan="4"></td>')
+		mc_detailed_separator.append('  </tr>')
 
-		mc.append("');") 
+		mc_detailed_row = []
+		mc_detailed_row.append(  '  <tr>')
+		mc_detailed_row.append("""   <td>' . $sub_data["pnfs"] . '</td>""")
+		mc_detailed_row.append("""   <td>' . $sub_data["started_full"] . '</td>""")
+		mc_detailed_row.append("""   <td>' . $sub_data["retries"] . '</td>""")
+		mc_detailed_row.append("""   <td>' . $sub_data["status_short"] . '</td>""")
+		mc_detailed_row.append(  '  </tr>')
+		mc_detailed_row.append(  '  <tr>')
+		mc_detailed_row.append("""   <td colspan="4">' . $sub_data["path"] . '</td>""")
+		mc_detailed_row.append(  '  </tr>')
 
-		mc.append("$first_row = true;")
-		mc.append("foreach ($dbh->query($details_db_sqlquery) as $sub_data)")
-		mc.append("{")
-		mc.append("  if(!$first_row)")
-		mc.append("    printf('")
-		mc.append("  <tr>")
-		mc.append("""   <td class="dCacheDatarestoreLazyRowSeparator" colspan="4"></td>""")
-		mc.append("  </tr>")
-		mc.append("');")
-		mc.append("  $first_row = false;")
-		mc.append("  printf('")
-		mc.append("  <tr>")
-		mc.append("""   <td>'.$sub_data["pnfs"].'</td>""")
-		mc.append("""   <td>'.$sub_data["started_full"].'</td>""")
-		mc.append("""   <td>'.$sub_data["retries"].'</td>""")
-		mc.append("""   <td>'.$sub_data["status_short"].'</td>""")
-		mc.append("  </tr>")
-		mc.append("  <tr>")
-		mc.append("""   <td colspan="4">'.$sub_data["path"].'</td>""")
-		mc.append("  </tr>")		
-		mc.append("');")
-		mc.append('}')
-		mc.append("  printf('")
-		mc.append(" </table>")
-		mc.append(" </div>")
+		mc_end = []
+		mc_end.append(' </table>')
+		mc_end.append('</div>')
 
-		mc.append("');")
-		mc.append(' ?>')
-		
-		module_content = ""
-		for i in mc:
-			module_content +=i+"\n"
+		module_content = """<?php
 
-		
+		$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
+
+		printf('""" + self.PHPArrayToString(mc_begin) + """');
+
+		$first_row = true;
+		foreach ($dbh->query($details_db_sqlquery) as $sub_data)
+		{
+		    if(!$first_row)
+		        printf('""" + self.PHPArrayToString(mc_detailed_separator) + """');
+		    $first_row = false;
+		    printf('""" + self.PHPArrayToString(mc_detailed_row) + """');
+		}
+
+		printf('""" + self.PHPArrayToString(mc_end) + """');
+
+		?>"""
 
 		return self.PHPOutput(module_content)
 

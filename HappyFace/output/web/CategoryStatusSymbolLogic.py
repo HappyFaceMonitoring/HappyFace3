@@ -4,8 +4,8 @@ class CategoryStatusSymbolLogic(object):
 	
     def __init__(self,theme):
 
-	self.output = """
-	<?php
+	self.output = """<?php
+
 	function getCatStatusSymbol($category,$cat_type,$cat_algo,$ModuleResultsArray)
 	{
 	    $cat_status = getCatStatus($category,$cat_algo,$ModuleResultsArray);
@@ -21,6 +21,6 @@ class CategoryStatusSymbolLogic(object):
 		else if ($cat_status == -1) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_noinfo.png" />'; }
 	    }
 	}
-	?>
-	"""
+
+	?>"""
 

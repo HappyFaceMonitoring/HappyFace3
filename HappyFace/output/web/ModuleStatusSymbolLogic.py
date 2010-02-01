@@ -4,8 +4,8 @@ class ModuleStatusSymbolLogic(object):
 	
     def __init__(self,theme):
 
-	self.output = """
-	<?php
+	self.output = """<?php
+
 	function getModStatusSymbol($status,$mod_type)
 	{
 	    if ($mod_type == "plots") {
@@ -34,5 +34,4 @@ class ModuleStatusSymbolLogic(object):
 	    }
 	}
 
-	?>
-	"""
+	?>"""

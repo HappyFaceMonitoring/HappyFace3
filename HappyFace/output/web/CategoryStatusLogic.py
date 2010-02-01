@@ -4,8 +4,8 @@ class CategoryStatusLogic(object):
 
     def __init__(self):
 
-	self.output = """
-	<?php
+	self.output = """<?php
+
 	# $ModuleResultsArray is created before (see ModuleResultsArrayBuilder)
 	# and used by the class CatStatusLogic
 	# structure: [module]["mod_title"=> ...,"status"=> ...,"mod_type"=> ...,"weight"=> ...,"category"=> ...]
@@ -84,5 +84,5 @@ class CategoryStatusLogic(object):
 	    # return the status of the Category from the created instance
             return $cat_status_object->cat_status;
 	}
-	?>
-	"""
+
+	?>"""
