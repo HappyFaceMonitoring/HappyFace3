@@ -29,9 +29,10 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
         self.base_url = self.base_url+"/"+globalVars['plot_type']
         self.downloadRequest['plot'] = 'wget|'+self.makeUrl()
 
-        self.mod_title = self.configService.get('setup', 'mod_title')
+        mod_title = self.configService.get('setup', 'mod_title')
 
-        if self.mod_title == 'auto':
+        
+        if mod_title == 'auto':
             title = ""
             title += 'CMS PhEDEx summary: '
 
@@ -65,4 +66,5 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
                 title +='not defined - '+globalVars['instance']
             title +=')'
 
-            self.mod_title = title
+            self.configService.set('setup', 'mod_title',title)
+            
