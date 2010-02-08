@@ -1,13 +1,13 @@
-import sys, os, popen2
+import sys, os, subprocess
 
 from HTMLOutput import *
 
 class TimeMachineController(HTMLOutput):
-	
+
     def __init__(self, logo_image):
 	HTMLOutput.__init__(self, 2)
 
-	rev = popen2.popen2('svnversion %s' % "../")[0].read().strip()
+	rev = subprocess.Popen(['svnversion', '../'], 0, None, None, subprocess.PIPE).stdout.read().strip()
 
 	output = []
 	output.append(   '<div class="HappyTitleBar">')
