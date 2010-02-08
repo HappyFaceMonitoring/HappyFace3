@@ -102,6 +102,7 @@ class WebCreator(object):
 	output += '  <link href="config/TabNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
 	output += '  <script src="config/FastNavigation.js" type="text/javascript"></script>' + "\n"
 	output += '  <link href="config/FastNavigation.css" rel="stylesheet" type="text/css" />' + "\n"
+	output += '  <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="favicon.ico" />' + "\n"
         for css in self.cssList:
             output += '  <link href="'+css+'" rel="stylesheet" type="text/css" />' + "\n"
         
