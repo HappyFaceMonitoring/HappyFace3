@@ -6,10 +6,11 @@ var AutoReload = true;
 if (!HappyTab) HappyTab = {};
 if (!HappyTab.Widget) HappyTab.Widget = {};
 
-HappyTab.Widget.HappyPanels = function(element, defTab, opts)
+HappyTab.Widget.HappyPanels = function(element, defTab, defModule, opts)
 {
 	this.element = this.getElement(element);
 	this.defaultTab = defTab;
+	this.defaultModule = defModule;
 	this.bindings = [];
 	this.tabSelectedClass = "HappyPanelsTabSelected";
 	this.tabHoverClass = "HappyPanelsTabHover";
@@ -347,6 +348,9 @@ HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(element)
 		this.addPanelEventListeners(tabs[i], panels[i]);
 
 	this.showPanel(this.defaultTab);
+
+	if(this.defaultModule != '')
+		goto(this.defaultModule);
 };
 
 /* function to set the right values before auto-reloading */

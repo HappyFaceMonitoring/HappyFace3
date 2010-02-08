@@ -119,12 +119,13 @@ class WebCreator(object):
 	output += """<?php
 			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
 			else { $selectedTab = "0"; }
+			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 			printf('  <script type="text/javascript">\n');
 			printf('  <!--\n');
 			printf('  var selectedTab='.$selectedTab.';\n');
+			printf('  var selectedMod="'.$selectedMod.'";\n');
 			printf('  //-->\n');
 			printf('  </script>\n');
-			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 		?>"""
 	output += '  <form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get">' + "\n"
 	output += '   <div>' + "\n"
@@ -156,15 +157,7 @@ class WebCreator(object):
 	output += '  </div>' + "\n"
 
 	# logic to memorize selected tab on auto reload part 2
-	output += '<?php if ($selectedMod != "") { ?>'
-
-	output += '  <script type="text/javascript">' + "\n"
-	output += '  <!--' + "\n"
-	output += """  goto("'.$selectedMod.'");""" + "\n"
-	output += '  //-->' + "\n"
-	output += '  </script>' + "\n"
-
-	output += '<?php } if($historyview) { ?>'
+	output += '<?php if($historyview) { ?>'
 	output += '  <script type="text/javascript">' + "\n"
 	output += '  <!--' + "\n"
 	output += '  AutoReload=false;' + "\n"
@@ -176,7 +169,7 @@ class WebCreator(object):
 	# some javascripts for website navigation
 	output += '  <script type="text/javascript">' + "\n"
 	output += '  <!--' + "\n"
-	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab);' + "\n"
+	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab,selectedMod);' + "\n"
 	output += '  //-->' + "\n"
 	output += '  </script>' + "\n"
 	
