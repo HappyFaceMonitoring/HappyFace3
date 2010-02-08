@@ -10,6 +10,7 @@ from TimeMachineController import *
 from SQLCallRoutines import *
 from ModuleResultsArrayBuilder import *
 from GetText4Firefox import *
+from GetXML import *
 
 class WebCreator(object):
     def __init__(self,config,modObj_list,timestamp):
@@ -87,6 +88,9 @@ class WebCreator(object):
 
         # provides functions for the firefox plugin
 	output += GetText4Firefox().output
+
+	# provides general XML output
+	output += GetXML(self.config).output
 
 	#######################################################
 

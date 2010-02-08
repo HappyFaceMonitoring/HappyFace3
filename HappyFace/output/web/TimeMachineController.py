@@ -34,7 +34,7 @@ class TimeMachineController(HTMLOutput):
 	output.append(   ' <div class="HappyTitleBarElement">')
 	output.append(   '  <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '   <tr>')
-	output.append(   "    <td>' . $time_message . '</td>")
+	output.append( """    <td><div style="text-align: left;">' . $time_message . '<span style="float: right;"><a href="?action=getxml"><img src="config/images/xml_icon.png" width="36" height="14" alt="XML icon" style="border: none; vertical-align: bottom;"/></a></span></div></td>""")
 	output.append(   '   </tr>')
 	output.append(   '  </table>')
 	output.append(   ' </div>')
