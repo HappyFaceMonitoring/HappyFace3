@@ -1,0 +1,26 @@
+[setup]
+
+# comma separated list of input xml files
+#xml_path    =   data/usm_pnfs_physik.rwth-aachen.de_cms_store_user_.xml,data/usm_pnfs_desy.de_cms_tier2_store_user_.xml,data/usm_pnfs_uni-karlsruhe.de_cms_store_user_.xml
+xml_path    =   data/usm_pnfs_physik.rwth-aachen.de_cms_store_user_.xml,data/usm_pnfs_desy.de_cms_tier2_store_user_.xml
+
+
+[users]
+
+# comma separated list of directory names you wish to exclude from processing
+excluded_users  =   test
+
+
+[power_users]
+
+# list of power users. syntax:
+# <dirname> = <quota in GB> <lifetime>
+# the quota lasts forever if <lifetime> is not specified
+giffels     =   3000.0  2009.10.01
+floss       =   9000.0  2009.09.01
+fedor       =   5000.0  2009.10.01
+geenen      =   5000.0  2009.10.01
+meyera      =   5000.0  2009.10.01
+jansen      =   5000.0  2009.09.01
+ata         =   3000.0  2009.09.01
+aperiean    =   20000.0 2009.10.01
