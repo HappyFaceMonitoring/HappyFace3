@@ -5,7 +5,7 @@ from Plot import *
 #############################################
 class MultiPlot(Plot):
 
-    def __init__(self, category, timestamp, archive_dir):
+    def __init__(self, module_options):
 
-        Plot.__init__(self, category, timestamp, archive_dir)
+        Plot.__init__(self, module_options)
 	

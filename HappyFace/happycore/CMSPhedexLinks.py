@@ -11,9 +11,9 @@ import re
 
 class CMSPhedexLinks(ModuleBase,PhpDownload):
 
-	def __init__(self,category,timestamp,storage_dir):
+	def __init__(self,module_options):
 
-		ModuleBase.__init__(self,category,timestamp,storage_dir)
+		ModuleBase.__init__(self,module_options)
 		PhpDownload.__init__(self)
 
 		## get the url

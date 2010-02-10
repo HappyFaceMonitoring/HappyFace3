@@ -56,10 +56,10 @@ class myUser:   #class storing the user's information
 
 class usm(XMLParsing,ModuleBase):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
 
         # read additional config settings
         self.xml_paths = self.configService.options('downloadservice')    #get the list of xml filenames

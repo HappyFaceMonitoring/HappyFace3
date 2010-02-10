@@ -2,10 +2,10 @@ from ModuleBase import *
 
 class get_started(ModuleBase):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
 
         # read additional config settings
         self.answer = self.configService.get('setup','answer')

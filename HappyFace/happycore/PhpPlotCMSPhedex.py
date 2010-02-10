@@ -4,9 +4,9 @@ from PhpDownload import *
 
 class PhpPlotCMSPhedex(Plot,PhpDownload):
 
-    def __init__(self, category, timestamp, archive_dir):
+    def __init__(self, module_options):
 
-        Plot.__init__(self, category, timestamp, archive_dir)
+        Plot.__init__(self, module_options)
         PhpDownload.__init__(self)
         
 

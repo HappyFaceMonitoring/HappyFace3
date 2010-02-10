@@ -9,8 +9,8 @@ from DownloadTag import *
 
 class Plot(ModuleBase):
     
-    def __init__(self, category, timestamp, archive_dir):
-        ModuleBase.__init__(self, category, timestamp, archive_dir)
+    def __init__(self, module_options):
+        ModuleBase.__init__(self, module_options)
 
         self.plots = {}
         

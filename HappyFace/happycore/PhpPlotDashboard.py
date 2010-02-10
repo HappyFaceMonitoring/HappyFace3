@@ -6,9 +6,9 @@ from PhpDownload import *
 #############################################
 class PhpPlotDashboard(Plot,PhpDownload):
 
-    def __init__(self, category, timestamp, archive_dir):
+    def __init__(self, module_options):
 
-        Plot.__init__(self, category, timestamp, archive_dir)
+        Plot.__init__(self, module_options)
         PhpDownload.__init__(self)
    
         self.base_url = self.base_url+"/"+self.configService.get('setup','base_url_add')

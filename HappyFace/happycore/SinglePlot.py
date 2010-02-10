@@ -5,9 +5,9 @@ from Plot import *
 #############################################
 class SinglePlot(Plot):
 
-    def __init__(self, category, timestamp, archive_dir):
+    def __init__(self, module_options):
 
-        Plot.__init__(self, category, timestamp, archive_dir)
+        Plot.__init__(self, module_options)
 	
         self.singlePlotTag = 'plot'
         configDownloadRequests = self.configService.getDownloadRequests()

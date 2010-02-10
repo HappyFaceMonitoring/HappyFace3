@@ -9,9 +9,9 @@ import re ## regular expressions
 
 class dCacheDatasetRestoreLazy(ModuleBase):
 
-	def __init__(self,category,timestamp,storage_dir):
+	def __init__(self,module_options):
 
-		ModuleBase.__init__(self,category,timestamp,storage_dir)
+		ModuleBase.__init__(self,module_options)
 
 		self.dsTag = 'lazyqueue'
 		self.fileExtension = 'html'

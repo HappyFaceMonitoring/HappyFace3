@@ -87,6 +87,12 @@ def HappyFace():
     ##########################################################
     ################ start with the execution ################
 
+    # create options dictionary
+    module_options = {}
+    
+    module_options["timestamp"] = timestamp
+    module_options["archive_dir"] = archive_dir
+    
     # directory collects the module objects
     modObj_list = {}
 
@@ -101,9 +107,11 @@ def HappyFace():
             # import module class dynamically
 	    modClass = __import__(module)
             moduleCount += 1
+	    
+	    module_options["category"] = category
 
        	    # create a object of the class dynamically
-       	    modObj_list[module] = getattr(modClass,module)(category, timestamp, archive_dir)
+       	    modObj_list[module] = getattr(modClass,module)(module_options)
             print "  "+str(moduleCount)+": "+module
 
     print "HappyFace: Module preparation finished."

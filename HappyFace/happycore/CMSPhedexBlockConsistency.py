@@ -10,11 +10,11 @@ class CMSPhedexBlockConsistency(ModuleBase):
     """
     Module to show results of the PhEDEx block consistency check.
     """
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
         """
          Defines keys for the module database table.
         """
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
         self.warning_limit = float(self.configService.get("setup",
                                                           "warning_limit"))
         self.old_result_warning_limit = float(self.configService.get("setup",

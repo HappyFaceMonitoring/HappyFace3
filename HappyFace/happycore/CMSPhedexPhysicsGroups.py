@@ -26,7 +26,7 @@ from PhpDownload import *
 
 class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         """
         The CMSPhedexPhysicsGroups class uses the
@@ -37,7 +37,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         """
 
         # inherits from the ModuleBase Class
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
 	PhpDownload.__init__(self)
  
         ## get the instance

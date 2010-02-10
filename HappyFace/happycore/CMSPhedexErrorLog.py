@@ -28,10 +28,10 @@ from PhpDownload import *
 
 class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
 	PhpDownload.__init__(self)
 
 

@@ -3,10 +3,10 @@ from XMLParsing import *
 
 class dCacheInfo(ModuleBase):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
         
         self.dsTag = self.configService.get('setup','xmltag')
 

@@ -7,8 +7,8 @@ from ModuleBase import *
 #############################################
 class Uschi(ModuleBase):
 
-    def __init__(self, category, timestamp, storage_dir):
-	ModuleBase.__init__(self, category, timestamp, storage_dir)
+    def __init__(self, module_options):
+	ModuleBase.__init__(self, module_options)
 
 	# definition of the database table keys and pre-defined values
 	self.db_keys['uschi_timestamp'] = StringCol()

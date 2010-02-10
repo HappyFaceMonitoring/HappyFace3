@@ -13,9 +13,8 @@ from ConfigService import *
 #########################################################
 class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
-    def __init__(self, category, timestamp, archive_dir):
+    def __init__(self, module_options):
 	HTMLOutput.__init__(self, 8)
-
 
         # Configuration Service to read in all config parameters
         self.configService = ConfigService()
@@ -27,20 +26,17 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
         self.configService.readParameter()
 
-
         # Container for download requests
         self.downloadRequest = {}
-
-
 
 	Thread.__init__(self)
 
 	lock_obj = DataBaseLock()
 	self.lock = lock_obj.lock
 	
-        self.category = category
-	self.timestamp = timestamp
-        self.archive_dir = archive_dir
+        self.category = module_options["category"]
+	self.timestamp = module_options["timestamp"]
+        self.archive_dir = module_options["archive_dir"]
 
 	# pre-defined status value -1 : no info
         self.status = -1

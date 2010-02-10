@@ -6,8 +6,8 @@ from PhpDownload import *
 
 class Sam(ModuleBase,PhpDownload):
 
-    def __init__(self, category, timestamp, archive_dir):
-        ModuleBase.__init__(self, category, timestamp, archive_dir)
+    def __init__(self, module_options):
+        ModuleBase.__init__(self, module_options)
         PhpDownload.__init__(self)
 
         # definition of the database table keys and pre-defined values

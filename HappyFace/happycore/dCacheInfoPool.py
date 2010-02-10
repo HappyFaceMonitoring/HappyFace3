@@ -2,10 +2,10 @@ from dCacheInfo import *
 
 class dCacheInfoPool(dCacheInfo):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
-        dCacheInfo.__init__(self,category,timestamp,storage_dir)
+        dCacheInfo.__init__(self,module_options)
 
         self.thresholds = {}
         self.thresholds['limit_global_critical'] = {}

@@ -2,10 +2,10 @@ from ModuleBase import *
 
 class subtable_example(ModuleBase):
 
-    def __init__(self,category,timestamp,storage_dir):
+    def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
-        ModuleBase.__init__(self,category,timestamp,storage_dir)
+        ModuleBase.__init__(self,module_options)
 
         # read additional config settings
 	self.max_number = self.configService.get('setup','max_number')
