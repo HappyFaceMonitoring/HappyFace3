@@ -165,7 +165,7 @@ class PhedexStats(ModuleBase):
 	end.append(  '</div>')
 	end.append(  '<br />')
 
-        # create output sting, will be executed by a printf('') PHP command
+        # create output sting, will be executed by a print('') PHP command
         # all data stored in DB is available via a $data[key] call
         module_content = """<?php
 	
@@ -173,15 +173,15 @@ class PhedexStats(ModuleBase):
 		$data["total_transfers"] = "no information";
 	}
 	
-	printf('""" + self.PHPArrayToString(begin) + """');
+	print('""" + self.PHPArrayToString(begin) + """');
 	
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-		printf('""" + self.PHPArrayToString(detailed_row) + """');
+		print('""" + self.PHPArrayToString(detailed_row) + """');
 	}
 
-	printf('""" + self.PHPArrayToString(end) + """');
+	print('""" + self.PHPArrayToString(end) + """');
 	?>"""
 
         return self.PHPOutput(module_content)

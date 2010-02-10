@@ -159,7 +159,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 
 		$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-		printf('""" + self.PHPArrayToString(mc_begin) + """');
+		print('""" + self.PHPArrayToString(mc_begin) + """');
 
 		$tier = 1;
 
@@ -178,21 +178,21 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		        $match = preg_match("/T1/",$info["linked_site"]);
 		        if (!$match) {
 		            $tier = 2;
-		            printf('""" + self.PHPArrayToString(row_sep) + """');
+		            print('""" + self.PHPArrayToString(row_sep) + """');
 		        }
 		    }
 		    if($tier == 2) {
 		        $match = preg_match("/T2/",$info["linked_site"]);
 		        if (!$match) {
 		            $tier = 3;
-		            printf('""" + self.PHPArrayToString(row_sep) + """');
+		            print('""" + self.PHPArrayToString(row_sep) + """');
 		        }
 		    }
 
-		    printf('""" + self.PHPArrayToString(table_row) + """');
+		    print('""" + self.PHPArrayToString(table_row) + """');
 		}
 
-		printf('""" + self.PHPArrayToString(mc_mid) + """');
+		print('""" + self.PHPArrayToString(mc_mid) + """');
 
 		foreach ($dbh->query($details_db_sqlquery) as $info)
 		{
@@ -205,10 +205,10 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 		    else
 		        $service_status_color_flag = "undefined";
 
-	            printf('""" + self.PHPArrayToString(detailed_row) + """');
+	            print('""" + self.PHPArrayToString(detailed_row) + """');
 		}
 
-		printf('""" + self.PHPArrayToString(mc_end) + """');
+		print('""" + self.PHPArrayToString(mc_end) + """');
 
 	        ?>"""
 

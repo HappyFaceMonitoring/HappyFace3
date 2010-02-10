@@ -215,13 +215,13 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	infobox = []
 	infobox.append(     '   <div id="' + self.__module__ + '_info" style="display: none;">')
 	infobox.append(     '    <table class="HappyDesc">')
-	infobox.append(     '     <tr><td style="width:20%%">Module File:</td><td>' + self.__module__ + '.py</td></tr>')
-	infobox.append(   """     <tr><td style="width:20%%">Module Type:</td><td>' . $data["mod_type"] . '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%%">Status Value:</td><td>' . number_format($data["status"],1). '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%%">Weight:</td><td>' . number_format($data["weight"],1) .'</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%%">Definition:</td><td>' .$data["definition"]. '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%%">Source:</td><td>' .$data["datasource"]. '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>""")
+	infobox.append(     '     <tr><td style="width:20%">Module File:</td><td>' + self.__module__ + '.py</td></tr>')
+	infobox.append(   """     <tr><td style="width:20%">Module Type:</td><td>' . $data["mod_type"] . '</td></tr>""")
+	infobox.append(   """     <tr><td style="width:20%">Status Value:</td><td>' . number_format($data["status"],1). '</td></tr>""")
+	infobox.append(   """     <tr><td style="width:20%">Weight:</td><td>' . number_format($data["weight"],1) .'</td></tr>""")
+	infobox.append(   """     <tr><td style="width:20%">Definition:</td><td>' .$data["definition"]. '</td></tr>""")
+	infobox.append(   """     <tr><td style="width:20%">Source:</td><td>' .$data["datasource"]. '</td></tr>""")
+	infobox.append(   """     <tr><td style="width:20%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>""")
 	infobox.append(     '    </table>')
 
 	infobox.append(     '    <form id="' + self.__module__ + '_PlotForm" action="plot_generator.php" method="get" onsubmit="javascript: submitFormToWindow(this)">')
@@ -296,12 +296,12 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    /*** Get variables for the direct module link ***/
 
 	    /*** print the HTML output ***/
-	    printf('""" + self.PHPArrayToString(html_begin) + """');
-	    printf('""" + self.PHPArrayToString(infobox) + """');
+	    print('""" + self.PHPArrayToString(html_begin) + """');
+	    print('""" + self.PHPArrayToString(infobox) + """');
 
 	    ?>""" + module_content + """<?php
 
-	    printf('""" + self.PHPArrayToString(html_end) + """');
+	    print('""" + self.PHPArrayToString(html_end) + """');
 	}
 
 	?>"""

@@ -170,7 +170,7 @@ class Sam(ModuleBase,PhpDownload):
 
                                         details = {}
                                         details["status"] = Status
-                                        details["url"] = (self.report_url + Url.__str__()).replace('&','&amp;').replace('%','%%')
+                                        details["url"] = (self.report_url + Url.__str__()).replace('&','&amp;')
                                         details["age"] = Age
                                         details["type"] = Type
                                         details["time"] = Time
@@ -308,7 +308,7 @@ class Sam(ModuleBase,PhpDownload):
 
     def output(self):
 
-        # this module_content string will be executed by a printf('') PHP command
+        # this module_content string will be executed by a print('') PHP command
         # all information in the database are available via a $data["key"] call
 	mc_group_begin = []
         mc_group_begin.append('<strong>Group status:</strong>')
@@ -405,7 +405,7 @@ class Sam(ModuleBase,PhpDownload):
 
         if ($GroupCount != 0)
 	{
-	    printf('""" + self.PHPArrayToString(mc_group_begin) + """');
+	    print('""" + self.PHPArrayToString(mc_group_begin) + """');
 	
 	    foreach ($dbh->query($details_summary_db_sqlquery) as $info)
        	    {
@@ -416,14 +416,14 @@ class Sam(ModuleBase,PhpDownload):
 	        else
 		    $service_status_color_flag = "critical";
 
-#	        printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
-	        printf('""" + self.PHPArrayToString(mc_group_row) + """');
+#	        print('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
+	        print('""" + self.PHPArrayToString(mc_group_row) + """');
 	    }
 
-	    printf('""" + self.PHPArrayToString(mc_group_end) + """');
+	    print('""" + self.PHPArrayToString(mc_group_end) + """');
 	}
 
-        printf('""" + self.PHPArrayToString(mc_service_begin) + """');
+        print('""" + self.PHPArrayToString(mc_service_begin) + """');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
@@ -436,16 +436,16 @@ class Sam(ModuleBase,PhpDownload):
 		else
 		    $service_status_color_flag = "critical";
 
-#		printf('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
+#		print('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
 
-		printf('""" + self.PHPArrayToString(mc_service_row) + """');
+		print('""" + self.PHPArrayToString(mc_service_row) + """');
 	    }
 	    $temp_element = $info["service_name"];
 	}
 
-	printf('""" + self.PHPArrayToString(mc_service_end) + """');
+	print('""" + self.PHPArrayToString(mc_service_end) + """');
 
-	printf('""" + self.PHPArrayToString(mc_details_begin) + """');
+	print('""" + self.PHPArrayToString(mc_details_begin) + """');
 	
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
@@ -454,21 +454,21 @@ class Sam(ModuleBase,PhpDownload):
 			$color = "critical";
 			if($results["$service_status"] == "0.5") $color="warning";
 
-			printf('""" + self.PHPArrayToString(mc_details_row_fail) + """');
+			print('""" + self.PHPArrayToString(mc_details_row_fail) + """');
 	    }
 	}
 
-	printf('""" + self.PHPArrayToString(mc_details_mid) + """');
+	print('""" + self.PHPArrayToString(mc_details_mid) + """');
 
 	foreach ($dbh->query($details_db_sqlquery) as $results)
 	{
 	    if ($results["status"] == "ok")
 	    {
-		printf('""" + self.PHPArrayToString(mc_details_row_ok) + """');
+		print('""" + self.PHPArrayToString(mc_details_row_ok) + """');
 	    }
 	}
 
-	printf('""" + self.PHPArrayToString(mc_details_end) + """');
+	print('""" + self.PHPArrayToString(mc_details_end) + """');
 
 	?>"""
 

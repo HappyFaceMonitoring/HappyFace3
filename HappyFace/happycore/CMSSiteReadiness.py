@@ -110,12 +110,12 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		"""
 		#module_content = """
 		#<?php
-		#printf('War einmal ein Boomerang,<br />');
-		#printf('War um ein Weniges zu lang.<br />');
-		#printf('Boomerang flog ein Stueck<br />');
-		#printf('Und kehrte nie mehr zurueck.<br />');
-		#printf('Publikum noch stundenlang<br />');
-		#printf('Wartete auf Boomerang.<br />');
+		#print('War einmal ein Boomerang,<br />');
+		#print('War um ein Weniges zu lang.<br />');
+		#print('Boomerang flog ein Stueck<br />');
+		#print('Und kehrte nie mehr zurueck.<br />');
+		#print('Publikum noch stundenlang<br />');
+		#print('Wartete auf Boomerang.<br />');
 		#?>
 		#"""
 
@@ -144,7 +144,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 
                 $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-                printf('""" + self.PHPArrayToString(mc_begin) + """');
+                print('""" + self.PHPArrayToString(mc_begin) + """');
 
 		$condition = "start";
 
@@ -163,21 +163,21 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 
 		    if($info["readiness_cond"] != $condition) {
 		        if($condition != "start") {
-		            printf('""" + self.PHPArrayToString(mc_row_end) + """');
+		            print('""" + self.PHPArrayToString(mc_row_end) + """');
 		        }
-		        printf('""" + self.PHPArrayToString(mc_row_begin) + """');
+		        print('""" + self.PHPArrayToString(mc_row_begin) + """');
 		        $condition = $info["readiness_cond"];
 		    }
 
 		    if( $info["cond_link"] == "noLink" ){
-		        printf('""" + self.PHPArrayToString(mc_cell_nolink) + """');
+		        print('""" + self.PHPArrayToString(mc_cell_nolink) + """');
 		    }
 		    else {
-		        printf('""" + self.PHPArrayToString(mc_cell_link) + """');
+		        print('""" + self.PHPArrayToString(mc_cell_link) + """');
 		    }
 	        }
 
-                printf('""" + self.PHPArrayToString(mc_end) + """');
+                print('""" + self.PHPArrayToString(mc_end) + """');
 
 		?>"""
 
@@ -346,15 +346,9 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 			        ## get the last x days
 				for entry in list[-(self.days):]:
 					details_db_values['cond_color'] = entry['color']
-					if not re.search('%',entry['value']):
-						details_db_values['cond_value'] = entry['value']
-					else:
-						details_db_values['cond_value'] = re.sub('%','%%',entry['value'])
+					details_db_values['cond_value'] = entry['value']
 					try:
-						if not re.search('%',entry['link']):
-							details_db_values['cond_link'] = entry['link']
-						else:
-							details_db_values['cond_link'] = re.sub('%','%%', entry['link'])
+						details_db_values['cond_link'] = entry['link']
 					except:
 						details_db_values['cond_link'] = 'noLink'
 

@@ -183,7 +183,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
         $duration_color="warning";
         }
 
-	printf('"""+warning_message+"""
+	print('"""+warning_message+"""
         
 	<table class="TableDataSmall">
 		<tr class=\"TableHeader\">
@@ -268,7 +268,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
         
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-		printf('<tr>
+		print('<tr>
                         <td>'.$info["dataset"].'</td>
 			<td>'.$info["blocks"].'</td>
 			<td>'.$info["files"].'</td>
@@ -276,7 +276,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
 		);
 	}
 
-	printf('</table></div><br/>
+	print('</table></div><br/>
 
 	<input type="button" value="show/hide Inconsistent Files" onfocus="this.blur()" onclick="show_hide(\\\'files_details\\\');" />
 	<div class="DetailedInfo" id=\\\'files_details\\\' style="display:none;">
@@ -291,13 +291,13 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	$details_db_sqlquery = "SELECT * FROM """+self.details_database+""" WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-		printf('<tr>
+		print('<tr>
                         <td>'.$info["lfn"].'</td>
 			<td>'.$info["status"].'</td>
                         </tr>'
 		);
 	}
-	printf('</table></div><br/>')
+	print('</table></div><br/>')
 
 	?>
 	"""

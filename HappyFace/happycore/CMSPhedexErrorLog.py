@@ -224,15 +224,15 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         mc_error.append(  ' <tr><td colspan="2" class="CMSPhedexErrorLogSeparator"></td></tr>')
         mc_error.append(""" <tr class="' .$info["dest_errors_status"] . '">""")
         mc_error.append(  '  <td>fraction of destination errors</td>')
-        mc_error.append("""  <td>'.round($frac_dest).'%%</td>""")
+        mc_error.append("""  <td>'.round($frac_dest).'%</td>""")
         mc_error.append(  ' </tr>')
         mc_error.append(""" <tr class="' .$info["source_errors_status"] . '">""")
         mc_error.append(  '  <td>fraction of source errors</td>')
-        mc_error.append("""  <td>'.round($frac_source).'%%</td>""")
+        mc_error.append("""  <td>'.round($frac_source).'%</td>""")
         mc_error.append(  ' </tr>');
         mc_error.append(""" <tr class="' .$service_status_color_flag_frac . '">""")
         mc_error.append(  '  <td>fraction of transfer errors</td>')
-        mc_error.append("""  <td>'.round($frac_trans).'%%</td>""")
+        mc_error.append("""  <td>'.round($frac_trans).'%</td>""")
         mc_error.append(  ' </tr>');
         mc_error.append(  '</table>')
         mc_error.append(  '<br />');
@@ -313,21 +313,21 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
                 else
                     $service_status_color_flag_frac = "report";
 
-                printf('""" + self.PHPArrayToString(mc_error) + """');
+                print('""" + self.PHPArrayToString(mc_error) + """');
             }
             $onlyOnce = 1;
         }
 
         if ($onlyOnce == 0) {
-            printf('""" + self.PHPArrayToString(mc_noerror) + """');
+            print('""" + self.PHPArrayToString(mc_noerror) + """');
         }
         else {
-            printf('""" + self.PHPArrayToString(detailed_begin) + """');
+            print('""" + self.PHPArrayToString(detailed_begin) + """');
             foreach ($dbh->query($details_db_sqlquery) as $info)
             {
-                printf('""" + self.PHPArrayToString(detailed_row) + """');
+                print('""" + self.PHPArrayToString(detailed_row) + """');
             }
-            printf('""" + self.PHPArrayToString(detailed_end) + """');
+            print('""" + self.PHPArrayToString(detailed_end) + """');
         }
 
         ?>"""

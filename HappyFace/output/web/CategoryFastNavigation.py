@@ -53,10 +53,10 @@ class CategoryFastNavigation(HTMLOutput):
 
 	output = """<?php
 
-	printf('""" + self.PHPArrayToString(begin) + """');
+	print('""" + self.PHPArrayToString(begin) + """');
 
 	if ( is_array($ModuleResultsArray) ) {
-	    printf('""" + self.PHPArrayToString(list_begin) + """');
+	    print('""" + self.PHPArrayToString(list_begin) + """');
 
 	    foreach ($ModuleResultsArray as $module) {
 
@@ -64,13 +64,13 @@ class CategoryFastNavigation(HTMLOutput):
 
 		    $nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"]);
 
-		    printf('""" + self.PHPArrayToString(list_item) + """');
+		    print('""" + self.PHPArrayToString(list_item) + """');
 	        }
 	    }
-	    printf('""" + self.PHPArrayToString(list_end) + """');
+	    print('""" + self.PHPArrayToString(list_end) + """');
 	}
 
-	printf('""" + self.PHPArrayToString(end) + """');
+	print('""" + self.PHPArrayToString(end) + """');
 
 	?>"""
 

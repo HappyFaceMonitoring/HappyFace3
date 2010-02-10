@@ -59,18 +59,18 @@ class subtable_example(ModuleBase):
 		# definition of the sql query for the subtable (depending on the saved script running timestamp)
 		$my_sqlquery = "SELECT * FROM " . $data["subtable"] . " WHERE timestamp = " . $data["timestamp"];
 		
-		printf('<table width="480" border="1">');
-		printf('<tr><td>number</td><td>square</td><td>square root</td></tr>');
+		print('<table width="480" border="1">');
+		print('<tr><td>number</td><td>square</td><td>square root</td></tr>');
 		
 		# ===========================================================================
 		# table access with a foreach loop and the created sql query
 		foreach ($dbh->query($my_sqlquery) as $sub_data)
 		{
-			printf('
+			print('
 				<tr><td>' . $sub_data["number"] . "</td><td> " . $sub_data["square"] . "</td><td>" . $sub_data["square_root"] . '</td><tr>
 			');
 		}
-		printf('</table>');
+		print('</table>');
 	?>
 	"""
 

@@ -68,7 +68,7 @@ class Plot(ModuleBase):
         
     def output(self):
 
-        # this module_content string will be executed by a printf('') PHP command
+        # this module_content string will be executed by a print('') PHP command
         # all information in the database are available via a $data["key"] call
         mc = []
         plotsList =  self.plots.keys()
@@ -82,5 +82,5 @@ class Plot(ModuleBase):
             if self.plotPosition == 'v':
                 mc.append('<br />')
    
-	module_content = "<?php printf('" + self.PHPArrayToString(mc) + "'); ?>";
+	module_content = "<?php print('" + self.PHPArrayToString(mc) + "'); ?>";
         return self.PHPOutput(module_content)

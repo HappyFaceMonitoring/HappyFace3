@@ -120,12 +120,12 @@ class WebCreator(object):
 			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
 			else { $selectedTab = "0"; }
 			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
-			printf('  <script type="text/javascript">\n');
-			printf('  <!--\n');
-			printf('  var selectedTab='.$selectedTab.';\n');
-			printf('  var selectedMod="'.$selectedMod.'";\n');
-			printf('  //-->\n');
-			printf('  </script>\n');
+			print('  <script type="text/javascript">\n');
+			print('  <!--\n');
+			print('  var selectedTab='.$selectedTab.';\n');
+			print('  var selectedMod="'.$selectedMod.'";\n');
+			print('  //-->\n');
+			print('  </script>\n');
 		?>"""
 	output += '  <form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get">' + "\n"
 	output += '   <div>' + "\n"

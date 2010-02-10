@@ -59,7 +59,7 @@ class dCacheInfoPool(dCacheInfo):
         for entry in self.getRatioVar(''):
             att = entry.split("/")
             name = self.poolAttribNames[att[0]]['name']+" / "+ self.poolAttribNames[att[1]]['name']
-            self.poolAttribNames[entry] =  {'name':name , 'unit':'%%'}
+            self.poolAttribNames[entry] =  {'name':name , 'unit':'%'}
 
 
         for entry in self.poolAttribNames:
@@ -274,7 +274,7 @@ class dCacheInfoPool(dCacheInfo):
 
     def output(self):
 
-        # create output sting, will be executed by a printf('') PHP command
+        # create output sting, will be executed by a print('') PHP command
         # all data stored in DB is available via a $data[key] call
 
 	mc_begin = []
@@ -331,7 +331,7 @@ class dCacheInfoPool(dCacheInfo):
         else
             $c_flag = "critical";
 
-	printf('""" + self.PHPArrayToString(mc_begin) + """');
+	print('""" + self.PHPArrayToString(mc_begin) + """');
 
         foreach ($dbh->query($details_db_sqlquery) as $sub_data)
         {
@@ -342,10 +342,10 @@ class dCacheInfoPool(dCacheInfo):
             elseif($sub_data["poolstatus"] == 0.)
                 $c_flag = "critical";
 
-            printf('""" + self.PHPArrayToString(mc_detailed_row) + """');
+            print('""" + self.PHPArrayToString(mc_detailed_row) + """');
 	}
 
-        printf('""" + self.PHPArrayToString(mc_end) + """');
+        print('""" + self.PHPArrayToString(mc_end) + """');
 
 	?>"""
 

@@ -333,18 +333,18 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 		$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-		printf('""" + self.PHPArrayToString(mc_begin) + """');
+		print('""" + self.PHPArrayToString(mc_begin) + """');
 
 		$first_row = true;
 		foreach ($dbh->query($details_db_sqlquery) as $sub_data)
 		{
 		    if(!$first_row)
-		        printf('""" + self.PHPArrayToString(mc_detailed_separator) + """');
+		        print('""" + self.PHPArrayToString(mc_detailed_separator) + """');
 		    $first_row = false;
-		    printf('""" + self.PHPArrayToString(mc_detailed_row) + """');
+		    print('""" + self.PHPArrayToString(mc_detailed_row) + """');
 		}
 
-		printf('""" + self.PHPArrayToString(mc_end) + """');
+		print('""" + self.PHPArrayToString(mc_end) + """');
 
 		?>"""
 

@@ -225,10 +225,10 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
              else
 	         $service_status_color_flag = "undefined";
 
-	     printf('""" + self.PHPArrayToString(info_row) + """');
+	     print('""" + self.PHPArrayToString(info_row) + """');
         }
 
-	printf('""" + self.PHPArrayToString(mid) + """');
+	print('""" + self.PHPArrayToString(mid) + """');
 
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
@@ -241,10 +241,10 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
             else
 	        $service_status_color_flag = "undefined";
 
-            printf('""" + self.PHPArrayToString(detailed_row) + """');
+            print('""" + self.PHPArrayToString(detailed_row) + """');
         }
 
-        printf('""" + self.PHPArrayToString(end) + """');
+        print('""" + self.PHPArrayToString(end) + """');
                 
         ?>"""
 

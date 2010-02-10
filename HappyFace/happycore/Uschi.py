@@ -97,10 +97,6 @@ class Uschi(ModuleBase):
 		    for line in about_list:
 			self.about += line
 		
-	# replace % in content with %% for the PHP printf command
-	self.log = self.log.replace('%','%%')
-	self.about = self.about.replace('%','%%')
-	
 	# definition fo the database table values
 	self.db_values['uschi_timestamp'] = self.uschi_timestamp
 	self.db_values['uschi_timestamp_module'] = self.uschi_timestamp_module
@@ -112,7 +108,7 @@ class Uschi(ModuleBase):
 
     def output(self):
 
-        # the module_content string will be executed by a printf('') PHP command
+        # the module_content string will be executed by a print('') PHP command
 	# all information in the database are available via a $data["key"] call
 
         mc = []
@@ -155,5 +151,5 @@ class Uschi(ModuleBase):
         mc.append("""<div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_result\\\'" + """ style="display:none;">'.$data["log"].'</div>""")
         mc.append(  '<br />')
 
-        module_content = "<?php printf('" + self.PHPArrayToString(mc) + "'); ?>"
+        module_content = "<?php print('" + self.PHPArrayToString(mc) + "'); ?>"
 	return self.PHPOutput(module_content)

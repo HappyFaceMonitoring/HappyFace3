@@ -242,13 +242,13 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 	mc_end.append('</div>')
 	mc_end.append('<br />');
 
-        # this module_content string will be executed by a printf('') PHP command
+        # this module_content string will be executed by a print('') PHP command
         # all information in the database are available via a $data["key"] call
         module_content = """<?php
 
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-	printf('""" + self.PHPArrayToString(mc_begin) + """');
+	print('""" + self.PHPArrayToString(mc_begin) + """');
 
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
@@ -262,10 +262,10 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
             $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
             $resident_data_percent = round(($info["node_bytes"]/$info["dest_bytes"])*100,1);
 
-            printf('""" + self.PHPArrayToString(mc_row) + """');
+            print('""" + self.PHPArrayToString(mc_row) + """');
         }
 
-        printf('""" + self.PHPArrayToString(mc_mid) + """');
+        print('""" + self.PHPArrayToString(mc_mid) + """');
 
         foreach ($dbh->query($details_db_sqlquery) as $info2)
        	{
@@ -281,10 +281,10 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
             $resident_files_Nb = $info2["node_files"];
             $subscribed_files_Nb = $info2["dest_files"];
 
-            printf('""" + self.PHPArrayToString(detailed_row) + """');
+            print('""" + self.PHPArrayToString(detailed_row) + """');
         }
 
-        printf('""" + self.PHPArrayToString(mc_end) + """');
+        print('""" + self.PHPArrayToString(mc_end) + """');
 
         ?>"""
 

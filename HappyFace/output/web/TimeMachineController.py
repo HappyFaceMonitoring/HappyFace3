@@ -117,13 +117,13 @@ class TimeMachineController(HTMLOutput):
 
 	out = """<?php
 
-	printf('""" + self.PHPArrayToString(output) + """');
+	print('""" + self.PHPArrayToString(output) + """');
 	reset_time();
 
 	if($time_error_message != "")
-	    printf('""" + self.PHPArrayToString(error_msg) + """');
+	    print('""" + self.PHPArrayToString(error_msg) + """');
 
-	printf('""" + self.PHPArrayToString(end) + """');
+	print('""" + self.PHPArrayToString(end) + """');
 
 	?>"""
 

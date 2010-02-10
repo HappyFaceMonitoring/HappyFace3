@@ -157,12 +157,12 @@ class CMSPhedexDeletionRequest(ModuleBase,PhpDownload):
 		"""
 		#module_content = """
 		#<?php
-		#printf('War einmal ein Boomerang,<br />');
-		#printf('War um ein Weniges zu lang.<br />');
-		#printf('Boomerang flog ein Stueck<br />');
-		#printf('Und kehrte nie mehr zurueck.<br />');
-		#printf('Publikum noch stundenlang<br />');
-		#printf('Wartete auf Boomerang.<br />');
+		#print('War einmal ein Boomerang,<br />');
+		#print('War um ein Weniges zu lang.<br />');
+		#print('Boomerang flog ein Stueck<br />');
+		#print('Und kehrte nie mehr zurueck.<br />');
+		#print('Publikum noch stundenlang<br />');
+		#print('Wartete auf Boomerang.<br />');
 		#?>
 		#"""
 
@@ -170,8 +170,8 @@ class CMSPhedexDeletionRequest(ModuleBase,PhpDownload):
 		<?php
 		$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-		printf('<table class="TableData">');
-		printf('<tr class="TableHeader"><td>request by</td><td>number of files</td><td>dataset</td></tr>');
+		print('<table class="TableData">');
+		print('<tr class="TableHeader"><td>request by</td><td>number of files</td><td>dataset</td></tr>');
 
 		$print = True;
 		$req_by = '';
@@ -181,14 +181,14 @@ class CMSPhedexDeletionRequest(ModuleBase,PhpDownload):
 		{
 		$service_status_color_flag = "report";
 	
-		printf('<tr class="' .$service_status_color_flag . '"><td>' . $info["req_by"] . '</td><td>'.$info["files"].'</td>');
+		print('<tr class="' .$service_status_color_flag . '"><td>' . $info["req_by"] . '</td><td>'.$info["files"].'</td>');
 		
-		printf('<td class="' .$service_status_color_flag . '">' .$info["dataset"] . '</td>'); 
-		printf('</tr>');
+		print('<td class="' .$service_status_color_flag . '">' .$info["dataset"] . '</td>'); 
+		print('</tr>');
 
 		
 		}
-		printf('</table></br>');
+		print('</table></br>');
 		?>
 		"""
 		

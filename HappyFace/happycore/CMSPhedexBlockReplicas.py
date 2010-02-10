@@ -224,8 +224,8 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
         }
 
         if(!$dummy){
-          printf('<table class="TableData">');
-          printf('<tr="TableHeader"><td>dataset</td><td>block</td><td>resident size [MB]</td></tr>');
+          print('<table class="TableData">');
+          print('<tr="TableHeader"><td>dataset</td><td>block</td><td>resident size [MB]</td></tr>');
 
           foreach ($dbh->query($details_db_sqlquery) as $info)
        	  {
@@ -239,17 +239,17 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 
           $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
 
-          printf('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$rep_size.'</td></tr>');
+          print('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$rep_size.'</td></tr>');
           }
           
-          printf('</table><br/>');
+          print('</table><br/>');
 
           
-          printf('<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
+          print('<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
           <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">');
 
-          printf('<table class="TableDetails">');
-          printf('<tr class="TableHeader"><td>dataset</td><td>block</td><td>block files</td><td>resident files</td><td>block size [MB]</td><td>resident size [MB]</td><td>group</td></tr>');
+          print('<table class="TableDetails">');
+          print('<tr class="TableHeader"><td>dataset</td><td>block</td><td>block files</td><td>resident files</td><td>block size [MB]</td><td>resident size [MB]</td><td>group</td></tr>');
 
           foreach ($dbh->query($details_db_sqlquery) as $info)
           {
@@ -264,15 +264,15 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
           $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
           $block_size = round($info["block_bytes"]/(1024*1024*1024),2);
 
-          printf('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$info["block_files"].'</td><td>'.$info["rep_files"].'</td><td>' .$block_size . '</td><td>'.$rep_size.'</td><td>'.$info["rep_group"].'</td></tr>');
+          print('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$info["block_files"].'</td><td>'.$info["rep_files"].'</td><td>' .$block_size . '</td><td>'.$rep_size.'</td><td>'.$info["rep_group"].'</td></tr>');
           }
-          printf('</table>');
+          print('</table>');
         
     
-        printf('</div><br/>');
+        print('</div><br/>');
         }
         else{
-          printf('All is fine.');
+          print('All is fine.');
         }
         
         ?>
