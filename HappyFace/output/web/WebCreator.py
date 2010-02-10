@@ -183,6 +183,14 @@ class WebCreator(object):
 	output += '    }' + "\n"
 	output += '  }' + "\n"
 
+	output += '  function show_hide_info(me, link) {' + "\n"
+	output += '    show_hide(me);' + "\n"
+	output += '    if(document.getElementById(me).style.display=="none")' + "\n"
+	output += '      document.getElementById(link).innerHTML = "Show module information";' + "\n"
+	output += '    else' + "\n"
+	output += '      document.getElementById(link).innerHTML = "Hide module information";' + "\n"
+	output += '  }' + "\n"
+
 	# Function to always open a form in a new tab or window (depending on the browser's settings)
 	output += '  var plotCounter = 0;' + "\n"
 	output += '  function submitFormToWindow(myForm) {' + "\n"
