@@ -84,6 +84,9 @@ def HappyFace():
     timeout        =  int(config.get('setup','timeout_module'))
     timeoutDowload =  int(config.get('setup','timeout_download'))
 
+    # definition of the holdback_time
+    holdback_time  =  int(config.get('setup','holdback_time'))
+
     ##########################################################
     ################ start with the execution ################
 
@@ -92,6 +95,7 @@ def HappyFace():
     
     module_options["timestamp"] = timestamp
     module_options["archive_dir"] = archive_dir
+    module_options["holdback_time"] = holdback_time
     
     # directory collects the module objects
     modObj_list = {}
@@ -160,7 +164,7 @@ def HappyFace():
 
         # store results (or pre-defined values if timeout) to DB
         # collect the output and results of the modules and compose category content
-        modObj_list[module].storeToDB()
+        modObj_list[module].processDB()
 
     print "HappyFace: Module processing finished." 
 

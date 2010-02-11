@@ -37,6 +37,8 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         self.category = module_options["category"]
 	self.timestamp = module_options["timestamp"]
         self.archive_dir = module_options["archive_dir"]
+	self.holdback_time = int( self.configService.getDefault('setup','holdback_time',module_options["holdback_time"]) )
+
 
 	# pre-defined status value -1 : no info
         self.status = -1
@@ -145,8 +147,23 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	
 	# unlock the database access
 	self.lock.release()
-	
-    def storeToDB(self):
+
+    def clearDB(self, My_DB_Class, holdback_time):
+
+	time_limit = self.timestamp - 24 * 3600 * holdback_time
+
+	self.lock.acquire()
+
+	old_data = My_DB_Class.select( My_DB_Class.q.timestamp <= time_limit)
+
+	for row in old_data:
+	    My_DB_Class.delete(row.id)
+
+	self.lock.release()
+
+	print self.__module__ + " is cleared with holdback time of: " + str(holdback_time) + " days."
+
+    def processDB(self):
 
 	# definition of the databases values which should be stored
 	self.db_values['module']	= self.__module__
@@ -165,7 +182,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	# init and storage the module specific information into the module table
 	module_table_class = self.table_init( self.database_table, self.db_keys )
 	self.table_fill( module_table_class, self.db_values )
-	
+	self.clearDB(module_table_class, self.holdback_time)
 
     # reading config files and return the corresponding directory structure
     def readConfigFile(self,config_file):
