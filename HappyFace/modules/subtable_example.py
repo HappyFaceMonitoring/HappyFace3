@@ -46,6 +46,11 @@ class subtable_example(ModuleBase):
 	    self.table_fill( my_subtable_class, sub_values )
 	    # ===============================================================================
 	    
+
+	# there is also a clearing algorith to erase old data
+	# the second int value defines the holdback time in days
+	# in that case, data which is older then 1 week will be erased
+	self.table_clear( my_subtable_class, 7 )
 	    
         # define module status 0.0..1.0 or -1 for error
         self.status = 1.0 # always happy

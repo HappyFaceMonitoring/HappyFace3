@@ -148,7 +148,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	# unlock the database access
 	self.lock.release()
 
-    def clearDB(self, My_DB_Class, holdback_time):
+    def table_clear(self, My_DB_Class, holdback_time):
 
 	time_limit = self.timestamp - 24 * 3600 * holdback_time
 
@@ -161,7 +161,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
 	self.lock.release()
 
-	print self.__module__ + " is cleared with holdback time of: " + str(holdback_time) + " days."
+	print self.__module__ + " is cleared with a holdback time value of: " + str(holdback_time) + " days."
 
     def processDB(self):
 
@@ -182,7 +182,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	# init and storage the module specific information into the module table
 	module_table_class = self.table_init( self.database_table, self.db_keys )
 	self.table_fill( module_table_class, self.db_values )
-	self.clearDB(module_table_class, self.holdback_time)
+	self.table_clear(module_table_class, self.holdback_time)
 
     # reading config files and return the corresponding directory structure
     def readConfigFile(self,config_file):

@@ -97,7 +97,7 @@ def HappyFace():
     module_options["archive_dir"] = archive_dir
     module_options["holdback_time"] = holdback_time
     
-    # directory collects the module objects
+    # dictionary collects the module objects
     modObj_list = {}
 
     # initialisation of modules
