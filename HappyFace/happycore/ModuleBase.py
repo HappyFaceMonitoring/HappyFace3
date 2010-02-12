@@ -150,6 +150,9 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
     def table_clear(self, My_DB_Class, holdback_time):
 
+	if holdback_time == -1:
+	    return
+
 	time_limit = self.timestamp - 24 * 3600 * holdback_time
 
 	self.lock.acquire()

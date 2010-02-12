@@ -163,7 +163,7 @@ def HappyFace():
             sys.stdout.write(modObj_list[module].error_message)
 
         # store results (or pre-defined values if timeout) to DB
-        # collect the output and results of the modules and compose category content
+	# if enabled, erase old data from the DB
         modObj_list[module].processDB()
 
     print "HappyFace: Module processing finished." 
@@ -171,6 +171,7 @@ def HappyFace():
     # create final PHP/HTML output
 
     print "HappyFace: Start output processing:" 
+
     for type in config.get('setup','output_types').split(","):
 	if type == "web":
 	     print "HappyFace: Start building web page:" 
