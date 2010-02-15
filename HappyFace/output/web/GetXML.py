@@ -30,6 +30,8 @@ class GetXML(object):
 	declare_cat_types += ');'
 	declare_cat_ids += ');'
 
+	web_title = config.get('setup','web_title')
+
 	self.output = """<?php
 
 	function curPageURL()
@@ -86,14 +88,18 @@ class GetXML(object):
 	    }
 
             echo '<happyface>' . "\n";
+	    echo ' <title>' . htmlentities('""" + web_title + """') . '</title>' . "\n";
 	    foreach ($cat_info as $category=>$info) {
-	        $status = '';
-		if($info['type'] == 'rated')
-		    $status = 'status="' . $info['status'] . '" ';
+	        echo ' <category>' . "\n";
+	        echo '  <name>' . $category . '</name>' . "\n";
+	        echo '  <title>' . htmlentities($info['title']) . '</title>' . "\n";
+	        if($info['type'] == 'rated')
+	            echo '  <status>' . $info['status'] . '</status>' . "\n";
+	        echo '  <type>' . $info['type'] . '</type>' . "\n";
+	        echo '  <link>' . $info['link'] . '</link>' . "\n";
 
-	        echo ' <category name="' . $category . '" title="' . htmlentities($info['title']) . '" ' . $status . 'type="' . $info['type'] . '" link="' . $info['link'] . '">' . "\n";
 	        echo $cat_modules[$category];
-		echo ' </category>' . "\n";
+	        echo ' </category>' . "\n";
 	    }
 
 	    echo '</happyface>';
