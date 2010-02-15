@@ -56,17 +56,18 @@ class GetXML(object):
 	    $cat_modules = array();
 	    $cat_info = array();
 	    foreach ($myModuleResultsArray as $module=>$data) {
+	        $date = date('Y-m-d', $data['timestamp']);
+		$time = date('H:i', $data['timestamp']);
+		$cat_id = $cat_ids[$data['category']];
+
 	        if(!array_key_exists($data['category'], $cat_info)) {
 	            $cat_modules[$data['category']] = '';
 	            $cat_info[$data['category']]['name'] = $data['category'];
 	            $cat_info[$data['category']]['title'] = $cat_titles[$data['category']];
 		    $cat_info[$data['category']]['status'] = $data['status'];
 		    $cat_info[$data['category']]['type'] = $cat_types[$data['category']];
+		    $cat_info[$data['category']]['link'] = "$pageURL?date=$date&amp;time=$time&amp;t=$cat_id";
 		}
-
-                $date = date('Y-m-d', $data['timestamp']);
-		$time = date('H:i', $data['timestamp']);
-		$cat_id = $cat_ids[$data['category']];
 
 		$cat_modules[$data['category']] .= "  <module>\n";
 		$cat_modules[$data['category']] .= "   <name>$module</name>\n";
@@ -90,7 +91,7 @@ class GetXML(object):
 		if($info['type'] == 'rated')
 		    $status = 'status="' . $info['status'] . '" ';
 
-	        echo ' <category name="' . $category . '" title="' . htmlentities($info['title']) . '" ' . $status . 'type="' . $info['type'] . '">' . "\n";
+	        echo ' <category name="' . $category . '" title="' . htmlentities($info['title']) . '" ' . $status . 'type="' . $info['type'] . '" link="' . $info['link'] . '">' . "\n";
 	        echo $cat_modules[$category];
 		echo ' </category>' . "\n";
 	    }
