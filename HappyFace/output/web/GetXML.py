@@ -92,7 +92,7 @@ class GetXML(object):
 	        echo ' <category>' . "\n";
 	        echo '  <name>' . $category . '</name>' . "\n";
 	        echo '  <title>' . htmlentities($info['title']) . '</title>' . "\n";
-	        if($info['type'] == 'rated')
+	        if($info['type'] != 'unrated')
 	            echo '  <status>' . $info['status'] . '</status>' . "\n";
 	        echo '  <type>' . $info['type'] . '</type>' . "\n";
 	        echo '  <link>' . $info['link'] . '</link>' . "\n";
