@@ -167,138 +167,152 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	""" Creates module contents for the web page, filling in
         the data from the database.
         """
+
+	mc_begin = []
+
         # Predefine warnings to be inserted in output:
         warning_color=""
         if (self.__old_result__()):
-            warning_message="<p class=CMSPhedexBlockConsistencyWarningMessage> WARNING: Result is older than " + str(self.__old_result__()) + " hours</p>"
-            warning_color=" class=warning"
-	module_content = """
-	<?php
-        if ($data["status"] == "1.0"){
-        $status_color="ok";
-        }elseif ($data["status"] == "0.0"){
-        $status_color="critical";
-        }
-        if ($data["duration"] >= $data["warning_limit"]){
-        $duration_color="warning";
-        }
+            mc_begin.append('<p class="CMSPhedexBlockConsistencyWarningMessage"> WARNING: Result is older than ' + str(self.__old_result__()) + ' hours</p>')
+            warning_color=' class="warning"'
 
-	print('"""+warning_message+"""
+	mc_begin.append(  '<table class="TableDataSmall">')
+	mc_begin.append(  ' <tr class="TableHeader">')
+	mc_begin.append(  '  <td>Buffer:</td>')
+        mc_begin.append("""  <td>' . $data["buffer"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Application:</td>')
+	mc_begin.append("""  <td>' . $data["application"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Test:</td>')
+	mc_begin.append("""  <td>' . $data["test"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr' + warning_color + '>')
+	mc_begin.append(  '  <td>Started:</td>')
+	mc_begin.append("""  <td>' . $data["starttime"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Ended:</td>')
+	mc_begin.append("""  <td>' . $data["endtime"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(""" <tr class="' . $duration_color . '">""")
+	mc_begin.append(  '  <td>Duration:</td>')
+        mc_begin.append("""  <td>' . $data["duration"] . ' hours<br />warning limit: ' . $data["warning_limit"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Total size:</td>')
+	mc_begin.append("""  <td>' . $data["total_size"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Technology:</td>')
+	mc_begin.append("""  <td>' . $data["technology"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Protocol:</td>')
+	mc_begin.append("""  <td>' . $data["protocol"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <!--')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Input file:</td>')
+	mc_begin.append("""  <td>' . $data["dumpfile"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  '  -->')
+	mc_begin.append(  '</table>')
+	mc_begin.append(  '<br />')
+	mc_begin.append(  '')
+	mc_begin.append(  '<table class="TableDataSmall">')
+	mc_begin.append(  ' <tr class="TableHeader">')
+	mc_begin.append(  '  <td>Tested:</td>')
+	mc_begin.append(  '  <td>Datasets:</td>')
+	mc_begin.append(  '  <td>Blocks:</td>')
+	mc_begin.append(  '  <td>Files:</td>')
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  ' <tr>')
+	mc_begin.append(  '  <td>Total:</td>')
+	mc_begin.append("""  <td>' . $data["total_datasets"] . '</td>""")
+	mc_begin.append("""  <td>' . $data["total_blocks"] . '</td>""")
+	mc_begin.append("""  <td>' . $data["total_files"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(""" <tr class="'.$status_color.'">""")
+	mc_begin.append(  '  <td>Failed:</td>')
+	mc_begin.append("""  <td>' . $data["failed_datasets"] . '</td>""")
+	mc_begin.append("""  <td>' . $data["failed_blocks"] . '</td>""")
+	mc_begin.append("""  <td>' . $data["failed_files"] . '</td>""")
+	mc_begin.append(  ' </tr>')
+	mc_begin.append(  '</table>')
+	mc_begin.append(  '<br />')
+	mc_begin.append(  '')
+	mc_begin.append("""<input type="button" value="show/hide Failed Datasets" onfocus="this.blur()" onclick="show_hide(\\\'datasets_details\\\');" />""")
+	mc_begin.append(  '<div class="DetailedInfo" id="datasets_details" style="display:none;">')
+	mc_begin.append(  ' <table class="TableDetails">')
+	mc_begin.append(  '  <tr class="TableHeader">')
+	mc_begin.append(  '   <td>Dataset</td>')
+	mc_begin.append(  '   <td>Failed Blocks</td>')
+	mc_begin.append(  '   <td>Failed Files</td>')
+	mc_begin.append(  '  </tr>')
+
+	mc_row = []
+	mc_row.append(    '  <tr>')
+	mc_row.append(  """   <td>' . $info["dataset"] . '</td>""")
+	mc_row.append(  """   <td>' . $info["blocks"] . '</td>""")
+	mc_row.append(  """   <td>' . $info["files"] . '</td>""")
+	mc_row.append(    '  </tr>')
+
+	mc_mid = []
+	mc_mid.append(    ' </table>')
+	mc_mid.append(    '</div>')
+	mc_mid.append(    '<br />')
+
+	mc_mid.append(  """<input type="button" value="show/hide Inconsistent Files" onfocus="this.blur()" onclick="show_hide(\\\'files_details\\\');" />""")
+	mc_mid.append(    '<div class="DetailedInfo" id="files_details" style="display:none;">')
+	mc_mid.append(    ' <table class="TableDetails">')
+	mc_mid.append(    '  <tr class="TableHeader">')
+	mc_mid.append(    '   <td>Logical File Name</td>')
+	mc_mid.append(    '   <td>Status</td>')
+	mc_mid.append(    '  </tr>')
+
+	mc_detailed_row = []
+	mc_detailed_row.append(  '  <tr>')
+	mc_detailed_row.append("""   <td>' . $info["lfn"] . '</td>""")
+	mc_detailed_row.append("""   <td>' . $info["status"] . '</td>""")
+	mc_detailed_row.append(  '  </tr>')
+
+	mc_end = []
+	mc_end.append(    ' </table>')
+	mc_end.append(    '</div>')
+	mc_end.append(    '<br />')
+
+	module_content = """<?php
+
+        if ($data["status"] == "1.0")
+            $status_color="ok";
+        elseif ($data["status"] == "0.0")
+            $status_color="critical";
+
+        if ($data["duration"] >= $data["warning_limit"])
+            $duration_color="warning";
+
+	print('""" + self.PHPArrayToString(mc_begin) + """');
         
-	<table class="TableDataSmall">
-		<tr class=\"TableHeader\">
-                  <td>Buffer:</td>
-                  <td>'.$data["buffer"].'</td>
-                </tr>
-		<tr>
-                  <td>Application:</td>
-                  <td>'.$data["application"].'</td>
-                </tr>
-		<tr>
-                  <td>Test:</td>
-                  <td>'.$data["test"].'</td>
-                </tr>
-		<tr"""+warning_color+""">
-                  <td>Started:</td>
-                  <td>'.$data["starttime"].'</td>
-                </tr>
-               	<tr>
-                  <td>Ended:</td>
-                  <td>'.$data["endtime"].'</td>
-                </tr>
-               	<tr class=\"'.$duration_color.'\">
-                  <td>Duration:</td>
-                  <td>'.$data["duration"].' hours <br />warning limit: '.$data["warning_limit"].'</td>
-                </tr>
-                <tr>
-                  <td>Total size:</td>
-                  <td>'.$data["total_size"].'</td>
-                </tr>
-		<tr>
-                  <td>Technology:</td>
-                  <td>'.$data["technology"].'</td>
-                </tr>
-		<tr>
-                  <td>Protocol:</td>
-                  <td>'.$data["protocol"].'</td>
-                </tr>
-<!--
-               	<tr>
-                  <td>Input file:</td>
-                  <td>'.$data["dumpfile"].'</td>
-                </tr>
--->
-	</table>
-    <br />
-	<table class="TableDataSmall">
-                <tr class=\"TableHeader\">
-                  <td> Tested:</td>
-                  <td> Datasets:</td>
-                  <td> Blocks:</td>
-                  <td> Files:</td>
-                </tr>
-                <tr>
-                  <td> Total:</td>
-                  <td>'.$data["total_datasets"].'</td>
-                  <td>'.$data["total_blocks"].'</td>
-                  <td>'.$data["total_files"].'</td>
-                </tr>
-                <tr class=\"'.$status_color.'\">
-                  <td> Failed:</td>
-                  <td>'.$data["failed_datasets"].'</td>
-                  <td>'.$data["failed_blocks"].'</td>
-                  <td>'.$data["failed_files"].'</td>
-                </tr>
-	</table>
-	<br/>
-
-	<input type="button" value="show/hide Failed Datasets" onfocus="this.blur()" onclick="show_hide(\\\'datasets_details\\\');" />
-	<div class="DetailedInfo" id=\\\'datasets_details\\\' style="display:none;">
-
-	<table class="TableDetails">
-            <tr class=\"TableHeader\">
-		<td>Dataset</td>
-		<td>Failed Blocks</td>
-		<td>Failed Files</td>
-		</tr>
-    
-	');
-
 	$details_db_sqlquery = "SELECT dataset, count(distinct block) as blocks, count(distinct lfn) as files FROM """+self.details_database+""" WHERE timestamp = " . $data["timestamp"] . " group by dataset";
         
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-		print('<tr>
-                        <td>'.$info["dataset"].'</td>
-			<td>'.$info["blocks"].'</td>
-			<td>'.$info["files"].'</td>
-                        </tr>'
-		);
+		print('""" + self.PHPArrayToString(mc_row) + """');
 	}
 
-	print('</table></div><br/>
-
-	<input type="button" value="show/hide Inconsistent Files" onfocus="this.blur()" onclick="show_hide(\\\'files_details\\\');" />
-	<div class="DetailedInfo" id=\\\'files_details\\\' style="display:none;">
-
-	<table class="TableDetails">
-            <tr class=\"TableHeader\">
-		<td>Logical File Name</td>
-		<td>Status</td>
-		</tr>
-	');
+	printf('""" + self.PHPArrayToString(mc_mid) + """');
 
 	$details_db_sqlquery = "SELECT * FROM """+self.details_database+""" WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
-		print('<tr>
-                        <td>'.$info["lfn"].'</td>
-			<td>'.$info["status"].'</td>
-                        </tr>'
-		);
+		print('""" + self.PHPArrayToString(mc_detailed_row) + """');
 	}
-	print('</table></div><br/>')
 
-	?>
-	"""
+	print('""" + self.PHPArrayToString(mc_end) + """');
+
+	?>"""
+
 	return self.PHPOutput(module_content)

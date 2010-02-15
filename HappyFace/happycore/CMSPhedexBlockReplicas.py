@@ -212,71 +212,110 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 
     def output(self):
 
-        module_content = """
-        <?php
+	mc_begin = []
+	mc_begin.append('<table class="TableData">')
+	mc_begin.append(' <tr class="TableHeader">')
+	mc_begin.append('  <td>dataset</td>')
+	mc_begin.append('  <td>block</td>')
+	mc_begin.append('  <td>resident size [MB]</td>')
+	mc_begin.append(' </tr>')
+
+	mc_row = []
+	mc_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+	mc_row.append("""  <td>' . $info["dataset_name"] . '</td>""")
+	mc_row.append("""  <td>' . $info["block_name"] . '</td>""")
+	mc_row.append("""  <td>' . $rep_size . '</td>""")
+	mc_row.append(  ' </tr>')
+
+	mc_mid = []
+	mc_mid.append(  '</table>')
+	mc_mid.append(  '<br />')
+	mc_mid.append("""<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_failed_result\\\');" />""")
+	mc_mid.append(  '<div class="DetailedInfo" id="' + self.__module__ + '_failed_result" style="display:none;">');
+	mc_mid.append(  ' <table class="TableDetails">')
+	mc_mid.append(  '  <tr class="TableHeader">')
+	mc_mid.append(  '   <td>dataset</td>')
+	mc_mid.append(  '   <td>block</td>')
+	mc_mid.append(  '   <td>block files</td>')
+	mc_mid.append(  '   <td>resident files</td>')
+	mc_mid.append(  '   <td>block size [MB]</td>')
+	mc_mid.append(  '   <td>resident size [MB]</td>')
+	mc_mid.append(  '   <td>group</td>')
+	mc_mid.append(  '  </tr>')
+
+	mc_detailed_row = []
+	mc_detailed_row.append("""  <tr class="' . $service_status_color_flag . '">""")
+	mc_detailed_row.append("""   <td>' . $info["dataset_name"] . '</td>""")
+	mc_detailed_row.append("""   <td>' . $info["block_name"] . '</td>""")
+	mc_detailed_row.append("""   <td>' . $info["block_files"] . '</td>""")
+	mc_detailed_row.append("""   <td>' . $info["rep_files"] . '</td>""")
+	mc_detailed_row.append("""   <td>' . $block_size . '</td>""")
+	mc_detailed_row.append("""   <td>' . $rep_size . '</td>""")
+	mc_detailed_row.append("""   <td>' . $info["rep_group"] . '</td>""")
+	mc_detailed_row.append(  '  </tr>')
+
+	mc_end = []
+	mc_end.append(' </table>')
+	mc_end.append('</div>')
+	mc_end.append('<br />')
+
+	mc_dummy = []
+        mc_dummy.append('All is fine.');
+
+        module_content = """<?php
+
         $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
         $dummy = false;
-        foreach ($dbh->query($details_db_sqlquery) as $info){
-          if ($info["block_name"] == "dummy"){
-            $dummy = true;
-          }
+        foreach ($dbh->query($details_db_sqlquery) as $info) {
+            if ($info["block_name"] == "dummy") {
+                $dummy = true;
+            }
         }
 
-        if(!$dummy){
-          print('<table class="TableData">');
-          print('<tr="TableHeader"><td>dataset</td><td>block</td><td>resident size [MB]</td></tr>');
+        if(!$dummy) {
+            print('""" + self.PHPArrayToString(mc_begin) + """');
 
-          foreach ($dbh->query($details_db_sqlquery) as $info)
-       	  {
-               if ($info["block_status"] == 2){
+            foreach ($dbh->query($details_db_sqlquery) as $info)
+       	    {
+                if ($info["block_status"] == 2)
                     $service_status_color_flag = "report";
-          }  
-               else if ($info["block_status"] == 0){
+                else if ($info["block_status"] == 0)
                     $service_status_color_flag = "critical";
-          }
-               else $service_status_color_flag = "undefined";
+                else
+	            $service_status_color_flag = "undefined";
 
-          $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
+                $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
 
-          print('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$rep_size.'</td></tr>');
-          }
+                print('""" + self.PHPArrayToString(mc_row) + """');
+            }
           
-          print('</table><br/>');
+            print('""" + self.PHPArrayToString(mc_mid) + """');
 
-          
-          print('<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """);" />
-          <div class="DetailedInfo" id=""" + "\\\'" + self.__module__+ "_failed_result\\\'" + """ style="display:none;">');
+            foreach ($dbh->query($details_db_sqlquery) as $info)
+            {
+                if ($info["block_status"] == 2){
+                    $service_status_color_flag = "report";
+                }
+                else if ($info["block_status"] == 0){
+                    $service_status_color_flag = "critical";
+                }
+                else
+		    $service_status_color_flag = "undefined";
 
-          print('<table class="TableDetails">');
-          print('<tr class="TableHeader"><td>dataset</td><td>block</td><td>block files</td><td>resident files</td><td>block size [MB]</td><td>resident size [MB]</td><td>group</td></tr>');
+                $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
+                $block_size = round($info["block_bytes"]/(1024*1024*1024),2);
 
-          foreach ($dbh->query($details_db_sqlquery) as $info)
-          {
-               if ($info["block_status"] == 2){
-                  $service_status_color_flag = "report";
-          }
-               else if ($info["block_status"] == 0){
-                  $service_status_color_flag = "critical";
-          }
-               else $service_status_color_flag = "undefined";
+                print('""" + self.PHPArrayToString(mc_detailed_row) + """');
+            }
 
-          $rep_size = round($info["rep_bytes"]/(1024*1024*1024),2);
-          $block_size = round($info["block_bytes"]/(1024*1024*1024),2);
-
-          print('<tr class="' .$service_status_color_flag . '"><td>'.$info["dataset_name"].'</td><td>' . $info["block_name"] . '</td><td>'.$info["block_files"].'</td><td>'.$info["rep_files"].'</td><td>' .$block_size . '</td><td>'.$rep_size.'</td><td>'.$info["rep_group"].'</td></tr>');
-          }
-          print('</table>');
-        
-    
-        print('</div><br/>');
+	    printf('""" + self.PHPArrayToString(mc_end) + """');
         }
-        else{
-          print('All is fine.');
+        else {
+            print('""" + self.PHPArrayToString(mc_dummy) + """');
         }
         
-        ?>
-        """
+        ?>"""
 
         return self.PHPOutput(module_content)
 
