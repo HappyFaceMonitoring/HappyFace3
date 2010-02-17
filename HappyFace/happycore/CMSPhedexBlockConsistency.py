@@ -197,7 +197,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	mc_begin.append(  '  <td>Ended:</td>')
 	mc_begin.append("""  <td>' . $data["endtime"] . '</td>""")
 	mc_begin.append(  ' </tr>')
-	mc_begin.append(""" <tr class="' . $duration_color . '">""")
+	mc_begin.append(""" <tr' . $duration_color . '>""")
 	mc_begin.append(  '  <td>Duration:</td>')
         mc_begin.append("""  <td>' . $data["duration"] . ' hours<br />warning limit: ' . $data["warning_limit"] . '</td>""")
 	mc_begin.append(  ' </tr>')
@@ -235,7 +235,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	mc_begin.append("""  <td>' . $data["total_blocks"] . '</td>""")
 	mc_begin.append("""  <td>' . $data["total_files"] . '</td>""")
 	mc_begin.append(  ' </tr>')
-	mc_begin.append(""" <tr class="'.$status_color.'">""")
+	mc_begin.append(""" <tr ' . $status_color . '>""")
 	mc_begin.append(  '  <td>Failed:</td>')
 	mc_begin.append("""  <td>' . $data["failed_datasets"] . '</td>""")
 	mc_begin.append("""  <td>' . $data["failed_blocks"] . '</td>""")
@@ -244,8 +244,8 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	mc_begin.append(  '</table>')
 	mc_begin.append(  '<br />')
 	mc_begin.append(  '')
-	mc_begin.append("""<input type="button" value="show/hide Failed Datasets" onfocus="this.blur()" onclick="show_hide(\\\'datasets_details\\\');" />""")
-	mc_begin.append(  '<div class="DetailedInfo" id="datasets_details" style="display:none;">')
+	mc_begin.append("""<input type="button" value="show/hide Failed Datasets" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__ + """_datasets_details\\\');" />""")
+	mc_begin.append(  '<div class="DetailedInfo" id="' + self.__module__ + '_datasets_details" style="display:none;">')
 	mc_begin.append(  ' <table class="TableDetails">')
 	mc_begin.append(  '  <tr class="TableHeader">')
 	mc_begin.append(  '   <td>Dataset</td>')
@@ -265,8 +265,8 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	mc_mid.append(    '</div>')
 	mc_mid.append(    '<br />')
 
-	mc_mid.append(  """<input type="button" value="show/hide Inconsistent Files" onfocus="this.blur()" onclick="show_hide(\\\'files_details\\\');" />""")
-	mc_mid.append(    '<div class="DetailedInfo" id="files_details" style="display:none;">')
+	mc_mid.append(  """<input type="button" value="show/hide Inconsistent Files" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__ + """_files_details\\\');" />""")
+	mc_mid.append(    '<div class="DetailedInfo" id="' + self.__module__ + '_files_details" style="display:none;">')
 	mc_mid.append(    ' <table class="TableDetails">')
 	mc_mid.append(    '  <tr class="TableHeader">')
 	mc_mid.append(    '   <td>Logical File Name</td>')
@@ -287,12 +287,12 @@ class CMSPhedexBlockConsistency(ModuleBase):
 	module_content = """<?php
 
         if ($data["status"] == "1.0")
-            $status_color="ok";
+            $status_color=' class="ok"';
         elseif ($data["status"] == "0.0")
-            $status_color="critical";
+            $status_color=' class="critical"';
 
         if ($data["duration"] >= $data["warning_limit"])
-            $duration_color="warning";
+            $duration_color=' class="warning"';
 
 	print('""" + self.PHPArrayToString(mc_begin) + """');
         
