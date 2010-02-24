@@ -258,7 +258,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         detailed_row.append(  '  <tr>')
         detailed_row.append("""   <td>'.$info["link_remote_node"].'</td>""")
         detailed_row.append("""   <td class="center">'.$info["file_detail_log_nb"].'</td>""")
-        detailed_row.append("""   <td>'.$info["file_detail_log"].'</td>""")
+        detailed_row.append("""   <td>'.htmlentities($info["file_detail_log"]).'</td>""")
         detailed_row.append(  '  </tr>');
 
         detailed_end = []
