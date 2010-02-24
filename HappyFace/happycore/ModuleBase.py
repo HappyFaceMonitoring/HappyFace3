@@ -143,10 +143,11 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	# lock object enables exclusive access to the database
 	self.lock.acquire()
 
-	My_DB_Class(**table_values)
-	
-	# unlock the database access
-	self.lock.release()
+	try:
+	    My_DB_Class(**table_values)
+	finally:
+	    # unlock the database access
+	    self.lock.release()
 
     def table_clear(self, My_DB_Class, holdback_time):
 
