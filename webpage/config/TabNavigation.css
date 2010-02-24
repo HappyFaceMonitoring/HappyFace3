@@ -159,6 +159,13 @@
         cursor: pointer;
 }
 
+/* Show module information link for each module */
+.HappyLink {
+        font: bold 0.9em sans-serif;
+	color: orange;
+ 	text-decoration: none;
+}
+
 /* Buttons/Status pictures in the navigation tab at the top of the page */
 .HappyNavTab {
 	width: 64px;
