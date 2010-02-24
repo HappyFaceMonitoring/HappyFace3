@@ -6,20 +6,27 @@ class CategoryStatusSymbolLogic(object):
 
 	self.output = """<?php
 
-	function getCatStatusSymbol($category,$cat_type,$cat_algo,$ModuleResultsArray)
+	function getCatStatusSymbol($cat_type,$cat_status,$cssclass)
 	{
-	    $cat_status = getCatStatus($category,$cat_algo,$ModuleResultsArray);
-	
+	    if($cssclass != '')
+	        $cssclass = 'class="' . $cssclass . '"';
+
 	    if ($cat_type == "plots") { 
-	        if ($cat_status >= 0) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_avail_plot.png" />'; }
-		else if ($cat_status == -1) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_unavail_plot.png" />'; }
+	        if ($cat_status >= 0) { return '<img alt="" ' . $cssclass . ' src="config/themes/""" + theme + """/cat_avail_plot.png" />'; }
+		else if ($cat_status == -1) { return '<img alt="" ' . $cssclass . ' src="config/themes/""" + theme + """/cat_unavail_plot.png" />'; }
 	    }
 	    else if ($cat_type == "rated") {
-		if ($cat_status > 0.66 && $cat_status <= 1.0) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_happy.png" />'; }
-		else if ($cat_status > 0.33 && $cat_status <= 0.66) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_neutral.png" />'; }
-		else if ($cat_status >= 0.0 && $cat_status <= 0.33) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_unhappy.png" />'; }
-		else if ($cat_status == -1) { return '<img alt="" class="HappyNavTab" src="config/themes/""" + theme + """/cat_noinfo.png" />'; }
+		if ($cat_status > 0.66 && $cat_status <= 1.0) { return '<img alt="" ' . $cssclass . ' src="config/themes/""" + theme + """/cat_happy.png" />'; }
+		else if ($cat_status > 0.33 && $cat_status <= 0.66) { return '<img alt="" ' . $cssclass . ' src="config/themes/""" + theme + """/cat_neutral.png" />'; }
+		else if ($cat_status >= 0.0 && $cat_status <= 0.33) { return '<img alt="" ' . $cssclass . ' src="config/themes/""" + theme + """/cat_unhappy.png" />'; }
+		else if ($cat_status == -1) { return '<img alt="" ' . $cssclass . ' src="config/themes/""" + theme + """/cat_noinfo.png" />'; }
 	    }
+	}
+
+	function getCatStatusSymbolForCategory($category,$cat_type,$cat_algo,$ModuleResultsArray)
+	{
+	    $cat_status = getCatStatus($category,$cat_algo,$ModuleResultsArray);
+	    return getCatStatusSymbol($cat_type, $cat_status, 'HappyNavTab');
 	}
 
 	?>"""

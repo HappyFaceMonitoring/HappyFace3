@@ -1,0 +1,31 @@
+/* CSS file for the HappyFace module: Summary */
+
+table.SummaryTable {
+	border: solid 1px #999;
+}
+
+table.SummaryTable td {
+	padding: 5px;
+	border: solid 1px #999;
+}
+
+.SummaryCatHeader {
+	text-align: center;
+        font: bold 0.7em sans-serif;
+}
+
+.SummaryCatCell {
+	text-align: center;
+	padding: 10px;
+}
+
+.SummarySite {
+        font: bold 1.0em sans-serif;
+	text-align: center;
+	padding: 10px;
+}
+
+.SummaryCatIcon {
+	width: 64px;
+	border: none;
+}
