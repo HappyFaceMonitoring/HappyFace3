@@ -2,7 +2,6 @@
 # Qstat test
 # at the moment experimental
 # the plot creating part has to be rewritten!!!
-# a rating system has to be implemented
 ##############################################
 
 from ModuleBase import *
@@ -25,6 +24,7 @@ class Qstat(ModuleBase):
 
         self.warning_limit = float(self.configService.get("setup","warning_limit"))
         self.critical_limit = float(self.configService.get("setup","critical_limit"))
+        self.min_cmsprd_jobs = float(self.configService.get("setup","min_cmsprd_jobs"))
 
 	self.db_keys["starttime"] = StringCol()
 	self.db_keys["endtime"] = StringCol()
@@ -76,6 +76,11 @@ class Qstat(ModuleBase):
             sys.stdout.write(err)
             self.error_message +=err
             return -1
+
+	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
+	self.configService.addToParameter('setup', 'definition', '<br />Warning limit: ' + str(self.warning_limit))
+	self.configService.addToParameter('setup', 'definition', '<br />Critical limit: ' + str(self.critical_limit))
+	self.configService.addToParameter('setup', 'definition', '<br />Minimum number of jobs for rating: ' + str(int(self.min_cmsprd_jobs)))
 
         dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
         if dl_error != "":
@@ -191,13 +196,14 @@ class Qstat(ModuleBase):
         self.status = 1.0
 
         # look only for "cmsprd" jobs
-##        if "cmsprd" in users:
-            
-##            if users["cmsprd"]["running"] != 0:
-##                trigger_ratio = float(users["cmsprd"]["ratio10"]) / float(users["cmsprd"]["running"])
+        if "cmsprd" in users:
+            if users["cmsprd"]["running"] > 0:
+                trigger_ratio = float(users["cmsprd"]["ratio10"]) / float(users["cmsprd"]["running"])
+	        if users["cmsprd"]["running"] >= self.min_cmsprd_jobs:
                 
-##                if trigger_ratio > self.critical_limit: self.status = 0.0
-##                elif trigger_ratio <= self.critical_limit and trigger_ratio > self.warning_limit: self.status = 0.5
+                    if trigger_ratio > self.critical_limit: self.status = 0.0
+                    elif trigger_ratio <= self.critical_limit and trigger_ratio > self.warning_limit: self.status = 0.5
+
 
 
         
