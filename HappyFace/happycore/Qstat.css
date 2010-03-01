@@ -1,0 +1,13 @@
+/* CSS file for the HappyFace module: Qstat */
+
+td.QstatTableFirstCol {
+	width:65%;
+}
+
+table.QstatTableDetails { }
+
+/* Commented out for consistency with the other modules: */
+/*
+table.qstatTableDetails td {
+	text-align: center;
+}*/
