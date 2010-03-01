@@ -86,7 +86,9 @@ class GetXML(object):
 		$cat_modules[$data['category']] .= "  </module>\n";
 	    }
 
-            echo '<happyface>' . "\n";
+	    header('Content-Type: text/xml');
+	    echo '<?xml version="1.0" encoding="ISO-8859-1"?>' . "\n";
+	    echo '<happyface>' . "\n";
 	    echo ' <title>' . htmlentities('""" + web_title + """') . '</title>' . "\n";
 	    foreach ($cat_info as $category=>$info) {
 	        echo ' <category>' . "\n";
