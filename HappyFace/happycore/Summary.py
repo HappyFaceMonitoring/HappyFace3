@@ -106,8 +106,6 @@ class Summary(ModuleBase):
 			            summary_db_values["status"] = 0.0;
 			    elif cat_elem.tag == "status":
 			        status = float(cat_elem.text)
-			        if status >= 0.0 and status <= self.status:
-			            self.status = status
 			        summary_db_values["status"] = status
 			    elif cat_elem.tag == "link":
 			        summary_db_values["link"] = cat_elem.text
@@ -139,6 +137,12 @@ class Summary(ModuleBase):
 		            for key in my_keys:
 		                if not key in summary_db_values:
 			            raise Exception('XML does not provide a value for ' + key)
+
+			    # Own status is worst category status of all
+			    # watched and rated categories of all sites.
+			    if status >= 0.0 and status <= self.status:
+			        if summary_db_values["type"] == 'rated':
+				    self.status = status
 
 		            self.table_fill(subtable_summary, summary_db_values)
 
