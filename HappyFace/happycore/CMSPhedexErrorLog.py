@@ -94,6 +94,11 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
 
     def run(self):
+	self.configService.addToParameter('setup', 'definition', '<br />Minimum number of failed transfers for rating: ' + str(self.errorThreshold))
+	self.configService.addToParameter('setup', 'definition', '<br />Warning limit for destination errors: ' + str(int(round(self.destWarning))) + '%')
+	self.configService.addToParameter('setup', 'definition', '<br />Critical limit for destination errors: ' + str(int(round(self.destCritical))) + '%')
+	self.configService.addToParameter('setup', 'definition', '<br />Warning limit for source errors: ' + str(int(round(self.sourceWarning))) + '%')
+	self.configService.addToParameter('setup', 'definition', '<br />Critical limit for source errors: ' + str(int(round(self.sourceCritical))) + '%')
 
         # run the test
 
