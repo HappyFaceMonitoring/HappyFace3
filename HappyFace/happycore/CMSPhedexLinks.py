@@ -237,7 +237,13 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 			tier_counter = 0
 			tier_down_counter = 0
 			for site in links.keys():
-				if not site in self.exclusion_list and re.search(tier, site):
+				if re.search( site, self.exclusion_list ) :
+					continue
+				## if you want to exclude a specific tier like, e.g. T3
+				if site.split("_")[0] in self.exclusion_list :
+					continue
+				#if not site in self.exclusion_list and re.search(tier, site):
+				if re.search( tier, site ):
 					tier_counter += 1
 					if links[site][0] == 'red':
 						tier_down_counter += 1
@@ -254,7 +260,13 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 			tier_counter = 0
 			tier_down_counter = 0
 			for site in links.keys():
-				if not site in self.exclusion_list and re.search(tier,site):
+				if site in self.exclusion_list:
+					continue
+				## if you want to exclude a specific tier like, e.g. T3
+				if site.split("_")[0] in self.exclusion_list:
+					continue
+				#if not site in self.exclusion_list and re.search(tier,site):
+				if re.search( tier,site ):
 					tier_counter += 1
 					if links[site][0] == 'red':
 						tier_down_counter += 1
