@@ -237,7 +237,7 @@ class CMSPhedexLinks(ModuleBase,PhpDownload):
 			tier_counter = 0
 			tier_down_counter = 0
 			for site in links.keys():
-				if re.search( site, self.exclusion_list ) :
+				if site in self.exclusion_list  :
 					continue
 				## if you want to exclude a specific tier like, e.g. T3
 				if site.split("_")[0] in self.exclusion_list :
