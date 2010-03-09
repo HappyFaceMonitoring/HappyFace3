@@ -66,7 +66,13 @@ class TimeMachineLogic(object):
 
 	# if the chosen timestamp is "older" then a half hour (1800 seconds)
 	# define a RED colored time string for the time bar output
-	if ($server_time - $timestamp < 1800) { $time_message = '<span>' . date("D, d. M Y", $timestamp) . '<br />' . date("H:i", $timestamp) . '</span>'; }
-	else { $time_message = '<span style="color:red;">' . date("D, d. M Y", $timestamp) . '<br />' . date("H:i", $timestamp) . '</span>'; }
+	if ($server_time - $timestamp < 1800) {
+	    $date_message = '<span>' . date("D, d. M Y", $timestamp) . '</span>';
+	    $time_message = '<span>' . date("H:i", $timestamp) . '</span>';
+	}
+	else {
+	    $date_message = '<span style="color:red;">' . date("D, d. M Y", $timestamp) . '</span>';
+	    $time_message = '<span style="color:red;">' . date("H:i", $timestamp) . '</span>';
+	}
 
 	?>"""
