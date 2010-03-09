@@ -193,46 +193,49 @@ class Summary(ModuleBase):
 	    $categories[$info['catname']]['type'] = $info['type'];
 	}
 
-	print('""" + self.PHPArrayToString(mc_begin) + """');
-
-	foreach($categories as $category=>$catinfo)
+        if(sizeof($sites) > 0 && sizeof($categories) > 0)
 	{
-	    print('""" + self.PHPArrayToString(mc_header_row) + """');
-	}
-
-	print('""" + self.PHPArrayToString(mc_header_end) + """');
-
-	foreach($sites as $site=>$siteinfo)
-	{
-	    // Don't set background color by worst category status...
-	    // does not look as good as I hoped it would.
-	    /*
-	    if(isset($sites[$info['site']]['status']))
-	    {
-	        if($sites[$info['site']]['status'] >= 0.66)
-	            $status_class = "ok";
-	        elseif($sites[$info['site']]['status'] >= 0.33 && $sites[$info['site']]['status'] <= 0.66)
-	            $status_class = "warning";
-	        else
-	            $status_class = "critical";
-	    }
-	    else*/
-	        $status_class = "undefined";
-
-	    print('""" + self.PHPArrayToString(mc_row_begin) + """');
+	    print('""" + self.PHPArrayToString(mc_begin) + """');
 
 	    foreach($categories as $category=>$catinfo)
 	    {
-	        if(isset($siteinfo[$category]))
-	            print('""" + self.PHPArrayToString(mc_row_cell_known) + """');
-		else
-	            print('""" + self.PHPArrayToString(mc_row_cell_unknown) + """');
+	        print('""" + self.PHPArrayToString(mc_header_row) + """');
 	    }
 
-	    print('""" + self.PHPArrayToString(mc_row_end) + """');
-	}
+	    print('""" + self.PHPArrayToString(mc_header_end) + """');
 
-	print('""" + self.PHPArrayToString(mc_end) + """');
+	    foreach($sites as $site=>$siteinfo)
+	    {
+	        // Don't set background color by worst category status...
+	        // does not look as good as I hoped it would.
+	        /*
+	        if(isset($sites[$info['site']]['status']))
+	        {
+	            if($sites[$info['site']]['status'] >= 0.66)
+	                $status_class = "ok";
+	            elseif($sites[$info['site']]['status'] >= 0.33 && $sites[$info['site']]['status'] <= 0.66)
+	                $status_class = "warning";
+	            else
+	                $status_class = "critical";
+	        }
+	        else*/
+	            $status_class = "undefined";
+
+	        print('""" + self.PHPArrayToString(mc_row_begin) + """');
+
+	        foreach($categories as $category=>$catinfo)
+	        {
+	            if(isset($siteinfo[$category]))
+	                print('""" + self.PHPArrayToString(mc_row_cell_known) + """');
+		    else
+	                print('""" + self.PHPArrayToString(mc_row_cell_unknown) + """');
+	        }
+
+	        print('""" + self.PHPArrayToString(mc_row_end) + """');
+	    }
+
+	    print('""" + self.PHPArrayToString(mc_end) + """');
+	}
 
 	?>"""
 
