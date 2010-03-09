@@ -82,7 +82,7 @@ def HappyFace():
 
     # definition of the global timeout
     timeout        =  int(config.get('setup','timeout_module'))
-    timeoutDowload =  int(config.get('setup','timeout_download'))
+    timeoutDownload =  int(config.get('setup','timeout_download'))
 
     # definition of the holdback_time
     holdback_time  =  int(config.get('setup','holdback_time'))
@@ -133,7 +133,7 @@ def HappyFace():
         cssService.add(modObj_list[module].getCssRequests())
 
     # Start parallel download of all specified files
-    downloadService.download(timeoutDowload)
+    downloadService.download(timeoutDownload)
 
     # parallel execution of the modules (threading)
     # see therefore: http://www.wellho.net/solutions/python-python-threads-a-first-example.html

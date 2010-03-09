@@ -22,14 +22,14 @@ class DownloadService(HTMLOutput):
     def add(self, downloadstring):
 
         tmpString = downloadstring.split("|")
-        if len(tmpString) < 4:
-            print "DownloadService: "+downloadstring+" does not match format prog|type|args|url"
+        if len(tmpString) == 0 or len(tmpString) % 4 != 0:
+            print "DownloadService: "+downloadstring+" does not match format prog|type|args|url|[...]"
             return -1
 
-        prog = tmpString.pop(0)
-        filetype = tmpString.pop(0)
-        args= tmpString.pop(0)
-        url = "|".join(tmpString)
+        prog = tmpString[0::4]
+	filetype = tmpString[1::4]
+	args = tmpString[2::4]
+	url = tmpString[3::4]
 
         if not downloadstring in self.downloadTags:
             self.downloadTags[downloadstring] = DownloadTag(prog,filetype,args,url,self.subdir)
@@ -67,12 +67,16 @@ class DownloadService(HTMLOutput):
         if len(self.downloadTags.keys()) > 0:
             print "DownloadService: deleting tmp files"
         for i in self.downloadTags.keys():
-            os.remove(self.downloadTags[i].getFilePath())
-            
+	    try:
+                os.remove(self.downloadTags[i].getFilePath())
+	    except:
+	        # Ignore errors here, for example the file might not be
+		# present if the Download failed
+	        pass
 
     def getFileType(self,downloadstring):
         if downloadstring in self.downloadTags:
-            fileType =  self.downloadTags[downloadstring].fileType
+            fileType =  self.downloadTags[downloadstring].fileType[-1]
             if fileType == "":
                 return fileType
             else:
