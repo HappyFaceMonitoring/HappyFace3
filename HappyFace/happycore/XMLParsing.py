@@ -13,7 +13,7 @@ class XMLParsing():
         error_message = ""
 	try:
 	    dom_object = parse(xml_file)
-	except Exception as ex:
+	except Exception, ex:
             error_message = '\nCould not parse ' + xml_file + ', ' + self.__module__ + ': ' + str(ex) + '\nAborting ...\n'
             sys.stdout.write(error_message)
             dom_object = ""
@@ -30,7 +30,7 @@ class XMLParsing():
                 source_file = open(file)
                 tree = etree.parse(source_file)
 
-            except Exception as ex:
+            except Exception, ex:
                 error_message = '\nCould not parse ' + file + ', ' + self.__module__ + ': ' + str(ex) + '\nAborting ...\n'
                 sys.stdout.write(error_message)
                 tree = ""
@@ -40,7 +40,7 @@ class XMLParsing():
                 parser = lxml.html.HTMLParser()
                 tree = lxml.html.parse(file,parser)
                 #tree = lxml.html.fromstring(file)
-            except Exception as ex:
+            except Exception, ex:
                 error_message = '\nCould not parse ' + file + ', ' + self.__module__ + ': ' + str(ex) + '\nAborting ...\n'
                 sys.stdout.write(error_message)
                 tree = ""
