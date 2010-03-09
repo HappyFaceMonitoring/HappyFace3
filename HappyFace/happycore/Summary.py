@@ -88,14 +88,14 @@ class Summary(ModuleBase):
 			have_category = False
 		        for cat_elem in element:
 		            if cat_elem.tag == "name":
+			        summary_db_values["catname"] = cat_elem.text
+			    elif cat_elem.tag == "title":
 			        # Check whether to include this category in summary
 			    	if len(self.categories) == 0 or cat_elem.text in self.categories:
 				    have_category = True
 				else:
 				    break # Don't waste time
 
-			        summary_db_values["catname"] = cat_elem.text
-			    elif cat_elem.tag == "title":
 			        summary_db_values["cattitle"] = cat_elem.text
 			    elif cat_elem.tag == "type":
 			        summary_db_values["type"] = cat_elem.text
@@ -177,7 +177,7 @@ class Summary(ModuleBase):
 
 	$summary_db_sqlquery = "SELECT * FROM " . $data["summary_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-	foreach($dbh->query($summary_db_sqlquery) as $info)   
+	foreach($dbh->query($summary_db_sqlquery) as $info)
 	{
 	    if($info['type'] == 'rated' && $info['status'] >= 0.0)
 	    {
@@ -187,10 +187,10 @@ class Summary(ModuleBase):
 	            $sites[$info['site']]['status'] = $info['status'];
 	    }
 
-	    $sites[$info['site']][$info['catname']]['status'] = $info['status'];
-	    $sites[$info['site']][$info['catname']]['link'] = $info['link'];
-	    $categories[$info['catname']]['title'] = $info['cattitle'];
-	    $categories[$info['catname']]['type'] = $info['type'];
+	    $sites[$info['site']][$info['cattitle']]['status'] = $info['status'];
+	    $sites[$info['site']][$info['cattitle']]['link'] = $info['link'];
+	    $categories[$info['cattitle']]['title'] = $info['cattitle'];
+	    $categories[$info['cattitle']]['type'] = $info['type'];
 	}
 
         if(sizeof($sites) > 0 && sizeof($categories) > 0)
