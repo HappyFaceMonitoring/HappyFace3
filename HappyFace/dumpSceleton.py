@@ -46,8 +46,8 @@ def dumpInstancePy(name):
     file_cont += 'import os, sys\n\n'
     file_cont += 'from ' + name + ' import * \n\n'
     file_cont += 'class ' + name_small + '(' + name + '):\n\n'
-    file_cont += '    def __init__(self,category,timestamp,archive_dir):\n\n'
-    file_cont += '        ' + name + '.__init__(self,category,timestamp,archive_dir)'
+    file_cont += '    def __init__(self,module_options):\n\n'
+    file_cont += '        ' + name + '.__init__(self,module_options)'
 
     file_module = open(name_module_py,"w")
 
@@ -162,16 +162,16 @@ def dumpHappycorePy(name,xml):
     if xml:
         intro += "from PhpDownload import *\n\n"
         init = 'class '+name+'(ModuleBase,PhpDownload):\n\n'
-        init += '\tdef __init__(self,category,timestamp,storage_dir):\n\n'
+        init += '\tdef __init__(self,module_options):\n\n'
         #init += '\t\t# inherits from the ModuleBase Class\n'
-        init += '\t\tModuleBase.__init__(self,category,timestamp,storage_dir)\n'
+        init += '\t\tModuleBase.__init__(self,module_options)\n'
         init += '\t\tPhpDownload.__init__(self)\n\n'
 
     else:
         init = '\nclass '+name+'(ModuleBase):\n\n'
-        init += '\tdef __init__(self,category,timestamp,storage_dir):\n\n'
+        init += '\tdef __init__(self,module_options):\n\n'
         init += '\t\t# inherits from the ModuleBase Class\n'
-        init += '\t\tModuleBase.__init__(self,category,timestamp,storage_dir)\n\n'
+        init += '\t\tModuleBase.__init__(self,module_options)\n\n'
         
     if xml:
         init += "\t\t## get the url\n"
