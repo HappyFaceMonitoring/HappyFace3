@@ -12,6 +12,7 @@ class PhpPlotDashboardJobSummary(Plot):
 	base_url = self.configService.get('setup', 'base_url')
 	time_range = float(self.configService.get('setup', 'time_range'))
 	site = self.configService.get('setup', 'site')
+        sort_by = self.configService.getDefault( 'setup','sort_by','activity' )
 
         # Get current UTC time, query plot for last time_range hours up to now
 	date1 = time.gmtime(time.time()-round(time_range*3600))
@@ -19,7 +20,7 @@ class PhpPlotDashboardJobSummary(Plot):
 	date1str = time.strftime('%Y-%m-%d %H:%M:%S', date1)
 	date2str = time.strftime('%Y-%m-%d %H:%M:%S', date2)
 
-	get_params = 'user=&site=' + site + '&ce=&submissiontool=&dataset=&application=&rb=&activity=&grid=&date1=' + date1str + '&date2=' + date2str + '&sortby=activity&nbars=&jobtype=&tier=&check=submitted'
+	get_params = 'user=&site=' + site + '&ce=&submissiontool=&dataset=&application=&rb=&activity=&grid=&date1=' + date1str + '&date2=' + date2str + '&sortby=' + sort_by + '&nbars=&jobtype=&tier=&check=submitted'
 	source_url = self.EscapeHTMLEntities(base_url + '/jobsummary#' + get_params)
 	self.configService.addToParameter('setup', 'source', 'Generated from: <a href="' + source_url + '">' + source_url + '</a><br />')
 
