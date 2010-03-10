@@ -305,7 +305,7 @@ class Qstat(ModuleBase):
 
 	
 	fig_abs.savefig(self.archive_dir + "/qstat_eff.png",dpi=60)
-	self.db_values["eff_plot"] = "archive/" + str(self.timestamp) + "/qstat_eff.png"
+	self.db_values["eff_plot"] = "qstat_eff.png"
 
 	##########################################################
 	# create second plot, relative view
@@ -325,8 +325,7 @@ class Qstat(ModuleBase):
 	axis_rel.legend( (rel_p0[0], rel_p1[0], rel_p2[0], rel_p3[0], rel_p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
 
 	fig_rel.savefig(self.archive_dir + "/qstat_rel_eff.png",dpi=60)
-	self.db_values["rel_eff_plot"] = "archive/" + str(self.timestamp) + "/qstat_rel_eff.png"
-
+	self.db_values["rel_eff_plot"] = "qstat_rel_eff.png"
 
     def output(self):
 
@@ -394,10 +393,10 @@ class Qstat(ModuleBase):
 	begin.append(  '<table class="TableDetails">')
 	begin.append(  ' <tr>')
 	begin.append(  '  <td>')
-	begin.append("""   <img src="'.$data["eff_plot"].'" alt=""/>""")
+	begin.append("""   <img src="' . $archive_dir . '/' . $data["eff_plot"] . '" alt=""/>""")
 	begin.append(  '  </td>')
 	begin.append(  '  <td>')
-	begin.append("""   <img src="'.$data["rel_eff_plot"].'" alt=""/>""")
+	begin.append("""   <img src="' . $archive_dir . '/' . $data["rel_eff_plot"] . '" alt=""/>""")
 	begin.append(  '  </td>')
 	begin.append(  ' </tr>')
 	begin.append(  '</table>')
@@ -440,6 +439,16 @@ class Qstat(ModuleBase):
 	module_content = """<?php
 
 	print('""" + self.PHPArrayToString(begin) + """');
+
+	$tm = localtime($data['timestamp']);
+	$year = $tm[5] + 1900; // PHP gives year since 1900
+	$month = sprintf('%02d', $tm[4] + 1); // PHP uses 0-11, Python uses 1-12
+	$day = sprintf('%02d', $tm[3]);
+	$archive_dir = "archive/$year/$month/$day/" . $data['timestamp'];
+
+	// Assume old format if archive_dir does not exist
+	if(!file_exists($archive_dir))
+		$archive_dir = '.';
 
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)

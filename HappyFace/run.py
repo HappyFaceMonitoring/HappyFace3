@@ -62,7 +62,7 @@ def HappyFace():
     timestamp = int(mktime(time_tuple)) - time_tuple[5]
 
     # create archive directory for binary files
-    archive_dir = output_dir + "/archive/" + str(timestamp)
+    archive_dir = output_dir + "/archive/" + str(time_tuple.tm_year) + "/" + ('%02d' % time_tuple.tm_mon) + "/" + ('%02d' % time_tuple.tm_mday) + "/" + str(timestamp)
     try:
         os.system("mkdir -p " + archive_dir)
     except:

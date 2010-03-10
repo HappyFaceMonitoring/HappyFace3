@@ -56,7 +56,7 @@ class Plot(ModuleBase):
         
             if success == True:
                 self.status = 1.0
-                filename = "archive/" + str(self.timestamp) + "/" + self.__module__+ident+fileType
+                filename = self.__module__+ident+fileType
             else:
                 filename = ""
 
@@ -76,11 +76,26 @@ class Plot(ModuleBase):
         for tag in plotsList:
             filename = 'filename'+self.plots[tag]
 #            url = 'url'+self.plots[tag]
-            mc.append("""<a href="' . htmlentities($data["""+filename+"""]) . '">""")
-	    mc.append(""" <img alt="" src="' . htmlentities($data["""+filename+"""]) . '" style="border: none;" />""")
+            mc.append("""<a href="' . $archive_dir . '/' . htmlentities($data["""+filename+"""]) . '">""")
+	    mc.append(""" <img alt="" src="' . $archive_dir . '/' . htmlentities($data["""+filename+"""]) . '" style="border: none;" />""")
 	    mc.append(  '</a>')
             if self.plotPosition == 'v':
                 mc.append('<br />')
-   
-	module_content = "<?php print('" + self.PHPArrayToString(mc) + "'); ?>";
+
+	module_content = """<?php
+
+	$tm = localtime($data['timestamp']);
+	$year = $tm[5] + 1900; // PHP gives year since 1900
+	$month = sprintf('%02d', $tm[4] + 1); // PHP uses 0-11, Python uses 1-12
+	$day = sprintf('%02d', $tm[3]);
+	$archive_dir = "archive/$year/$month/$day/" . $data['timestamp'];
+
+	// Assume old format if archive_dir does not exist
+	if(!file_exists($archive_dir))
+		$archive_dir = '.';
+
+	print('""" + self.PHPArrayToString(mc) + """');
+
+	?>""";
+
         return self.PHPOutput(module_content)
