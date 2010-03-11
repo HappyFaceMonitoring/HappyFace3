@@ -131,6 +131,7 @@ class WebCreator(object):
 	output += '   <div>' + "\n"
 	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
 	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
+	output += '    <input type="hidden" id="ReloadExpand" name="expand" value="" />' + "\n"
 	output += '   </div>' + "\n"
 	output += '  </form>' + "\n"
 
@@ -176,9 +177,18 @@ class WebCreator(object):
 	output += '  <script type="text/javascript">' + "\n"
 	output += '  <!--' + "\n"
 	output += '  function show_hide(me) {' + "\n"
+	output += '    var expands = document.getElementById("ReloadExpand").value;' + "\n"
 	output += '    if (document.getElementById(me).style.display=="none") {' + "\n"
+	output += '      if(expands.length > 0) expands = expands + " " + me;' + "\n"
+	output += '      else expands = me;' + "\n"
+	output += '      document.getElementById("ReloadExpand").value = expands;' + "\n"
 	output += '      document.getElementById(me).style.display="block";' + "\n"
 	output += '    } else {' + "\n"
+	output += '      var ar = expands.split(" ");' + "\n"
+	output += '      for(var i = 0; i < ar.length; ++i)' + "\n"
+	output += '        if(ar[i] == me)' + "\n"
+	output += '          { ar.splice(i,1); break; }' + "\n"
+	output += '      document.getElementById("ReloadExpand").value = ar.join(" ")' + "\n"
 	output += '      document.getElementById(me).style.display="none";' + "\n"
 	output += '    }' + "\n"
 	output += '  }' + "\n"
@@ -190,6 +200,17 @@ class WebCreator(object):
 	output += '    else' + "\n"
 	output += '      document.getElementById(link).innerHTML = "Hide module information";' + "\n"
 	output += '  }' + "\n"
+
+	# re-expand details info on reload
+	output += '  var expand = "<?php echo $_GET["expand"]; ?>";' + "\n"
+	output += '  var expand_modules = expand.split(" ");' + "\n"
+	output += '  for(var j = 0; j < expand_modules.length; ++j) ' + "\n"
+	output += '    if(expand_modules[j].length > 0) {' + "\n"
+	output += '      if(document.getElementById(expand_modules[j] + "_link"))' + "\n"
+	output += '        show_hide_info(expand_modules[j], expand_modules[j] + "_link");' + "\n"
+	output += '      else' + "\n"
+	output += '        show_hide(expand_modules[j]);' + "\n"
+	output += '    }' + "\n";
 
 	# Function to always open a form in a new tab or window (depending on the browser's settings)
 	output += '  var plotCounter = 0;' + "\n"
