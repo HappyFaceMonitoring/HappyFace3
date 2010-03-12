@@ -87,50 +87,17 @@ def makeInstanceName(name, string):
 
     return name_module
 
-def dumpHappycoreCss(name):
-    """dumps a sceleton for the core module css file"""
-
-    name_css = "happycore/" + name + ".css"
-
-    file_css = open(name_css,"w")
-    
-    file_css.write(str("/*CSS file for the HappyFace module: " + name + " */\n"))
-
-    ### no longer needed
-    ### but still print out empty file
-    #file_css.write(str("." + name + "Table,." + name + "TableDetails {\n"))
-    #file_css.write("        border: solid 1px #999;\n")
-    #file_css.write("        width: 800px;\n")
-    #file_css.write("}\n\n")
-    #file_css.write(str("." + name + "Table td {\n"))
-    #file_css.write("	padding: 5px;\n")
-    #file_css.write("	border: solid 1px #999;\n")
-    #file_css.write("	text-align: left;\n")
-    #file_css.write("}\n\n")
-    #file_css.write(str("." + name + "TableDetails td {\n"))
-    #file_css.write("	padding: 5px;\n")
-    #file_css.write("	border: solid 1px #999;\n")
-    #file_css.write("	text-align: left;\n")
-    #file_css.write("}\n\n")
-    #file_css.write(str("." + name + "DetailedInfo { \n"))
-    #file_css.write("	font-family: monospace;\n")
-    #file_css.write("	line-height: 14px;\n")
-    #file_css.write("}\n\n\n")
-    #file_css.write("tr.success {\n")
-    #file_css.write("	background-color:  #AAFFAA;\n")
-    #file_css.write("}\n")
-    #file_css.write("tr.warning {\n")
-    #file_css.write("	background-color:  #FFAA46;\n")
-    #file_css.write("}\n")
-    #file_css.write("tr.critical {\n")
-    #file_css.write("	background-color:  #FF6464;\n")
-    #file_css.write("}\n")
-    #file_css.write("tr.undef {\n")
-    #file_css.write("	background-color:  #C0C0C0;\n")
-    #file_css.write("}\n")
-        
-    file_css.close()
-    return name_css
+#def dumpHappycoreCss(name):
+#    """dumps a sceleton for the core module css file"""
+#
+#    name_css = "happycore/" + name + ".css"
+#
+#    file_css = open(name_css,"w")
+#    
+#    file_css.write(str("/*CSS file for the HappyFace module: " + name + " */\n"))
+#
+#    file_css.close()
+#    return name_css
     
 
 def dumpHappycoreCfg(name,xml):
@@ -208,27 +175,13 @@ def dumpHappycorePy(name,xml):
     run += '\t\tdetails_db_keys = {}\n'
     run += '\t\tdetails_db_values = {}\n\n'
     run += '\t\t## define details_deb_keys here\n\n\n'
-    #run += '\t\t## write global after which the query will work\n'
-    #run += '\t\tdetails_db_keys["timestamp"] = IntCol()\n'
-    #run += '\t\tdetails_db_values["timestamp"] = self.timestamp\n\n'
     run += '\t\tmy_subtable_class = self.table_init( details_database, details_db_keys )\n\n'
-    #run += '\t\t## create index for timestamp\n'
-    #run += '\t\tdetails_db_keys["index"] = DatabaseIndex(\'timestamp\')\n\n'
-    #run += '\t\t## lock object enables exclusive access to the database\n'
-    #run += '\t\tself.lock.acquire()\n\n'
-    #run += '\t\tDetails_DB_Class = type(details_database, (SQLObject,), details_db_keys )\n\n'
-    #run += '\t\tDetails_DB_Class.sqlmeta.cacheValues = False\n'
-    #run += '\t\tDetails_DB_Class.sqlmeta.fromDatabase = True\n\n'
-    #run += '\t\t## if table is not existing, create it\n'
-    #run += '\t\tDetails_DB_Class.createTable(ifNotExists=True)\n\n'
     if not xml:
         run += '\t\t### now do something\n\n'
     else:
         run += '\t\t## now start parsing the xml tree\n'
         run += '\t\troot = source_tree.getroot()\n\n'
         run += '\t\t### now do something\n\n'
-    #run += '\t\t# unlock the database access\n'
-    #run += '\t\tself.lock.release()\n\n'
     run += '\t\t# always happy for the moment\n'
     run += '\t\tself.status = 1.\n\n'
 
@@ -236,17 +189,71 @@ def dumpHappycorePy(name,xml):
     output += '\t\t"""\n\t\tAccess data from the sqlite database from here and decide how\n'
     output += '\t\tto present it'
     output += '\n\t\t"""\n'
-    output += '\t\tmodule_content = """\n'
-    output += '\t\t<?php\n'
-    output += "\t\tprintf('War einmal ein Boomerang,<br />');\n"
-    output += "\t\tprintf('War um ein Weniges zu lang.<br />');\n"
-    output += "\t\tprintf('Boomerang flog ein Stueck<br />');\n"
-    output += "\t\tprintf('Und kehrte nie mehr zurueck.<br />');\n"
-    output += "\t\tprintf('Publikum noch stundenlang<br />');\n"
-    output += "\t\tprintf('Wartete auf Boomerang.<br />');\n"
-    output += '\t\t?>\n'
-    output += '\t\t"""\n\n'
-    output += '\t\treturn self.PHPOutput(module_content)\n'
+    #output += '\t\tmodule_content = """\n'
+    #output += '\t\t<?php\n'
+    #output += "\t\tprintf('War einmal ein Boomerang,<br />');\n"
+    #output += "\t\tprintf('War um ein Weniges zu lang.<br />');\n"
+    #output += "\t\tprintf('Boomerang flog ein Stueck<br />');\n"
+    #output += "\t\tprintf('Und kehrte nie mehr zurueck.<br />');\n"
+    #output += "\t\tprintf('Publikum noch stundenlang<br />');\n"
+    #output += "\t\tprintf('Wartete auf Boomerang.<br />');\n"
+    #output += '\t\t?>\n'
+    #output += '\t\t"""\n\n'
+
+    output += '\t\tbegin = []\n'
+    output += '\t\tbegin.append(\'<table class="TableData">\')\n'
+    output += '\t\tbegin.append(\' <tr class="TableHeader">\')\n'
+    output += '\t\tbegin.append(\'  <td>Boomerang</td>\')\n'
+    output += '\t\tbegin.append(\' </tr>\')\n\n'
+
+    output += '\t\tinfo_row = []\n'
+    output += '\t\tinfo_row.append(""" <tr class="ok">""")\n'
+    output += '\t\t#info_row.append("""  <td>\' . $info["key"] . \'</td>""")\n'
+    output += '\t\tinfo_row.append("""  <tr class="ok"><td>War einmal ein Boomerang,</td></tr>""")\n'
+    output += '\t\tinfo_row.append("""  <tr class="ok"><td>War um ein Weniges zu lang.,</td></tr>""")\n'
+    output += '\t\tinfo_row.append("""  <tr class="ok"><td>Boomerang flog ein Stueck,</td></tr>""")\n'
+    output += '\t\tinfo_row.append("""  <tr class="ok"><td>Und kehrte nie mehr zurueck.</td></tr>""")\n'
+    output += '\t\tinfo_row.append("""  <tr class="ok"><td>Publikum noch stundenlang,</td></tr>""")\n'
+    output += '\t\tinfo_row.append("""  <tr class="ok"><td>Wartete auf Boomerang</td>""")\n'
+    output += '\t\tinfo_row.append(  \' </tr>\')\n\n'
+
+    output += '\t\tmid = []\n'
+    output += '\t\tmid.append(  \'</table>\')\n'
+    output += '\t\tmid.append(  \'<br />\');\n'
+    output += '\t\tmid.append("""<input type="button" value="details" onfocus="this.blur()" onclick="show_hide(\\\\\'""" + self.__module__+ "_failed_result" + """\\\\\');" />""")\n'
+    output += '\t\tmid.append(  \'<div class="DetailedInfo" id="\' + self.__module__+ \'_failed_result" style="display:none;">\')\n'
+    output += '\t\tmid.append(  \' <table class="TableDetails">\')\n'
+    output += '\t\tmid.append(  \'  <tr class="TableHeader">\')\n'
+    output += '\t\tmid.append(  \'   <td>details</td>\')\n'
+    output += '\t\tmid.append(  \'  </tr>\')\n\n'
+
+    output += '\t\tdetailed_row = []\n'
+    output += '\t\tdetailed_row.append("""  <tr class="ok">""")\n'
+    output += '\t\t#detailed_row.append("""   <td>\' . $info["key"]   . \'</td>""")\n'
+    output += '\t\tdetailed_row.append("""   <td>Gedicht.</td>""")\n'
+    output += '\t\tdetailed_row.append(  \'  </tr>\');\n\n'
+
+    output += '\t\tend = []\n'
+    output += '\t\tend.append(\' </table>\')\n'
+    output += '\t\tend.append(\'</div>\')\n\n'
+
+    output += '\t\tmodule_content = self.PHPArrayToString(begin) + """<?php\n\n'
+    output += '\t\t#$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];\n\n'
+    output += '\t\t#foreach ($dbh->query($details_db_sqlquery) as $info)\n'
+    output += '\t\t#{\n'
+    output += '\t\tprint(\'""" + self.PHPArrayToString(info_row) + """\');\n'
+    output += '\t\t#}\n\n'
+    output += '\t\tprint(\'""" + self.PHPArrayToString(mid) + """\');\n'
+    
+    output += '\t\t#foreach ($dbh->query($details_db_sqlquery) as $info)\n'
+    output += '\t\t#{\n'
+    output += '\t\tprint(\'""" + self.PHPArrayToString(detailed_row) + """\');\n'
+    output += '\t\t#}\n\n'
+
+    output += '\t\tprint(\'""" + self.PHPArrayToString(end) + """\');\n'
+    output += '\t\t?>"""\n\n'
+
+    output += '\t\treturn self.PHPOutput(module_content)\n\n'
 
     file_py = open(name_py,"w")
     file_py.write(intro)
@@ -263,14 +270,14 @@ def dumpFiles(name,xml):
     """executes all the dump functions"""
     name_py = dumpHappycorePy(name,xml)
     name_cfg = dumpHappycoreCfg(name,xml)
-    name_css = dumpHappycoreCss(name)
+    #name_css = dumpHappycoreCss(name)
     name_inst_py = dumpInstancePy(name)
     name_inst_cfg = dumpInstanceCfg(name,xml)
-    return name_py,name_cfg,name_css,name_inst_py,name_inst_cfg
+    return name_py,name_cfg,name_inst_py,name_inst_cfg
 
-def printExitMessage(name_py,name_cfg,name_css,name_inst_py,name_inst_cfg):
+def printExitMessage(name_py,name_cfg,name_inst_py,name_inst_cfg):
     """prints the names of the files created"""
-    print "wrote the files " + name_py + ", " + name_cfg + ", " + name_css + ", " + name_inst_py + ",and " + name_inst_cfg +"."
+    print "wrote the files " + name_py + ", " + name_cfg + ", " + name_inst_py + ",and " + name_inst_cfg +"."
 
 def usage():
     """usage of this script"""
@@ -319,6 +326,6 @@ if __name__ == "__main__":
     ## get the command lines
     name, xml = main(sys.argv[1:])
 
-    name_py,name_cfg,name_css,name_mod_py,name_mod_cfg = dumpFiles(name,xml)
+    name_py,name_cfg,name_mod_py,name_mod_cfg = dumpFiles(name,xml)
 
-    printExitMessage(name_py,name_cfg,name_css,name_mod_py,name_mod_cfg)
+    printExitMessage(name_py,name_cfg,name_mod_py,name_mod_cfg)
