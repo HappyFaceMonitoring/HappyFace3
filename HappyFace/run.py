@@ -75,9 +75,15 @@ def HappyFace():
         # has to be the full path
         connection_string = 'sqlite:' + os.getcwd() + "/" + database
         connection = connectionForURI(connection_string)
+
+	# Acquire database lock for writing or bail early if it cannot be
+	# obtained.
+	raw_conn = connection.getConnection()
+	raw_conn.execute('BEGIN IMMEDIATE TRANSACTION')
+
         sqlhub.processConnection = connection
-    except:
-        sys.stdout.write('Could not initiate or create the database ' + os.getcwd() + "/" + database + ', aborting ...\n')
+    except Exception, ex:
+        sys.stdout.write('Could not initiate or create the database ' + os.getcwd() + "/" + database + ': ' + str(ex) + '\nAborting ...\n')
         sys.exit(-1)
 
     # definition of the global timeout
@@ -142,6 +148,11 @@ def HappyFace():
         modObj_list[module].setDownloadService(downloadService)
         # execute the object in a thread
         modObj_list[module].start()
+
+    # Release the database lock before module processing, otherwise the modules
+    # cannot write to the database since the threads they run in acquire a new
+    # connection which cannot get the lock we are holding.
+    raw_conn.execute('END');
 
     print "HappyFace: Start module processing." 
 
