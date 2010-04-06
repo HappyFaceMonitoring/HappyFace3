@@ -260,7 +260,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	infobox.append(     '       </td>')
 	infobox.append(     '       <td>Variable:</td>')
 	infobox.append(     '       <td>')
-	infobox.append(     '        <select name="variable">')
+	infobox.append(     '        <select name="variables">')
 	infobox.append(     '         ' + plot_values)
 	infobox.append(     '        </select>')
 	infobox.append(     '       </td>')

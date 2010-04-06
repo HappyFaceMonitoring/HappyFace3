@@ -7,29 +7,99 @@
  #=====================================
  # Array Constructor
  # Values <=> Timestamps
-  
- #echo "Start: " . $_GET["date0"] . " " . $_GET["time0"] . "</br>";
- #echo "End: " . $_GET["date1"] . " " . $_GET["time1"] . "</br>";
- #echo "Variable: ". $_GET["variable"] . "</br>";
- #echo "Module: " . $_GET["module"] . "</br>";
- 
+
  $ta0 = date_parse($_GET["date0"] . " " . $_GET["time0"]);
  $ta1 = date_parse($_GET["date1"] . " " . $_GET["time1"]);
- 
+
  $timestamp0 = mktime( $ta0["hour"],$ta0["minute"],0,$ta0["month"],$ta0["day"],$ta0["year"] );
  $timestamp1 = mktime( $ta1["hour"],$ta1["minute"],0,$ta1["month"],$ta1["day"],$ta1["year"] );
- 
- $sql_command_strings[$_GET["module"]] = 'SELECT * FROM ' . $_GET["module"] . '_table WHERE timestamp >= ' .$timestamp0. ' AND timestamp <= ' . $timestamp1 . ' ORDER BY timestamp';
+
+ # Get timestamp variable to show
+ $timestamp_var = 'timestamp';
+ if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
+   $timestamp_var = sqlite_escape_string($_GET['timestamp_var']);
+ $module_table = sqlite_escape_string($_GET['module'] . '_table');
+ if(isset($_GET['subtable']) && $_GET['subtable'] != '')
+   $module_table = sqlite_escape_string($_GET['subtable']);
+
+ # Apply additional constraint
+ $where_clause = "";
+ $constraint_vars = array();
+ $constraint_values = array();
+ if(isset($_GET['constraint']) && $_GET['constraint'] != '')
+ {
+   $comp = explode('=', $_GET['constraint'], 2);
+   if(count($comp) == 2)
+   {
+     $constraint_var = sqlite_escape_string($comp[0]);
+     $constraint_value = sqlite_escape_string($comp[1]);
+     $comp = explode(',', $constraint_value);
+
+     // If constraint is on one column only then just select it via a WHERE clause
+     // Otherwise exclude manually later.
+     if(count($comp) == 1)
+     {
+       $where_clause = "AND $constraint_var = \"$constraint_value\"";
+     }
+     else
+     {
+       $constraint_vars[] = $constraint_var;
+       $constraint_values[$constraint_var] = $comp; // constrain this var to the given values
+     }
+   }
+   else
+   {
+     $constraint_vars[] = sqlite_escape_string($_GET['constraint']); // make a separate plot for each value of this var but don't constrain
+   }
+ }
+
+ # Get variables to plot
+ if(isset($_GET['variable']))
+   $variables = array(sqlite_escape_string($_GET['variable']));
+ if(isset($_GET['variables']))
+ {
+   $variables = explode(',', $_GET['variables']);
+   for($i = 0; $i < count($variables); ++$i)
+     $variables[$i] = sqlite_escape_string($variables[$i]);
+ }
+ $variable_str = '"' . implode('","', array_merge($variables, $constraint_vars)) . '"';
+
+ $sql_command_string = "SELECT \"$timestamp_var\",$variable_str FROM $module_table WHERE $timestamp_var >= " .$timestamp0. " AND $timestamp_var <= " . $timestamp1 . " $where_clause ORDER BY $timestamp_var";
 
  # create empty arrays 
  $array["values"] = array();
  $array["timestamps"] = array();
+ foreach($variables as $variable)
+   $array["values"][$variable] = array();
  
  # fill arrays with data if available
- foreach ($dbh->query($sql_command_strings[$_GET["module"]]) as $data)
+ foreach ($dbh->query($sql_command_string) as $data)
  {
-   $array["values"][] = $data[$_GET["variable"]];
-   $array["timestamps"][] = date( "d. M, H:i",$data["timestamp"]);
+   // Check constraints
+   $c_array = array();
+   $constrained = false;
+   foreach($constraint_vars as $constraint_var)
+   {
+     if(isset($constraint_values[$constraint_var]))
+       if(array_search($data[$constraint_var], $constraint_values[$constraint_var]) === false)
+         { $constrained = true; break; }
+     $c_array[] = $data[$constraint_var];
+   }
+
+   if($constrained) continue;
+   $c_string = implode(',', $c_array);
+
+   // Add data for each variable
+   foreach($variables as $variable)
+   {
+     if(!isset($array["values"][$variable][$c_string]))
+       $array["values"][$variable][$c_string] = array();
+     $array["values"][$variable][$c_string][] = $data[$variable];
+   }
+
+   $date = date( "d. M, H:i",$data[$timestamp_var]);
+   if(count($array['timestamps']) == 0 || $array['timestamps'][count($array['timestamps'])-1] != $date)
+     $array["timestamps"][] = $date;
  }
 
  if (count($array["timestamps"]) > 48) {
@@ -41,56 +111,71 @@
  #=====================================
  # Plot Builder
  # start if there is data in arrays
- if (count($array["values"]) > 0 && count($array["timestamps"]) > 0) {
+ if (count($array["timestamps"]) > 0) {
  
-	 // Standard inclusions
-	 include("config/pChart/pChart/pData.class");
-	 include("config/pChart/pChart/pChart.class");
-	  
-	 // Dataset definition
-	 $DataSet = new pData;
-	 $DataSet->AddPoint($array["values"],"Serie1");
+   // Standard inclusions
+   include("config/pChart/pChart/pData.class");
+   include("config/pChart/pChart/pChart.class");
+    
+   // Dataset definition
+   $DataSet = new pData;
 
-	 $DataSet->AddPoint($array["timestamps"],"Serie3");
-	 $DataSet->AddSerie("Serie1");
+   foreach($variables as $index => $variable)
+   {
+     foreach($array["values"][$variable] as $constraint_string => $datapoints)
+     {
+       $serie = 'Serie' . $variable . '_' . $constraint_string;
+       $DataSet->AddPoint($datapoints, $serie);
+       $DataSet->AddSerie($serie);
 
-	 $DataSet->SetAbsciseLabelSerie("Serie3");
-	 $DataSet->SetSerieName($_GET["variable"],"Serie1");
+       if(count($constraint_vars) > 0 && count($variables) > 1)
+         $name = "$variable, $constraint_string";
+       else if(count($constraint_vars) > 0)
+         $name = $constraint_string;
+       else
+         $name = $variable;
+       $DataSet->SetSerieName($name, $serie);
+     }
+   }
+ 
+   $DataSet->AddPoint($array["timestamps"],"SerieTime");
+   $DataSet->SetAbsciseLabelSerie("SerieTime");
 
-	 $DataSet->SetYAxisName($_GET["variable"]);
-	 
-	 #$DataSet->SetYAxisFormat("time");
-	 #$DataSet->SetXAxisFormat("metric");
+   if(count($variables) <= 1)
+     $DataSet->SetYAxisName($variable);
 
-	 // Initialise the graph   
-	 $Test = new pChart(900,350);
-	 $Test->setColorPalette(0,0,0,255); 
-	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",8);
-	 $Test->setGraphArea(85,30,850,250);
-	 $Test->drawFilledRoundedRectangle(7,7,900,350,5,240,240,240);
-	 $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
-	 $Test->drawGraphArea(255,255,255,TRUE);
-	 $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
-	 
-	 // show Grid if there are less than 48 timestamps
-	 if ( count($array["timestamps"]) < 48 ) { $Test->drawGrid(4,TRUE); }
-	 
-	 // Draw the 0 line   
-	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
-	 $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-	 
-	 // Draw the line graph
-	 $Test->drawLineGraph($DataSet->GetData(),$DataSet->GetDataDescription());
-	 $Test->drawPlotGraph($DataSet->GetData(),$DataSet->GetDataDescription(),3,1,255,255,255);
-	 
-	 // Finish the graph
-	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
-	 $Test->drawLegend(90,35,$DataSet->GetDataDescription(),255,255,255);
-	 $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
-	 $Test->drawTitle(60,22,"Module: " . $_GET["module"],50,50,50,585);
-	 $Test->Stroke("plot.png");
+   #$DataSet->SetYAxisFormat("time");
+   #$DataSet->SetXAxisFormat("metric");
+
+   // Initialise the graph   
+   $Test = new pChart(900,350);
+   $Test->setColorPalette(0,0,0,255); 
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",8);
+   $Test->setGraphArea(85,30,850,250);
+   $Test->drawFilledRoundedRectangle(7,7,900,350,5,240,240,240);
+   $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
+   $Test->drawGraphArea(255,255,255,TRUE);
+   $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
+   
+   // show Grid if there are less than 48 timestamps
+   if ( count($array["timestamps"]) < 48 ) { $Test->drawGrid(4,TRUE); }
+   
+   // Draw the 0 line   
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
+   $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+   
+   // Draw the line graph
+   $Test->drawLineGraph($DataSet->GetData(),$DataSet->GetDataDescription());
+   $Test->drawPlotGraph($DataSet->GetData(),$DataSet->GetDataDescription(),3,1,255,255,255);
+   
+   // Finish the graph
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
+   $Test->drawLegend(90,35,$DataSet->GetDataDescription(),255,255,255);
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
+   $Test->drawTitle(60,22,"Module: " . $_GET["module"],50,50,50,585);
+   $Test->Stroke("plot.png");
 
  } else {
-	 echo "<h4>No Data available for Visualisation!!</h4>";
+   echo "<h4>No Data available for Visualisation!!</h4>";
  }
 ?>
