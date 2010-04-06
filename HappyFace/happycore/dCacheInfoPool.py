@@ -278,6 +278,23 @@ class dCacheInfoPool(dCacheInfo):
         # all data stored in DB is available via a $data[key] call
 
 	mc_begin = []
+        mc_begin.append('<script type="text/javascript">')
+        mc_begin.append('function ' + self.__module__ + '_checked_constraint()')
+        mc_begin.append('{')
+        mc_begin.append('  var constraints = new Array();')
+        mc_begin.append('  for(var i = 0;;++i)')
+        mc_begin.append('  {')
+        mc_begin.append('    var elem = document.getElementById("' + self.__module__ + '_check_" + i);')
+	mc_begin.append('    if(!elem) break;')
+	mc_begin.append('    if(elem.checked) constraints.push(elem.value);')
+        mc_begin.append('  }')
+        mc_begin.append('  ')
+        mc_begin.append('  if(constraints.length > 0)')
+        mc_begin.append('    document.getElementById("' + self.__module__ + '_constraint").value = "poolname=" + constraints.join(",");')
+        mc_begin.append('  else')
+        mc_begin.append('    document.getElementById("' + self.__module__ + '_constraint").value = "poolname";')
+        mc_begin.append('}')
+        mc_begin.append('</script>')
         mc_begin.append('<table class="TableData">')
         for att in self.globalSummary:
             mc_begin.append(' <tr>')
@@ -296,28 +313,64 @@ class dCacheInfoPool(dCacheInfo):
 
         mc_begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
         mc_begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
-        mc_begin.append(  ' <table class="TableDetails">')
-        mc_begin.append(  '  <tr class="TableHeader">')
-        mc_begin.append(  '   <td>Poolname</td>')
+	mc_begin.append(  ' <form method="get" action="plot_generator.php" onsubmit="javascript:submitFormToWindow(this);">')
+
+	mc_begin.append(  '  <table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border: 1px #999 solid;">')
+	mc_begin.append(  '   <tr>')
+	mc_begin.append(  '    <td>Start:</td>')
+	mc_begin.append(  '    <td>')
+	mc_begin.append("""     <input name="date0" type="text" size="10" style="text-align:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
+	mc_begin.append("""     <input name="time0" type="text" size="5" style="text-align:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
+	mc_begin.append(  '    </td>')
+	mc_begin.append(  '    <td>End:</td>')
+	mc_begin.append(  '    <td>')
+	mc_begin.append("""     <input name="date1" type="text" size="10" style="text-align:center;" value="' . $date_string .'" />""")
+	mc_begin.append("""     <input name="time1" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />""")
+	mc_begin.append(  '    </td>')
+	mc_begin.append(  '    <td>')
+	mc_begin.append(  '     <input type="hidden" name="module" value="' + self.__module__ + '" />')
+	mc_begin.append(  '     <input type="hidden" name="subtable" value="' + self.__module__ + '_table_details" />')
+	mc_begin.append(  '     <input type="hidden" id="' + self.__module__ + '_constraint" name="constraint" value="" />')
+	mc_begin.append(  '    </td>')
+	mc_begin.append(  '   </tr>')
+	mc_begin.append(  '  </table>')
+
+        mc_begin.append(  '  <table class="TableDetails">')
+        mc_begin.append(  '   <tr class="TableHeader">')
+        mc_begin.append(  '    <td>Poolname</td>')
         for att in self.localAttribs:
-            mc_begin.append(  '   <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
+            mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
         for att in self.localRatios:
-            mc_begin.append(  '   <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
-        mc_begin.append('  </tr>')
+            mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
+	mc_begin.append('     <td>Pool Plot</td>')
+        mc_begin.append('   </tr>')
 
 	mc_detailed_row = []
-        mc_detailed_row.append("""  <tr class="' . $c_flag . '">""")
-        mc_detailed_row.append("""   <td>' . $sub_data["poolname"] . '</td>""")
+        mc_detailed_row.append("""   <tr class="' . $c_flag . '">""")
+        mc_detailed_row.append("""    <td><input type="checkbox" id=\"""" + self.__module__ + """_check_' . $count . '" value="' . $sub_data["poolname"] . '"/>' . $sub_data["poolname"] . '</td>""")
         for att in self.localAttribs:
-            mc_detailed_row.append("""   <td class="dCacheInfoPoolTableDetailsRestRow">' . round(($sub_data['""" + att + """']),""" + self.decs + """) . '</td>""")
+            mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . round(($sub_data['""" + att + """']),""" + self.decs + """) . '</td>""")
 
         for entry in self.localRatios:
             att = entry.split("/")
-	    mc_detailed_row.append("""   <td class="dCacheInfoPoolTableDetailsRestRow">' . (($sub_data['""" + att[1] + """'] == 0.) ? '--' : round(($sub_data['""" + att[0] +"""']/$sub_data['""" + att[1] + """'])*100,1)) . '</td>""")
-	mc_detailed_row.append(  '  </tr>')
+	    mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . (($sub_data['""" + att[1] + """'] == 0.) ? '--' : round(($sub_data['""" + att[0] +"""']/$sub_data['""" + att[1] + """'])*100,1)) . '</td>""")
+	mc_detailed_row.append("""    <td><button name="variables" value=\"""" + ','.join(self.localAttribs) + """\" onfocus="this.blur()" onclick="document.getElementById(\\\'""" + self.__module__ + """_constraint\\\').value=\\\'poolname=' . $sub_data['poolname'] . '\\\'">Plot Row</button></td>""")
+#	mc_begin.append(  '  <input type="hidden" name="variables" value="' + ','.join(self.localAttribs) + '" />')
+	mc_detailed_row.append(  '   </tr>')
 
 	mc_end = []
-        mc_end.append(' </table>')
+        mc_end.append(  '   <tr class="TableHeader" style="text-align: center;">')
+        mc_end.append(  '    <td></td>')
+
+        for att in self.localAttribs:
+            mc_end.append("""    <td><button name="variables" value=\"""" + att + """\" onfocus="this.blur()" onclick=\"""" + self.__module__ + """_checked_constraint();">Plot Col</button></td>""")
+        for entry in self.localRatios:
+	    mc_end.append(  '    <td></td>')
+
+	mc_end.append('    <td></td>')
+	mc_end.append('   </tr>')
+        mc_end.append('  </table>')
+        mc_end.append(' </form>')
         mc_end.append('</div>')
 
 	module_content = """<?php
@@ -333,7 +386,7 @@ class dCacheInfoPool(dCacheInfo):
 
 	print('""" + self.PHPArrayToString(mc_begin) + """');
 
-        foreach ($dbh->query($details_db_sqlquery) as $sub_data)
+        foreach ($dbh->query($details_db_sqlquery) as $count => $sub_data)
         {
             if($sub_data["poolstatus"] == 1.)
                 $c_flag = "ok";
