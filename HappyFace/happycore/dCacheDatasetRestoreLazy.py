@@ -1,5 +1,5 @@
 from ModuleBase import *
-from XMLParsing import *
+from HTMLParsing import *
 from PhpDownload import *
 from time import *
 
@@ -69,7 +69,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 							  'definition',
 							  'Only '+self.voName+' pools are considered.<br />')
 
-		source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile,'html')
+		source_tree, error_message = HTMLParsing().parse_htmlfile_lxml(sourceFile)
 
 		if not error_message == "":
 			self.error_message += error_message

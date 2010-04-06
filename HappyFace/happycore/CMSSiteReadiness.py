@@ -1,5 +1,5 @@
 from ModuleBase import *
-from XMLParsing import *
+from HTMLParsing import *
 from PhpDownload import *
 
 import re ## regular expressions
@@ -59,7 +59,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 			return -1
 
 		success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-		source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile,'html')
+		source_tree, error_message = HTMLParsing().parse_htmlfile_lxml(sourceFile)
 
 		if not error_message == "":
 			self.error_message += error_message
