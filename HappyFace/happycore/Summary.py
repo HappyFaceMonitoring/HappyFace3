@@ -18,7 +18,6 @@ class Summary(ModuleBase):
 	self.dsTags = {}
 	sites = self.configService.getSection('Sites')
 
-	first_iteration = True
 	for site in sites.keys():
 	    dsTag = 'summary_xml_source_' + site
 	    url = sites[site] + "?action=getxml"
@@ -68,7 +67,7 @@ class Summary(ModuleBase):
 
 	        self.configService.addToParameter('setup', 'source', site + ': ' + self.downloadService.getUrlAsLink(self.getDownloadRequest(tag)))
 
-
+	    for tag in self.dsTags.keys():
 	        dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(tag))
 	        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
