@@ -7,32 +7,25 @@ import sys
 #############################################
 class XMLParsing():
 
-    def parse_xmlfile_minidom(self,xml_file):
+    # TODO: Error is passed as an exception, therefore remove second return
+    # argument.
+    # usage of the dom object: http://docs.python.org/library/xml.dom.minidom.html
+    def parse_xmlfile_minidom(self, xml_file):
 
-        error_message = ""
 	try:
 	    dom_object = parse(xml_file)
+	    return dom_object,""
 	except Exception, ex:
-            error_message = '\nCould not parse ' + xml_file + ', ' + self.__module__ + ': ' + str(ex) + '\nAborting ...\n'
-            sys.stdout.write(error_message)
-            dom_object = ""
+	    raise Exception('Could not parse \"' + xml_file + '\" in module ' + self.__module__ + ': ' + str(ex))
 
-	# usage of the dom object: http://docs.python.org/library/xml.dom.minidom.html
-	return dom_object,error_message
+    # TODO: Error is passed as an exception, therefore remove second return
+    # argument.
+    # usage of the etree object: http://codespeak.net/lxml/
+    def parse_xmlfile_lxml(self, xml_file):
 
-
-    def parse_xmlfile_lxml(self,file):
-
-        error_message = ""
         try:
-            source_file = open(file)
+            source_file = open(xml_file)
             tree = etree.parse(source_file)
-
+            return tree,""
         except Exception, ex:
-            error_message = '\nCould not parse ' + file + ', ' + self.__module__ + ': ' + str(ex) + '\nAborting ...\n'
-            sys.stdout.write(error_message)
-            tree = ""
-
-        # usage of the etree object: http://codespeak.net/lxml/
-        return tree,error_message
-
+	    raise Exception('Could not parse \"' + xml_file + '\" in module ' + self.__module__ + ': ' + str(ex))

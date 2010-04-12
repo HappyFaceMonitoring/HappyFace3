@@ -85,7 +85,11 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
     def setDownloadService(self,downloadService):
         self.downloadService = downloadService
-        
+
+    def getDownloadRequest(self, downloadTag):
+        if not downloadTag in self.downloadRequest:
+	    raise Exception('Could not find required download tag: ' + downloadTag)
+	return self.downloadRequest[downloadTag]
 
     def getDownloadRequests(self):
         configDownloadRequests = self.configService.getDownloadRequests()
@@ -213,8 +217,9 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         try:
 	    self.process()
 	except Exception, ex:
-	    self.error_message = str(ex)
-	    sys.stderr.write(str(ex))
+	    msg = str(ex).strip()
+	    self.error_message = msg
+	    sys.stderr.write(self.__module__ + ': ' + msg + '\n')
 	    return -1
 
     def process(self):
@@ -238,7 +243,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	html_begin.append("""   <button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide_info(\\\'""" + self.__module__+ """_info\\\', \\\'""" + self.__module__ + """_info_link\\\');">' .$status_symbol. '</button>""")
 	html_begin.append(  '  </td>')
 	html_begin.append("""  <td><strong><a href="?date='.$date_string.'&amp;time='.$time_string.'&amp;t='.$category_id.'&amp;m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' . htmlentities($data['mod_title']) . '</a><br />' . $mod_time_message . ' <span style="color:gray;">-</span> <small><a href="javascript:show_hide_info(\\\'""" + self.__module__ + """_info\\\', \\\'""" + self.__module__ + """_info_link\\\');" class="HappyLink" onfocus="this.blur()" id=\"""" + self.__module__ + """_info_link\">Show module information</a></small></strong></td>""")
-	html_begin.append(""" </tr>'.$error_message.'""")
+	html_begin.append(""" </tr>' . $error_message . '""")
 	html_begin.append(  ' <tr>')
 	html_begin.append(  '  <td>')
 	html_begin.append(  '  </td>')
@@ -314,7 +319,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    $error_message = "";
 	    if ( $data['error_message'] != "" )
 	    {
-	        $error_message = '\n <tr><td></td><td><h4 style="color:red;">' . htmlentities($data["error_message"]) .'</h4></td></tr>';
+	        $error_message = '\n <tr><td></td><td><h4 style="color:red;">' . nl2br(htmlentities($data["error_message"])) .'</h4></td></tr>';
 	    }
 	    if ($server_time - $data["timestamp"] < 1800)
 	    {

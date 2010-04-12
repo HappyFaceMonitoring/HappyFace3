@@ -1,4 +1,4 @@
-from lxml import etree
+#from lxml import etree
 import lxml.html # for html parsing
 import sys
 
@@ -7,18 +7,14 @@ import sys
 #############################################
 class HTMLParsing():
 
-    def parse_htmlfile_lxml(self,file):
+    # TODO: Error is passed as an exception, therefore remove second return
+    # argument.
+    # usage of the etree object: http://codespeak.net/lxml/
+    def parse_htmlfile_lxml(self, html_file):
 
-        error_message = ""
         try:
             parser = lxml.html.HTMLParser()
-            tree = lxml.html.parse(file,parser)
-            #tree = lxml.html.fromstring(file)
+            tree = lxml.html.parse(html_file, parser)
+	    return tree,""
         except Exception, ex:
-            error_message = '\nCould not parse ' + file + ', ' + self.__module__ + ': ' + str(ex) + '\nAborting ...\n'
-            sys.stdout.write(error_message)
-            tree = ""
-
-        # usage of the etree object: http://codespeak.net/lxml/
-        return tree,error_message
-            
+	    raise Exception('Could not parse \"' + html_file + '\" in module ' + self.__module__ + ': ' + str(ex))

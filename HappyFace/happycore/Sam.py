@@ -39,28 +39,10 @@ class Sam(ModuleBase,PhpDownload):
 
         # run the test
 
-        if not self.dsTag in self.downloadRequest:
-            err = 'Error: Could not find required tag: '+self.dsTag+'\n'
-            sys.stdout.write(err)
-            self.error_message +=err
-            return -1
-
-
-	dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-        if dl_error != "":
-            self.error_message+= dl_error
-            return
-
-        self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
-
+	dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
+        self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
 
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
-        self.error_message += xml_error
-
-        ##############################################################################
-        # if xml parsing fails, abort the test; 
-	# self.status will be pre-defined -1
-        if source_tree == "": return
 
 	# parse the details and store it in a special database table
 	details_database = self.__module__ + "_table_details"
@@ -176,11 +158,8 @@ class Sam(ModuleBase,PhpDownload):
                                         details["time"] = Time
                                         self.SamResults[ServiceName]["tests"].append(details)
 
-	except:
-	    # module status will be -1
-	    self.error_message = "Couldn't extract any usefull data from the XML source code for the status calculation."
-
-
+	except Exception, ex:
+	    raise Exception('Could not extract any useful data from the XML source code for the status calculation:\n' + str(ex))
 
         samGroups = {}
    

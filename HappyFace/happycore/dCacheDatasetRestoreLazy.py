@@ -33,30 +33,18 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		"""
 		# run the test
 
-		if not self.dsTag in self.downloadRequest:
-			err = 'Error: Could not find required tag: '+self.dsTag+'\n'
-			sys.stdout.write(err)
-			self.error_message +=err
-			return -1
-
-
 		timeSplit = self.timeLimit.split(":")
 		if len(timeSplit) != 3:
-			err = 'Error: Wrong stage_max_time format\n'
-			sys.stdout.write(err)
-			self.error_message +=err
-			return -1
-
-
+			raise Exception('Wrong stage_max_time format')
 		
 		timeLimitSeconds = int(timeSplit[0])*60*60+int(timeSplit[1])*60+int(timeSplit[2])
 
 
-		success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+		success,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 
 		self.configService.addToParameter('setup',
 						  'source',
-						  self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
+						  self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
 
 		if self.detailsTableCutOff != '':
 			self.configService.addToParameter('setup',
@@ -70,20 +58,6 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 							  'Only '+self.voName+' pools are considered.<br />')
 
 		source_tree, error_message = HTMLParsing().parse_htmlfile_lxml(sourceFile)
-
-		if not error_message == "":
-			self.error_message += error_message
-			return -1
-
-
-
-
-
-
-		##############################################################################
-		# if xml parsing fails, abort the test;
-		# self.status will be pre-defined -1
-		if source_tree == "": return
 
 
 

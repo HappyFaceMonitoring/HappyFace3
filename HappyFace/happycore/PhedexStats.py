@@ -24,24 +24,8 @@ class PhedexStats(ModuleBase):
 
     def process(self):
 
-        if not self.dsTag in self.downloadRequest:
-            err = 'Error: Could not find required tag: '+self.dsTag+'\n'
-            sys.stdout.write(err)
-            self.error_message +=err
-            return -1
-
-        dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-        if dl_error != "":
-            self.error_message+= dl_error
-            return
-
+        dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
-        self.error_message += xml_error
-
-        ##############################################################################
-        # if xml parsing fails, abort the test; 
-	# self.status will be pre-defined -1
-        if source_tree == "": return
 
 	root = source_tree.getroot()
 	

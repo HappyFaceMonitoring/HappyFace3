@@ -66,18 +66,11 @@ class Summary(ModuleBase):
 	            self.configService.addToParameter('setup', 'source', '<br />')
 	        first_iteration = False
 
-	        self.configService.addToParameter('setup', 'source', site + ': ' + self.downloadService.getUrlAsLink(self.downloadRequest[tag]))
+	        self.configService.addToParameter('setup', 'source', site + ': ' + self.downloadService.getUrlAsLink(self.getDownloadRequest(tag)))
 
-	        if not tag in self.downloadRequest:
-		    raise Exception('Error: Could not find required tag: ' + tag)
 
-	        dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[tag])
-	        if dl_error != "":
-		    raise Exception(dl_error)
-
+	        dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(tag))
 	        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
-		if source_tree == "":
-		    raise Exception(xml_error)
 
 	        root = source_tree.getroot()
 	        summary_db_values["site"] = site
@@ -146,9 +139,8 @@ class Summary(ModuleBase):
 
 		            self.table_fill(subtable_summary, summary_db_values)
 
-	except Exception as ex:
-	    self.status = -1.0
-	    self.error_message = "Failed to parse XML: " + str(ex)
+	except Exception, ex:
+	    raise Exception('Failed to parse XML: ' + str(ex))
 
     def output(self):
 

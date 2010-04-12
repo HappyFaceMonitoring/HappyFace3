@@ -82,12 +82,11 @@ class DownloadService(HTMLOutput):
             else:
                 return "."+fileType
 
-    # TODO: Return filepath only; error will be passed as exception
+    # TODO: Error is passed as an exception, therefore remove first return
+    # argument.
     def getFile(self,downloadstring):
-        success,error = self.checkDownload(downloadstring)
-        if success:
-            return error,self.downloadTags[downloadstring].getFilePath()
-	raise Exception(error)
+        self.checkDownload(downloadstring)
+        return "",self.downloadTags[downloadstring].getFilePath()
 
     def getUrl(self,downloadstring):
         return self.downloadTags[downloadstring].getUrl()
@@ -99,29 +98,17 @@ class DownloadService(HTMLOutput):
 
 
     def copyFile(self,downloadstring,destfile):
-        success,error = self.checkDownload(downloadstring)
-        if success:
-            localFile = self.downloadTags[downloadstring].getFilePath()
-            ret = os.system('cp '+localFile+' '+destfile)
-            return True,""
-        else:
-            return success,error
-
+        self.checkDownload(downloadstring)
+        localFile = self.downloadTags[downloadstring].getFilePath()
+	# TODO: Use python file copy function instead
+        ret = os.system('cp '+localFile+' '+destfile)
 
     def checkDownload(self,downloadstring):
-        success = True
-        error = ""
         if downloadstring in self.downloadTags:
             if not self.downloadTags[downloadstring].finished:
-                success = False
-                error = "Download has not finished in time."
-                
+	        raise Exception('Download has not finished in time.')
             elif not self.downloadTags[downloadstring].success:
-                success = False
-                error = "Download failed."
-            
-        else:
-            success = False
-            error = "Tag \'"+downloadstring+"\' not found."
+	        raise Exception('Download failed.')
 
-        return success,error
+        else:
+            raise Exception("Tag '"+downloadstring+"' not found.")

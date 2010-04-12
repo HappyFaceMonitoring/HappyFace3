@@ -150,25 +150,13 @@ def dumpHappycorePy(name,xml):
         init += "\t\tself.dsTag = '"+name+"_xml_source'\n"
         init += "\t\tself.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()\n\n"
 
-    run = '\tdef run(self):\n'
+    run = '\tdef process(self):\n'
     run += '\t\t"""\n\t\tCollects the data from the web source. Stores it then into the\n'
     run += '\t\tsqlite data base. The overall status has to be determined here.\n\t\t"""\n'
     run += '\t\t# run the test\n\n'
     if xml:
-        run += '\t\tif not self.dsTag in self.downloadRequest:\n'
-        run += '\t\t\terr = \'Error: Could not find required tag: \'+self.dsTag+\'\\n\'\n'
-        run += '\t\t\tsys.stdout.write(err)\n'
-        run += '\t\t\tself.error_message +=err\n'
-        run += '\t\t\treturn -1\n\n'
-        run += '\t\tsuccess,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])\n'
+        run += '\t\tsuccess,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))\n'
         run += '\t\tsource_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile)\n\n'
-        run += '\t\tif not error_message == "":\n'
-        run += '\t\t\tself.error_message += error_message\n'
-        run += '\t\t\treturn -1\n\n'
-        run += '\t\t##############################################################################\n'
-        run += '\t\t# if xml parsing fails, abort the test;\n'
-        run += '\t\t# self.status will be pre-defined -1\n'
-        run += '\t\tif source_tree == "": return\n\n'       
     run += '\t\t# parse the details and store it in a special database table\n'
     run += '\t\tdetails_database = self.__module__ + "_table_details"\n\n'
     run += '\t\tself.db_values["details_database"] = details_database\n\n'

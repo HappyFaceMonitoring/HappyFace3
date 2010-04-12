@@ -85,24 +85,8 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
     def process(self):
 
         # run the test
-
-        if not self.dsTag in self.downloadRequest:
-            err = 'Error: Could not find required tag: '+self.dsTag+'\n'
-            sys.stdout.write(err)
-            self.error_message +=err
-            return -1
-
-        success,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
+        success,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile)
-
-        if not error_message == '':
-            self.error_message += error_message
-            return -1
-
-        ##############################################################################
-        # if xml parsing fails, abort the test; 
-	# self.status will be pre-defined -1
-        if source_tree == "": return
 
         # parse the details and store it in a special database table
 	details_database = self.__module__ + "_table_details"
@@ -130,8 +114,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
         if root.get("request_timestamp"):
             request_time = float(root.get("request_timestamp"))
         else:
-            print "Error: could not get request time at instance "+self.instance+". Aborting."
-            return
+	    raise Exception("Could not get request time at instance " + self.instance)
 
         for element in root:
             if element.tag == "node":

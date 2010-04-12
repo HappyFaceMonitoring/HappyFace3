@@ -36,26 +36,10 @@ class Uschi(ModuleBase):
 
         ##############################################################################
         # run the test
-	# downlaod the XML source file and saves it under: __module__ + "source.xml"
+	# download the XML source file and saves it under: __module__ + "source.xml"
 
-        if not self.dsTag in self.downloadRequest:
-            err = 'Error: Could not find required tag: '+self.dsTag+'\n'
-            sys.stdout.write(err)
-            self.error_message +=err
-            return -1
-
-        dl_error,uschiFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
-        if dl_error != "":
-            self.error_message+= dl_error
-            return
-
+        dl_error,uschiFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	uschi_dom_object,xml_error = XMLParsing().parse_xmlfile_minidom(uschiFile)
-        self.error_message += xml_error
-        
-        ##############################################################################
-        # if xml parsing fails, abort the test; 
-	# self.status will be pre-defined -1
-        if uschi_dom_object == "": return
 
 	##############################################################################
 	# get the last USCHI running time

@@ -27,17 +27,9 @@ class Plot(ModuleBase):
         for tag in self.downloadRequest.keys():
             if tag.find('plot') == 0:
                 self.plots[tag] = tag.replace('plot','')
-                
-
 
         if len(self.plots) == 0:
-            err = 'Error: Could not find download tag(s)\n'
-            sys.stdout.write(err)
-            self.error_message +=err
-
-        if self.error_message != "":
-            sys.stdout.write(self.error_message)
-            return -1
+	    raise Exception('Could not find download tag(s)')
 
         plotsList =  self.plots.keys()
         plotsList.sort()
@@ -50,16 +42,14 @@ class Plot(ModuleBase):
             self.configService.addToParameter('setup','source',tag+": "+self.downloadService.getUrlAsLink(self.downloadRequest[tag])+"<br />")
 
 
-            filenameFullPath = self.archive_dir +"/" + self.__module__+ident+fileType
-            success,stderr = self.downloadService.copyFile(self.downloadRequest[tag],filenameFullPath)
-            self.error_message +=stderr
-        
-            if success == True:
+	    try:
+	        filenameFullPath = self.archive_dir +"/" + self.__module__+ident+fileType
+                self.downloadService.copyFile(self.downloadRequest[tag],filenameFullPath)
                 self.status = 1.0
                 filename = self.__module__+ident+fileType
-            else:
-                filename = ""
-
+	    except Exception, ex:
+                self.error_message += str(ex).strip() + "\n"
+		filename = ""
 
 	# definition fo the database table values
 	    self.db_keys['filename'+ident] = StringCol()
