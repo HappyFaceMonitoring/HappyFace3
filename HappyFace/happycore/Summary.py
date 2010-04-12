@@ -68,6 +68,7 @@ class Summary(ModuleBase):
 	        self.configService.addToParameter('setup', 'source', site + ': ' + self.downloadService.getUrlAsLink(self.getDownloadRequest(tag)))
 
 	    for tag in self.dsTags.keys():
+	        site = self.dsTags[tag]['site']
 	        dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(tag))
 	        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
