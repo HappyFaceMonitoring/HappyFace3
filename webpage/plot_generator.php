@@ -8,9 +8,22 @@
 		<form action="<?php echo $PHP_SELF; ?>" method="get">
 
 <?php
+
+// Quick'n'dirty check to avoid SQL injection attacks on column names.
+// Unfortunately preparated statements do not work on table or column names
+// with SQLite.
+// TODO: Avoid code duplication with show_plot.php
+function verify_column_name($name)
+{
+  for($i = 0; $i < count($name); ++$i)
+    if(!ctype_alnum($name[$i]) && $name[$i] != '_')
+      { echo "Invalid column name: $name"; die; }
+  return $name;
+}
+
 $timestamp_var = 'timestamp';
 if(isset($_GET['timestamp_var']))
-	$timestamp_var = $_GET['timestamp_var'];
+	$timestamp_var = verify_column_name($_GET['timestamp_var']);
 ?>
 
 			<input type="hidden" name="module" value="<?php echo htmlentities($_GET["module"]); ?>" />
@@ -66,18 +79,22 @@ if($variable == "status")
 	$timestamp0 = mktime($ta0['hour'], $ta0['minute'], 0, $ta0['month'], $ta0['day'], $ta0['year']);
 	$timestamp1 = mktime($ta1['hour'], $ta1['minute'], 0, $ta1['month'], $ta1['day'], $ta1['year']);
 
-	$module_table = sqlite_escape_string($_GET['module'] . '_table');
+	$module_table = verify_column_name($_GET['module'] . '_table');
 	if(isset($_GET['subtable']) && $_GET['subtable'] != '')
-		$module_table = sqlite_escape_string($_GET['subtable']);
+		$module_table = verify_column_name($_GET['subtable']);
 
-	$sql_command = "SELECT DISTINCT $timestamp_var,status FROM $module_table WHERE $timestamp_var >= $timestamp0 AND $timestamp_var <= $timestamp1 ORDER BY $timestamp_var";
+	$stmt = $dbh->prepare("SELECT DISTINCT $timestamp_var,status FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end ORDER BY $timestamp_var");
+	$stmt->bindParam(':timestamp_begin', $timestamp0);
+	$stmt->bindParam(':timestamp_end', $timestamp1);
 
 	$prev_timestamp = -1;
 	$prev_status = -1;
 	$accum_status = 0.0;
 	$accum_timestamp = 0.0;
 	$availabality = 0.0;
-	foreach($dbh->query($sql_command) as $data)
+
+	$stmt->execute();
+	while($data = $stmt->fetch())
 	{
 		$timestamp = $data['timestamp'];
 		$status = $data['status'];

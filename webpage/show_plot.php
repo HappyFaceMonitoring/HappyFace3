@@ -4,6 +4,17 @@
  # connect to SQLite database
  $dbh = new PDO("sqlite:HappyFace.db");
 
+ // Quick'n'dirty check to avoid SQL injection attacks on column names.
+ // Unfortunately preparated statements do not work on table or column names
+ // with SQLite.
+ function verify_column_name($name)
+ {
+   for($i = 0; $i < count($name); ++$i)
+     if(!ctype_alnum($name[$i]) && $name[$i] != '_')
+       { echo "Invalid column name: $name"; die; }
+   return $name;
+ }
+
  #=====================================
  # Array Constructor
  # Values <=> Timestamps
@@ -17,10 +28,10 @@
  # Get timestamp variable to show
  $timestamp_var = 'timestamp';
  if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
-   $timestamp_var = sqlite_escape_string($_GET['timestamp_var']);
- $module_table = sqlite_escape_string($_GET['module'] . '_table');
+   $timestamp_var = verify_column_name($_GET['timestamp_var']);
+ $module_table = verify_column_Name($_GET['module'] . '_table');
  if(isset($_GET['subtable']) && $_GET['subtable'] != '')
-   $module_table = sqlite_escape_string($_GET['subtable']);
+   $module_table = verify_column_name($_GET['subtable']);
 
  # Apply additional constraint
  $where_clause = "";
@@ -31,15 +42,15 @@
    $comp = explode('=', $_GET['constraint'], 2);
    if(count($comp) == 2)
    {
-     $constraint_var = sqlite_escape_string($comp[0]);
-     $constraint_value = sqlite_escape_string($comp[1]);
-     $comp = explode(',', $constraint_value);
+     $constraint_var = verify_column_name($comp[0]);
+     $constraint_value = explode(',', $comp[1]);
 
      // If constraint is on one column only then just select it via a WHERE clause
      // Otherwise exclude manually later.
      if(count($comp) == 1)
      {
-       $where_clause = "AND $constraint_var = \"$constraint_value\"";
+       $constraint_value = $comp[0];
+       $where_clause = "AND $constraint_var = :constraint_value";
      }
      else
      {
@@ -49,22 +60,26 @@
    }
    else
    {
-     $constraint_vars[] = sqlite_escape_string($_GET['constraint']); // make a separate plot for each value of this var but don't constrain
+     $constraint_vars[] = verify_column_name($_GET['constraint']); // make a separate plot for each value of this var but don't constrain
    }
  }
 
  # Get variables to plot
  if(isset($_GET['variable']))
-   $variables = array(sqlite_escape_string($_GET['variable']));
+   $variables = array(verify_column_name($_GET['variable']));
  if(isset($_GET['variables']))
  {
    $variables = explode(',', $_GET['variables']);
    for($i = 0; $i < count($variables); ++$i)
-     $variables[$i] = sqlite_escape_string($variables[$i]);
+     $variables[$i] = verify_column_name($variables[$i]);
  }
- $variable_str = '"' . implode('","', array_merge($variables, $constraint_vars)) . '"';
+ $variable_str = implode(',', array_merge($variables, $constraint_vars));
 
- $sql_command_string = "SELECT \"$timestamp_var\",$variable_str FROM $module_table WHERE $timestamp_var >= " .$timestamp0. " AND $timestamp_var <= " . $timestamp1 . " $where_clause ORDER BY $timestamp_var";
+ $stmt = $dbh->prepare("SELECT $timestamp_var,$variable_str FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end $where_clause ORDER BY $timestamp_var");
+ $stmt->bindParam(':timestamp_begin', $timestamp0);
+ $stmt->bindParam(':timestamp_end', $timestamp1);
+ if(isset($constraint_value))
+   $stmt->bindParam(':constraint_value', $constraint_value);
 
  # create empty arrays 
  $array["values"] = array();
@@ -73,7 +88,8 @@
    $array["values"][$variable] = array();
  
  # fill arrays with data if available
- foreach ($dbh->query($sql_command_string) as $data)
+ $stmt->execute();
+ while($data = $stmt->fetch())
  {
    // Check constraints
    $c_array = array();
