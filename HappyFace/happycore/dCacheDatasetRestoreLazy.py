@@ -26,7 +26,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 		self.statusTagsFail = ['Waiting','Suspended','Unknown']
 
 
-	def run(self):
+	def process(self):
 
 		"""
 		Some Text

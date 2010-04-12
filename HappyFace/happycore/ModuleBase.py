@@ -209,6 +209,17 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	
 	return config
 
+    def run(self):
+        try:
+	    self.process()
+	except Exception, ex:
+	    self.error_message = str(ex)
+	    sys.stderr.write(str(ex))
+	    return -1
+
+    def process(self):
+        raise Exception("process() not implemented for module " + self.__module__)
+
     # the module frame asks for the following quantities
     # status, error_message, mod_title, mod_type, weight, definition, instruction
     def PHPOutput(self,module_content):

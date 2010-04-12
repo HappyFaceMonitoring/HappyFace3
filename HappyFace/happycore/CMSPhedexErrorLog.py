@@ -93,7 +93,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         self.downloadRequest[self.dsTag] = 'wget|'+self.fileType+'||'+self.base_url+'/'+self.instance+'/errorlog'+"?"+"&".join(argList)
 
 
-    def run(self):
+    def process(self):
 	self.configService.addToParameter('setup', 'definition', '<br />Minimum number of failed transfers for rating: ' + str(self.errorThreshold))
 	self.configService.addToParameter('setup', 'definition', '<br />Warning limit for destination errors: ' + str(int(round(self.destWarning))) + '%')
 	self.configService.addToParameter('setup', 'definition', '<br />Critical limit for destination errors: ' + str(int(round(self.destCritical))) + '%')

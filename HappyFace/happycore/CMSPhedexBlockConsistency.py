@@ -56,7 +56,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
         if (result_age > self.old_result_warning_limit):
             return self.old_result_warning_limit
 
-    def run(self):
+    def process(self):
         """
         Downloads input source xml file.
         Parses xml document and saves data in the database.

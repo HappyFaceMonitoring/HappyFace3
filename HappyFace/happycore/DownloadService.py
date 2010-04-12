@@ -82,13 +82,12 @@ class DownloadService(HTMLOutput):
             else:
                 return "."+fileType
 
-
+    # TODO: Return filepath only; error will be passed as exception
     def getFile(self,downloadstring):
         success,error = self.checkDownload(downloadstring)
         if success:
             return error,self.downloadTags[downloadstring].getFilePath()
-        else:
-            return error,""
+	raise Exception(error)
 
     def getUrl(self,downloadstring):
         return self.downloadTags[downloadstring].getUrl()

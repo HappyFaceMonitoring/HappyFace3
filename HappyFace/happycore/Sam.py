@@ -35,7 +35,7 @@ class Sam(ModuleBase,PhpDownload):
 
 
 	
-    def run(self):
+    def process(self):
 
         # run the test
 

@@ -45,7 +45,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		#self.downloadRequest[self.dsTag] = 'wge|:'+self.makeUrl()
 		self.downloadRequest[self.dsTag] = 'wget|'+ self.fileExtension + '||' + self.base_url
 
-	def run(self):
+	def process(self):
 		"""
 		Collects the data from the web source. Stores it then into the
 		sqlite data base. The overall status has to be determined here.

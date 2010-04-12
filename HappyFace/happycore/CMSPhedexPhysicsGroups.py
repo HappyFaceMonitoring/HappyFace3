@@ -100,7 +100,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         return restrictions
 
 
-    def run(self):
+    def process(self):
 
         # run the test
 

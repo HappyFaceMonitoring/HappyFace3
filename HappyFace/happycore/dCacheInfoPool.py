@@ -17,7 +17,7 @@ class dCacheInfoPool(dCacheInfo):
 
 
 
-    def run(self):
+    def process(self):
 
        
         

@@ -69,7 +69,7 @@ class Qstat(ModuleBase):
 
         self.dsTag = 'qstat_xml_source'
 
-    def run(self):
+    def process(self):
 
         if not self.dsTag in self.downloadRequest:
             err = 'Error: Could not find required tag: '+self.dsTag+'\n'

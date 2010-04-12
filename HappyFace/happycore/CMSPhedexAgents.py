@@ -82,7 +82,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
         self.downloadRequest[self.dsTag] = 'wget|'+self.fileType+'||'+self.base_url+'/'+self.instance+'/agents'+"?"+"&".join(argList)
 
 
-    def run(self):
+    def process(self):
 
         # run the test
 

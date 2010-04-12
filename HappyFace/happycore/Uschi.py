@@ -29,7 +29,7 @@ class Uschi(ModuleBase):
 
         self.dsTag = 'uschi_xml'
                 
-    def run(self):
+    def process(self):
 
 	self.testname_string = self.configService.get('setup','testname_string')
 

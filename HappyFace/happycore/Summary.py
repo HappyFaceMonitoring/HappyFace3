@@ -31,7 +31,7 @@ class Summary(ModuleBase):
 	if self.categories == ['']:
 		self.categories = []
 
-    def run(self):
+    def process(self):
 
 	# Database setup
 	summary_database = self.__module__ + "_table_summary"

@@ -74,7 +74,7 @@ class CMSPhedexBlockReplicas(ModuleBase,PhpDownload):
 
 
 
-    def run(self):
+    def process(self):
         # run the test
 
         if not self.dsTag in self.downloadRequest:

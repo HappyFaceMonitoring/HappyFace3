@@ -46,7 +46,7 @@ class DashboardDatasetUsage(ModuleBase,PhpDownload):
 		self.dsTag = 'DashboardDatasetUsage_xml_source'
 		self.downloadRequest[self.dsTag] = 'wget|' + self.makeUrl() + "&date1=" + date1 + "&date2=" + date2 
 
-	def run(self):
+	def process(self):
 		"""
 		Collects the data from the web source. Stores it then into the
 		sqlite data base. The overall status has to be determined here.

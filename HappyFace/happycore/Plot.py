@@ -16,7 +16,7 @@ class Plot(ModuleBase):
         
 
                 
-    def run(self):
+    def process(self):
 
         # run the test
 
