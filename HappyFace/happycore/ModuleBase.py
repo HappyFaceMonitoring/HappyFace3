@@ -217,6 +217,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         try:
 	    self.process()
 	except Exception, ex:
+	    self.status = -1.0
 	    msg = str(ex).strip()
 	    self.error_message = msg
 	    sys.stderr.write(self.__module__ + ': ' + msg + '\n')
