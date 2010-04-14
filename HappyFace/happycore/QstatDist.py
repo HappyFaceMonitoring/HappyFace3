@@ -139,7 +139,7 @@ class QstatDist(ModuleBase):
 	plot = []
 	plot.append("""<img src="' . $archive_dir . '/' . $data["filename"] . '" alt=""/>""")
 	noplot = []
-	noplot.append('<h4>There are no CMDPRD jobs running</h4>')
+	noplot.append('<h4>There are no CMSPRD jobs running</h4>')
 
 	module_content = """<?php
 
