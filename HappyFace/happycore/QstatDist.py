@@ -47,8 +47,10 @@ class QstatDist(ModuleBase):
 	    if element.tag == "jobDetails":
 		for child in element:
 
+		    # Only count running CMSPRD jobs
 		    user = child.attrib["user"]
-		    if user != "cmsprd":
+		    state = child.attrib["job_state"]
+		    if user != "cmsprd" or state != 'R':
 		    	continue
 
 		    valuestr = child.attrib[variable]
