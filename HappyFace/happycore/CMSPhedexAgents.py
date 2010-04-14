@@ -47,6 +47,9 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
             print "Error: no instance specified. Abort"
             return
 
+	# get black-list of agents which are ignored for status calculation
+	self.blacklist = self.configService.get('setup','blacklist')
+
         # definition of the database table keys and pre-defined values
 	self.db_keys["details_database"] = StringCol()
         self.db_values["details_database"] = ""
@@ -55,7 +58,6 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 
         self.base_url += '/'+self.instance+'/agents'
         self.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()
-
 
     def getPhpArgs_old(self, config):
         for i in config.items('phpArgs'):
@@ -136,7 +138,15 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
                     time = (request_time - time_update)
 
                     agent_status = self.determineAgentStatus(time/3600, label)
-                    agentStatusList.append(agent_status)
+
+		    # check if agent is in black-list, then ignore its status
+		    skipagent = False
+		    for blagent in self.blacklist.rsplit(","):
+			if blagent.strip() == label:		    
+			    skipagent = True
+
+		    if not skipagent:
+			agentStatusList.append(agent_status)
 
                     details_db_values['agent_status'] = agent_status
 
