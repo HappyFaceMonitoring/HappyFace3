@@ -374,34 +374,36 @@ class Qstat(ModuleBase):
 	begin.append(  ' </tr>')
 	begin.append(  '</table>')
 	begin.append(  '<br/>')
-	begin.append(  '')
-	begin.append(  '<table class="TableDetails">')
-	begin.append(  ' <tr>')
-	begin.append(  '  <td>')
-	begin.append("""   <img src="' . $archive_dir . '/' . $data["eff_plot"] . '" alt=""/>""")
-	begin.append(  '  </td>')
-	begin.append(  '  <td>')
-	begin.append("""   <img src="' . $archive_dir . '/' . $data["rel_eff_plot"] . '" alt=""/>""")
-	begin.append(  '  </td>')
-	begin.append(  ' </tr>')
-	begin.append(  '</table>')
-	begin.append(  '<br />')
-	begin.append(  '')
-	begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
-	begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
-	begin.append(  ' <strong>JOB STATISTICS</strong>')
-	begin.append(  ' <table class="TableDetails QstatTableDetails">')
-	begin.append(  '  <tr class="TableHeader">')
-	begin.append(  '   <td>User</td>')
-	begin.append(  '   <td>Total</td>')
-	begin.append(  '   <td>Running</td>')
-	begin.append(  '   <td>Waiting</td>')
-	begin.append(  '   <td>Queue</td>')
-	begin.append(  '   <td>Eff. > 80%</td>')
-	begin.append(  '   <td>80% > Eff. > 30%</td>')
-	begin.append(  '   <td>30% > Eff. > 10%</td>')
-	begin.append(  '   <td>Eff. &lt; 10%</td>')
-	begin.append(  '  </tr>')
+
+	plots = []
+	plots.append(  '<table class="TableDetails">')
+	plots.append(  ' <tr>')
+	plots.append(  '  <td>')
+	plots.append("""   <img src="' . $archive_dir . '/' . $data["eff_plot"] . '" alt=""/>""")
+	plots.append(  '  </td>')
+	plots.append(  '  <td>')
+	plots.append("""   <img src="' . $archive_dir . '/' . $data["rel_eff_plot"] . '" alt=""/>""")
+	plots.append(  '  </td>')
+	plots.append(  ' </tr>')
+	plots.append(  '</table>')
+	plots.append(  '<br />')
+
+	details = []
+	details.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
+	details.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
+	details.append(  ' <strong>JOB STATISTICS</strong>')
+	details.append(  ' <table class="TableDetails QstatTableDetails">')
+	details.append(  '  <tr class="TableHeader">')
+	details.append(  '   <td>User</td>')
+	details.append(  '   <td>Total</td>')
+	details.append(  '   <td>Running</td>')
+	details.append(  '   <td>Waiting</td>')
+	details.append(  '   <td>Queue</td>')
+	details.append(  '   <td>Eff. > 80%</td>')
+	details.append(  '   <td>80% > Eff. > 30%</td>')
+	details.append(  '   <td>30% > Eff. > 10%</td>')
+	details.append(  '   <td>Eff. &lt; 10%</td>')
+	details.append(  '  </tr>')
 
 	details_row = []
 	details_row.append(  '  <tr>')
@@ -423,8 +425,6 @@ class Qstat(ModuleBase):
 
 	module_content = """<?php
 
-	print('""" + self.PHPArrayToString(begin) + """');
-
 	$tm = localtime($data['timestamp']);
 	$year = $tm[5] + 1900; // PHP gives year since 1900
 	$month = sprintf('%02d', $tm[4] + 1); // PHP uses 0-11, Python uses 1-12
@@ -434,6 +434,13 @@ class Qstat(ModuleBase):
 	// Assume old format if archive_dir does not exist
 	if(!file_exists($archive_dir))
 		$archive_dir = '.';
+
+	print('""" + self.PHPArrayToString(begin) + """');
+
+	if($data['eff_plot'] != '' || $data['rel_eff_plot'] != '')
+		print('""" + self.PHPArrayToString(plots) + """');
+
+	print('""" + self.PHPArrayToString(details) + """');
 
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 	foreach ($dbh->query($details_db_sqlquery) as $info)
