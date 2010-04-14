@@ -43,7 +43,7 @@
    if(count($comp) == 2)
    {
      $constraint_var = verify_column_name($comp[0]);
-     $constraint_value = explode(',', $comp[1]);
+     $comp = explode(',', $comp[1]);
 
      // If constraint is on one column only then just select it via a WHERE clause
      // Otherwise exclude manually later.
