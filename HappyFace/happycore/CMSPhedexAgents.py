@@ -13,6 +13,10 @@ from time import strftime
 #             Module ported to new config service
 #	      Module now inhertis from PhpDownload to avoid code doubling
 #
+# 2010/04/16, Armin Scheurer:
+#	      Introduced blacklisting feature for agents specified in
+#             the config file
+#
 # ToDo:
 
 
@@ -98,14 +102,14 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 	details_db_keys = {}
 	details_db_values = {}
 
-        details_db_keys["name"] = StringCol()
-        details_db_keys["label"] = StringCol()
-        details_db_keys["version"] = StringCol()
-        details_db_keys["host"] = StringCol()
-        details_db_keys["dir"] = StringCol()
-        #details_db_keys["time"] = FloatCol()
-        details_db_keys["time"] = StringCol()
+        details_db_keys['name'] = StringCol()
+        details_db_keys['label'] = StringCol()
+        details_db_keys['version'] = StringCol()
+        details_db_keys['host'] = StringCol()
+        details_db_keys['dir'] = StringCol()
+        details_db_keys['time'] = StringCol()
         details_db_keys['agent_status'] = FloatCol()
+	details_db_keys['critical'] = StringCol()
 
 	my_subtable_class = self.table_init( details_database, details_db_keys )
 
@@ -147,6 +151,9 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 
 		    if not skipagent:
 			agentStatusList.append(agent_status)
+			details_db_values['critical'] = "yes"
+		    else:
+			details_db_values['critical'] = "no"
 
                     details_db_values['agent_status'] = agent_status
 
@@ -167,6 +174,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 	begin.append('  <td>agent</td>')
 	begin.append('  <td>label</td>')
 	begin.append('  <td>last report</td>')
+	begin.append('  <td>critical</td>')
 	begin.append(' </tr>')
 
 	info_row = []
@@ -174,6 +182,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 	info_row.append("""  <td>' . $info["name"] . '</td>""")
 	info_row.append("""  <td>' . $info["label"]. '</td>""")
 	info_row.append("""  <td>' . $info["time"] . '</td>""")
+	info_row.append("""  <td>' . $info["critical"] . '</td>""")
 	info_row.append(  ' </tr>')
 
 	mid = []
