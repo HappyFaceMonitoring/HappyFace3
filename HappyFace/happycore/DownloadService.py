@@ -49,6 +49,10 @@ class DownloadService(HTMLOutput):
             print "  "+str(counter)+" "+i
             self.downloadTags[i].start()
         for i in self.downloadTags.keys():
+	    if resttime == -1:
+	        self.downloadTags[i].join()
+		continue
+		
             start = int(time())
             self.downloadTags[i].join(resttime)
             resttime -= int(time()) - start

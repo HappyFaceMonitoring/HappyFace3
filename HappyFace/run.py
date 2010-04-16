@@ -156,6 +156,10 @@ def HappyFace():
 
         # wait till all modules are finished OR till the global timeout
         for module in modObj_list.keys():
+	    if timeout == -1:
+	        modObj_list[module].join()
+		continue
+	
             start = int(time())
             modObj_list[module].join(timeout)
             timeout -= int(time()) - start
