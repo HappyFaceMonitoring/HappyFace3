@@ -40,7 +40,7 @@
  if(isset($_GET['constraint']) && $_GET['constraint'] != '')
  {
    $comp = explode('=', $_GET['constraint'], 2);
-   if(count($comp) == 2)
+   if(count($comp) == 2 && $comp[1] != '')
    {
      $constraint_var = verify_column_name($comp[0]);
      $comp = explode(',', $comp[1]);
@@ -60,7 +60,11 @@
    }
    else
    {
-     $constraint_vars[] = verify_column_name($_GET['constraint']); // make a separate plot for each value of this var but don't constrain
+     // make a separate plot for each value of this var but don't constrain
+     if(count($comp) == 2)
+       $constraint_vars[] = verify_column_name($comp[0]);
+     else
+       $constraint_vars[] = verify_column_name($_GET['constraint']);
    }
  }
 

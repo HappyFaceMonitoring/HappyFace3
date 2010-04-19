@@ -385,7 +385,7 @@ class dCacheInfoPool(dCacheInfo):
 	for index in range(0, len(self.localAttribs)):
 	    att = self.localAttribs[index]
             mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">')
-	    mc_begin.append("""     <input type="checkbox" id=\"""" + self.__module__ + """_variable_""" + str(index) + """\" value=\"""" + att + """\"/>""")
+	    mc_begin.append("""     <input type="checkbox" id=\"""" + self.__module__ + """_variable_""" + str(index) + """\" value=\"""" + att + """\" checked="checked" />""")
 	    mc_begin.append(  '     ' + self.poolAttribNames[att]["webname"])
 	    mc_begin.append(  '    </td>')
         for att in self.localRatios:
@@ -394,19 +394,19 @@ class dCacheInfoPool(dCacheInfo):
         mc_begin.append('   </tr>')
 
         mc_begin.append('   <tr class="TableHeader" style="text-align: center;">')
-        mc_begin.append('    <td><input type="button" value="Toggle selection" onfocus="this.blur()" onclick="' + self.__module__ + '_toggle_button()" /></td>')
+        mc_begin.append('    <td><input type="button" value="Toggle Selection" onfocus="this.blur()" onclick="' + self.__module__ + '_toggle_button()" /></td>')
 
         for att in self.localAttribs:
             mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_col_button(\\\'""" + att + """\\\')">Plot Col</button></td>""")
         for entry in self.localRatios:
 	    mc_begin.append(  '    <td></td>')
 
-	mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_both_button()">Plot Both</button></td>""")
+	mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_both_button()">Plot Selected</button></td>""")
 	mc_begin.append('   </tr>')
 
 	mc_detailed_row = []
         mc_detailed_row.append("""   <tr class="' . $c_flag . '">""")
-        mc_detailed_row.append("""    <td><input type="checkbox" id=\"""" + self.__module__ + """_constraint_' . $count . '" value="' . $sub_data["poolname"] . '"/>' . $sub_data["poolname"] . '</td>""")
+        mc_detailed_row.append("""    <td><input type="checkbox" id=\"""" + self.__module__ + """_constraint_' . $count . '" value="' . $sub_data["poolname"] . '" checked="checked" />' . $sub_data["poolname"] . '</td>""")
         for att in self.localAttribs:
             mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . round(($sub_data['""" + att + """']),""" + self.decs + """) . '</td>""")
 
