@@ -277,24 +277,64 @@ class dCacheInfoPool(dCacheInfo):
         # create output sting, will be executed by a print('') PHP command
         # all data stored in DB is available via a $data[key] call
 
+	# JavaScript for plotting functionality
+	js = []
+        js.append('<script type="text/javascript">')
+	js.append('function ' + self.__module__ + '_get_list_of_checked_elements(id)')
+	js.append('{')
+	js.append('  elems = new Array();')
+	js.append('  for(var i = 0;;++i)')
+	js.append('  {')
+	js.append('    var elem = document.getElementById("' + self.__module__ + '_" + id + "_" + i);')
+	js.append('    if(!elem) break;')
+	js.append('    if(elem.checked) elems.push(elem.value);')
+	js.append('  }')
+	js.append('  return elems.join(",");')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_toggle_checked_elements(id)')
+	js.append('{')
+	js.append('  for(var i = 0;;++i)')
+	js.append('  {')
+	js.append('    var elem = document.getElementById("' + self.__module__ + '_" + id + "_" + i);')
+	js.append('    if(!elem) break;')
+	js.append('    elem.checked = !elem.checked;')
+	js.append('  }')
+	js.append('}')
+	js.append('')
+        js.append('function ' + self.__module__ + '_toggle_button()')
+	js.append('{')
+	js.append('  ' + self.__module__ + '_toggle_checked_elements("constraint");')
+	js.append('  ' + self.__module__ + '_toggle_checked_elements("variable");')
+	js.append('}')
+	js.append('')
+        js.append('function ' + self.__module__ + '_col_button(variable)')
+	js.append('{')
+	js.append('  var poolnames = ' + self.__module__ + '_get_list_of_checked_elements("constraint");')
+	js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "poolname=" + poolnames;')
+	js.append('  document.getElementById("' + self.__module__ + '_variables").value = variable;')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_row_button(poolname)')
+	js.append('{')
+	js.append('  var variables = ' + self.__module__ + '_get_list_of_checked_elements("variable");')
+	js.append('  if(variables == "") variables = "' + ','.join(self.localAttribs) + '";')
+	js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "poolname=" + poolname;')
+	js.append('  document.getElementById("' + self.__module__ + '_variables").value = variables;')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_both_button()')
+	js.append('{')
+	js.append('  var poolnames = ' + self.__module__ + '_get_list_of_checked_elements("constraint");')
+	js.append('  var variables = ' + self.__module__ + '_get_list_of_checked_elements("variable");')
+	js.append('  if(variables == "") variables = "' + ','.join(self.localAttribs) + '";')
+	js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "poolname=" + poolnames;')
+	js.append('  document.getElementById("' + self.__module__ + '_variables").value = variables;')
+	js.append('}')
+        js.append('</script>')
+
+	# Main module content
 	mc_begin = []
-        mc_begin.append('<script type="text/javascript">')
-        mc_begin.append('function ' + self.__module__ + '_checked_constraint()')
-        mc_begin.append('{')
-        mc_begin.append('  var constraints = new Array();')
-        mc_begin.append('  for(var i = 0;;++i)')
-        mc_begin.append('  {')
-        mc_begin.append('    var elem = document.getElementById("' + self.__module__ + '_check_" + i);')
-	mc_begin.append('    if(!elem) break;')
-	mc_begin.append('    if(elem.checked) constraints.push(elem.value);')
-        mc_begin.append('  }')
-        mc_begin.append('  ')
-        mc_begin.append('  if(constraints.length > 0)')
-        mc_begin.append('    document.getElementById("' + self.__module__ + '_constraint").value = "poolname=" + constraints.join(",");')
-        mc_begin.append('  else')
-        mc_begin.append('    document.getElementById("' + self.__module__ + '_constraint").value = "poolname";')
-        mc_begin.append('}')
-        mc_begin.append('</script>')
         mc_begin.append('<table class="TableData">')
         for att in self.globalSummary:
             mc_begin.append(' <tr>')
@@ -331,6 +371,7 @@ class dCacheInfoPool(dCacheInfo):
 	mc_begin.append(  '     <input type="hidden" name="module" value="' + self.__module__ + '" />')
 	mc_begin.append(  '     <input type="hidden" name="subtable" value="' + self.__module__ + '_table_details" />')
 	mc_begin.append(  '     <input type="hidden" id="' + self.__module__ + '_constraint" name="constraint" value="" />')
+	mc_begin.append(  '     <input type="hidden" id="' + self.__module__ + '_variables" name="variables" value="" />')
 	mc_begin.append(  '    </td>')
 	mc_begin.append(  '   </tr>')
 	mc_begin.append(  '  </table>')
@@ -338,34 +379,38 @@ class dCacheInfoPool(dCacheInfo):
         mc_begin.append(  '  <table class="TableDetails">')
         mc_begin.append(  '   <tr class="TableHeader">')
         mc_begin.append(  '    <td>Poolname</td>')
-        for att in self.localAttribs:
-            mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
+	for index in range(0, len(self.localAttribs)):
+	    att = self.localAttribs[index]
+            mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">')
+	    mc_begin.append("""     <input type="checkbox" id=\"""" + self.__module__ + """_variable_""" + str(index) + """\" value=\"""" + att + """\"/>""")
+	    mc_begin.append(  '     ' + self.poolAttribNames[att]["webname"])
+	    mc_begin.append(  '    </td>')
         for att in self.localRatios:
             mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
 	mc_begin.append('     <td>Pool Plot</td>')
         mc_begin.append('   </tr>')
 
         mc_begin.append('   <tr class="TableHeader" style="text-align: center;">')
-        mc_begin.append('    <td></td>')
+        mc_begin.append('    <td><input type="button" value="Toggle selection" onfocus="this.blur()" onclick="' + self.__module__ + '_toggle_button()" /></td>')
 
         for att in self.localAttribs:
-            mc_begin.append("""    <td><button name="variables" value=\"""" + att + """\" onfocus="this.blur()" onclick=\"""" + self.__module__ + """_checked_constraint();">Plot Col</button></td>""")
+            mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_col_button(\\\'""" + att + """\\\')">Plot Col</button></td>""")
         for entry in self.localRatios:
 	    mc_begin.append(  '    <td></td>')
 
-	mc_begin.append('    <td></td>')
+	mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_both_button()">Plot Both</button></td>""")
 	mc_begin.append('   </tr>')
 
 	mc_detailed_row = []
         mc_detailed_row.append("""   <tr class="' . $c_flag . '">""")
-        mc_detailed_row.append("""    <td><input type="checkbox" id=\"""" + self.__module__ + """_check_' . $count . '" value="' . $sub_data["poolname"] . '"/>' . $sub_data["poolname"] . '</td>""")
+        mc_detailed_row.append("""    <td><input type="checkbox" id=\"""" + self.__module__ + """_constraint_' . $count . '" value="' . $sub_data["poolname"] . '"/>' . $sub_data["poolname"] . '</td>""")
         for att in self.localAttribs:
             mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . round(($sub_data['""" + att + """']),""" + self.decs + """) . '</td>""")
 
         for entry in self.localRatios:
             att = entry.split("/")
 	    mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . (($sub_data['""" + att[1] + """'] == 0.) ? '--' : round(($sub_data['""" + att[0] +"""']/$sub_data['""" + att[1] + """'])*100,1)) . '</td>""")
-	mc_detailed_row.append("""    <td><button name="variables" value=\"""" + ','.join(self.localAttribs) + """\" onfocus="this.blur()" onclick="document.getElementById(\\\'""" + self.__module__ + """_constraint\\\').value=\\\'poolname=' . $sub_data['poolname'] . '\\\'">Plot Row</button></td>""")
+	mc_detailed_row.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_row_button(\\\'' . $sub_data['poolname'] . '\\\')">Plot Row</button></td>""")
 	mc_detailed_row.append(  '   </tr>')
 
 	mc_end = []
@@ -383,6 +428,9 @@ class dCacheInfoPool(dCacheInfo):
             $c_flag = "warning";
         else
             $c_flag = "critical";
+
+	// JavaScript for plotting functionality:
+	print('""" + self.PHPArrayToString(js) + """');
 
 	print('""" + self.PHPArrayToString(mc_begin) + """');
 
