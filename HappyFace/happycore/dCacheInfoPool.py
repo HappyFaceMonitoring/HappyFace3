@@ -345,6 +345,17 @@ class dCacheInfoPool(dCacheInfo):
 	mc_begin.append('     <td>Pool Plot</td>')
         mc_begin.append('   </tr>')
 
+        mc_begin.append('   <tr class="TableHeader" style="text-align: center;">')
+        mc_begin.append('    <td></td>')
+
+        for att in self.localAttribs:
+            mc_begin.append("""    <td><button name="variables" value=\"""" + att + """\" onfocus="this.blur()" onclick=\"""" + self.__module__ + """_checked_constraint();">Plot Col</button></td>""")
+        for entry in self.localRatios:
+	    mc_begin.append(  '    <td></td>')
+
+	mc_begin.append('    <td></td>')
+	mc_begin.append('   </tr>')
+
 	mc_detailed_row = []
         mc_detailed_row.append("""   <tr class="' . $c_flag . '">""")
         mc_detailed_row.append("""    <td><input type="checkbox" id=\"""" + self.__module__ + """_check_' . $count . '" value="' . $sub_data["poolname"] . '"/>' . $sub_data["poolname"] . '</td>""")
@@ -355,20 +366,9 @@ class dCacheInfoPool(dCacheInfo):
             att = entry.split("/")
 	    mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . (($sub_data['""" + att[1] + """'] == 0.) ? '--' : round(($sub_data['""" + att[0] +"""']/$sub_data['""" + att[1] + """'])*100,1)) . '</td>""")
 	mc_detailed_row.append("""    <td><button name="variables" value=\"""" + ','.join(self.localAttribs) + """\" onfocus="this.blur()" onclick="document.getElementById(\\\'""" + self.__module__ + """_constraint\\\').value=\\\'poolname=' . $sub_data['poolname'] . '\\\'">Plot Row</button></td>""")
-#	mc_begin.append(  '  <input type="hidden" name="variables" value="' + ','.join(self.localAttribs) + '" />')
 	mc_detailed_row.append(  '   </tr>')
 
 	mc_end = []
-        mc_end.append(  '   <tr class="TableHeader" style="text-align: center;">')
-        mc_end.append(  '    <td></td>')
-
-        for att in self.localAttribs:
-            mc_end.append("""    <td><button name="variables" value=\"""" + att + """\" onfocus="this.blur()" onclick=\"""" + self.__module__ + """_checked_constraint();">Plot Col</button></td>""")
-        for entry in self.localRatios:
-	    mc_end.append(  '    <td></td>')
-
-	mc_end.append('    <td></td>')
-	mc_end.append('   </tr>')
         mc_end.append('  </table>')
         mc_end.append(' </form>')
         mc_end.append('</div>')
