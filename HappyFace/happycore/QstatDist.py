@@ -85,17 +85,27 @@ class QstatDist(ModuleBase):
 
 	min_var = min(values)
 	max_var = max(values)
+	diff_var = max_var - min_var
+
+	# Show only one bin in case there is only one value or all values are
+	# equivalent
+	if diff_var == 0:
+	    nbins = 1
 
 	content = [0]*nbins
 	for value in values:
-	    bin = (value - min_var) * nbins / (max_var - min_var)
+	    if diff_var > 0:
+	        bin = (value - min_var) * nbins / diff_var
+	    else:
+	        bin = nbins;
+
 	    if bin == nbins:
 	        bin = nbins - 1
 	    content[bin] += 1
 
 	xlabels = [0]*nbins
 	for x in range(0,nbins):
-	    num = min_var + (x + 0.5)/nbins * (max_var - min_var)
+	    num = min_var + (x + 0.5)/nbins * diff_var
 	    int_num = int(num + 0.5)
 
 	    xlabelvalues = []
