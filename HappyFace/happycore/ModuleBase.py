@@ -1,4 +1,5 @@
 import os, sys, re
+import traceback
 import ConfigParser
 
 from HTMLOutput import *
@@ -221,6 +222,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    msg = str(ex).strip()
 	    self.error_message = msg
 	    sys.stderr.write(self.__module__ + ': ' + msg + '\n')
+	    traceback.print_exc()
 	    return -1
 
     def process(self):
