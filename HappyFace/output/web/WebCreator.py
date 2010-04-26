@@ -120,10 +120,13 @@ class WebCreator(object):
 			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
 			else { $selectedTab = "0"; }
 			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
+			if ($_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
+			else { $initialScroll = -1; }
 			print('  <script type="text/javascript">\n');
 			print('  <!--\n');
 			print('  var selectedTab='.$selectedTab.';\n');
 			print('  var selectedMod="'.$selectedMod.'";\n');
+			print('  var initialScroll='.$initialScroll.';\n');
 			print('  //-->\n');
 			print('  </script>\n');
 		?>"""
@@ -132,6 +135,8 @@ class WebCreator(object):
 	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
 	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
 	output += '    <input type="hidden" id="ReloadExpand" name="expand" value="" />' + "\n"
+	output += '    <input type="hidden" id="ReloadScroll" name="scroll" value="" />' + "\n"
+	output += '    <input type="hidden" id="ReloadManualRefresh" name="refresh" value="" />' + "\n"
 	output += '   </div>' + "\n"
 	output += '  </form>' + "\n"
 
@@ -170,7 +175,11 @@ class WebCreator(object):
 	# some javascripts for website navigation
 	output += '  <script type="text/javascript">' + "\n"
 	output += '  <!--' + "\n"
-	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab,selectedMod);' + "\n"
+	output += '    if(document.getElementById("ReloadManualRefresh").value == "")' + "\n"
+	output += '      document.getElementById("ReloadManualRefresh").value = "1";' + "\n"
+	output += '    else' + "\n"
+	output += '      initialScroll = -1;' + "\n" # user refreshed manually: let the browser do a proper rescroll
+	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab,selectedMod,initialScroll);' + "\n"
 	output += '  //-->' + "\n"
 	output += '  </script>' + "\n"
 	

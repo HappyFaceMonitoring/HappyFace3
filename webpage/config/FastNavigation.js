@@ -20,32 +20,42 @@ function movenav(navid) {
 	}
 };
 
-/* Functiony to jump to the different modules and move content 
+/* Function to jump to the different modules and move content 
  * layer to the proper position.
  */
 function goto(target) {
 	var i;
 	for(i = 0; i < document.images.length; i++) {
 		if (document.images[i].height == 0 && !document.images[i].complete) {
-			setTimeout("goto(\"" + target + "\")", 100);
+			if(typeof(target) == 'number')
+				setTimeout("goto(" + target + ")", 100);
+			else
+				setTimeout("goto(\"" + target + "\")", 100);
 			return;
 		}
 	}
 
-	var browser = getBrowser();
-	if (browser == "FF") {
-		var targetY = document.getElementById(target).offsetTop+15;
-	} 
-	else if (browser == "IE7") {
-		var targetY = document.getElementById(target).offsetTop-140;
-	} 
-	else {
-		var targetY = document.getElementById(target).offsetTop;
+	if(typeof(target) == 'number')
+	{
+		scroll(0, target);
 	}
-	document.getElementById('ReloadMod').value=target;
-	document.getElementById('HistoReloadMod1').value=target;
-	document.getElementById('HistoReloadMod2').value=target;
-	window.scrollTo(0,targetY);
+	else
+	{
+		var browser = getBrowser();
+		if (browser == "FF") {
+			var targetY = document.getElementById(target).offsetTop+15;
+		} 
+		else if (browser == "IE7") {
+			var targetY = document.getElementById(target).offsetTop-140;
+		} 
+		else {
+			var targetY = document.getElementById(target).offsetTop;
+		}
+		document.getElementById('ReloadMod').value=target;
+		document.getElementById('HistoReloadMod1').value=target;
+		document.getElementById('HistoReloadMod2').value=target;
+		window.scrollTo(0,targetY);
+	}
 };
 
 /* Get browser type */

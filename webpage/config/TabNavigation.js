@@ -6,7 +6,7 @@ var AutoReload = true;
 if (!HappyTab) HappyTab = {};
 if (!HappyTab.Widget) HappyTab.Widget = {};
 
-HappyTab.Widget.HappyPanels = function(element, defTab, defModule, opts)
+HappyTab.Widget.HappyPanels = function(element, defTab, defModule, initialScroll, opts)
 {
 	this.element = this.getElement(element);
 	this.defaultTab = defTab;
@@ -47,7 +47,7 @@ HappyTab.Widget.HappyPanels = function(element, defTab, defModule, opts)
 	if (this.defaultTab)
 		this.defaultTab = this.getElement(this.defaultTab);
 
-	this.attachBehaviors();
+	this.attachBehaviors(initialScroll);
 };
 
 HappyTab.Widget.HappyPanels.prototype.getElement = function(ele)
@@ -338,7 +338,7 @@ HappyTab.Widget.HappyPanels.prototype.showPanel = function(elementOrIndex)
 	this.currentTabIndex = tpIndex;
 };
 
-HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(element)
+HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(scroll)
 {
 	var tabs = this.getTabs();
 	var panels = this.getContentPanels();
@@ -349,14 +349,28 @@ HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(element)
 
 	this.showPanel(this.defaultTab);
 
-	if(this.defaultModule != '')
+	if(scroll != -1)
+		goto(scroll);
+	else if(this.defaultModule != '')
 		goto(this.defaultModule);
 };
+
+function GetScrollY()
+{
+	if(typeof(window.pageYOffset) == 'number')
+		return window.pageYOffset;
+	else
+		return document.body.scrollTop; /* IE? */
+}
 
 /* function to set the right values before auto-reloading */
 function HappyReload(time) {
 	if(AutoReload) {
-		refresh = setTimeout("document.getElementById('ReloadForm').submit();", time*1000);
+		refresh = setTimeout(function() {
+			document.getElementById('ReloadManualRefresh').value = "";
+			document.getElementById('ReloadScroll').value = GetScrollY();
+			document.getElementById('ReloadForm').submit();
+		}, time*1000);
 	}
 }
 
