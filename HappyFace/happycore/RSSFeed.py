@@ -21,6 +21,7 @@ class RSSFeed(ModuleBase):
 
         self.n_entries = int(self.configService.getDefault('setup', 'n_entries', '-1'))
 	self.n_days   = int(self.configService.getDefault('setup', 'n_days', '-1'))
+	self.hide_feed_title = int(self.configService.getDefault('setup', 'hide_feed_title', 0))
 
         self.dsTag = 'feed'
 
@@ -84,12 +85,15 @@ class RSSFeed(ModuleBase):
     def output(self):
 
 	mc_begin = []
-	mc_begin.append("""<h4><a href="' . $data['link'] . '">' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $data['title']) . '</a></h4>""")
+	if not self.hide_feed_title:
+		mc_begin.append("""<h4><a href="' . $data['link'] . '">' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $data['title']) . '</a></h4>""")
+	mc_none = []
+	mc_none.append('<h4>No feed entries available at this time</h4>')
 
 	mc_entry = []
-	mc_entry.append(  '<div>')
-	mc_entry.append(""" <h5><a href="' . $entry['link'] . '">' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['title']) . '</a></h5>""")
-	mc_entry.append(  " Posted ' . (($entry['author'] != '') ? 'by <strong>' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['author']) . '</strong> ' : '') . 'on <strong>' . date('r', $entry['updated']) . '</strong>")
+	mc_entry.append(  '<div class="RSSFeedEntry">')
+	mc_entry.append(""" <p><span class="RSSFeedEntryTitle"><a href="' . $entry['link'] . '">' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['title']) . '</a></span><br />""")
+	mc_entry.append(""" <span class="RSSFeedEntryDate">Posted ' . (($entry['author'] != '') ? 'by <strong>' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['author']) . '</strong> ' : '') . 'on <strong>' . date('r', $entry['updated']) . '</strong></span></p>""")
 	mc_entry.append(  " ' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['content']) . '")
 	mc_entry.append(  '</div>')
 
@@ -99,10 +103,15 @@ class RSSFeed(ModuleBase):
 
 	print('""" + self.PHPArrayToString(mc_begin) + """');
 
+	$count = 0;
 	foreach($dbh->query($summary_db_sqlquery) as $entry)
 	{
 	    print('""" + self.PHPArrayToString(mc_entry) + """');
+	    ++$count;
 	}
+
+	if(!$count)
+		print('""" + self.PHPArrayToString(mc_none) + """');
 
 	?>"""
 
