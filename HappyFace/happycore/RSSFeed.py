@@ -92,7 +92,7 @@ class RSSFeed(ModuleBase):
 
 	mc_entry = []
 	mc_entry.append(  '<div class="RSSFeedEntry">')
-	mc_entry.append(""" <p><span class="RSSFeedEntryTitle"><a href="' . $entry['link'] . '">' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['title']) . '</a></span><br />""")
+	mc_entry.append(""" <p><span class="RSSFeedEntryTitle"><a class="RSSFeedEntryTitle" href="' . $entry['link'] . '">' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['title']) . '</a></span><br />""")
 	mc_entry.append(""" <span class="RSSFeedEntryDate">Posted ' . (($entry['author'] != '') ? 'by <strong>' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['author']) . '</strong> ' : '') . 'on <strong>' . date('r', $entry['updated']) . '</strong></span></p>""")
 	mc_entry.append(  " ' . iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $entry['content']) . '")
 	mc_entry.append(  '</div>')

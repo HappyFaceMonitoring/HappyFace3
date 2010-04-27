@@ -8,7 +8,9 @@
 
 .RSSFeedEntryTitle
 {
-	font-size: large;
+	font-size: medium;
+	text-decoration: none;
+	font-weight: bold;
 }
 
 .RSSFeedEntryDate
