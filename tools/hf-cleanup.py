@@ -7,7 +7,7 @@ import getopt
 import shutil
 import sqlite3
 
-def cleanup_table(conn, hfdir, table_name, start, end, drop):
+def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 	"""Remove all entries between start and end in table_name. Also cleanup
 	   plots in archive directory"""
 
@@ -67,8 +67,9 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop):
 		result = conn.execute("DROP TABLE %s" % (table_name))
 	conn.commit()
 
-	for subtable in subtables:
-		cleanup_table(conn, hfdir, subtable, start, end)
+	if recurse_subtables:
+	    for subtable in subtables:
+		cleanup_table(conn, hfdir, subtable, start, end, drop, recurse_subtables)
 
 start = -1
 end = -1
@@ -79,13 +80,23 @@ optlist,args = getopt.getopt(sys.argv[1:], [], ['start=', 'end=', 'modules='])
 options = dict(optlist)
 if '--start' in options:
 	start = int(options['--start'])
+
+	# If start or end are very low we interpret them as number of days
+	# from today, not as a timestamp
+	if start < 1000000:
+		start = time.time() - start*60*60*24
 if '--end' in options:
 	end = int(options['--end'])
+
+	# If start or end are very low we interpret them as number of days
+	# from today, not as a timestamp
+	if end < 1000000:
+		end = time.time() - end*60*60*24
 if '--modules' in options:
 	modules = options['--modules']
 
 if len(args) != 1:
-	sys.stderr.write('%s [--start=timestamp] [--end=timestamp] [--modules=module1,module2,...] <HappyFace Database>\n' % sys.argv[0])
+	sys.stderr.write('%s [--start=timestamp or number of days from today] [--end=timestamp or number of days from today] [--modules=module1,module2,...] <HappyFace Database>\n' % sys.argv[0])
 	sys.exit(-1)
 
 allowed_modules = []
@@ -132,9 +143,10 @@ for file in cfg_files:
 	except:
 		pass
 
-# TODO: "?" answer
-answers = ['a','q','c','s','y','n']
+# TODO: Avoid code duplication below
+answers = ['a','q','c','s','y','n', '?']
 all = False
+none = False
 for category in categories:
 	print 'Category "' + category + '":'
 	all_cat = False
@@ -143,33 +155,44 @@ for category in categories:
 		while (not all and not all_cat) and not answer in answers:
 			sys.stdout.write('\tClean up module "' + module + '"? [' + ''.join(answers) + '] ')
 			answer = sys.stdin.readline()
-			if answer == '': answer = 'q'
+			if answer == '': answer = '?'
 			if answer[-1] == '\n': answer = answer[:-1]
 
+			if answer == '?':
+			    print 'a: Clean up all modules'
+			    print 'q: Do not clean up any module'
+			    print 'c: Clean up all modules in this category'
+			    print 's: Skip all modules in this category'
+			    print 'y: Clean up this module'
+			    print 'n: Do not clean up this module'
+			    answer = None
+
 		if all or all_cat:
-			cleanup_table(conn, dirname, module + '_table', start, end, False)
+			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
 		elif answer == 'q':
-			# TODO: Break out of both loops so we do the unused tables check below
-			sys.exit(0)
+			none = True
+			break
 		elif answer == 'a':
 			all = True
-			cleanup_table(conn, dirname, module + '_table', start, end, False)
+			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
 		elif answer == 'c':
 			all_cat = True
-			cleanup_table(conn, dirname, module + '_table', start, end, False)
+			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
 		elif answer == 's':
 			break
 		elif answer == 'y':
-			cleanup_table(conn, dirname, module + '_table', start, end, False)
+			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
+	if(none): break
 
 # Check for tables not associated with a module
 cursor = conn.cursor()
 cursor.execute('SELECT name FROM sqlite_master WHERE type="table"')
 rows = cursor.fetchall() # Fetch all to avoid a lock on the table
 
-answers = ['a','q','y','n'] # TODO: Add "?" answer
+answers = ['a','q','y','n', '?']
 
 all = False
+n_rows = 0
 print 'Tables no longer referenced in configuration:'
 for row in rows:
 	table = row['name']
@@ -181,19 +204,46 @@ for row in rows:
 			break
 
 	if has_module:
+		n_rows += 1
 		answer = None
 		while not all and not answer in answers:
 			sys.stdout.write('\tDrop table "' + table + '"? [' + ''.join(answers) + '] ')
 			answer = sys.stdin.readline()
-			if answer == '': answer = 'q'
+			if answer == '': answer = '?'
 			if answer[-1] == '\n': answer = answer[:-1]
 
+			if answer == '?':
+			    print 'a: Drop all unreferenced tables'
+			    print 'q: Do not drop any unreferenced table'
+			    print 'y: Drop this table'
+			    print 'n: Do not drop this table'
+			    answer = None
+
 		if all:
-			cleanup_table(conn, dirname, table, -1, -1, True)
+			cleanup_table(conn, dirname, table, -1, -1, True, False)
 		elif answer == 'q':
 			break
 		elif answer == 'a':
 			all = True
-			cleanup_table(conn, dirname, table, -1, -1, True)
+			cleanup_table(conn, dirname, table, -1, -1, True, False)
 		elif answer == 'y':
-			cleanup_table(conn, dirname, table, -1, -1, True)
+			cleanup_table(conn, dirname, table, -1, -1, True, False)
+
+if n_rows == 0:
+	print '\tNone'
+
+answers = ['y','n', '?']
+answer = None
+while answer not in answers:
+	sys.stdout.write('VACUUM? [' + ''.join(answers) + '] ')
+	answer = sys.stdin.readline()
+	if answer == '': answer = '?'
+	if answer[-1] == '\n': answer = answer[:-1]
+
+	if answer == '?':
+	    print 'y: Run the SQLite VACUUM command to free disk space'
+	    print 'n: Do not run the VACUUM command'
+	    answer = None
+
+if answer == 'y':
+	cursor.execute('VACUUM')
