@@ -27,7 +27,7 @@ class CategoryContentTab(HTMLOutput):
 	"""
 
 	mc_begin = []
-	mc_begin.append('<div class="HappyPanelsContent">')
+	mc_begin.append('<div class="HappyPanelsContent" id="' + category + '_panel">')
 
 	mc_end = []
 	mc_end.append(' <div>')
@@ -39,7 +39,7 @@ class CategoryContentTab(HTMLOutput):
 	mc_end.append(' </div>')
 	mc_end.append('</div>')
 
-	output = "<?php $category_id='" + str(cat_id) + "';?>"
+	output = "<?php $category='" + category + "';?>"
 
 	output += self.PHPArrayToString(mc_begin)
 	output += fast_nav + "\n"

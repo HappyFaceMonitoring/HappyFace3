@@ -8,8 +8,8 @@ if (!HappyTab.Widget) HappyTab.Widget = {};
 
 HappyTab.Widget.HappyPanels = function(element, defTab, defModule, initialScroll, opts)
 {
-	this.element = this.getElement(element);
-	this.defaultTab = defTab;
+	this.element = document.getElementById(element);
+	this.defaultTab = document.getElementById(defTab + "_tab");
 	this.defaultModule = defModule;
 	this.bindings = [];
 	this.tabSelectedClass = "HappyPanelsTabSelected";
@@ -18,43 +18,12 @@ HappyTab.Widget.HappyPanels = function(element, defTab, defModule, initialScroll
 	this.panelVisibleClass = "HappyPanelsContentVisible";
 	this.focusElement = null;
 	this.hasFocus = false;
-	this.currentTabIndex = 0;
+	this.currentTab = null;
 	this.enableKeyboardNavigation = true;
 
 	HappyTab.Widget.HappyPanels.setOptions(this, opts);
 
-	// If the defaultTab is expressed as a number/index, convert
-	// it to an element.
-
-	if (typeof (this.defaultTab) == "number")
-	{
-		if (this.defaultTab < 0)
-			this.defaultTab = 0;
-		else
-		{
-			var count = this.getHappyPanelCount();
-			if (this.defaultTab >= count)
-				this.defaultTab = (count > 1) ? (count - 1) : 0;
-		}
-
-		this.defaultTab = this.getTabs()[this.defaultTab];
-	}
-
-	// The defaultTab property is supposed to be the tab element for the tab content
-	// to show by default. The caller is allowed to pass in the element itself or the
-	// element's id, so we need to convert the current value to an element if necessary.
-
-	if (this.defaultTab)
-		this.defaultTab = this.getElement(this.defaultTab);
-
 	this.attachBehaviors(initialScroll);
-};
-
-HappyTab.Widget.HappyPanels.prototype.getElement = function(ele)
-{
-	if (ele && typeof ele == "string")
-		return document.getElementById(ele);
-	return ele;
 };
 
 HappyTab.Widget.HappyPanels.prototype.getElementChildren = function(element)
@@ -116,6 +85,18 @@ HappyTab.Widget.HappyPanels.prototype.getTabs = function()
 	return tabs;
 };
 
+// Return the category name for the given tab
+HappyTab.Widget.HappyPanels.prototype.getTabCategory = function(tab)
+{
+	return tab.id.slice(0,-4);
+}
+
+// Return the panel which belongs to the given tab
+HappyTab.Widget.HappyPanels.prototype.getPanelForTab = function(tab)
+{
+	return document.getElementById(this.getTabCategory(tab) + "_panel");
+}
+
 HappyTab.Widget.HappyPanels.prototype.getContentPanelGroup = function()
 {
 	if (this.element)
@@ -134,33 +115,6 @@ HappyTab.Widget.HappyPanels.prototype.getContentPanels = function()
 	if (pg)
 		panels = this.getElementChildren(pg);
 	return panels;
-};
-
-HappyTab.Widget.HappyPanels.prototype.getIndex = function(ele, arr)
-{
-	ele = this.getElement(ele);
-	if (ele && arr && arr.length)
-	{
-		for (var i = 0; i < arr.length; i++)
-		{
-			if (ele == arr[i])
-				return i;
-		}
-	}
-	return -1;
-};
-
-HappyTab.Widget.HappyPanels.prototype.getTabIndex = function(ele)
-{
-	var i = this.getIndex(ele, this.getTabs());
-	if (i < 0)
-		i = this.getIndex(ele, this.getContentPanels());
-	return i;
-};
-
-HappyTab.Widget.HappyPanels.prototype.getCurrentTabIndex = function()
-{
-	return this.currentTabIndex;
 };
 
 HappyTab.Widget.HappyPanels.prototype.getHappyPanelCount = function(ele)
@@ -183,11 +137,11 @@ HappyTab.Widget.HappyPanels.addEventListener = function(element, eventType, hand
 HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 {
 	this.showPanel(tab);
-	document.getElementById('ReloadTab').value=this.getTabIndex(tab);
+	document.getElementById('ReloadTab').value=this.getTabCategory(tab);
 	document.getElementById('ReloadMod').value='';
-	document.getElementById('HistoReloadTab1').value=this.getTabIndex(tab);
+	document.getElementById('HistoReloadTab1').value=this.getTabCategory(tab);
 	document.getElementById('HistoReloadMod1').value='';
-	document.getElementById('HistoReloadTab2').value=this.getTabIndex(tab);
+	document.getElementById('HistoReloadTab2').value=this.getTabCategory(tab);
 	document.getElementById('HistoReloadMod2').value='';
 	window.scroll(0,0);
 };
@@ -300,26 +254,19 @@ HappyTab.Widget.HappyPanels.prototype.addPanelEventListeners = function(tab, pan
 	}
 };
 
-HappyTab.Widget.HappyPanels.prototype.showPanel = function(elementOrIndex)
+// Show the panel which belongs to the given tab
+HappyTab.Widget.HappyPanels.prototype.showPanel = function(tab)
 {
-	var tpIndex = -1;
-	
-	if (typeof elementOrIndex == "number")
-		tpIndex = elementOrIndex;
-	else // Must be the element for the tab or content panel.
-		tpIndex = this.getTabIndex(elementOrIndex);
-	
-	if (!tpIndex < 0 || tpIndex >= this.getHappyPanelCount())
-		return;
+	var panel = this.getPanelForTab(tab)
 
 	var tabs = this.getTabs();
 	var panels = this.getContentPanels();
 
-	var numHappyPanels = Math.max(tabs.length, panels.length);
+	var numHappyPanels = this.getHappyPanelCount();
 
 	for (var i = 0; i < numHappyPanels; i++)
 	{
-		if (i != tpIndex)
+		if (!tabs[i] || tabs[i] != tab)
 		{
 			if (tabs[i])
 				this.removeClassName(tabs[i], this.tabSelectedClass);
@@ -331,11 +278,11 @@ HappyTab.Widget.HappyPanels.prototype.showPanel = function(elementOrIndex)
 		}
 	}
 
-	this.addClassName(tabs[tpIndex], this.tabSelectedClass);
-	this.addClassName(panels[tpIndex], this.panelVisibleClass);
-	panels[tpIndex].style.display = "block";
+	this.addClassName(tab, this.tabSelectedClass);
+	this.addClassName(panel, this.panelVisibleClass);
+	panel.style.display = "block";
 
-	this.currentTabIndex = tpIndex;
+	this.currentTab = tab
 };
 
 HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(scroll)
@@ -347,7 +294,10 @@ HappyTab.Widget.HappyPanels.prototype.attachBehaviors = function(scroll)
 	for (var i = 0; i < panelCount; i++)
 		this.addPanelEventListeners(tabs[i], panels[i]);
 
-	this.showPanel(this.defaultTab);
+	if(this.defaultTab)
+		this.showPanel(this.defaultTab);
+	else
+		this.showPanel(tabs[0]);
 
 	if(scroll != -1)
 		goto(scroll);

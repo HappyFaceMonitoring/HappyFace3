@@ -118,13 +118,12 @@ class WebCreator(object):
 	# logic to memorize selected tab on auto reload part 1
 	output += """<?php
 			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
-			else { $selectedTab = "0"; }
 			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 			if ($_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
 			else { $initialScroll = -1; }
 			print('  <script type="text/javascript">\n');
 			print('  <!--\n');
-			print('  var selectedTab='.$selectedTab.';\n');
+			print('  var selectedTab="'.$selectedTab.'";\n');
 			print('  var selectedMod="'.$selectedMod.'";\n');
 			print('  var initialScroll='.$initialScroll.';\n');
 			print('  //-->\n');
@@ -132,8 +131,8 @@ class WebCreator(object):
 		?>"""
 	output += '  <form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get">' + "\n"
 	output += '   <div>' + "\n"
-	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo $selectedTab; ?>" />' + "\n"
-	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo $selectedMod; ?>" />' + "\n"
+	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo htmlentities($selectedTab); ?>" />' + "\n"
+	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo htmlentities($selectedMod); ?>" />' + "\n"
 	output += '    <input type="hidden" id="ReloadExpand" name="expand" value="" />' + "\n"
 	output += '    <input type="hidden" id="ReloadScroll" name="scroll" value="" />' + "\n"
 	output += '    <input type="hidden" id="ReloadManualRefresh" name="refresh" value="" />' + "\n"

@@ -7,7 +7,7 @@ class CategoryNavigationTab(HTMLOutput):
     	HTMLOutput.__init__(self, 4)
 
 	output = []
-	output.append('<li class="HappyPanelsTab">')
+	output.append('<li class="HappyPanelsTab" id="' + category + '_tab">')
 	output.append(' <table width="100%">')
 	output.append('  <tr>')
 	output.append('   <td>')
