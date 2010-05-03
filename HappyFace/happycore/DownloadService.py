@@ -97,6 +97,8 @@ class DownloadService(HTMLOutput):
 
     def getUrlAsLink(self,downloadstring):
         url = self.downloadTags[downloadstring].getUrl()
+	if url is None:
+	    return 'N/A'
         return '<a href="' + self.EscapeHTMLEntities(url) + '">' + self.EscapeHTMLEntities(url) + '</a>'
 
 
@@ -112,7 +114,10 @@ class DownloadService(HTMLOutput):
             if not self.downloadTags[downloadstring].finished:
 	        raise Exception('Download has not finished in time.')
             elif not self.downloadTags[downloadstring].success:
-	        raise Exception('Download failed.')
+	        if self.downloadTags[downloadstring].error is not None:
+		    raise self.downloadTags[downloadstring].error
+		else:
+	            raise Exception('Download failed.')
 
         else:
             raise Exception("Tag '"+downloadstring+"' not found.")
