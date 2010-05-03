@@ -174,18 +174,8 @@ class WebCreator(object):
 	# some javascripts for website navigation
 	output += '  <script type="text/javascript">' + "\n"
 	output += '  <!--' + "\n"
-	output += '    if(document.getElementById("ReloadManualRefresh").value == "")' + "\n"
-	output += '      document.getElementById("ReloadManualRefresh").value = "1";' + "\n"
-	output += '    else' + "\n"
-	output += '      initialScroll = -1;' + "\n" # user refreshed manually: let the browser do a proper rescroll
-	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab,selectedMod,initialScroll);' + "\n"
-	output += '  //-->' + "\n"
-	output += '  </script>' + "\n"
-	
-	output += '  <script type="text/javascript">' + "\n"
-	output += '  <!--' + "\n"
+
 	output += '  var reload_expands = new Array();' + "\n"
-	output += '  ' + "\n"
 	output += '  function show_hide(me) {' + "\n"
 	output += '    if (document.getElementById(me).style.display=="none") {' + "\n"
 	output += '      reload_expands.push(me);' + "\n"
@@ -211,16 +201,25 @@ class WebCreator(object):
 	output += '      document.getElementById(link).innerHTML = "Hide module information";' + "\n"
 	output += '  }' + "\n"
 
-	# re-expand details info on reload
+	# re-expand details infos on reload (do this before we do initial
+	# scrolling, so that scrolling takes into account potentially
+	# expanded regions).
 	output += '  var expand = "<?php echo $_GET["expand"]; ?>";' + "\n"
 	output += '  var expand_modules = expand.split(" ");' + "\n"
-	output += '  for(var j = 0; j < expand_modules.length; ++j) ' + "\n"
+	output += '  for(var j = 0; j < expand_modules.length; ++j) {' + "\n"
 	output += '    if(expand_modules[j].length > 0) {' + "\n"
 	output += '      if(document.getElementById(expand_modules[j] + "_link"))' + "\n"
 	output += '        show_hide_info(expand_modules[j], expand_modules[j] + "_link");' + "\n"
 	output += '      else' + "\n"
 	output += '        show_hide(expand_modules[j]);' + "\n"
 	output += '    }' + "\n";
+	output += '  }' + "\n";
+
+	output += '  if(document.getElementById("ReloadManualRefresh").value == "")' + "\n"
+	output += '    document.getElementById("ReloadManualRefresh").value = "1";' + "\n"
+	output += '  else' + "\n"
+	output += '    initialScroll = -1;' + "\n" # user refreshed manually: let the browser do a proper rescroll
+	output += '  var HappyPanels1 = new HappyTab.Widget.HappyPanels("HappyPanels1",selectedTab,selectedMod,initialScroll);' + "\n"
 
 	# Function to always open a form in a new tab or window (depending on the browser's settings)
 	output += '  var plotCounter = 0;' + "\n"

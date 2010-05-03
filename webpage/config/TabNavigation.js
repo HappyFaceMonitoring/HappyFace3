@@ -146,6 +146,11 @@ HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 	window.scroll(0,0);
 };
 
+HappyTab.Widget.HappyPanels.prototype.onTabDblClick = function(e, tab)
+{
+	HappyReloadPage(this.getTabCategory(tab), null);
+}
+
 HappyTab.Widget.HappyPanels.prototype.onTabMouseOver = function(e, tab)
 {
 	this.addClassName(tab, this.tabHoverClass);
@@ -210,6 +215,7 @@ HappyTab.Widget.HappyPanels.prototype.addPanelEventListeners = function(tab, pan
 {
 	var self = this;
 	HappyTab.Widget.HappyPanels.addEventListener(tab, "click", function(e) { return self.onTabClick(e, tab); }, false);
+	HappyTab.Widget.HappyPanels.addEventListener(tab, "dblclick", function(e) { return self.onTabDblClick(e, tab); }, false);
 	HappyTab.Widget.HappyPanels.addEventListener(tab, "mouseover", function(e) { return self.onTabMouseOver(e, tab); }, false);
 	HappyTab.Widget.HappyPanels.addEventListener(tab, "mouseout", function(e) { return self.onTabMouseOut(e, tab); }, false);
 
@@ -311,6 +317,33 @@ function GetScrollY()
 		return window.pageYOffset;
 	else
 		return document.body.scrollTop; /* IE? */
+}
+
+/* reload page and show given category+module */
+function HappyReloadPage(category, module)
+{
+	var get = new Array();
+	query = window.location.search.substring(1);
+	kvpairs = query.split('&');
+	for(i=0; i < kvpairs.length; ++i)
+	{
+		kv = kvpairs[i].split('=');
+		get[kv[0]] = kv[1];
+	}
+
+	var params = new Array()
+	if(get['date']) params.push('date=' + get['date'])
+	if(get['time']) params.push('time=' + get['time'])
+	params.push('expand=' + document.getElementById("ReloadExpand").value)
+	params.push('t=' + category)
+	if(module) params.push('m=' + module)
+
+	url = window.location.protocol + '//' + window.location.hostname;
+	if(window.location.port) url += ':' + window.location.port;
+	url += window.location.pathname + '?';
+	url += params.join('&');
+
+	window.location.href = url;
 }
 
 /* function to set the right values before auto-reloading */
