@@ -245,5 +245,5 @@ class DashboardDatasetUsage(ModuleBase,PhpDownload):
 			self.table_fill( my_subtable_class, details_db_values )
 
 			counter += 1
-
+		self.subtable_clear(my_subtable_class, [], self.holdback_time)
 		pass

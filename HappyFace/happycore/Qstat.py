@@ -173,6 +173,7 @@ class Qstat(ModuleBase):
 
 	    # write details to database
 	    self.table_fill( my_subtable_class, details_db_values )
+	self.subtable_clear(my_subtable_class, [], self.holdback_time)
 	
 
 
@@ -291,6 +292,7 @@ class Qstat(ModuleBase):
 	
 	fig_abs.savefig(self.archive_dir + "/qstat_eff.png",dpi=60)
 	self.db_values["eff_plot"] = "qstat_eff.png"
+	self.archive_columns.append('eff_plot')
 
 	##########################################################
 	# create second plot, relative view
@@ -311,6 +313,7 @@ class Qstat(ModuleBase):
 
 	fig_rel.savefig(self.archive_dir + "/qstat_rel_eff.png",dpi=60)
 	self.db_values["rel_eff_plot"] = "qstat_rel_eff.png"
+	self.archive_columns.append('rel_eff_plot')
 
     def output(self):
 

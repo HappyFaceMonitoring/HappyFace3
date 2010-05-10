@@ -338,7 +338,8 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 						details_db_values['cond_link'] = 'noLink'
 
 					self.table_fill( my_subtable_class, details_db_values )
-					
+		self.subtable_clear(my_subtable_class, [], self.holdback_time)
+
 		pass
 
 	def getStatusConditions(self):

@@ -182,6 +182,7 @@ class dCacheInfoPool(dCacheInfo):
 
             # store the values to the database
             self.table_fill( my_subtable_class, details_db_values )
+	self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
         for att in self.sumInfo.keys():
             self.db_values[ att ] = self.sumInfo[att]

@@ -141,6 +141,8 @@ class Summary(ModuleBase):
 
 	except Exception, ex:
 	    raise Exception('Failed to parse XML: ' + str(ex))
+	finally:
+	    self.subtable_clear(subtable_summary, [], self.holdback_time)
 
     def output(self):
 

@@ -215,7 +215,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 			if self.detailsTableCutOff != '':
 				if count >= int(self.detailsTableCutOff): break
 			count+=1
-
+		self.subtable_clear(subtable_problems, [], self.holdback_time)
 
 		
 		self.limitCritical = self.configService.get('setup','limit_critical')

@@ -27,11 +27,13 @@ class PhpPlotDashboardJobSummary(Plot):
 	self.downloadRequest['plot'] = 'wget|html|--header="Accept: application/image-map"|' + base_url + '/jobsummary-plot-or-table?' + get_params + '|wget|png||<img\\s*src=\"(?P<url>\\S*)\" (\\s*\\S*=\"\\S*\"\\s*)*/>'
 
     def process(self):
+        Plot.process(self)
+
         # Catch if the regex did not match: This happens if there is no
-        # Dashboard data available.
+        # Dashboard data available. Note that we need to run Plot.process
+	# first so that self.achive_columns is properly set for cleanup.
         try:
             self.downloadService.checkDownload(self.downloadRequest['plot'])
         except DownloadTag.MatchFailedError, ex:
             raise Exception('No Dashboard Data available')
 
-        return Plot.process(self)

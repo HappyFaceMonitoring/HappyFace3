@@ -81,6 +81,7 @@ class RSSFeed(ModuleBase):
 	        break
 
 	self.status = 1.0
+	self.subtable_clear(subtable_feed, [], self.holdback_time)
 
     def output(self):
 

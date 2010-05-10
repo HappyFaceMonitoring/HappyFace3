@@ -145,6 +145,7 @@ class QstatDist(ModuleBase):
 	
 	fig.savefig(self.archive_dir + "/qstat_dist_" + variable + ".png",dpi=60)
 	self.db_values["filename"] = "qstat_dist_" + variable + ".png"
+        self.archive_columns.append('filename')
 
     def output(self):
 

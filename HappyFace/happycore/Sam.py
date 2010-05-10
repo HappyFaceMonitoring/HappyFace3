@@ -240,7 +240,6 @@ class Sam(ModuleBase,PhpDownload):
                     details_db_values[i] = test[i]
                 self.table_fill( subtable_details , details_db_values )
 
-
         worstGroupStatus = 99.0
         if len(samGroups) > 0:
             for group in samGroups:
@@ -252,9 +251,6 @@ class Sam(ModuleBase,PhpDownload):
                 
                 if theGroup['status'] >= 0:
                     if theGroup['status'] < worstGroupStatus: worstGroupStatus = theGroup['status']
-            
-                
-
         else:
             for service in theNodes:
                  serviceInfo =  self.SamResults[service]
@@ -264,6 +260,8 @@ class Sam(ModuleBase,PhpDownload):
         if worstGroupStatus != 99.0: self.status = worstGroupStatus
         else: self.status = -1
              
+	self.subtable_clear(subtable_details, [], self.holdback_time)
+	self.subtable_clear(subtable_summary, [], self.holdback_time)
 
     def getGroupStatus(self,theGroup,type):
           if not theGroup.has_key(type): return False

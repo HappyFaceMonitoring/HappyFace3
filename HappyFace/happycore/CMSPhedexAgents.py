@@ -162,6 +162,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
                     
                     # store the values to the database
 		    self.table_fill( my_subtable_class, details_db_values )
+        self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
         # happy, if all groups don't use more space than allowedfor now always happy
         self.status = self.determineStatus(agentStatusList)

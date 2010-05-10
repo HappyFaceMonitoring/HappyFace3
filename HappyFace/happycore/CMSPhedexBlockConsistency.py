@@ -124,6 +124,7 @@ class CMSPhedexBlockConsistency(ModuleBase):
                         # write details to databse
 
                         self.table_fill( my_subtable_class, details_db_values )
+	self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
         
 

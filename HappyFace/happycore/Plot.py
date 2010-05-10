@@ -51,9 +51,13 @@ class Plot(ModuleBase):
                 self.error_message += str(ex).strip() + "\n"
 		filename = ""
 
-	# definition fo the database table values
+	# definition of the database table values
 	    self.db_keys['filename'+ident] = StringCol()
             self.db_values['filename'+ident] = filename
+
+	# Let module base know that these columns refer to a file in the
+	# archive directory so that it can remove the files on table cleanup
+	    self.archive_columns.append('filename' + ident)
 
         
     def output(self):

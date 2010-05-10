@@ -129,7 +129,7 @@ class CMSPhedexDeletionRequest(ModuleBase,PhpDownload):
 			except:
 				pass
 
-
+		self.subtable_clear(my_subtable_class, [], self.holdback_time)
 		## will stay happy
 		self.status = 1.
 

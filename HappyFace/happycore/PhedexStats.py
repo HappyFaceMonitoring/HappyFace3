@@ -92,7 +92,8 @@ class PhedexStats(ModuleBase):
 			
 			# store the values to the database
 			self.table_fill( my_subtable_class, details_db_values )
-	
+
+	self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
 	self.db_values["failed_transfers"] = failed_transfers
 

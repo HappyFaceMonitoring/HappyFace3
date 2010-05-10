@@ -1,4 +1,4 @@
-import os, sys, re
+import os, sys, re, time
 import traceback
 import ConfigParser
 
@@ -38,6 +38,8 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         self.category = module_options["category"]
 	self.timestamp = module_options["timestamp"]
         self.archive_dir = module_options["archive_dir"]
+	self.archive_columns = []
+	self.clear_tables = []
 	self.holdback_time = int( self.configService.getDefault('setup','holdback_time',module_options["holdback_time"]) )
 
 
@@ -154,7 +156,14 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    # unlock the database access
 	    self.lock.release()
 
-    def table_clear(self, My_DB_Class, holdback_time):
+    # This should be called by modules to set up their subtables for clearing
+    # They can't call table_clear directly because they would otherwise exceed
+    # the timeout for module processing. Instead this queues the table to be
+    # cleared at the end in processDB.
+    def subtable_clear(self, DB_Class, archive_columns, holdback_time):
+        self.clear_tables.append({'table_class': DB_Class, 'archive_columns': archive_columns, 'holdback_time': holdback_time})
+
+    def table_clear(self, My_DB_Class, archive_columns, holdback_time):
 
 	if holdback_time == -1:
 	    return
@@ -163,14 +172,52 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
 	self.lock.acquire()
 
-	old_data = My_DB_Class.select( My_DB_Class.q.timestamp <= time_limit)
+	try:
+		old_data = My_DB_Class.select( My_DB_Class.q.timestamp <= time_limit)
 
-	for row in old_data:
-	    My_DB_Class.delete(row.id)
+		for row in old_data:
+		    for column in archive_columns:
+		        file = getattr(row,column)
 
-	self.lock.release()
+			# If Download failed the column might be empty. We don't
+			# have anything to do in that case.
+			if file is None:
+			    break
 
-	print self.__module__ + " is cleared with a holdback time value of: " + str(holdback_time) + " days."
+			# Find archive directory for this file
+			# TODO: This is a bit of a hack as we are not supposed to know
+			# anything about the archive directory structure... should find
+			# a better solution for this
+			timestamp = row.timestamp
+			time_tuple = time.localtime(timestamp)
+
+			output_dir = self.archive_dir
+			while os.path.basename(output_dir) != 'archive':
+				output_dir = os.path.dirname(output_dir)
+
+			archive_dir = output_dir + "/" + str(time_tuple.tm_year) + "/" + ('%02d' % time_tuple.tm_mon) + "/" + ('%02d' % time_tuple.tm_mday) + "/" + str(timestamp)
+			file = archive_dir + '/' + file
+
+			try:
+				# Remove archived files
+				os.unlink(file)
+				# Remove empty directories (note this throws if a
+				# directory attempted to be removed is not empty).
+				dir = archive_dir
+				while dir != output_dir:
+					os.rmdir(dir)
+					dir = os.path.dirname(dir)
+			except:
+				pass
+
+		My_DB_Class.deleteMany(My_DB_Class.q.timestamp <= time_limit)
+	except Exception, ex:
+		print 'Failed to clear table: ' + str(ex)
+	        traceback.print_exc()
+	finally:
+		self.lock.release()
+
+	print 'Table "' + My_DB_Class.sqlmeta.table + '" of module "' + self.__module__ + '" is cleared with a holdback time value of: ' + str(holdback_time) + ' days; clearing all data from before ' + time.strftime("%c", time.localtime(time_limit))
 
     def processDB(self):
 
@@ -191,7 +238,9 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	# init and storage the module specific information into the module table
 	module_table_class = self.table_init( self.database_table, self.db_keys )
 	self.table_fill( module_table_class, self.db_values )
-	self.table_clear(module_table_class, self.holdback_time)
+	self.table_clear(module_table_class, self.archive_columns, self.holdback_time)
+	for table in self.clear_tables:
+	    self.table_clear(table['table_class'], table['archive_columns'], table['holdback_time'])
 
     # reading config files and return the corresponding directory structure
     def readConfigFile(self,config_file):
