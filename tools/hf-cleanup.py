@@ -48,9 +48,15 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 				day = '%02d' % tm.tm_mday
 
 				if row[column] is not None:
-					source_file = hfdir + '/archive/' + str(year) + '/' + str(month) + '/' + str(day) + '/' + str(timestamp) + '/' + row[column]
+					output_dir = hfdir + '/archive'
+					archive_dir = output_dir + '/' + str(year) + '/' + str(month) + '/' + str(day) + '/' + str(timestamp)
+					source_file = archive_dir + '/' + row[column]
 					try:
 						os.unlink(source_file)
+						dir = archive_dir
+						while dir != output_dir:
+							os.rmdir(dir)
+							dir = os.path.dirname(dir)
 					except Exception as ex:
 						# Ignore if file does not exist in archive directory...
 						# maybe a previous run of the script removed it
