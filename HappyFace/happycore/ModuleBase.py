@@ -38,10 +38,10 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         self.category = module_options["category"]
 	self.timestamp = module_options["timestamp"]
         self.archive_dir = module_options["archive_dir"]
-	self.archive_columns = []
-	self.clear_tables = []
 	self.holdback_time = int( self.configService.getDefault('setup','holdback_time',module_options["holdback_time"]) )
 
+	self.archive_columns = []
+	self.clear_tables = []
 
 	# pre-defined status value -1 : no info
         self.status = -1

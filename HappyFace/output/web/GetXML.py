@@ -59,8 +59,8 @@ class GetXML(object):
 
 	    """ + declare_cat_titles + "\n" + declare_cat_types + "\n" + declare_cat_algos + """
 
-    # Get different categories with their type from the result Matrix
-    $cat_modules = array();
+	    # Get different categories with their type from the result Matrix
+	    $cat_modules = array();
 	    $cat_info = array();
 	    foreach ($myModuleResultsArray as $module=>$data) {
 	        $date = date('Y-m-d', $data['timestamp']);
@@ -86,28 +86,50 @@ class GetXML(object):
 		$cat_modules[$category] .= "  </module>\n";
 	    }
 
-	    header('Content-Type: text/xml');
-	    echo '<?xml version="1.0" encoding="ISO-8859-1"?>' . "\n";
-	    echo '<happyface>' . "\n";
-	    echo ' <title>' . htmlentities('""" + web_title + """') . '</title>' . "\n";
+	    $xml = '';
+	    $xml .= '<?xml version="1.0" encoding="ISO-8859-1"?>' . "\n";
+	    $xml .= '<happyface>' . "\n";
+	    $xml .= ' <title>' . htmlentities('""" + web_title + """') . '</title>' . "\n";
 	    foreach ($cat_info as $category=>$info) {
-	        echo ' <category>' . "\n";
-	        echo '  <name>' . $category . '</name>' . "\n";
-	        echo '  <title>' . htmlentities($info['title']) . '</title>' . "\n";
+	        $xml .= ' <category>' . "\n";
+	        $xml .= '  <name>' . $category . '</name>' . "\n";
+	        $xml .= '  <title>' . htmlentities($info['title']) . '</title>' . "\n";
 	        if($info['type'] != 'unrated')
-	            echo '  <status>' . $info['status'] . '</status>' . "\n";
-	        echo '  <type>' . $info['type'] . '</type>' . "\n";
-	        echo '  <link>' . $info['link'] . '</link>' . "\n";
+	            $xml .= '  <status>' . $info['status'] . '</status>' . "\n";
+	        $xml .= '  <type>' . $info['type'] . '</type>' . "\n";
+	        $xml .= '  <link>' . $info['link'] . '</link>' . "\n";
 
-	        echo $cat_modules[$category];
-	        echo ' </category>' . "\n";
+	        $xml .= $cat_modules[$category];
+	        $xml .= ' </category>' . "\n";
 	    }
 
-	    echo '</happyface>';
-	    exit;
+	    $xml .= '</happyface>';
+	    return $xml;
 	}
 
 	if ($_REQUEST['action']=="getxml")
-		getCatStatusXML($ModuleResultsArray);
+	{
+		$xml_data = getCatStatusXML($ModuleResultsArray);
+
+		// Write cache if it is not up to date (see GetXMLCache.py)
+		if(isset($xml_cache_file) && !$xml_cache_uptodate)
+		{
+			$fh = fopen($xml_cache_file, 'w');
+			if($fh)
+			{
+				fwrite($fh, $xml_data);
+				fclose($fh);
+			}
+			else
+			{
+				print 'Failed to write XML cache!';
+				exit;
+			}
+		}
+
+		header('Content-Type: text/xml');
+		print $xml_data;
+		exit;
+	}
 
 	?>"""

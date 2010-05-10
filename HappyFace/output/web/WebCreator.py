@@ -11,6 +11,7 @@ from SQLCallRoutines import *
 from ModuleResultsArrayBuilder import *
 from GetText4Firefox import *
 from GetXML import *
+from GetXMLCache import *
 
 class WebCreator(object):
     def __init__(self,config,modObj_list,timestamp):
@@ -61,15 +62,18 @@ class WebCreator(object):
 	# this should be used to get validated PHP hrefs (only cosmetics ;-) )
 	output += '<?php ini_set("arg_separator.output","&amp;"); ?>'
 
+	# provides the logic for the timestamp definition
+	output += TimeMachineLogic(histo_step).output
+	
+	# Deliver XML from cache if possible
+	output += GetXMLCache(self.config, self.timestamp).output
+
 	# initiate the database
 	output += '<?php' + "\n"
 	output += '    /*** connect to SQLite database ***/' + "\n"
 	output += '    $dbh = new PDO("sqlite:HappyFace.db");' + "\n"
 	output += '?>'
 
-	# provides the logic for the timestamp definition
-	output += TimeMachineLogic(histo_step).output
-	
 	# SQL call routines for all active modules
 	output += SQLCallRoutines(self.config).output
 
@@ -77,6 +81,9 @@ class WebCreator(object):
 	# status, type, weight, category => used by the CategoryStatusLogic
 	output += ModuleResultsArrayBuilder().output
 	
+	# provides general XML output (this is used for 
+	output += GetXML(self.config).output
+
 	# provides a function for the category status
 	output += CategoryStatusLogic().output
 
@@ -88,9 +95,6 @@ class WebCreator(object):
 
         # provides functions for the firefox plugin
 	output += GetText4Firefox().output
-
-	# provides general XML output
-	output += GetXML(self.config).output
 
 	#######################################################
 
