@@ -17,7 +17,7 @@ class DownloadTag(Thread):
 	    # download content.
 	    self.content = content
 	def __str__(self):
-            return 'The content of the page at \"' + self.url + '\" does not match on \"' + regex + '\"'
+            return 'The content of the page at \"' + self.url + '\" does not match on \"' + self.regexp + '\"'
 
 
     def __init__(self,program,fileType, args, url,subdir):
