@@ -45,9 +45,9 @@ class DownloadTag(Thread):
 	        dest_dir = tempfile.gettempdir()
 
             if self.program[self.curIndex] == "wget":
-                self.success,self.error = self.dataFetcher.getDataWget(self.args[self.curIndex] ,self.url[self.curIndex], dest_dir, self.localFile)
+                self.dataFetcher.getDataWget(self.args[self.curIndex] ,self.url[self.curIndex], dest_dir, self.localFile)
             elif self.program[self.curIndex] == "wgetXmlRequest":
-                self.success,self.error = self.dataFetcher.getDataWgetXmlRequest(self.args[self.curIndex] ,self.url[self.curIndex], dest_dir, self.localFile)
+                self.dataFetcher.getDataWgetXmlRequest(self.args[self.curIndex] ,self.url[self.curIndex], dest_dir, self.localFile)
             else:
 	        raise Exception(self.program+" currently not supported!")
 
@@ -84,6 +84,7 @@ class DownloadTag(Thread):
     def run(self):
         try:
             self.download()
+	    self.success = True
 	except Exception, ex:
 	    self.success = False
 	    # Store exception, will be rethrown in main thread when trying
