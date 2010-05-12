@@ -1,6 +1,7 @@
 import os, sys, re, time
 import traceback
 import ConfigParser
+import GetData
 
 from HTMLOutput import *
 
@@ -266,6 +267,12 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
     def run(self):
         try:
 	    self.process()
+	except GetData.DownloadError, ex:
+	    self.status = -1.0
+	    msg = str(ex).strip()
+	    self.error_message = msg
+	    sys.stderr.write(self.__module__ + ': ' + msg + '\n' + 'wget output was:\n\n' + ex.stderr + '\n')
+	    traceback.print_exc()
 	except Exception, ex:
 	    self.status = -1.0
 	    msg = str(ex).strip()

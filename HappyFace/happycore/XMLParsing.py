@@ -16,7 +16,7 @@ class XMLParsing():
 	    dom_object = parse(xml_file)
 	    return dom_object,""
 	except Exception, ex:
-	    raise Exception('Could not parse \"' + xml_file + '\" in module ' + self.__module__ + ': ' + str(ex))
+	    raise Exception('Could not parse XML file \"' + xml_file + '\": ' + str(ex))
 
     # TODO: Error is passed as an exception, therefore remove second return
     # argument.
@@ -28,4 +28,4 @@ class XMLParsing():
             tree = etree.parse(source_file)
             return tree,""
         except Exception, ex:
-	    raise Exception('Could not parse \"' + xml_file + '\" in module ' + self.__module__ + ': ' + str(ex))
+	    raise Exception('Could not parse XML file \"' + xml_file + '\": ' + str(ex))

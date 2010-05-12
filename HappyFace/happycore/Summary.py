@@ -138,9 +138,6 @@ class Summary(ModuleBase):
 				    self.status = status
 
 		            self.table_fill(subtable_summary, summary_db_values)
-
-	except Exception, ex:
-	    raise Exception('Failed to parse XML: ' + str(ex))
 	finally:
 	    self.subtable_clear(subtable_summary, [], self.holdback_time)
 
