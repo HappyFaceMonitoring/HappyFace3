@@ -40,6 +40,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	self.timestamp = module_options["timestamp"]
         self.archive_dir = module_options["archive_dir"]
 	self.holdback_time = int( self.configService.getDefault('setup','holdback_time',module_options["holdback_time"]) )
+	self.plot_blacklist = self.configService.getDefault('setup', 'plot_blacklist', '').split(',')
 
 	self.archive_columns = []
 	self.clear_tables = []
@@ -291,8 +292,9 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	plot_values = ""
 	for value in self.db_values:
 	    if (type(self.db_values[value]) is int) or (type(self.db_values[value]) is float):
-		plot_values += '<option value="' + value + '">' + value + '</option>'
-    
+	        if not value in self.plot_blacklist:
+		    plot_values += '<option value="' + value + '">' + value + '</option>'
+
 	html_begin = []
 	html_begin.append(  '<!-- Beginning of module "' + self.__module__ + '" -->')
 	html_begin.append("""<a id="' . $data["module"]. '"></a>""")
