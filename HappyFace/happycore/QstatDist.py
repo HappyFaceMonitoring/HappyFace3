@@ -53,7 +53,14 @@ class QstatDist(ModuleBase):
 		    if user != "cmsprd" or state != 'R':
 		    	continue
 
-		    valuestr = child.attrib[variable]
+		    # Sometimes the requested variable is still not available
+		    # even though the state is R. We do simply ignore that
+		    # case.
+                    try:
+		        valuestr = child.attrib[variable]
+                    except:
+		        continue
+
 		    valuelist = valuestr.split(':')
 		    valuelist.reverse()
 		    value = 0
