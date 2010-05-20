@@ -15,6 +15,42 @@
    return $name;
  }
 
+ // from http://www.actionscript.org/forums/archive/index.php3/t-50746.html
+ function HSV_TO_RGB($H, $S, $V) // HSV Values: Number 0-1
+ {                               // RGB Results: Number 0-255
+   $RGB = array();
+
+   if($S == 0)
+   {
+     $R = $G = $B = $V * 255;
+   }
+   else
+   {
+     $var_H = $H * 6;
+     $var_i = floor( $var_H );
+     $var_1 = $V * ( 1 - $S );
+     $var_2 = $V * ( 1 - $S * ( $var_H - $var_i ) );
+     $var_3 = $V * ( 1 - $S * (1 - ( $var_H - $var_i ) ) );
+
+     if ($var_i == 0) { $var_R = $V ; $var_G = $var_3 ; $var_B = $var_1 ; }
+     else if ($var_i == 1) { $var_R = $var_2 ; $var_G = $V ; $var_B = $var_1 ; }
+     else if ($var_i == 2) { $var_R = $var_1 ; $var_G = $V ; $var_B = $var_3 ; }
+     else if ($var_i == 3) { $var_R = $var_1 ; $var_G = $var_2 ; $var_B = $V ; }
+     else if ($var_i == 4) { $var_R = $var_3 ; $var_G = $var_1 ; $var_B = $V ; }
+     else { $var_R = $V ; $var_G = $var_1 ; $var_B = $var_2 ; }
+
+     $R = $var_R * 255;
+     $G = $var_G * 255;
+     $B = $var_B * 255;
+   }
+
+   $RGB['R'] = $R;
+   $RGB['G'] = $G;
+   $RGB['B'] = $B;
+
+   return $RGB;
+ }
+
  #=====================================
  # Array Constructor
  # Values <=> Timestamps
@@ -140,6 +176,7 @@
    // Dataset definition
    $DataSet = new pData;
 
+   $n_series = 0;
    foreach($variables as $index => $variable)
    {
      foreach($array["values"][$variable] as $constraint_string => $datapoints)
@@ -147,6 +184,7 @@
        $serie = 'Serie' . $variable . '_' . $constraint_string;
        $DataSet->AddPoint($datapoints, $serie);
        $DataSet->AddSerie($serie);
+       ++$n_series;
 
        if(count($constraint_vars) > 0 && count($variables) > 1)
          $name = "$variable, $constraint_string";
@@ -176,7 +214,23 @@
    $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
    $Test->drawGraphArea(255,255,255,TRUE);
    $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
-   
+
+   $hue = 0;
+   $mod = 120;
+   for($i = 0; $i < $n_series; ++$i)
+   {
+     $rgb = HSV_TO_RGB(fmod(($hue+240.0), 360.0)/360.0, 1.0, 1.0 - 0.3*($i%3));
+     $Test->SetColorPalette($i, $rgb['R'], $rgb['G'], $rgb['B']);
+
+     $hue += $mod;
+     if($hue >= 360)
+     {
+       if($hue > 360)
+         $mod /= 2.0;
+       $hue = $mod/2.0;
+     }
+   }
+
    // show Grid if there are less than 48 timestamps
    if ( count($array["timestamps"]) < 48 ) { $Test->drawGrid(4,TRUE); }
    
