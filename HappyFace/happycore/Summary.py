@@ -77,7 +77,7 @@ class Summary(ModuleBase):
 
 	        for element in root:
 		    if element.tag == "category":
-		        mod_status = -1.0
+		        worst_mod_status = -1.0
 			have_category = False
 		        for cat_elem in element:
 		            if cat_elem.tag == "name":
@@ -106,21 +106,21 @@ class Summary(ModuleBase):
 			    # module within that category, if any (for "rated"
 			    # categories and modules only).
 			    elif cat_elem.tag == "module" and summary_db_values["type"] == "rated":
-				status = -1.0
+				mod_status = -1.0
 				type = ""
 				link = ""
 				for mod_elem in cat_elem:
 				    if mod_elem.tag == "status":
-				        status = float(mod_elem.text)
+				        mod_status = float(mod_elem.text)
 				    elif mod_elem.tag == "type":
 				        type = mod_elem.text
 				    elif mod_elem.tag == "link":
 				        link = mod_elem.text
 
-				if type == "rated" and link != "" and status >= 0.0:
-				    if mod_status < 0.0 or status < mod_status:
-				        mod_status = status
-					if mod_status < 1.0:
+				if type == "rated" and link != "" and mod_status >= 0.0:
+				    if worst_mod_status < 0.0 or mod_status < worst_mod_status:
+				        worst_mod_status = mod_status
+					if worst_mod_status < 1.0:
 			                    summary_db_values["link"] = link
 
 		        if have_category:
