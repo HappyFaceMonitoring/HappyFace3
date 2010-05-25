@@ -289,11 +289,35 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
     # status, error_message, mod_title, mod_type, weight, definition, instruction
     def PHPOutput(self,module_content):
 
-	plot_values = ""
+	plot_options = '<option value="all_variables">all variables (trend plot)</option>'
+	plot_list = []
 	for value in self.db_values:
 	    if (type(self.db_values[value]) is int) or (type(self.db_values[value]) is float):
 	        if not value in self.plot_blacklist:
-		    plot_values += '<option value="' + value + '">' + value + '</option>'
+		    selected = ''
+		    if value == 'status':
+		        selected = ' selected="selected"'
+
+		    plot_options += '<option value="' + value + '"' + selected + '>' + value + '</option>'
+		    plot_list.append(value)
+
+	js = []
+	js.append('<script type="text/javascript">')
+	js.append('function ' + self.__module__ + '_do_baseplot(variables, squash, renormalize)')
+	js.append('{')
+	js.append('  document.getElementById("' + self.__module__ + '_baseplot_variables").value = variables;')
+	js.append('  document.getElementById("' + self.__module__ + '_baseplot_squash").value = squash;')
+	js.append('  document.getElementById("' + self.__module__ + '_baseplot_renormalize").value = renormalize;')
+	js.append('}')
+	js.append('function ' + self.__module__ + '_baseplot()')
+	js.append('{')
+	js.append('  var variable = document.getElementById("' + self.__module__ + '_baseplot_single_variable").value;')
+	js.append('  if(variable == "all_variables")')
+	js.append('    ' + self.__module__ + '_do_baseplot("' + ','.join(plot_list) + '", 1, ' + (len(plot_list) > 1 and str(1) or str(0)) + ');')
+	js.append('  else')
+	js.append('    ' + self.__module__ + '_do_baseplot(variable, 0, 0);')
+	js.append('}')
+	js.append('</script>')
 
 	html_begin = []
 	html_begin.append(  '<!-- Beginning of module "' + self.__module__ + '" -->')
@@ -301,7 +325,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	html_begin.append("""<table class="main" style="width:1000px;">""")
 	html_begin.append(  ' <tr>')
 	html_begin.append(  '  <td style="width:64px;">')
-	html_begin.append("""   <button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide_info(\\\'""" + self.__module__+ """_info\\\', \\\'""" + self.__module__ + """_info_link\\\');">' .$status_symbol. '</button>""")
+	html_begin.append("""   <button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide_info(\\\'""" + self.__module__+ """_info\\\', \\\'""" + self.__module__ + """_info_link\\\');">' . $status_symbol . '</button>""")
 	html_begin.append(  '  </td>')
 	html_begin.append("""  <td><strong><a href="?date='.$date_string.'&amp;time='.$time_string.'&amp;t='.$category.'&amp;m=""" + self.__module__ + """" style="text-decoration:none;color:#000000;" onfocus="this.blur()">' . htmlentities($data['mod_title']) . '</a><br />' . $mod_time_message . ' <span style="color:gray;">-</span> <small><a href="javascript:show_hide_info(\\\'""" + self.__module__ + """_info\\\', \\\'""" + self.__module__ + """_info_link\\\');" class="HappyLink" onfocus="this.blur()" id=\"""" + self.__module__ + """_info_link\">Show module information</a></small></strong></td>""")
 	html_begin.append(""" </tr>' . $error_message . '""")
@@ -323,27 +347,36 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	infobox.append(     '    </table>')
 
 	infobox.append(     '    <form id="' + self.__module__ + '_PlotForm" action="plot_generator.php" method="get" onsubmit="javascript: submitFormToWindow(this)">')
-	infobox.append(     '     <table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: center;">')
+	infobox.append(     '     <table style="font: bold 0.7em sans-serif; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: left; width: 800px;">')
 	infobox.append(     '      <tr>')
-	infobox.append(     '       <td>Start:</td>')
+	infobox.append(     '       <td>')
+	infobox.append(     '        Start:')
+	infobox.append(     '       </td>')
 	infobox.append(     '       <td>')
 	infobox.append(   """        <input name="date0" type="text" size="10" style="text-align:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
 	infobox.append(   """        <input name="time0" type="text" size="5" style="text-align:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
 	infobox.append(     '       </td>')
-	infobox.append(     '       <td>End:</td>')
+	infobox.append(     '       <td>')
+	infobox.append(     '        End:')
+	infobox.append(     '       </td>')
 	infobox.append(     '       <td>')
 	infobox.append(   """        <input name="date1" type="text" size="10" style="text-align:center;" value="' . $date_string .'" />""")
 	infobox.append(   """        <input name="time1" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />""")
 	infobox.append(     '       </td>')
-	infobox.append(     '       <td>Variable:</td>')
 	infobox.append(     '       <td>')
-	infobox.append(     '        <select name="variables">')
-	infobox.append(     '         ' + plot_values)
+	infobox.append(     '        Variable:')
+	infobox.append(     '       </td>')
+	infobox.append(     '       <td>')
+	infobox.append(     '        <select id="' + self.__module__ + '_baseplot_single_variable" style="width: 100%;">')
+	infobox.append(     '         ' + plot_options)
 	infobox.append(     '        </select>')
 	infobox.append(     '       </td>')
 	infobox.append(     '       <td>')
 	infobox.append(   """        <input type="hidden" name="module" value="' . $data["module"] . '" />""")
-	infobox.append(   """        <div><button onclick="javascript: submitform()" onfocus="this.blur()">Show Plot</button></div>""")
+	infobox.append(     '        <input type="hidden" name="variables" value="" id="' + self.__module__ + '_baseplot_variables" />')
+	infobox.append(     '        <input type="hidden" name="squash" value="0" id="' + self.__module__ + '_baseplot_squash" />')
+	infobox.append(     '        <input type="hidden" name="renormalize" value="0" id="' + self.__module__ + '_baseplot_renormalize" />')
+	infobox.append(   """        <button onclick=\"""" + self.__module__ + """_baseplot()" onfocus="this.blur()" style="width: 100%;">Show&nbsp;Plot</button>""")
 	infobox.append(     '       </td>')
 	infobox.append(     '      </tr>')
 	infobox.append(     '     </table>')
@@ -392,6 +425,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    }
 
 	    /*** Get variables for the direct module link ***/
+	    print('""" + self.PHPArrayToString(js) + """');
 
 	    /*** print the HTML output ***/
 	    print('""" + self.PHPArrayToString(html_begin) + """');
