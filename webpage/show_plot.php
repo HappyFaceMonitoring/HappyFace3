@@ -55,6 +55,8 @@
  # Array Constructor
  # Values <=> Timestamps
 
+ $renormalize = isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0;
+
  $ta0 = date_parse($_GET["date0"] . " " . $_GET["time0"]);
  $ta1 = date_parse($_GET["date1"] . " " . $_GET["time1"]);
 
@@ -181,6 +183,17 @@
    {
      foreach($array["values"][$variable] as $constraint_string => $datapoints)
      {
+       if($renormalize)
+       {
+         $min = min($datapoints);
+         $max = max($datapoints);
+	 foreach($datapoints as &$value)
+	   if(abs($min - $max) > 0.0001)
+	     $value = ($value - $min) / ($max - $min);
+	   else
+	     $value = 0.5;
+       }
+
        $serie = 'Serie' . $variable . '_' . $constraint_string;
        $DataSet->AddPoint($datapoints, $serie);
        $DataSet->AddSerie($serie);
@@ -200,7 +213,10 @@
    $DataSet->SetAbsciseLabelSerie("SerieTime");
 
    if(count($variables) <= 1)
-     $DataSet->SetYAxisName($variable);
+     if($renormalize)
+       $DataSet->SetYAxisName($variable . " [arb. units]");
+     else
+       $DataSet->SetYAxisName($variable);
 
    #$DataSet->SetYAxisFormat("time");
    #$DataSet->SetXAxisFormat("metric");

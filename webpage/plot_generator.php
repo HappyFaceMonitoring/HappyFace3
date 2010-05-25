@@ -32,6 +32,7 @@ if(isset($_GET['timestamp_var']))
 			<input type="hidden" name="timestamp_var" value="<?php echo htmlentities($timestamp_var); ?>" />
 			<input type="hidden" name="constraint" value="<?php echo htmlentities($_GET['constraint']); ?>" />
 			<input type="hidden" name="squash" value="<?php echo htmlentities($_GET['squash']); ?>" />
+			<input type="hidden" name="renormalize" value="<?php echo htmlentities($_GET['renormalize']); ?>" />
 
 			<table>
 				<tr>
@@ -65,7 +66,11 @@ foreach($variables as $variable)
 {
 ?>
 			<h3>Variable(s): <?php echo htmlentities($variable); ?></h3>
-			<p><img alt="" border="2" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities($variable); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>" /></p>
+<?php
+if(isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0)
+	echo '<p><strong>Note:</strong> Individual variables have been scaled so that they fit into [0,1] on this plot.</p>';
+?>
+			<p><img alt="" border="2" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities($variable); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>&renormalize=<?php echo htmlentities($_GET['renormalize']); ?>" /></p>
 
 <?php
 
