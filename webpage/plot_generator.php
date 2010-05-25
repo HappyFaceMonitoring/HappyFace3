@@ -65,10 +65,10 @@ else
 foreach($variables as $variable)
 {
 ?>
-			<h3>Variable(s): <?php echo htmlentities($variable); ?></h3>
+			<h3>Variable(s): <?php echo htmlentities(implode(', ', explode(',', $variable))); ?></h3>
 <?php
 if(isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0)
-	echo '<p><strong>Note:</strong> Individual variables have been scaled so that they fit into [0,1] on this plot.</p>';
+	echo '<p><strong>Trend Plot:</strong> Note that individual variables have been scaled so that they fit into [0,1] on this plot.</p>';
 ?>
 			<p><img alt="" border="2" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities($variable); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>&renormalize=<?php echo htmlentities($_GET['renormalize']); ?>" /></p>
 

@@ -223,13 +223,11 @@
 
    // Initialise the graph   
    $Test = new pChart(900,350);
-   $Test->setColorPalette(0,0,0,255); 
-   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",8);
-   $Test->setGraphArea(85,30,850,250);
-   $Test->drawFilledRoundedRectangle(7,7,900,350,5,240,240,240);
-   $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
-   $Test->drawGraphArea(255,255,255,TRUE);
-   $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
+
+   // For a trend plot make sure the min and max values don't
+   // stick to the border
+   if($renormalize)
+     $Test->setFixedScale(-0.00, 1.00);
 
    $hue = 0;
    $mod = 120;
@@ -247,6 +245,17 @@
      }
    }
 
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
+   $LegendSize = $Test->getLegendBoxSize($DataSet->GetDataDescription());
+
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",8);
+   $Test->setGraphArea(50,30,850,250);
+   if($n_series > 1) $Test->setGraphArea(50,30,850-$LegendSize[0]-20,250); // put legend to the right of the plot
+   $Test->drawFilledRoundedRectangle(7,7,900,350,5,240,240,240);
+   $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
+   $Test->drawGraphArea(255,255,255,TRUE);
+   $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
+
    // show Grid if there are less than 48 timestamps
    if ( count($array["timestamps"]) < 48 ) { $Test->drawGrid(4,TRUE); }
    
@@ -260,7 +269,10 @@
    
    // Finish the graph
    $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
-   $Test->drawLegend(90,35,$DataSet->GetDataDescription(),255,255,255);
+   if($n_series > 1)
+     $Test->drawLegend(850-$LegendSize[0],35,$DataSet->GetDataDescription(),255,255,255);
+   else
+     $Test->drawLegend(90,35,$DataSet->GetDataDescription(),255,255,255);
    $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
    $Test->drawTitle(60,22,"Module: " . $_GET["module"],50,50,50,585);
    $Test->Stroke("plot.png");
