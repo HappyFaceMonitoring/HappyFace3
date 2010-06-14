@@ -52,7 +52,7 @@ class Sam(ModuleBase,PhpDownload):
 	self.db_values["details_database_summary"] = details_database_summary
 
 	details_db_keys = {}
-	details_db_values = {}
+	details_db_value_list = []
 
 	details_db_keys["service_type"] = StringCol()
 	details_db_keys["service_name"] = StringCol()
@@ -64,7 +64,7 @@ class Sam(ModuleBase,PhpDownload):
 	details_db_keys["time"] = StringCol()
 
 	details_summary_db_keys = {}
-	details_summary_db_values = {}
+	details_summary_db_value_list = []
 
         details_summary_db_keys["name"] = StringCol()
         details_summary_db_keys["nodes"] = StringCol()
@@ -232,25 +232,30 @@ class Sam(ModuleBase,PhpDownload):
         for service in theNodes:
             serviceInfo =  self.SamResults[service]
 
+	    details_db_values = {}
             details_db_values["service_type"] = serviceInfo['type'] 
             details_db_values["service_name"] = serviceInfo['name']
             details_db_values["service_status"] = serviceInfo['status']
             for test in  serviceInfo['tests']:
                 for i in test.keys():
                     details_db_values[i] = test[i]
-                self.table_fill( subtable_details , details_db_values )
+		details_db_value_list.append(details_db_values.copy())
+        self.table_fill_many( subtable_details , details_db_value_list )
 
         worstGroupStatus = 99.0
         if len(samGroups) > 0:
             for group in samGroups:
                 theGroup = samGroups[group]
+
+                details_summary_db_values = {}
                 details_summary_db_values["name"] = group
                 details_summary_db_values["nodes"] = ', '.join(theGroup['nodes'])
                 details_summary_db_values["status"] = theGroup['status']
-                self.table_fill( subtable_summary , details_summary_db_values )
+                details_summary_db_value_list.append(details_summary_db_values)
                 
                 if theGroup['status'] >= 0:
                     if theGroup['status'] < worstGroupStatus: worstGroupStatus = theGroup['status']
+            self.table_fill_many( subtable_summary , details_summary_db_value_list )
         else:
             for service in theNodes:
                  serviceInfo =  self.SamResults[service]

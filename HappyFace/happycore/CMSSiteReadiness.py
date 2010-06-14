@@ -61,7 +61,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		self.db_values["details_database"] = details_database
 
 		details_db_keys = {}
-		details_db_values = {}
+		details_db_value_list = []
 
 		details_db_keys['readiness_cond'] = StringCol()
 		details_db_keys['cond_color'] = StringCol()
@@ -82,7 +82,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		#	self.getReadinessT2(siteTable)
 
 		self.getReadiness(siteTable)
-		self.makeDatabaseEntries(details_db_keys,details_db_values,my_subtable_class)
+		self.makeDatabaseEntries(details_db_keys,details_db_value_list,my_subtable_class)
 
 		# always happy for the moment
 		self.status = self.determineStatus()
@@ -313,7 +313,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 			return -1	
 		pass
 
-	def makeDatabaseEntries(self,details_db_keys,details_db_values,my_subtable_class):
+	def makeDatabaseEntries(self,details_db_keys,details_db_value_list,my_subtable_class):
 
 		"""
 		Makes the database entries from the readiness dictionary made
@@ -323,6 +323,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		for key in self.key_list:
 			if not key == None:
 				#print key
+				details_db_values = {}
 				details_db_values['readiness_cond'] = key
 				list = self.readiness[key]
 				#print list[-(self.days):]
@@ -337,7 +338,8 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 					except:
 						details_db_values['cond_link'] = 'noLink'
 
-					self.table_fill( my_subtable_class, details_db_values )
+					details_db_value_list.append(details_db_values.copy())
+		self.table_fill_many( my_subtable_class, details_db_value_list )
 		self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
 		pass

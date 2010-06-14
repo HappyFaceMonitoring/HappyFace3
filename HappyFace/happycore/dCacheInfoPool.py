@@ -131,7 +131,7 @@ class dCacheInfoPool(dCacheInfo):
 
         
 	details_db_keys = {}
-	details_db_values = {}
+	details_db_value_list = []
         
         details_db_keys["poolname"] = StringCol()
         details_db_keys["poolstatus"] = FloatCol()
@@ -146,6 +146,7 @@ class dCacheInfoPool(dCacheInfo):
         
         for pool in thePoolInfo.keys():
             self.sumInfo['poolnumber'] +=1
+            details_db_values = {}
             details_db_values["poolname"] = pool
 
             if  len(thePoolInfo[pool]) == 0:
@@ -177,11 +178,9 @@ class dCacheInfoPool(dCacheInfo):
             elif details_db_values["poolstatus"] == 0.:
                 self.sumInfo['poolcritical'] +=1
 
-
-        
-
-            # store the values to the database
-            self.table_fill( my_subtable_class, details_db_values )
+	    details_db_value_list.append(details_db_values)
+        # store the values to the database
+        self.table_fill_many( my_subtable_class, details_db_value_list )
 	self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
         for att in self.sumInfo.keys():

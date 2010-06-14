@@ -37,7 +37,7 @@ class Summary(ModuleBase):
 	self.db_values["summary_database"] = summary_database
 
 	summary_db_keys = {}
-	summary_db_values = {}
+	summary_db_value_list = []
 
 	summary_db_keys["site"] = StringCol()
 	summary_db_keys["catname"] = StringCol()
@@ -72,8 +72,9 @@ class Summary(ModuleBase):
 	        dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(tag))
 	        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
-	        root = source_tree.getroot()
+		summary_db_values = {}
 	        summary_db_values["site"] = site
+	        root = source_tree.getroot()
 
 	        for element in root:
 		    if element.tag == "category":
@@ -137,8 +138,9 @@ class Summary(ModuleBase):
 			        if summary_db_values["type"] == 'rated':
 				    self.status = status
 
-		            self.table_fill(subtable_summary, summary_db_values)
+			    summary_db_value_list.append(summary_db_values.copy())
 	finally:
+	    self.table_fill_many(subtable_summary, summary_db_value_list)
 	    self.subtable_clear(subtable_summary, [], self.holdback_time)
 
     def output(self):
