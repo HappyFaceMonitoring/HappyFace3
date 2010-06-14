@@ -4,9 +4,9 @@
 # and DBS to find out how many files are staged, pinned, etc. for each dataset
 # individually.
 
-input_directory = 'dumps'
-output_file = 'dm.xml'
-
+import ConfigParser
+import optparse
+import subprocess
 import urllib2
 import xml.sax
 import calendar
@@ -17,6 +17,22 @@ import os
 
 # DBSAPI refuses to work otherwise when it is run by cron
 os.environ['USER'] = 'hilfeomgcmssoftwarefrickel'
+
+class Config:
+    def __init__(self, filename):
+	config = ConfigParser.ConfigParser()
+	config.read(filename)
+
+	self.input_directory = self.get_default(config, 'chimera', 'input_directory', '')
+	self.output_file = self.get_default(config, 'chimera', 'output_file', '')
+	self.upload_url = self.get_default(config, 'chimera', 'upload_url', '')
+	self.password = self.get_default(config, 'chimera', 'password', '')
+
+    def get_default(self, parser, section, option, default):
+        try:
+	    return parser.get(section, option)
+        except:
+	    return default
 
 # XML parser callback handler, merging filesizes into file<->dataset mapping
 class SizeHandler(xml.sax.ContentHandler):
@@ -230,9 +246,9 @@ def write_xml_output(result, filename, timestamp):
     f.write('</datasets>')
     f.close()
 
-def run():
+def run(config):
     # Check whether there is a new chimera dump available
-    chimera = query_chimera_dump(input_directory, 'last_modified')
+    chimera = query_chimera_dump(config.input_directory, 'chimera.last_modified')
     if chimera is None:
         sys.stdout.write('Chimera dump not updated since last execution\n')
 	return
@@ -254,8 +270,20 @@ def run():
     chimera[1].close()
 
     # Write XML output for HappyFace, chimera[2] is timestamp of chimera dump
-    write_xml_output(result, output_file, chimera[2])
-    file('last_modified', 'w').write(str(chimera[2]))
+    write_xml_output(result, config.output_file, chimera[2])
+    file('chimera.last_modified', 'w').write(str(chimera[2]))
+
+    if config.upload_url != '':
+        # Upload
+	upload_url = config.upload_url
+	if config.password != '':
+	    split = config.upload_url.split('//')
+	    upload_url = split[0] + '//' + config.password + '@' + split[1]
+	sub_p = subprocess.Popen(['curl', '-F', 'Datei=@' + config.output_file, upload_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	sub_p.communicate()
+	if sub_p.returncode != 0:
+            sys.stderr.write('Upload failed: %s...\n' % sub_p.stderr)
+	    sys.exit(-1)
 
 # Don't do anything if the script is already running (so it's save to run it
 # frequently in a cronjob).
@@ -265,6 +293,14 @@ try:
 except:
     try:
         file('chimera.py.pid', 'w').write(str(os.getpid()))
-        run()
+
+        parser = optparse.OptionParser()
+	parser.add_option('-c', '--config', dest='config', help='Config file to use', metavar='CONFIG')
+        (options, args) = parser.parse_args()
+
+	config_file = options.config
+	if not config_file: config_file = 'chimera.cfg'
+
+        run(Config(config_file))
     finally:
         os.unlink('chimera.py.pid')
