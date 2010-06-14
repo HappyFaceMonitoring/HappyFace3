@@ -1,10 +1,12 @@
 import sys,os
 import shlex
 import subprocess
+import re
 
 class DownloadError(Exception):
-    def __init__(self, url, stderr):
+    def __init__(self, url, http_errcode, stderr):
 	self.url = url
+	self.http_errcode = http_errcode
 	self.stderr = stderr
     def __str__(self):
 	return 'Could not download "' + self.url + '"'
@@ -22,7 +24,12 @@ class GetData(object):
 	stderr = process.communicate()[1]
 
         if process.returncode != 0:
-	    raise DownloadError(url, stderr)
+	    # Find the HTTP error code from output
+	    match = re.search('ERROR ([0-9][0-9][0-9])', stderr)
+	    http_errcode = 0
+	    if match: http_errcode = int(match.group(1))
+
+	    raise DownloadError(url, http_errcode, stderr)
 
 # execute the Wget with special parameters to load an XML file
     def getDataWgetXmlRequest(self,args,url,path,file):
@@ -32,4 +39,9 @@ class GetData(object):
 	stderr = process.communicate()[1]
 
         if process.returncode != 0:
-	    raise DownloadError(url, stderr)
+	    # Find the HTTP error code from output
+	    match = re.search('ERROR ([0-9][0-9][0-9])', stderr)
+	    http_errcode = 0
+	    if match: http_errcode = int(match.group(1))
+
+	    raise DownloadError(url, http_errcode, stderr)
