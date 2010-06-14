@@ -4,9 +4,8 @@
 # and DBS to find out how many files are staged, pinned, etc. for each dataset
 # individually.
 
-#dump_file = 'http://ekpwww.physik.uni-karlsruhe.de/~zvada/chimera-dump/cms-chimera-dump-marian-test-20100526-v0.9.0-pool.xml.bz2'
-dump_file = 'http://ekpwww.physik.uni-karlsruhe.de/~zvada/chimera-dump/cms-chimera-dump-marian-test-20100601-v0.9.0-pool.xml.bz2'
-size_file = 'http://ekpwww.physik.uni-karlsruhe.de/~zvada/chimera-dump/cms-chimera-dump-marian-test-20100531-v0.9.0-dump.xml.bz2'
+input_directory = 'dumps'
+output_file = 'dm.xml'
 
 import urllib2
 import xml.sax
@@ -15,6 +14,9 @@ import time
 import sys
 import bz2
 import os
+
+# DBSAPI refuses to work otherwise when it is run by cron
+os.environ['USER'] = 'hilfeomgcmssoftwarefrickel'
 
 # XML parser callback handler, merging filesizes into file<->dataset mapping
 class SizeHandler(xml.sax.ContentHandler):
@@ -139,27 +141,41 @@ class Handler(xml.sax.ContentHandler):
             self.entry_name = None
 
 def query_chimera_dump(url, last_modified_file):
-    headers = {}
+    prev_timestamp = 0
     try:
-        headers['If-Modified-Since'] = file(last_modified_file, 'r').read()
+        prev_timestamp = int(file(last_modified_file, 'r').read())
     except:
         pass
 
-    try:
-        req = urllib2.Request(dump_file, None, headers)
-        dl = urllib2.urlopen(req)
-        info = dl.info()
-	return dl
-    except urllib2.HTTPError, ex:
-        if ex.code == 304:
-            sys.stdout.write('Chimera dump not updated since last execution\n')
-            return None
-        raise ex
+    most_recent = None
+    most_recent_dump_path = None
+    most_recent_pool_path = None
+
+    for filename in os.listdir(url):
+        # Only scan dumps
+        if not filename.startswith('chimera_dump'):
+	    continue
+
+        path = url + '/' + filename
+	timestamp = os.stat(path).st_mtime
+	if timestamp > prev_timestamp and (most_recent == None or timestamp > most_recent):
+	    # The dump is more recent than the one we scanned the last time
+	    # Check whether there is also a sizes file.
+	    pool_filename = 'chimera_pool' + filename[12:]
+	    pool_path = url + '/' + pool_filename
+	    if os.path.exists(pool_path):
+	        most_recent = timestamp
+	        most_recent_dump_path = path
+		most_recent_pool_path = pool_path
+
+    if most_recent is None:
+        return None
+
+    return [bz2.BZ2File(most_recent_pool_path), bz2.BZ2File(most_recent_dump_path), int(most_recent)]
 
 # Queries DBS to obtain a mapping from files to dataset
 def query_dataset_files():
-    # TODO
-    sys.path.extend(['grid-control/python', '.'])
+    sys.path.append('dbsapi')
     import provider_dbsv2
 
     api = provider_dbsv2.createDBSAPI('')
@@ -184,23 +200,19 @@ def parse_chimera_dump(file, datasets):
     parser.setContentHandler(xml_handler)
 
     # TODO: This is a temporary work-around for invalid XML in the chimera dump
-    #for line in file:
-    #    line = line.replace('&', '&amp;')
-    #    parser.feed(line)
+#    for line in file:
+#        line = line.replace('&', '&amp;')
+#        parser.feed(line)
 
     parser.parse(file)
     return xml_handler
 
-def write_xml_output(result, filename, info):
+def write_xml_output(result, filename, timestamp):
     total_data = {}
 
     f = file(filename, 'w')
     f.write('<datasets>\n')
 
-    if 'Last-Modified' in info:
-        timestamp = calendar.timegm(time.strptime(info['Last-Modified'], '%a, %d %b %Y %H:%M:%S GMT'))
-    else:
-        timestamp = time.time()
     f.write('\t<time>' + str(timestamp) + '</time>\n')
     for dataset in result.records:
         record = result.records[dataset]
@@ -218,37 +230,41 @@ def write_xml_output(result, filename, info):
     f.write('</datasets>')
     f.close()
 
-dl = query_chimera_dump(dump_file, 'last_modified')
-if dl is None:
-    sys.exit(0)
-info = dl.info()
+def run():
+    # Check whether there is a new chimera dump available
+    chimera = query_chimera_dump(input_directory, 'last_modified')
+    if chimera is None:
+        sys.stdout.write('Chimera dump not updated since last execution\n')
+	return
 
-# Great, we have a new chimera dump to parse. Before doing so, get dataset
-# information from DBS to assign files in the chimera dump to datasets. Since
-# this might take a while however store the chimera dump to a file so that we
-# don't rely on the HTTP connection still open when that has finished.
-sys.stdout.write('New Chimera dump available, downloading...\n')
-file('chimera_dump', 'w').write(dl.read())
-dl.close()
+    # Great, we have a new chimera dump to parse. Before doing so, get dataset
+    # information from DBS to assign files in the chimera dump to datasets.
+    sys.stdout.write('New Chimera dump available...\n')
 
-sys.stdout.write('Querying DBS...\n')
-datasets = query_dataset_files()
-#datasets = {}
+    sys.stdout.write('Querying DBS...\n')
+    datasets = query_dataset_files()
+    #datasets = {}
 
-sys.stdout.write('Loading file size dump...\n')
-sizes_dl= urllib2.urlopen(size_file)
-file('chimera_size', 'w').write(sizes_dl.read()) # TODO: Direct streaming decompression, without writing to disk first
-parse_chimera_sizes(bz2.BZ2File('chimera_size'), datasets)
-os.unlink('chimera_size')
+    sys.stdout.write('Parsing sizes dump...\n')
+    parse_chimera_sizes(chimera[1], datasets)
 
-sys.stdout.write('Parsing Chimera dump...\n')
-bzfile = bz2.BZ2File('chimera_dump')
-result = parse_chimera_dump(bzfile, datasets)
-bzfile.close()
-os.unlink('chimera_dump')
+    sys.stdout.write('Parsing pool dump...\n')
+    result = parse_chimera_dump(chimera[0], datasets)
+    chimera[0].close()
+    chimera[1].close()
 
-# Write XML output for HappyFace
-write_xml_output(result, 'out.xml', info)
+    # Write XML output for HappyFace, chimera[2] is timestamp of chimera dump
+    write_xml_output(result, output_file, chimera[2])
+    file('last_modified', 'w').write(str(chimera[2]))
 
-if 'Last-Modified' in info:
-    file('last_modified', 'w').write(info['Last-Modified'])
+# Don't do anything if the script is already running (so it's save to run it
+# frequently in a cronjob).
+try:
+    file('chimera.py.pid', 'r').read()
+    sys.stdout.write('PID file exists already\n')
+except:
+    try:
+        file('chimera.py.pid', 'w').write(str(os.getpid()))
+        run()
+    finally:
+        os.unlink('chimera.py.pid')
