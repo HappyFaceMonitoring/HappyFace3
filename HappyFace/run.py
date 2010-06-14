@@ -4,6 +4,7 @@
 import sys, os
 import traceback
 from time import time, localtime, mktime
+import signal
 import thread
 import ConfigParser
 
@@ -70,15 +71,26 @@ def HappyFace():
         sys.stdout.write('Could not create archive directory ' + archive_dir + ', aborting ...\n')
         sys.exit(-1)
 
-    # Check for lockfile existence
-    # TODO: Remove the race
-    lockfile = output_dir + "/hf.lock"
-    if os.path.exists(lockfile):
-        sys.stdout.write('Lock file exists. Is there another HappyFace instance running? Aborting ...\n')
-	sys.exit(-1)
-
     try:
-        open(lockfile, 'w').close()
+        lockfile = output_dir + "/hf.lock"
+
+        def signal_handler(signum, stack):
+	    print('HappyFace: Terminating due to signal %s' % str(signum))
+	    # Note that this raises an exception so the lock file will be
+	    # removed by the finally clause of the outer try block.
+	    sys.exit(-2)
+
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
+
+        # Check for lockfile existence
+        try:
+	    os.close(os.open(lockfile, os.O_CREAT | os.O_EXCL))
+	except:
+            sys.stdout.write('Lock file exists. Is there another HappyFace instance running? Aborting ...\n')
+	    # Prevent outer try block from removing the lock file
+	    lockfile = ''
+	    sys.exit(-1)
 
         # try to initiate / create the database
         database = output_dir + "/HappyFace.db"
@@ -217,10 +229,11 @@ def HappyFace():
         print str(ex) + '\nAborting ...'
 	traceback.print_exc()
     finally:
-        try:
-            os.unlink(lockfile)
-	except: 
-	    pass
+        if lockfile != '':
+            try:
+               os.unlink(lockfile)
+	    except: 
+	       pass
 
 if __name__ == '__main__':
     HappyFace()
