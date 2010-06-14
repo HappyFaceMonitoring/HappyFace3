@@ -96,12 +96,13 @@ class dCacheDataManagement(ModuleBase):
 	    class sqlmeta:
 	        table = self.database_table
 	    timestamp = IntCol()
+	    chimera_timestamp = IntCol()
 
         prev_timestamp = 0
         try:
 	    prev_row = list(main_table.select(orderBy=DESC(main_table.q.timestamp))[0:1])
 	    if len(prev_row) > 0:
-	        prev_timestamp = prev_row[0].timestamp
+	        prev_timestamp = prev_row[0].chimera_timestamp
 	except:
 	    pass
 
