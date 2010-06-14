@@ -158,6 +158,36 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    # unlock the database access
 	    self.lock.release()
 
+    # This should be used instead of table_fill if many rows are to be inserted
+    # since this is much faster than calling table_fill multiple times.
+    def table_fill_many(self, My_DB_Class, table_values):
+	# lock object enables exclusive access to the database
+	self.lock.acquire()
+
+	try:
+            for value in table_values:
+	        value['timestamp'] = self.timestamp
+
+            # Inserting using SQLObject is quite slow, so we use executemany
+	    # directly within a transaction which is faster by at least
+	    # a factor 10. See also this for a comparison between various APIs:
+	    # http://pyinsci.blogspot.com/2007/07/fastest-python-database-interface.html
+
+	    # TODO: I am not sure how sqlite-specific this code is, maybe
+	    # needs to be changed/adapted for other DBMSes if we switch one day.
+	    connection = sqlhub.processConnection
+            dbObject = connection.getConnection()
+	    cursor = dbObject.cursor()
+
+	    name = My_DB_Class.sqlmeta.table
+	    columns = My_DB_Class.sqlmeta.columns
+
+	    cursor.execute('BEGIN')
+	    cursor.executemany('INSERT INTO ' + name + '(' + ','.join(columns) + ') VALUES (' + ','.join(map(lambda x: ':'+x, columns)) + ')', table_values)
+	    cursor.execute('COMMIT')
+	finally:
+	    self.lock.release()
+
     # This should be called by modules to set up their subtables for clearing
     # They can't call table_clear directly because they would otherwise exceed
     # the timeout for module processing. Instead this queues the table to be
