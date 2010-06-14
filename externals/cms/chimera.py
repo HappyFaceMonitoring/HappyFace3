@@ -271,7 +271,6 @@ def run(config):
 
     # Write XML output for HappyFace, chimera[2] is timestamp of chimera dump
     write_xml_output(result, config.output_file, chimera[2])
-    file('chimera.last_modified', 'w').write(str(chimera[2]))
 
     if config.upload_url != '':
         # Upload
@@ -284,6 +283,8 @@ def run(config):
 	if sub_p.returncode != 0:
             sys.stderr.write('Upload failed: %s...\n' % sub_p.stderr)
 	    sys.exit(-1)
+
+    file('chimera.last_modified', 'w').write(str(chimera[2]))
 
 # Don't do anything if the script is already running (so it's save to run it
 # frequently in a cronjob).
