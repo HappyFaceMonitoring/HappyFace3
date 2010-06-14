@@ -62,6 +62,8 @@ class dCacheDataManagement(ModuleBase):
 	details_db_keys["total_on_disk_files"] = IntCol()
 	details_db_keys["total_on_disk_size"] = FloatCol()
 
+	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
+
 	details_table = self.table_init(details_database, details_db_keys)
 
 	dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
