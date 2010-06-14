@@ -1,5 +1,6 @@
 from xml.dom.minidom import * # for XML parsing
 from lxml import etree
+import xml.sax # for sequential XML parsing
 import sys
 
 #############################################
@@ -29,3 +30,15 @@ class XMLParsing():
             return tree,""
         except Exception, ex:
 	    raise Exception('Could not parse XML file \"' + xml_file + '\": ' + str(ex))
+
+    # Allows for sequential XML parsing using a SAX parser
+    # See http://docs.python.org/library/xml.sax.html
+    def parse_xmlfile_sax(self, xml_filename_or_stream, handler, error_handler = xml.sax.ErrorHandler()):
+        try:
+	    xml.sax.parse(xml_filename_or_stream, handler, error_handler)
+        except Exception, ex:
+	    if isinstance(xml_filename_or_stream, basestring):
+	        raise Exception('Could not parse XML file \"' + xml_filename_or_stream + '\": ' + str(ex))
+	    else:
+	        raise Exception('Could not parse XML file \"' + xml_filename_or_stream.name + '\": ' + str(ex))
+
