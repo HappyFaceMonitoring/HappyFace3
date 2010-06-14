@@ -2,6 +2,7 @@
 
 # import statements
 import sys, os
+import traceback
 from time import time, localtime, mktime
 import thread
 import ConfigParser
@@ -214,6 +215,7 @@ def HappyFace():
         print "\nDONE!!\n"
     except Exception, ex:
         print str(ex) + '\nAborting ...'
+	traceback.print_exc()
     finally:
         try:
             os.unlink(lockfile)
