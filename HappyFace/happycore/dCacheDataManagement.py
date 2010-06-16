@@ -33,6 +33,13 @@ class dCacheDataManagement(ModuleBase):
 	self.db_values["total_on_disk_files"] = 0
 	self.db_values["total_on_disk_size"] = 0.0
 
+	self.warning_limit = int(self.configService.getDefault('setup', 'warning_limit', '-1'))
+	self.critical_limit = int(self.configService.getDefault('setup', 'critical_limit', '-1'))
+
+	self.configService.addToParameter('setup', 'definition', 'Warning level depending on timestamp of last chimera dump:')
+	self.configService.addToParameter('setup', 'definition', '<br />Warning: &gt;= ' + str(self.warning_limit) + ' hours')
+	self.configService.addToParameter('setup', 'definition', '<br />Critical: &gt;= ' + str(self.critical_limit) + ' hours')
+
 	self.dsTag = 'xml_source'
 
     def set_db_value(self, db_values, dataset, value):
@@ -110,7 +117,12 @@ class dCacheDataManagement(ModuleBase):
 		self.table_fill_many(details_table, details_db_values)
 	self.subtable_clear(details_table, [], self.holdback_time)
 
-	self.status = 1.0
+	if cur_timestamp == 0 or (self.critical_limit != -1 and time.time() - self.critical_limit*3600 > cur_timestamp):
+		self.status = 0.0
+	elif self.warning_limit != -1 and time.time() - self.warning_limit*3600 > cur_timestamp:
+		self.status = 0.5
+	else:
+		self.status = 1.0
 
     def output(self):
 
