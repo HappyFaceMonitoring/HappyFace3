@@ -22,6 +22,12 @@ os.environ['USER'] = 'hilfeomgcmssoftwarefrickel'
 root = os.path.dirname(os.path.abspath(os.path.normpath(sys.argv[0])))
 sys.path.insert(0, os.path.join(root, 'dbsapi'))
 
+# File in chimera dump.
+class File:
+    def __init__(self, size = -1, dataset = None):
+        self.size = size
+	self.dataset = dataset
+
 class Config:
     def __init__(self, filename):
 	config = ConfigParser.ConfigParser()
@@ -32,6 +38,7 @@ class Config:
 	self.output_file = self.get_default(config, 'chimera', 'output_file', '')
 	self.upload_url = self.get_default(config, 'chimera', 'upload_url', '')
 	self.password = self.get_default(config, 'chimera', 'password', '')
+	self.unassigned_file = self.get_default(config, 'chimera', 'unassigned_file', '')
 
     def get_default(self, parser, section, option, default):
         try:
@@ -41,8 +48,8 @@ class Config:
 
 # XML parser callback handler, merging filesizes into file<->dataset mapping
 class SizeHandler(xml.sax.ContentHandler):
-    def __init__(self, datasets):
-        self.datasets = datasets
+    def __init__(self, files):
+        self.files = files
 
         self.entry_name = None
         self.entry_size = None
@@ -64,10 +71,11 @@ class SizeHandler(xml.sax.ContentHandler):
 	elif name == 'entry':
             if self.entry_name.startswith('/pnfs/gridka.de/cms/store/'):
 	        index = self.entry_name[19:]
-	        if not index in self.datasets:
-	            self.datasets[index] = {'size': self.entry_size}
+	        if not index in self.files:
+		    # Seems this file is not in DBS
+	            self.files[index] = File(size = self.entry_size)
 	        else:
-	            self.datasets[index]['size'] = self.entry_size
+	            self.files[index].size = self.entry_size
 
             self.entry_size = None
             self.entry_name = None
@@ -85,8 +93,8 @@ class Handler(xml.sax.ContentHandler):
 	    self.data['total_on_disk_size'] = 0
 	    self.incomplete_sizes = 0
 
-    def __init__(self, datasets):
-        self.datasets = datasets
+    def __init__(self, files):
+        self.files = files
         self.records = {}
 
         self.total_entries = set()
@@ -123,21 +131,29 @@ class Handler(xml.sax.ContentHandler):
             if self.entry_name.startswith('/pnfs/gridka.de/cms/store/'):
 	        index = self.entry_name[19:]
 
-		if not index in self.datasets or not 'path' in self.datasets[index]:
+		if not index in self.files or self.files[index].dataset is None:
 		    dataset = 'Unassigned'
+		    if index in self.files:
+		        self.files[index].dataset = None
+		    else:
+		        self.files[index] = File(dataset=None)
 		else:
-		    dataset = self.datasets[index]['path']
+		    dataset = self.files[index].dataset
 
 		if not dataset in self.records:
 		    self.records[dataset] = Handler.Record()
 
 		# Get entry size directly from <size> or from pre-parsed
-		# dump in self.datasets[index]['size'] as a fallback
+		# dump in self.files[index]['size'] as a fallback
                 entry_size = 0
 		if self.entry_size is not None:
 		    entry_size = self.entry_size
-		elif index in self.datasets and 'size' in self.datasets[index]:
-		    entry_size = self.datasets[index]['size']
+		    if index in self.files:
+		        self.files[index].size = entry_size
+		    else:
+		        self.files[index] = File(size = entry_size)
+		elif index in self.files and self.files[index].size != -1:
+		    entry_size = self.files[index].size
 		else:
 		    if not self.entry_name in self.total_entries:
 		        # Could not get size for this file, annotate in XML
@@ -203,11 +219,11 @@ def query_dataset_files():
 
     paths = set(map(lambda x: x['Path'], api.listBlocks(storage_element_name="cmssrm-fzk.gridka.de")))
 
-    datasets = {}
+    files = {}
     for p in paths:
         for f in map(lambda x: x['LogicalFileName'], api.listDatasetFiles(p)):
-            datasets[f] = {'path': p}
-    return datasets
+            files[f] = File(dataset = p)
+    return files
 
 def parse_chimera_sizes(file, datasets):
     xml_handler = SizeHandler(datasets)
@@ -251,6 +267,14 @@ def write_xml_output(result, filename, timestamp):
     f.write('</datasets>')
     f.close()
 
+def write_unassigned_output(result, filename, timestamp):
+    f = file(filename, 'w')
+    f.write('Files with no dataset assigned on ' + time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime(timestamp)) + ':\n\n')
+    for filename in result.files:
+        if result.files[filename].dataset is None:
+	    f.write(filename + "\n")
+    f.close()
+
 def run(config):
     # Check whether there is a new chimera dump available
     last_modified_file = os.path.join(config.cache_directory, 'chimera.last_modified')
@@ -264,18 +288,19 @@ def run(config):
     sys.stdout.write('New Chimera dump available...\n')
 
     sys.stdout.write('Querying DBS...\n')
-    datasets = query_dataset_files()
-    #datasets = {}
+    files = query_dataset_files()
+    #files = {}
 
     sys.stdout.write('Parsing sizes dump...\n')
-    parse_chimera_sizes(chimera[1], datasets)
+    parse_chimera_sizes(chimera[1], files)
 
     sys.stdout.write('Parsing pool dump...\n')
-    result = parse_chimera_dump(chimera[0], datasets)
+    result = parse_chimera_dump(chimera[0], files)
     chimera[0].close()
     chimera[1].close()
 
     # Write XML output for HappyFace, chimera[2] is timestamp of chimera dump
+    sys.stdout.write('Write and Upload output...\n')
     output_file = os.path.join(config.cache_directory, config.output_file)
     write_xml_output(result, output_file, chimera[2])
 
@@ -290,6 +315,11 @@ def run(config):
 	if sub_p.returncode != 0:
             sys.stderr.write('Upload failed: %s...\n' % sub_p.stderr)
 	    sys.exit(-1)
+
+    if config.unassigned_file != '':
+        unassigned_file = os.path.join(config.cache_directory, config.unassigned_file)
+	write_unassigned_output(result, unassigned_file, chimera[2])
+
 
     file(last_modified_file, 'w').write(str(chimera[2]))
 
