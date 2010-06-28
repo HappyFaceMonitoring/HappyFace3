@@ -127,7 +127,7 @@ class dCacheDataManagement(ModuleBase):
     def output(self):
 
 	html = []
-	html.append(  "<p><large>Chimera dump generated on ' . strftime('%a, %d %b %Y %T %z', $data['chimera_timestamp']) . '</large></p>")
+	html.append(  "<p style=\"font-size:large;\">Chimera dump generated on ' . strftime('%a, %d %b %Y %T %z', $data['chimera_timestamp']) . '</p>")
 	html.append(  '<table class="TableData">')
 	html.append(  ' <tr class="TableHeader">')
 	html.append(  '  <td></td>')
