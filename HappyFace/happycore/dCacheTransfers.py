@@ -203,7 +203,7 @@ class dCacheTransfers(ModuleBase):
 		# Show/Hide details table
 		mc_begin.append("""<input type="button" value="show/hide results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_result\\\');" />""")
 		mc_begin.append(  '<div class="DetailedInfo" id="' + self.__module__+ '_result" style="display:none;">')
-		mc_begin.append(  ' <table class="TableDetails">')
+		mc_begin.append(  ' <table class="TableDetails" id="' + self.__module__ + '_details_table">')
 		mc_begin.append(  '  <tr class="TableHeader">')
 		mc_begin.append(  '   <td>pnfsID</td>')
 		mc_begin.append(  '   <td>Pool</td>')
@@ -228,6 +228,10 @@ class dCacheTransfers(ModuleBase):
 		mc_end = []
 		mc_end.append(' </table>')
 		mc_end.append('</div>')
+		mc_end.append('<script type="text/javascript">')
+		mc_end.append('  makeTableSortable("' + self.__module__ + '_details_table", [sortFetchText, sortFetchText, sortFetchText, sortFetchText, sortFetchTime, sortFetchNumeric, sortFetchNumeric]);')
+		mc_end.append('</script>')
+
 
 		module_content = """<?php
 

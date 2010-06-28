@@ -158,7 +158,7 @@ class dCacheDataManagement(ModuleBase):
 	details_begin = []
 	details_begin.append("""<input type="button" value="Show/Hide details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_details\\\');" />""")
 	details_begin.append('  <div class="DetailedInfo" id="' + self.__module__+ '_details" style="display:none;">')
-	details_begin.append('   <table class="TableDetails">')
+	details_begin.append('   <table class="TableDetails" id="' + self.__module__ + '_details_table">')
 	details_begin.append('    <tr class="TableHeader">')
 	details_begin.append('     <td>Dataset name</td>')
 	details_begin.append('     <td>Bare total</td>')
@@ -177,6 +177,14 @@ class dCacheDataManagement(ModuleBase):
 	details_end = []
 	details_end.append(' </table>')
 	details_end.append('</div>')
+	details_end.append('<script type="text/javascript">')
+	details_end.append('  function sortFetch' + self.__module__ + '(a,b)')
+	details_end.append('  {')
+	details_end.append('    return parseFloat(a.firstChild.nextSibling.nextSibling.nodeValue);')
+	details_end.append('  }')
+	details_end.append('')
+	details_end.append('  makeTableSortable("' + self.__module__ + '_details_table", [sortFetchText, sortFetch' + self.__module__ + ', sortFetch' + self.__module__ + ', sortFetch' + self.__module__  + ']);')
+	details_end.append('</script>')
 
 	module_content = """<?php
 
