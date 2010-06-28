@@ -21,6 +21,7 @@ class dCacheDataManagement(ModuleBase):
 	self.db_keys["bare_on_disk_size"] = FloatCol()
 	self.db_keys["total_on_disk_files"] = IntCol()
 	self.db_keys["total_on_disk_size"] = FloatCol()
+	self.db_keys["on_disk_threshold"] = FloatCol()
 
 	# Make sure there are valid values for these columns just in case
 	# there is an error before we get to set them.
@@ -32,13 +33,16 @@ class dCacheDataManagement(ModuleBase):
 	self.db_values["bare_on_disk_size"] = 0.0
 	self.db_values["total_on_disk_files"] = 0
 	self.db_values["total_on_disk_size"] = 0.0
+	self.db_values["on_disk_threshold"] = 0.0
 
 	self.warning_limit = int(self.configService.getDefault('setup', 'warning_limit', '-1'))
 	self.critical_limit = int(self.configService.getDefault('setup', 'critical_limit', '-1'))
+	self.on_disk_threshold = float(self.configService.getDefault('setup', 'on_disk_threshold', '0.95'))
 
 	self.configService.addToParameter('setup', 'definition', 'Warning level depending on timestamp of last chimera dump:')
 	self.configService.addToParameter('setup', 'definition', '<br />Warning: &gt;= ' + str(self.warning_limit) + ' hours')
 	self.configService.addToParameter('setup', 'definition', '<br />Critical: &gt;= ' + str(self.critical_limit) + ' hours')
+	self.configService.addToParameter('setup', 'definition', '<br />On-disk threshold: ' + str(int(round(self.on_disk_threshold * 100))) + '%')
 
 	self.dsTag = 'xml_source'
 
@@ -59,6 +63,7 @@ class dCacheDataManagement(ModuleBase):
     def process(self):
         details_database = self.__module__ + "_table_details"
 	self.db_values['details_database'] = details_database
+	self.db_values["on_disk_threshold"] = self.on_disk_threshold
 
 	details_db_keys = {}
 	details_db_keys['name'] = StringCol()
@@ -167,7 +172,7 @@ class dCacheDataManagement(ModuleBase):
 	details_begin.append('    </tr>')
 
 	details_row = []
-	details_row.append(  '  <tr>')
+	details_row.append("""  <tr' . $class_str . '>""")
 	details_row.append("""   <td class="dCacheDataManagementDetailsName">' . htmlentities($info['name']) . '</td>""")
 	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_total_files'] . ' files<br/>' . round($info['bare_total_size']/1024.0/1024.0/1024.0,1) . ' GB</td>""")
 	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_on_disk_files'] . ' files (' . ( ($info['bare_total_files'] != 0) ? round($info['bare_on_disk_files']*100.0/$info['bare_total_files']) : 0) . '%)<br/>' . round($info['bare_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GB (' . (($info['bare_total_size'] != 0) ? round($info['bare_on_disk_size']*100.0/$info['bare_total_size']) : 0) . '%)</td>""")
@@ -201,6 +206,11 @@ class dCacheDataManagement(ModuleBase):
 
 	foreach($dbh->query($details_db_sqlquery) as $info)
 	{
+		$class_str = '';
+		$on_disk_ratio = $info['bare_on_disk_files'] * 1.0 / $info['bare_total_files'];
+		if($on_disk_ratio > $data['on_disk_threshold'])
+			$class_str = ' class=ok';
+
 		if($info['name'] == 'Unassigned')
 			$unassigned = $info;
 		else
@@ -211,6 +221,11 @@ class dCacheDataManagement(ModuleBase):
 	if(isset($unassigned))
 	{
 		$info = $unassigned;
+
+		$class_str = '';
+		if($info['bare_on_disk_files'] * 1.0 / $info['bare_total_files'] > $info['on_disk_threshold'])
+			$class_str = ' class=ok';
+
 		print('""" + self.PHPArrayToString(details_row) + """');
 	}
 
