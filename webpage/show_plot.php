@@ -1,4 +1,8 @@
 <?php
+
+ # This parses $_GET parameters to obtain timerange to plot
+include('plot_common.php');
+
  #=====================================
  # DataBase Initialisation
  # connect to SQLite database
@@ -51,17 +55,7 @@
    return $RGB;
  }
 
- #=====================================
- # Array Constructor
- # Values <=> Timestamps
-
  $renormalize = isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0;
-
- $ta0 = date_parse($_GET["date0"] . " " . $_GET["time0"]);
- $ta1 = date_parse($_GET["date1"] . " " . $_GET["time1"]);
-
- $timestamp0 = mktime( $ta0["hour"],$ta0["minute"],0,$ta0["month"],$ta0["day"],$ta0["year"] );
- $timestamp1 = mktime( $ta1["hour"],$ta1["minute"],0,$ta1["month"],$ta1["day"],$ta1["year"] );
 
  # Get timestamp variable to show
  $timestamp_var = 'timestamp';
