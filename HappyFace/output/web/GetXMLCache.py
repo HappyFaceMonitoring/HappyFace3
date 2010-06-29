@@ -17,7 +17,7 @@ class GetXMLCache(object):
 	# requested, then deliver it instead of doing a database query.
 	self.output = """<?php
 
-	if($_GET['action'] == 'getxml' && $timestamp >= """ + str(timestamp) + """)
+	if(isset($_GET['action']) && $_GET['action'] == 'getxml' && $timestamp >= """ + str(timestamp) + """)
 	{
 		$xml_cache_file = 'cache/HappyFace.xml';
 		$stat_result = @stat($xml_cache_file);

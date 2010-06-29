@@ -7,7 +7,7 @@ class TimeMachineLogic(object):
 	self.output = """<?php
 
 	# check if stepping is set, otherwise use default
-	if ($_GET["s"] != "") { $histo_step = $_GET["s"];}
+	if (isset($_GET["s"]) && $_GET["s"] != "") { $histo_step = $_GET["s"];}
 	else { $histo_step = '""" + histo_step + """';}
 
 	# function to reset the date/time input variables from previous views
@@ -24,7 +24,7 @@ class TimeMachineLogic(object):
 	$time_error_message = "";
 
 	# read $_GET["..."] variables (from previous views)
-	if ($_GET["date"] != "" && $_GET["time"] != "") {
+	if (isset($_GET["date"]) && isset($_GET["time"]) && $_GET["date"] != "" && $_GET["time"] != "") {
 
 	    # variable to disable the auto reload on history view
 	    $historyview = "true";

@@ -119,9 +119,9 @@ class WebCreator(object):
 
 	# logic to memorize selected tab on auto reload part 1
 	output += """<?php
-			if ($_GET["t"] != "") { $selectedTab = $_GET["t"]; }
-			if ($_GET["m"] != "") { $selectedMod = $_GET["m"]; }
-			if ($_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
+			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; }
+			if (isset($_GET["t"]) && $_GET["m"] != "") { $selectedMod = $_GET["m"]; }
+			if (isset($_GET["scroll"]) && $_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
 			else { $initialScroll = -1; }
 			print('  <script type="text/javascript">\n');
 			print('  <!--\n');
@@ -206,7 +206,7 @@ class WebCreator(object):
 	# re-expand details infos on reload (do this before we do initial
 	# scrolling, so that scrolling takes into account potentially
 	# expanded regions).
-	output += '  var expand = "<?php echo $_GET["expand"]; ?>";' + "\n"
+	output += '  var expand = "<?php if(isset($_GET["expand"])) echo $_GET["expand"]; ?>";' + "\n"
 	output += '  var expand_modules = expand.split(" ");' + "\n"
 	output += '  for(var j = 0; j < expand_modules.length; ++j) {' + "\n"
 	output += '    if(expand_modules[j].length > 0) {' + "\n"
