@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<uschi frequency="15" time="2010-06-30 14:24:00">
+  <tests>
+    <test frequency="15" name="test_system_load.sh" result="0" time="2010-06-30 14:24:00">
+      <about>
+        This test checks the system load of the VoBox and
+ gives a warning if it exceeds a certain value.
+ The warning and critical status thresholds are given in
+ the output below.
+      </about>
+      <log>
+        *** Get uptime and load information
+ 14:24:00 up 111 days,  3:19,  5 users,  load average: 0.52, 0.25, 0.14
+*** Current loads (rounded):
+***  1 minute average: 0
+***  5 minute average: 0
+*** 15 minute average: 0
+*** Current thresholds:
+***  1 minute average: 10 (warning), 14 (critical)
+***  5 minute average: 8  (warning), 12 (critical)
+*** 15 minute average: 5  (warning), 7  (critical)
+*******************
+***** Test OK *****
+*******************
+      </log>
+    </test>
+  </tests>
+</uschi>
+
