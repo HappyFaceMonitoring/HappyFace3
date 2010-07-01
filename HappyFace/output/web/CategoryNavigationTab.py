@@ -13,6 +13,7 @@ class CategoryNavigationTab(HTMLOutput):
 	output.append('   <td>')
 	output.append('    <div style="text-align:center;">')
 	output.append("     ' . getCatStatusSymbolForCategory('" + category + "','" + cat_type + "','" + cat_algo + "', $ModuleResultsArray) . '")
+	output.append("     ' . getCatIndexSymbolForCategory('" + category + "', $ModuleResultsArray) . '")
 	output.append('    </div>')
 	output.append('   </td>')
 	output.append('  </tr>')

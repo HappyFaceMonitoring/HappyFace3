@@ -29,5 +29,24 @@ class CategoryStatusSymbolLogic(object):
 	    return getCatStatusSymbol($cat_type, $cat_status, 'HappyNavTab');
 	}
 
+        function getCatIndexSymbolForCategory($category,$ModuleResultsArray)
+        {
+            $cssclass = 'class="HappyNavTabIndex"';
+
+            $indexstatus = 'ok';
+
+	    foreach ($ModuleResultsArray as $module) {
+		if ($module["category"] == $category) {
+		    $mod_status = $module["status"];
+		    if ($mod_status == -1) {
+			$indexstatus = 'warn';			
+		    }
+		}
+	    }
+
+            return '<img alt="" ' . $cssclass . ' src="config/images/index_' . $indexstatus . '.png" />';
+        }
+
+
 	?>"""
 
