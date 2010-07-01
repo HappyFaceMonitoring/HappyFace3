@@ -14,15 +14,17 @@ class myUser:   #class storing the user's information
         self.username = ""
         self.dn = ""
         self.voms = ""
+        self.mail = ""      
         self.matched = False
         self.limit = 0.0    #the user's space quota
         self.lifetime = ""  #an optional lifetime for the user's non-standard quota
         myUser.totalDirs += 1
     
-    def setUserInfo(self, name, dn, voms):
+    def setUserInfo(self, name, dn, voms, mail):
         self.username = name
         self.dn = dn
         self.voms = voms
+        self.mail = mail
         self.matched = True
         myUser.matchedDirs += 1
                         
@@ -56,11 +58,12 @@ class myUser:   #class storing the user's information
 
 class usm(XMLParsing,ModuleBase):
 
+   # def __init__(self,category,timestamp,storage_dir):
     def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
+        #ModuleBase.__init__(self,category,timestamp,storage_dir)
         ModuleBase.__init__(self,module_options)
-
         # read additional config settings
         self.xml_paths = self.configService.options('downloadservice')    #get the list of xml filenames
         self.gen_limit = self.configService.get('users','general_limit')   #get the default user quota
@@ -69,7 +72,7 @@ class usm(XMLParsing,ModuleBase):
         self.admins = self.configService.get('users','admins').split(",")  #get the list admins
         self.allDirs = {}   #the main dictionary
         self.users_overquota = 0
-       
+        self.holdback_time=float(self.configService.get('users','holdback_time'))
         
         # definition of the database keys and pre-defined values
         # possible format: StringCol(), IntCol(), FloatCol(), ...
@@ -81,8 +84,37 @@ class usm(XMLParsing,ModuleBase):
         self.db_values["totalspace"] = ""
         self.db_keys["usersoq"] = IntCol()
         self.db_values["usersoq"] = 0
+        
+        #all users subtable
+        self.db_keys["users"] = StringCol()
+        self.db_values["users"] = self.__module__ + "_users"
+        self.db_keys["site"] = StringCol()
+        self.db_values["site"] = self.__module__ + "_site"
+ 
                                 
     def run(self):
+        
+        site_sub_keys={}
+        users_sub_keys = {}
+      
+        site_sub_keys["site"] = StringCol()
+
+        users_sub_keys["username"] = StringCol()
+        users_sub_keys["dirname"] = StringCol()
+        users_sub_keys["dn"] = StringCol()
+        users_sub_keys["voms"] = StringCol()
+        users_sub_keys["email"] = StringCol()
+        users_sub_keys["site"] = StringCol()
+        users_sub_keys["sitedir"] = StringCol()
+        users_sub_keys["du"] = FloatCol()
+        users_sub_keys["total"] = FloatCol()
+        users_sub_keys["red"] = BoolCol()
+        users_sub_keys["matched"] = BoolCol()
+        users_sub_keys["color"] = StringCol()
+        users_sub_keys["status"] = StringCol()
+        
+        users_class = self.table_init( self.db_values["users"], users_sub_keys )
+        site_class = self.table_init( self.db_values["site"], site_sub_keys )
  
         for filetag in self.xml_paths:
             dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[filetag])
@@ -100,7 +132,7 @@ class usm(XMLParsing,ModuleBase):
                 if user.getAttribute("dirname") not in self.excl_users:
                     if user.getAttribute("dirname") not in self.allDirs:    #check if the user already exists
                         tmpUser = myUser(user.getAttribute("dirname"))
-                        tmpUser.setUserInfo(user.getAttribute("username"), user.getAttribute("DN"), user.getAttribute("voms"))
+                        tmpUser.setUserInfo(user.getAttribute("username"), user.getAttribute("DN"), user.getAttribute("voms"), user.getAttribute("mail"))
                         if user.getAttribute("dirname") in self.power_users:    #special rules for power users
                             if len(self.configService.get('power_users',user.getAttribute("dirname")).split()) == 2:
                                 tmpUser.limit = float(self.configService.get('power_users',user.getAttribute("dirname")).split()[0])
@@ -135,7 +167,15 @@ class usm(XMLParsing,ModuleBase):
         self.db_values["totaldirs"] = myUser.totalDirs
         self.db_values["matcheddirs"] = myUser.matchedDirs
         self.db_values["totalspace"] = "%.1f" % (myUser.totalSpace/pow(1024,4))
-        self.db_values["usersoq"] = self.users_overquota                
+        self.db_values["usersoq"] = self.users_overquota 
+        
+        
+        self.fill__users_subtable(users_class)
+        self.fill__site_subtable(site_class)
+        self.table_clear( users_class,[],self.holdback_time)
+        self.table_clear( site_class,[],self.holdback_time)
+        
+                       
 
     def cmp_du(self, x, y): #a comparison function, sorting a list according to user's disk usage. puts unmatched users at the end of the list
         if self.allDirs[x].matched == True and self.allDirs[y].matched == False:
@@ -156,6 +196,67 @@ class usm(XMLParsing,ModuleBase):
                 return 0
             else:
                 return -1        
+    
+    def fill__site_subtable(self,site_class):
+        sub_values = {}
+        for site in myUser.sites:
+                sub_values["site"] = site
+                self.table_fill( site_class, sub_values )
+    
+    def fill__users_subtable(self,users_class):
+ 
+        sub_values = {}
+        dir_list = self.allDirs.keys()
+        dir_list.sort(self.cmp_du)  #sort the main user list
+        
+        for site in myUser.sites:
+            for user in dir_list:
+                sub_values["site"] = site
+                sub_values["sitedir"] =""
+                sub_values["du"]=0.0
+                sub_values["dirname"] = self.allDirs[user].dirname
+                sub_values["dn"] = self.allDirs[user].dn
+                sub_values["voms"] = self.allDirs[user].voms
+                sub_values["email"] = self.allDirs[user].mail
+                sub_values["username"] = self.allDirs[user].username
+                sub_values["total"] =float( "%.1f" %(float(self.allDirs[user].getTotalSpace()/pow(1024,3))))
+                sub_values["red"] =False
+                if self.allDirs[user].matched:
+                   sub_values["matched"] =True
+                   if self.allDirs[user].getQuotaUsage() <= 1.0 and self.allDirs[user].getQuotaLifetime() > 0.0:
+                       if self.allDirs[user].voms == "/cms/dcms":
+                            sub_values["color"] ="000000"
+                       else:
+                            sub_values["color"] ="0033CC"
+                   else:
+                       sub_values["color"] ="FF0000"
+                       sub_values["red"] =True
+                else:
+                    sub_values["color"] ="FF9900"
+                    sub_values["matched"] =False
+                for place in self.allDirs[user].places:
+                    if place["site"] == site:
+                        sub_values["sitedir"] ="[" + place["site"] + "] " + place["se"]  + ":" + place["path"] + self.allDirs[user].dirname
+                        sub_values["du"]=float("%.1f" %(float(place["du"])/pow(1024,3)))
+                if self.allDirs[user].matched:
+                    if self.allDirs[user].getQuotaUsage() <= 1.0:
+                        if self.allDirs[user].getQuotaLifetime() > 0.0 and self.allDirs[user].getQuotaLifetime() != 0.1:
+                            sub_values["status"]="%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expires in ''' + "%d" % (self.allDirs[user].getQuotaLifetime()) + ''' day(s) on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y') 
+                        elif self.allDirs[user].getQuotaLifetime() == 0.1:
+                            sub_values["status"]="%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0)+ '''&thinsp;%%''' 
+                        else:
+                            sub_values["status"]="%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expired ''' + "%d" % (-1.0*float(self.allDirs[user].getQuotaLifetime())) + ''' day(s) ago on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y')
+                    else:
+                        if self.allDirs[user].getQuotaLifetime() > 0.0 and self.allDirs[user].getQuotaLifetime() != 0.1:
+                            sub_values["status"]="%.1f" % (float(self.allDirs[user].limit)/pow(102424,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expires in ''' + "%d" % (self.allDirs[user].getQuotaLifetime()) + ''' day(s) on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y')
+                        elif self.allDirs[user].getQuotaLifetime() == 0.1:
+                            sub_values["status"]="%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0)+'''&thinsp;%%'''
+                        else:
+                            sub_values["status"]="%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expired ''' + "%d" % (-1.0*float(self.allDirs[user].getQuotaLifetime())) + ''' day(s) ago on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y')
+                else:
+                    sub_values["status"]=""
+                self.table_fill( users_class, sub_values )
+
     
     
     def cmp_nn(self, x, y): #a comparison function, sorting a list according to last names. puts unmatched users at the end of the list
@@ -178,7 +279,77 @@ class usm(XMLParsing,ModuleBase):
                 return 1
             else:
                 return -1
-    
+    def getuserSQLcontent(self):
+        phpusercontent='''
+<?php
+        $usm=array();
+        $user_sql=array();
+        $sites_sql=array();
+        $a_places=array();        
+        $i=0;
+        $plasces_sqlquery = "SELECT site FROM " . $data["site"] . " WHERE timestamp = " . $data["timestamp"];
+
+        $users_sqlquery = "SELECT * FROM " . $data["users"] . " WHERE timestamp = " . $data["timestamp"]." group by dirname order by matched desc, total desc";
+#        print_r ($users_sqlquery);
+        foreach ($dbh->query($plasces_sqlquery) as $place)
+        {
+            $sites_sql[$place["site"]]= $i;
+            
+            $i++;
+        }
+        foreach ($dbh->query($users_sqlquery) as $user)
+        {
+               $user_sql["dirname"]=$user["dirname"];    
+               $user_sql["username"]=$user["username"];    
+               $user_sql["dn"]=$user["dn"];    
+               $user_sql["voms"]=$user["voms"];    
+               $user_sql["mail"]=$user["email"];    
+#               $user_sql["matched"]=$user["matched"];    
+               $user_sql["color"]=$user["color"];    
+               $user_sql["total"]=$user["total"];    
+               $user_sql["status"]=$user["status"];    
+
+               $sites_sqlquery =  "SELECT site, sitedir,du FROM " . $data["users"] . " WHERE timestamp = " . $data["timestamp"]." and dirname = '".$user_sql["dirname"]."'";
+               $a_places=array();
+               $a_sites=array();        
+               $i=0;              
+               foreach ($dbh->query($sites_sqlquery) as $site)
+                {
+                    if ($site["du"]>0 )
+                    {
+                        $a_sites[$sites_sql[$site["site"]]]=$site["du"];
+                    }else
+                    {
+                        $a_sites[$sites_sql[$site["site"]]]="";
+                    }
+                    
+                    if (! empty($site["sitedir"]))
+                    {
+                        $a_places[$i]=$site["du"]."&thinsp;GiB @ ".$site["sitedir"];
+                        $i++;
+                    }                   
+                    
+                }
+                $user_sql["sites"]=$a_sites;
+                $user_sql["places"]=$a_places;
+                   
+                if ($user["matched"])
+                {
+                       $user_sql["matched"]=$user["matched"];
+                       $usm[$user["username"]]=$user_sql;
+                }else
+                {
+                       $user_sql["matched"]="";
+                       $user_sql["username"]=$user["dirname"];    
+                       $usm[$user["dirname"]]=$user_sql;
+                }
+            
+        }
+   
+?>
+        '''
+        return phpusercontent
+
     def getAdminsString(self):
         tmpString='''
 <?php
@@ -203,10 +374,6 @@ $admins= array('''
         
         adminsString=self.getAdminsString()        
 
-        certString='''
-<?php
-$usm= array(
-            '''
         # the module's output is completely stored in 'phpString'
         phpString = '''
     <?php
@@ -355,6 +522,9 @@ printf('
                     <div id="usminfotd" class="userinfo"><strong>DN: </strong>'.$usm_entry["dn"].'</div>
                 </div>
                 <div id="usminfotr">
+                    <div id="usminfotd" class="userinfo"><strong>email: </strong> <a href="mailto:'.$usm_entry["mail"].'">'.$usm_entry["mail"].'</a></div>
+                </div>
+                <div id="usminfotr">
                     <div id="usminfotd" class="userinfo"><strong>VOMS Group: </strong>'.$usm_entry["voms"].'</div>
                 </div>');
                        foreach($usm_entry["places"] as $place){
@@ -376,69 +546,6 @@ printf('
 '''
     
         
-        for user in dir_list:
-            if self.allDirs[user].matched:
-                if self.allDirs[user].getQuotaUsage() <= 1.0 and self.allDirs[user].getQuotaLifetime() > 0.0:
-                    if self.allDirs[user].voms == "/cms/dcms":
-                        certString+='"'+self.allDirs[user].username +'''"=> array("matched"=>"1","color" =>"000000","username"=>"'''+ self.allDirs[user].username+'"'
-                    else:
-                        certString+='"'+self.allDirs[user].username +'''"=> array("matched"=>"1","color" =>"0033CC","username"=>"'''+ self.allDirs[user].username+'"'
-                else:
-                     certString+='"'+self.allDirs[user].username +'''"=> array("matched"=>"1","color" =>"FF0000","username"=>"'''+ self.allDirs[user].username+'"'
-            else:
-                certString+='"'+self.allDirs[user].dirname +'''"=> array("matched"=>"","color"=>"FF9900","username"=>"'''+ self.allDirs[user].dirname+'"'
-            certString+=',"dirname"=>"'+ self.allDirs[user].dirname+'''",
-                            "sites"=> array('''
-            for site in myUser.sites:
-                user_site_space = 0.0
-                user_site_places = 0
-                for place in self.allDirs[user].places:
-                    if place["site"] == site:
-                        user_site_space += float(place["du"])
-                        user_site_places += 1
-                if user_site_space > 0:
-                    certString+='"'+"%.0f" % (user_site_space/pow(1024,3))+'''", '''
-                else:
-                    certString+='''"",'''
-            certString+="),"
-            if num_sites != 1:
-                certString+='''"total"=>'''+ "%.0f" % (self.allDirs[user].getTotalSpace()/pow(1024,3))+", "
-            
-            certString+='''"dn"=> "'''+self.allDirs[user].dn+'''","voms"=>"'''+self.allDirs[user].voms+'''",'''
-            certString+='''
-                            "places"=>array('''                    
-            for place in self.allDirs[user].places:
-                certString+='"'+"%.0f" % (float(place["du"])/pow(1024,3)) + "&thinsp;GiB @ [" + place["site"] + "] " + place["se"]  + ":" + place["path"] + self.allDirs[user].dirname + '",'
-            certString+="),"
-            if self.allDirs[user].matched:
-                if self.allDirs[user].getQuotaUsage() <= 1.0:
-                    if self.allDirs[user].getQuotaLifetime() > 0.0 and self.allDirs[user].getQuotaLifetime() != 0.1:
-                        certString+='''
-                            "status"=> "''' + "%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expires in ''' + "%d" % (self.allDirs[user].getQuotaLifetime()) + ''' day(s) on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y') 
-                    elif self.allDirs[user].getQuotaLifetime() == 0.1:
-                        certString+='''
-                            "status"=> "'''+ "%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0)+ '''&thinsp;%%''' 
-                    else:
-                        certString+='''
-                            "status"=> "'''+ "%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expired ''' + "%d" % (-1.0*float(self.allDirs[user].getQuotaLifetime())) + ''' day(s) ago on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y')
-                else:
-                    if self.allDirs[user].getQuotaLifetime() > 0.0 and self.allDirs[user].getQuotaLifetime() != 0.1:
-                        certString+='''
-                            "status"=> "'''+ "%.1f" % (float(self.allDirs[user].limit)/pow(102424,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expires in ''' + "%d" % (self.allDirs[user].getQuotaLifetime()) + ''' day(s) on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y')
-                    elif self.allDirs[user].getQuotaLifetime() == 0.1:
-                        certString+='''
-                            "status"=> "''' + "%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0)+'''&thinsp;%%'''
-                    else:
-                        certString+='''
-                            "status"=> "'''+ "%.1f" % (float(self.allDirs[user].limit)/pow(1024,1)) + '''&thinsp;TiB quota used by ''' + "%.1f" % (self.allDirs[user].getQuotaUsage()*100.0) + '''&thinsp;%%. The quota expired ''' + "%d" % (-1.0*float(self.allDirs[user].getQuotaLifetime())) + ''' day(s) ago on ''' + (date.today()+timedelta(self.allDirs[user].getQuotaLifetime())).strftime('%b %d %Y')
-            else:
-                 certString+='''
-                            "status"=> "'''
-                  
-            certString+='''"),
-            '''
-               
-    
         phpString += '''
 <div id="usmtable" style="border-bottom: none;">
     <div id="usmtr">
@@ -482,16 +589,13 @@ printf('
 } 
 printf('
 </div>'''
-        certString+=''');
-       
-?>
-'''      
         phpString += '''
                       ');
     ?>'''
 
-        # create output sting, will be executed by a printf('') PHP command
+       # create output sting, will be executed by a printf('') PHP command
         # all data stored in DB is available via a $data[key] call
-        module_content = adminsString+certString+phpString
+ 
+        module_content = adminsString+self.getuserSQLcontent()+phpString
     
         return self.PHPOutput(module_content)
