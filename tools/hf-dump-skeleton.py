@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+import os
 import sys, getopt
 
 
 def dumpInstanceCfg(name,xml):
-    """ dumps a sceleton of instance config file """
+    """ dumps a skeleton of instance config file """
 
     name_module_cfg = makeInstanceName(name, ".cfg")
 
@@ -30,17 +31,19 @@ def dumpInstanceCfg(name,xml):
     return name_module_cfg
 
 def dumpInstancePy(name):
-    """dumps a sceleton of the instance python file"""
+    """dumps a skeleton of the instance python file"""
 
+    print name
     name_module_py = makeInstanceName(name, ".py")
+    print name_module_py
 
     ## get rid of ".py"
-    name_module = name_module_py.split(".",1)
-    name_nomodule = name_module[0].split("/",1)
-    name_small = name_nomodule[1]
+    (name_base, name_ext) = os.path.splitext(name_module_py)
+    name_small = os.path.basename(name_base)
+    print str(name_small)
 
-    del name_module
-    del name_nomodule
+    del name_base
+    del name_ext
 
     file_cont = ''
     file_cont += 'import os, sys\n\n'
@@ -81,16 +84,16 @@ def makeInstanceName(name, string):
     ## put the last snippet also into the list
     snippetList.append(name_snippet)
 
-    name_module = "modules/" + snippetList[0]
+    name_module = "../HappyFace/modules/" + snippetList[0]
     snippetList.pop(0)
     name_module +=  "_".join(snippetList) + string
 
     return name_module
 
 #def dumpHappycoreCss(name):
-#    """dumps a sceleton for the core module css file"""
+#    """dumps a skeleton for the core module css file"""
 #
-#    name_css = "happycore/" + name + ".css"
+#    name_css = "../HappyFace/happycore/" + name + ".css"
 #
 #    file_css = open(name_css,"w")
 #    
@@ -101,9 +104,9 @@ def makeInstanceName(name, string):
     
 
 def dumpHappycoreCfg(name,xml):
-    """dumps a sceleton for the core module config file"""
+    """dumps a skeleton for the core module config file"""
 
-    name_cfg = "happycore/" + name + ".cfg"
+    name_cfg = "../HappyFace/happycore/" + name + ".cfg"
 
     file_cfg = open(name_cfg,"w")
     file_cfg.write("[setup]")
@@ -117,11 +120,11 @@ def dumpHappycoreCfg(name,xml):
 
 def dumpHappycorePy(name,xml):
     """
-    dumps a sceleton of the main python file of the core
+    dumps a skeleton of the main python file of the core
     module.
     """
 
-    name_py = "happycore/" + name + ".py"
+    name_py = "../HappyFace/happycore/" + name + ".py"
 
     intro = "from ModuleBase import *\n"
     intro += "from XMLParsing import *\n"
@@ -274,7 +277,7 @@ def usage():
     print "options are"
     print
     print "-h,--help:\t\t\tprint this message and exit"
-    print "-x,--xml:\t\t\tif switched on, the sceleton for xml parsing will be added."
+    print "-x,--xml:\t\t\tif switched on, the skeleton for xml parsing will be added."
     print "\t\t\t\tdefault is False."
     print "-n ARG, --name=ARG:\t\tdefine the name of the new test."
 
