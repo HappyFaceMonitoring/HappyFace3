@@ -44,7 +44,9 @@ class DownloadTag(Thread):
 	    if self.curIndex < len(self.program) - 1:
 	        dest_dir = tempfile.gettempdir()
 
-            if self.program[self.curIndex] == "wget":
+            if self.program[self.curIndex] == "local":
+	        self.dataFetcher.getDataLocal(self.args[self.curIndex], self.url[self.curIndex], dest_dir, self.localFile)
+            elif self.program[self.curIndex] == "wget":
                 self.dataFetcher.getDataWget(self.args[self.curIndex] ,self.url[self.curIndex], dest_dir, self.localFile)
             elif self.program[self.curIndex] == "wgetXmlRequest":
                 self.dataFetcher.getDataWgetXmlRequest(self.args[self.curIndex] ,self.url[self.curIndex], dest_dir, self.localFile)

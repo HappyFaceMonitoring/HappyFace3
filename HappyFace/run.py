@@ -16,6 +16,7 @@ from sqlobject import *
 # setup search paths for python modules
 sys.path.insert(0, os.path.expandvars('./happycore'))
 sys.path.insert(0, os.path.expandvars('./modules'))
+sys.path.insert(0, os.path.expandvars('./modules/examples'))
 if os.path.exists('./local/modules'):
     sys.path.insert(0, os.path.expandvars('./local/modules'))
 sys.path.insert(0, os.path.expandvars('./output/web'))

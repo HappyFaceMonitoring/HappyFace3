@@ -17,7 +17,7 @@ class get_started(ModuleBase):
 
        
 
-    def run(self):
+    def process(self):
 
         # run the "test" ;-)
         message = self.answer + " is the answer of everything!!!"

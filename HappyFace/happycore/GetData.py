@@ -1,5 +1,6 @@
 import sys,os
 import shlex
+import shutil
 import subprocess
 import re
 
@@ -15,6 +16,14 @@ class DownloadError(Exception):
 # class to download external data
 #############################################
 class GetData(object):
+
+# copy a local file from a relative or absolute path
+    def getDataLocal(self, args, url, path, file):
+        # Ignore args
+	try:
+	    shutil.copy2(url, path + '/' + file)
+	except Exception as ex:
+	    raise Exception('Could not copy from ' + url + ': ' + str(ex))
 
 # execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
     def getDataWget(self, args, url, path, file):

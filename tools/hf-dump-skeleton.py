@@ -33,14 +33,11 @@ def dumpInstanceCfg(name,xml):
 def dumpInstancePy(name):
     """dumps a skeleton of the instance python file"""
 
-    print name
     name_module_py = makeInstanceName(name, ".py")
-    print name_module_py
 
     ## get rid of ".py"
     (name_base, name_ext) = os.path.splitext(name_module_py)
     name_small = os.path.basename(name_base)
-    print str(name_small)
 
     del name_base
     del name_ext
