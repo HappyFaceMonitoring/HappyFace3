@@ -60,10 +60,10 @@ class dCacheTransfers(ModuleBase):
 		self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
 
 		# TODO: Add definition
-		self.configService.addToParameter('setup', 'definition', 'Speed warning limit: ' + str(self.speed_warning_limit) + '<br/>')
-		self.configService.addToParameter('setup', 'definition', 'Speed critical limit: ' + str(self.speed_critical_limit) + '<br/>')
-		self.configService.addToParameter('setup', 'definition', 'Time warning limit: ' + str(self.time_warning_limit) + '<br/>')
-		self.configService.addToParameter('setup', 'definition', 'Time critical limit: ' + str(self.time_critical_limit) + '<br/>')
+		self.configService.addToParameter('setup', 'definition', 'Speed warning limit: ' + str(self.speed_warning_limit) + ' KB/s<br/>')
+		self.configService.addToParameter('setup', 'definition', 'Speed critical limit: ' + str(self.speed_critical_limit) + ' KB/s<br/>')
+		self.configService.addToParameter('setup', 'definition', 'Time warning limit: ' + str(self.time_warning_limit) + ' hours<br/>')
+		self.configService.addToParameter('setup', 'definition', 'Time critical limit: ' + str(self.time_critical_limit) + ' hours<br/>')
 		self.configService.addToParameter('setup', 'definition', 'Rating threshold: ' + str(self.rating_threshold) + ' transfers<br/>')
 		self.configService.addToParameter('setup', 'definition', 'Rating ratio: ' + str(round(self.rating_ratio*100)) + '% <br/>')
 
@@ -209,7 +209,7 @@ class dCacheTransfers(ModuleBase):
 		mc_begin.append(  '   <td>Pool</td>')
 		mc_begin.append(  '   <td>Host</td>')
 		mc_begin.append(  '   <td>Status</td>')
-		mc_begin.append(  '   <td>Since</td>')
+		mc_begin.append(  '   <td>Time</td>')
 		mc_begin.append(  '   <td>Trans. [GB]</td>')
 		mc_begin.append(  '   <td>Speed [KB/s]</td>')
 		mc_begin.append(  '  </tr>')
