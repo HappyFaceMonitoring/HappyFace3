@@ -82,28 +82,41 @@ class Qstat(ModuleBase):
 	root = source_tree.getroot()
 
 	for element in root:
-	    if element.tag == "GlobalInfo":
-		element_attrib = element.attrib
-		self.db_values["starttime"] = element_attrib["qstatStart"]
-		self.db_values["endtime"] = element_attrib["qstatEnd"]
+	    if element.tag == "additional":
+	        if element.attrib["batchsystem"] == "PBS":
+		    for child in element:
+		        if child.tag == 'qstatinfo':
+			    element_attrib = child.attrib
+			    self.db_values["starttime"] = element_attrib["start"]
+			    self.db_values["endtime"] = element_attrib["end"]
 
-	    if element.tag == "jobsummary":
+	    if element.tag == "summaries":
 		for child in element:
-		    if child.tag == "all":
+		    if child.tag == "summary":
 			child_attrib = child.attrib
-			self.db_values["all_total"] = int(child_attrib["total"])
-			self.db_values["all_running"] = int(child_attrib["running"])
-			self.db_values["all_ratio10"] = int(child_attrib["ratio10"])
-		    if child.tag == "cms":
-			child_attrib = child.attrib
-			self.db_values["cms_total"] = int(child_attrib["total"])
-			self.db_values["cms_running"] = int(child_attrib["running"])
-			self.db_values["cms_ratio10"] = int(child_attrib["ratio10"])
-		    if child.tag == "cmsprd":
-			child_attrib = child.attrib
-			self.db_values["cmsprd_total"] = int(child_attrib["total"])
-			self.db_values["cmsprd_running"] = int(child_attrib["running"])
-			self.db_values["cmsprd_ratio10"] = int(child_attrib["ratio10"])
+			if not "group" in child_attrib:
+			    total = 'all_total'
+			    running = 'all_running'
+			    ratio10 = 'all_ratio10'
+		        elif child_attrib["group"] == "cms":
+			    total = 'cms_total'
+			    running = 'cms_running'
+			    ratio10 = 'cms_ratio10'
+		        elif child_attrib["group"] == "cmsprd":
+			    total = 'cmsprd_total'
+			    running = 'cmsprd_running'
+			    ratio10 = 'cmsprd_ratio10'
+			else:
+			    continue
+
+			for subchild in child:
+			    if subchild.tag == 'jobs':
+			        self.db_values[total] = int(subchild.text.strip())
+			    elif subchild.tag == 'running':
+			        self.db_values[running] = int(subchild.text.strip())
+			    elif subchild.tag == 'ratio10':
+			        self.db_values[ratio10] = int(subchild.text.strip())
+
 
 	#############################################################################
 	# parse the details and store it in a special database table
@@ -128,10 +141,21 @@ class Qstat(ModuleBase):
 	users = {}
 
 	for element in root:
-	    if element.tag == "jobDetails":
+	    if element.tag == "jobs":
 		for child in element:
 
-		    user = child.attrib["user"]
+		    user = job_state = cpuwallratio = ''
+		    for subchild in child:
+		        if subchild.tag == 'user':
+			    user = subchild.text.strip()
+			if subchild.tag == 'state':
+			    job_state = subchild.text.strip()
+			if subchild.tag == 'cpueff':
+			    cpuwallratio = subchild.text.strip()
+
+		    if user == '':
+		        continue
+
 		    if user not in users:
 			users[user] = {}
 
@@ -144,20 +168,22 @@ class Qstat(ModuleBase):
 			users[user]["ratio30"] = 0
 			users[user]["ratio10"] = 0
 
-		    users[user]["total"] = users[user]["total"] + 1
+		    users[user]["total"] += 1
 
-		    if child.attrib["job_state"] == "Q": users[user]["queue"] = users[user]["queue"] + 1
-		    if child.attrib["job_state"] == "W": users[user]["waiting"] = users[user]["waiting"] + 1
-		    if child.attrib["job_state"] == "R":
-                        users[user]["running"] = users[user]["running"] + 1
-                        try:
-                            # sometimes there is no "cpuwallratio" variable for running jobs
-                            if int(child.attrib["cpuwallratio"]) > 80: users[user]["ratio100"] = users[user]["ratio100"] + 1
-                            if int(child.attrib["cpuwallratio"]) > 30 and int(child.attrib["cpuwallratio"]) <= 80: users[user]["ratio80"] = users[user]["ratio80"] + 1
-                            if int(child.attrib["cpuwallratio"]) > 10 and int(child.attrib["cpuwallratio"]) <= 30: users[user]["ratio30"] = users[user]["ratio30"] + 1
-                            if int(child.attrib["cpuwallratio"]) <= 10: users[user]["ratio10"] = users[user]["ratio10"] + 1
-                        except:
-                            pass
+		    if job_state == 'pending': users[user]["queue"] = users[user]["queue"] + 1
+		    if job_state == 'waiting': users[user]["waiting"] = users[user]["waiting"] + 1
+		    if job_state == 'running':
+                        users[user]["running"] += 1
+                        # sometimes there is no "cpuwallratio" variable for running jobs
+                        if cpuwallratio != '':
+                            if float(cpuwallratio) > 80:
+			        users[user]["ratio100"] += 1
+                            elif float(cpuwallratio) > 30:
+			        users[user]["ratio80"] += 1
+                            elif float(child.attrib["cpuwallratio"]) > 10:
+			        users[user]["ratio30"] += 1
+                            else:
+			        users[user]["ratio10"] += 1
 
 	
 	for user in users.keys():
@@ -209,7 +235,6 @@ class Qstat(ModuleBase):
 	### striktere definitionen der plot-eigenschaften, verschieben der legende
 	### verringerung von code durch auslagerung von funktionen
 
-	
 	N = len(users)
 
 	### break image creation if there are no user stats about batch jobs

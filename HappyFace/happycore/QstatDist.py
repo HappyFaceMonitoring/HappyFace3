@@ -28,7 +28,11 @@ class QstatDist(ModuleBase):
 	self.db_values["filename"] = ""
 
         self.dsTag = 'qstat_xml_source'
+
+	# Split up cputime and walltime into seconds, minutes and hours
 	self.splitnum = 1
+	if self.variable == 'cputime' or self.variable == 'walltime':
+	    self.splitnum = 3
 
     def process(self):
 
@@ -44,32 +48,22 @@ class QstatDist(ModuleBase):
 	nbins = 20
 
 	for element in root:
-	    if element.tag == "jobDetails":
+	    if element.tag == "jobs":
 		for child in element:
-
+                    user = job_state = variable_str = ''
 		    # Only count running CMSPRD jobs
-		    user = child.attrib["user"]
-		    state = child.attrib["job_state"]
-		    if user != "cmsprd" or state != 'R':
+		    for subchild in child:
+		        if subchild.tag == 'user':
+			    user = subchild.text.strip()
+			if subchild.tag == 'state':
+			    job_state = subchild.text.strip()
+			if subchild.tag == variable:
+			    variable_str = subchild.text.strip()
+
+		    if user != "cmsprd" or job_state != 'running' or variable_str == '':
 		    	continue
 
-		    # Sometimes the requested variable is still not available
-		    # even though the state is R. We do simply ignore that
-		    # case.
-                    try:
-		        valuestr = child.attrib[variable]
-                    except:
-		        continue
-
-		    valuelist = valuestr.split(':')
-		    valuelist.reverse()
-		    value = 0
-		    for part in valuelist:
-		        value = value * 60 + int(part)
-		    values.append(value)
-
-		    # Remember split count to correctly restore the X ticks labels
-		    self.splitnum = len(valuelist)
+		    values.append(float(variable_str))
 
         # create plots for output
 	self.createDistPlot(variable,values,nbins)
