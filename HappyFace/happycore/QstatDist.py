@@ -96,7 +96,7 @@ class QstatDist(ModuleBase):
 	content = [0]*nbins
 	for value in values:
 	    if diff_var > 0:
-	        bin = (value - min_var) * nbins / diff_var
+	        bin = int(round((value - min_var) * nbins / diff_var))
 	    else:
 	        bin = nbins;
 

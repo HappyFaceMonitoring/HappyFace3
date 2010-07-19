@@ -180,7 +180,7 @@ class Qstat(ModuleBase):
 			        users[user]["ratio100"] += 1
                             elif float(cpuwallratio) > 30:
 			        users[user]["ratio80"] += 1
-                            elif float(child.attrib["cpuwallratio"]) > 10:
+                            elif float(cpuwallratio) > 10:
 			        users[user]["ratio30"] += 1
                             else:
 			        users[user]["ratio10"] += 1
