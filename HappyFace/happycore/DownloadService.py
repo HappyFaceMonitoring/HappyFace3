@@ -17,6 +17,14 @@ class DownloadService(HTMLOutput):
         if not os.path.exists(subdir):
             os.mkdir(subdir)
 
+        # Remove any file in the tmp directory, probably leftovers from
+        # previous runs
+        first = True
+        for entry in os.listdir(subdir):
+            if first:
+                first = False
+                print 'DownloadService: Cleaning tmp directory'
+            os.unlink(os.path.join(subdir, entry))
 
 
     def add(self, downloadstring):
