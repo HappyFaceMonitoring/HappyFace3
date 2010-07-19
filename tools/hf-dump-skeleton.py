@@ -269,7 +269,7 @@ def printExitMessage(name_py,name_cfg,name_inst_py,name_inst_cfg):
 
 def usage():
     """usage of this script"""
-    print "usage: dumpSceleton [option]"
+    print "usage: hf-dump-skeleton [option]"
     print "be careful! No testing of this script yet!"
     print "options are"
     print
