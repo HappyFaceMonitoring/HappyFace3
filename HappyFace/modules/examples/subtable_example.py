@@ -15,11 +15,10 @@ class subtable_example(ModuleBase):
         self.db_keys["subtable"] = StringCol()
         self.db_values["subtable"] = self.__module__ + "_whatever_subtable"
 	
-    def run(self):
+    def process(self):
 
 	# definition of the dictionaries for the subtable
 	sub_keys = {}
-	sub_values = {}
 
 	# possible data types are IntCol, FloatCol, StringCol
 	sub_keys["number"] = IntCol()
@@ -32,27 +31,32 @@ class subtable_example(ModuleBase):
 	my_subtable_class = self.table_init( self.db_values["subtable"], sub_keys )
 	# ===================================================================================
 	
+	sub_values_list = []
 	# for loop for multiple table filling with the same timestamp
 	for i in range( 0, int(self.max_number) ):
+	    sub_values = {}
 	    sub_values["number"] = i
 	    sub_values["square"] = i*i
 	    sub_values["square_root"] = float(i)**(1/2.0)
+	    sub_values_list.append(sub_values)
 	    
-	    # ===============================================================================
-	    # fill the table with values; "table_fill"(created_table_class, table_values)
-	    # the timestamp will automaticly be saved as an non-unique primary index
-	    # for the later sql query in the php fragment
-	    # beware that the names of keys and values are consistent
-	    self.table_fill( my_subtable_class, sub_values )
-	    # ===============================================================================
+	# ===============================================================================
+	# fill the table with values; "table_fill_many"(created_table_class, list_of_table_values)
+	# the timestamp will automatically be saved as an non-unique primary index
+	# for the later sql query in the php fragment
+	# beware that the names of keys and values are consistent
+        self.table_fill_many(my_subtable_class, sub_values_list)
+	# ===============================================================================
 	    
 
 	# there is also a clearing algorith to erase old data
 	# the second parameter specifies a list of columns containing filenames
 	# which should be deleted
 	# the third int value defines the holdback time in days
-	# in that case, data which is older then 1 week will be erased
-	self.table_clear( my_subtable_class, [], 7 )
+	# normally this should be the default holdback time configured in the
+	# main HappyFace configuration which is accessible by
+	# self.holdback_time
+	self.table_clear( my_subtable_class, [], self.holdback_time)
 	    
         # define module status 0.0..1.0 or -1 for error
         self.status = 1.0 # always happy
