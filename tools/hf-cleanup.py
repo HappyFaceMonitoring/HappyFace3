@@ -7,6 +7,54 @@ import getopt
 import shutil
 import sqlite3
 
+def help():
+	print(
+'''hf-cleanup [options] <Happyface Database File>
+
+This script performs three steps to clean up the HappyFace database:
+1) It removes old entries of existing modules
+2) It removes any remaining data belonging to modules no longer in use
+3) It optimizes the database file
+
+Possible options are:
+
+--start=TIMESTAMP	if given only erase database entries recorded after TIMESTAMP
+--end=TIMESTAMP		if given only erase database entries recorded before TIMESTAMP
+--modules=MODULES	specifies a comma-separated list of modules to clean up
+
+All three options only affect the first of the three steps explained above.
+If TIMESTAMP for --start or --end is lower then it is interpreted as the
+number of days since the time of executing the script. If either --start or
+--end are not given then they are taken as 0 or the current time, respectively.
+If --modules is not given then all modules are cleaned up. However, for each
+module and for each of the three steps there will be a confirmation prompt to
+explicitely confirm deletion of data.
+
+WARNING: This means that if you run hf-cleanup without --start and without
+--end then it will erase the entire database for selected modules (if
+confirmed at the prompt).
+
+Examples:
+
+./hf-cleanup HappyFace.db
+Erases the complete HappyFace database.
+
+./hf-cleanup --modules=qstat HappyFace.db
+Erases all entries for the qstat module from the HappyFace database.
+
+./hf-cleanup --end=100 HappyFace.db
+Removes all entries from the HappyFace database that are older than 100 days.
+
+./hf-cleanup --end=1279626292 HappyFace.db
+Removes all entries from the HappyFace database from before
+Tue Jul 20 13:45 CEST 2010.
+
+./hf-cleanup --modules=none HappyFace.db
+Skips the first of the three steps (this could also be achieved by answering q
+at the first prompt).''')
+
+	sys.exit(0)
+
 def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 	"""Remove all entries between start and end in table_name. Also cleanup
 	   plots in archive directory"""
@@ -82,8 +130,10 @@ end = -1
 modules = ''
 source = ''
 
-optlist,args = getopt.getopt(sys.argv[1:], [], ['start=', 'end=', 'modules='])
+optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'modules=', 'help'])
 options = dict(optlist)
+if '-h' in options or '--help' in options:
+	help()
 if '--start' in options:
 	start = int(options['--start'])
 

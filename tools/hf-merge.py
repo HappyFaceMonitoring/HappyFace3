@@ -7,13 +7,39 @@ import getopt
 import shutil
 import sqlite3
 
+def help():
+	print(
+'''hf-merge [options] --into=<Destination Database File> <Source HappyFace Database File>
+
+This tool merges one HappyFace instance into another. This can be useful if
+you shut your main instance down for maintenance and run a secondary instance
+during that time. Using this script you can merge the data of the secondary
+instance into the main instance so that you can remove the secondary instance
+afterwards without losing data.
+
+The following options are possible:
+
+--into=FILE		Database file of the HappyFace instance to merge into
+--start=TIMESTAMP	if given only merge database entries recorded after TIMESTAMP
+--end=TIMESTAMP		if given only merge database entries recorded before TIMESTAMP
+
+If --start and/or --end are given then only database entries in the specified
+timerange are merged. If you want to merge the complete database then you do
+not need to specify them. Entries which are already contained in the
+destination database already will not be overwritten. Note that the --into
+option is required.
+''')
+	sys.exit(0)
+
 start = -1
 end = -1
 dest = ''
 source = ''
 
-optlist,args = getopt.getopt(sys.argv[1:], [], ['start=', 'end=', 'into='])
+optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'into=', 'help'])
 options = dict(optlist)
+if '-h' in options or '--help' in options:
+	help()
 if '--start' in options:
 	start = int(options['--start'])
 if '--end' in options:
