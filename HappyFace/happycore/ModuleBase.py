@@ -319,35 +319,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
     # status, error_message, mod_title, mod_type, weight, definition, instruction
     def PHPOutput(self,module_content):
 
-	plot_options = '<option value="all_variables">all variables (trend plot)</option>'
-	plot_list = []
-	for value in self.db_values:
-	    if (type(self.db_values[value]) is int) or (type(self.db_values[value]) is float):
-	        if not value in self.plot_blacklist:
-		    selected = ''
-		    if value == 'status':
-		        selected = ' selected="selected"'
-
-		    plot_options += '<option value="' + value + '"' + selected + '>' + value + '</option>'
-		    plot_list.append(value)
-
-	js = []
-	js.append('<script type="text/javascript">')
-	js.append('function ' + self.__module__ + '_do_baseplot(variables, squash, renormalize)')
-	js.append('{')
-	js.append('  document.getElementById("' + self.__module__ + '_baseplot_variables").value = variables;')
-	js.append('  document.getElementById("' + self.__module__ + '_baseplot_squash").value = squash;')
-	js.append('  document.getElementById("' + self.__module__ + '_baseplot_renormalize").value = renormalize;')
-	js.append('}')
-	js.append('function ' + self.__module__ + '_baseplot()')
-	js.append('{')
-	js.append('  var variable = document.getElementById("' + self.__module__ + '_baseplot_single_variable").value;')
-	js.append('  if(variable == "all_variables")')
-	js.append('    ' + self.__module__ + '_do_baseplot("' + ','.join(plot_list) + '", 1, ' + (len(plot_list) > 1 and str(1) or str(0)) + ');')
-	js.append('  else')
-	js.append('    ' + self.__module__ + '_do_baseplot(variable, 0, 0);')
-	js.append('}')
-	js.append('</script>')
+	variable_list = filter(lambda x: (type(self.db_values[x]) is int or type(self.db_values[x]) is float) and not x in self.plot_blacklist, self.db_values)
 
 	html_begin = []
 	html_begin.append(  '<!-- Beginning of module "' + self.__module__ + '" -->')
@@ -364,59 +336,27 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	html_begin.append(  '  </td>')
 	html_begin.append(  '  <td>')
 
-	infobox = []
-	infobox.append(     '   <div id="' + self.__module__ + '_info" style="display: none;">')
-	infobox.append(     '    <table class="HappyDesc">')
-	infobox.append(     '     <tr><td style="width:20%">Module File:</td><td>' + self.__module__ + '.py</td></tr>')
-	infobox.append(   """     <tr><td style="width:20%">Module Type:</td><td>' . $data["mod_type"] . '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%">Status Value:</td><td>' . number_format($data["status"],1). '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%">Weight:</td><td>' . number_format($data["weight"],1) .'</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%">Definition:</td><td>' .$data["definition"]. '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%">Source:</td><td>' .$data["datasource"]. '</td></tr>""")
-	infobox.append(   """     <tr><td style="width:20%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>""")
-	infobox.append(     '    </table>')
+	infobox_begin = []
+	infobox_begin.append(     '   <div id="' + self.__module__ + '_info" style="display: none;">')
+	infobox_begin.append(     '    <table class="HappyDesc">')
+	infobox_begin.append(     '     <tr><td style="width:20%">Module File:</td><td>' + self.__module__ + '.py</td></tr>')
+	infobox_begin.append(   """     <tr><td style="width:20%">Module Type:</td><td>' . $data["mod_type"] . '</td></tr>""")
+	infobox_begin.append(   """     <tr><td style="width:20%">Status Value:</td><td>' . number_format($data["status"],1). '</td></tr>""")
+	infobox_begin.append(   """     <tr><td style="width:20%">Weight:</td><td>' . number_format($data["weight"],1) .'</td></tr>""")
+	infobox_begin.append(   """     <tr><td style="width:20%">Definition:</td><td>' .$data["definition"]. '</td></tr>""")
+	infobox_begin.append(   """     <tr><td style="width:20%">Source:</td><td>' .$data["datasource"]. '</td></tr>""")
+	infobox_begin.append(   """     <tr><td style="width:20%">Instruction:</td><td>' .$data["instruction"]. '</td></tr>""")
+	infobox_begin.append(     '    </table>')
+	infobox_begin.append(     '    <table style="font: bold 0.7em sans-serif; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: left; width: 800px;">')
+	infobox_begin.append(     '      <tr>')
+	infobox_begin.append(     '       <td>')
 
-	infobox.append(     '    <form id="' + self.__module__ + '_PlotForm" action="plot_generator.php" method="get" onsubmit="javascript: submitFormToWindow(this)">')
-	infobox.append(     '     <table style="font: bold 0.7em sans-serif; background-color: #ddd; border-left: 1px #999 solid; border-right: 1px #999 solid; border-bottom: 1px #999 solid; text-align: left; width: 800px;">')
-	infobox.append(     '      <tr>')
-	infobox.append(     '       <td>')
-	infobox.append(     '        Start:')
-	infobox.append(     '       </td>')
-	infobox.append(     '       <td>')
-	infobox.append(   """        <input name="date0" type="text" size="10" style="text-align:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
-	infobox.append(   """        <input name="time0" type="text" size="5" style="text-align:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
-	infobox.append(     '       </td>')
-	infobox.append(     '       <td>')
-	infobox.append(     '        End:')
-	infobox.append(     '       </td>')
-	infobox.append(     '       <td>')
-	infobox.append(   """        <input name="date1" type="text" size="10" style="text-align:center;" value="' . $date_string .'" />""")
-	infobox.append(   """        <input name="time1" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />""")
-	infobox.append(     '       </td>')
-	infobox.append(     '       <td>')
-	infobox.append(     '        Variable:')
-	infobox.append(     '       </td>')
-	infobox.append(     '       <td>')
-	infobox.append(     '        <select id="' + self.__module__ + '_baseplot_single_variable" style="width: 100%;">')
-	infobox.append(     '         ' + plot_options)
-	infobox.append(     '        </select>')
-	infobox.append(     '       </td>')
-	infobox.append(     '       <td>')
-	infobox.append(   """        <input type="hidden" name="module" value="' . $data["module"] . '" />""")
-	infobox.append(     '        <input type="hidden" name="variables" value="" id="' + self.__module__ + '_baseplot_variables" />')
-	infobox.append(     '        <input type="hidden" name="squash" value="0" id="' + self.__module__ + '_baseplot_squash" />')
-	infobox.append(     '        <input type="hidden" name="renormalize" value="0" id="' + self.__module__ + '_baseplot_renormalize" />')
-	infobox.append(   """        <button onclick=\"""" + self.__module__ + """_baseplot()" onfocus="this.blur()" style="width: 100%;">Show&nbsp;Plot</button>""")
-	infobox.append(     '       </td>')
-	infobox.append(     '      </tr>')
-	infobox.append(     '     </table>')
-	infobox.append(     '    </form>')
-	infobox.append(     '   </div>')
-	infobox.append(     '   <br />')
-
-	#for i in infobox:
-	#	html_begin.append('   ' + i)
-	#html_begin.append(  "'); ?>")
+	infobox_end = []
+	infobox_end.append(     '      </td>')
+	infobox_end.append(     '     </tr>')
+	infobox_end.append(     '    </table>')
+	infobox_end.append(     '   </div>')
+	infobox_end.append(     '   <br />')
 
 	# module content goes between html_begin and html_end
 
@@ -454,12 +394,11 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	        $mod_time_message = '<span style="color:#FF6666;font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
 	    }
 
-	    /*** Get variables for the direct module link ***/
-	    print('""" + self.PHPArrayToString(js) + """');
-
 	    /*** print the HTML output ***/
 	    print('""" + self.PHPArrayToString(html_begin) + """');
-	    print('""" + self.PHPArrayToString(infobox) + """');
+	    print('""" + self.PHPArrayToString(infobox_begin) + """');
+	    print_plot_timerange_selection('""" + self.__module__ + """', '', '', '', 0, 0, array('""" + "','".join(variable_list) + """'), 'status', time() - 48*60*60, time(), 0, 0, true);
+	    print('""" + self.PHPArrayToString(infobox_end) + """');
 
 	    ?>""" + module_content + """<?php
 

@@ -5,11 +5,11 @@
 	</head>
 	<body>
 		<h2><strong>Module: <?php echo $_GET["module"]?></strong></h2>
-		<form action="<?php echo $PHP_SELF; ?>" method="get">
 
 <?php
 
 include('plot_common.php');
+include('plot_timerange_select.php');
 
 // Quick'n'dirty check to avoid SQL injection attacks on column names.
 // Unfortunately preparated statements do not work on table or column names
@@ -24,41 +24,11 @@ function verify_column_name($name)
 }
 
 $timestamp_var = 'timestamp';
-if(isset($_GET['timestamp_var']))
+if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
 	$timestamp_var = verify_column_name($_GET['timestamp_var']);
-?>
 
-			<input type="hidden" name="module" value="<?php echo htmlentities($_GET["module"]); ?>" />
-			<input type="hidden" name="subtable" value="<?php echo htmlentities($_GET["subtable"]); ?>" />
-			<input type="hidden" name="variables" value="<?php echo htmlentities($_GET["variables"]); ?>" />
-			<input type="hidden" name="timestamp_var" value="<?php echo htmlentities($timestamp_var); ?>" />
-			<input type="hidden" name="constraint" value="<?php echo htmlentities($_GET['constraint']); ?>" />
-			<input type="hidden" name="squash" value="<?php echo htmlentities($_GET['squash']); ?>" />
-			<input type="hidden" name="renormalize" value="<?php echo htmlentities($_GET['renormalize']); ?>" />
+print_plot_timerange_selection($_GET['module'], $_GET['subtable'], $_GET['timestamp_var'], $_GET['constraint'], $_GET['squash'], $_GET['renormalize'], null, $_GET['variables'], $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false);
 
-			<table>
-				<tr>
-					<td>
-						Start:
-					</td>
-					<td>
-						<input name="date0" type="text" size="10" style="text-align:center;" value="<?php echo strftime('%Y-%m-%d', $timestamp0); ?>" />
-						<input name="time0" type="text" size="5" style="text-align:center;" value="<?php echo strftime('%H:%M', $timestamp0); ?>" />
-					</td>
-					<td>
-						End:
-					</td>
-					<td>
-						<input name="date1" type="text" size="10" style="text-align:center;" value="<?php echo strftime('%Y-%m-%d', $timestamp1); ?>" />
-						<input name="time1" type="text" size="5" style="text-align:center;" value="<?php echo strftime('%H:%M', $timestamp1); ?>" />
-					</td>
-					<td>
-						<div><button onfocus="this.blur()">Show Plot</button></div>
-					</td>
-				</tr>
-			</table>
-
-<?php
 if(isset($_GET['squash']) && intval($_GET['squash']) != 0)
   $variables = array($_GET['variables']);
 else
@@ -143,6 +113,5 @@ if($variable == "status")
 }
 ?>
 
-		</form>
 	</body>
 </html>

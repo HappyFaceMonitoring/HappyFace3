@@ -73,6 +73,11 @@ class WebCreator(object):
 	output += '    $dbh = new PDO("sqlite:HappyFace.db");' + "\n"
 	output += '?>'
 
+	# initiate the database
+	output += '<?php' + "\n"
+	output += '    include("plot_timerange_select.php");' + "\n"
+	output += '?>'
+
 	# SQL call routines for all active modules
 	output += SQLCallRoutines(self.config).output
 

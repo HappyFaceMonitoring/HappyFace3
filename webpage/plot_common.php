@@ -1,6 +1,8 @@
 <?php
 
 // Parse $_GET parameters into $timestamp0 and $timestamp1
+// Also sets $timestamp_now and $timestamp_timerange to specify how the
+// timerange was provided.
 
 // First get end date
 if(isset($_GET['date1']) && isset($_GET['time1']) && $_GET['date1'] != '' && $_GET['time1'] != '')
@@ -8,12 +10,14 @@ if(isset($_GET['date1']) && isset($_GET['time1']) && $_GET['date1'] != '' && $_G
 	// End date given
 	$ta1 = date_parse($_GET['date1'] . ' ' . $_GET['time1']);
 	$timestamp1 = mktime($ta1['hour'], $ta1['minute'], 0, $ta1['month'], $ta1['day'], $ta1['year']);
+	$timestamp_now = false;
 }
 
 if(!isset($timestamp1))
 {
 	// If end date is not given use current time
 	$timestamp1 = time();
+	$timestamp_now = true;
 }
 
 // Get start date. There are two ways it can be provided; either explicitely
@@ -22,6 +26,7 @@ if(isset($_GET['date0']) && isset($_GET['time0']) && $_GET['date0'] != '' && $_G
 {
 	$ta0 = date_parse($_GET['date0'] . ' ' . $_GET['time0']);
 	$timestamp0 = mktime($ta0['hour'], $ta0['minute'], 0, $ta0['month'], $ta0['day'], $ta0['year']);
+	$timestamp_timerange = false;
 }
 else if(isset($_GET['timerange']))
 {
@@ -41,12 +46,14 @@ else if(isset($_GET['timerange']))
 	}
 
 	if(isset($secs)) $timestamp0 = $timestamp1 - $secs;
+	$timestamp_timerange = true;
 }
 
 if(!isset($timestamp0))
 {
 	// 48h timerange if nothing given
 	$timestamp0 = $timestamp1 - 48*60*60;
+	$timestamp_timerange = true;
 }
 
 ?>
