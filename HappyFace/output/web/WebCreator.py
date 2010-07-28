@@ -128,7 +128,7 @@ class WebCreator(object):
 			$initialScroll = -1;
 
 			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; }
-			if (isset($_GET["t"]) && $_GET["m"] != "") { $selectedMod = $_GET["m"]; }
+			if (isset($_GET["m"]) && $_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 			if (isset($_GET["scroll"]) && $_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
 
 			print('  <script type="text/javascript">\n');
