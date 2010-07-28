@@ -60,7 +60,7 @@ class CategoryFastNavigation(HTMLOutput):
 
 	    foreach ($ModuleResultsArray as $module) {
 
-	        if ($module["category"] == """ + category + """) {
+	        if ($module["category"] == \"""" + category + """\") {
 
 		    $nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"]);
 

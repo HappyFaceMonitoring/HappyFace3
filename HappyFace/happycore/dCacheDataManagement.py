@@ -223,7 +223,7 @@ class dCacheDataManagement(ModuleBase):
 		$info = $unassigned;
 
 		$class_str = '';
-		if($info['bare_on_disk_files'] * 1.0 / $info['bare_total_files'] > $info['on_disk_threshold'])
+		if($info['bare_on_disk_files'] * 1.0 / $info['bare_total_files'] > $data['on_disk_threshold'])
 			$class_str = ' class=ok';
 
 		print('""" + self.PHPArrayToString(details_row) + """');
