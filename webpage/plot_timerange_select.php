@@ -126,13 +126,13 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo ' <input type="hidden" name="date1" id="' . $module . '_date1" />';
 	echo ' <input type="hidden" name="time1" id="' . $module . '_time1" />';
 
-	echo ' <table>';
+	echo ' <table cellspacing="0" cellpadding="2">';
 	echo '  <tr>';
 	echo '   <td style="padding-right: .3em;"><input id="' . $module . '_direct" type="radio" name="group"' . (!$timestamp_timerange ? ' checked="checked"' : '') . ' />Start:</td>';
 	echo '   <td style="padding-right: .9em;"><input id="' . $module . '_direct_date0" type="text" size="10" style="text-align: center;" value="' . strftime('%Y-%m-%d', $timestamp_begin) . '" onchange="javascript:document.getElementById(\'' . $module . '_direct\').checked=true" /> <input id="' . $module . '_direct_time0" type="text" size="5" style="text-align: center;" value="' . strftime('%H:%M', $timestamp_begin) . '" onchange="javascript:document.getElementById(\'' . $module . '_direct\').checked=true" /></td>';
 	echo '   <td style="padding-right: .3em;">Stop:</td>';
-	echo '   <td style="padding-right: .9em;"><input id="' . $module . '_direct_date1" type="text" size="10" style="text-align: center;" value="' . strftime('%Y-%m-%d', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module .'_direct\').checked=true" /> <input id="' . $module . '_direct_time1" type="text" size="5" style="text-align: center;" value="' . strftime('%H:%M', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module . '_direct\').checked=true" /></td>';
-	echo '   <td style="padding-right: .9em;">Variable:</td>';
+	echo '   <td style="padding-right: .4em; border-right: 1px solid grey;"><input id="' . $module . '_direct_date1" type="text" size="10" style="text-align: center;" value="' . strftime('%Y-%m-%d', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module .'_direct\').checked=true" /> <input id="' . $module . '_direct_time1" type="text" size="5" style="text-align: center;" value="' . strftime('%H:%M', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module . '_direct\').checked=true" /></td>';
+	echo '   <td style="padding-left: .4em;">Variable: ' . $variable_out . '</td>';
 	echo '  </tr>';
 	echo '  <tr>';
 	echo '   <td style="padding-right: .3em;"><input id="' . $module . '_timerange_now" type="radio" name="group"' . (($timestamp_timerange && $timestamp_now) ? ' checked="checked"' : '') . ' />Interval:</td>';
@@ -143,8 +143,8 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo '    </select>';
 	echo '   </td>';
 	echo '   <td style="padding-right: .3em;">Stop:</td>';
-	echo '   <td style="padding-right: .9em;">now</td>';
-	echo '   <td style="padding-right: .9em;">' . $variable_out . '</td>';
+	echo '   <td style="padding-right: .4em; border-right: 1px solid grey;">now</td>';
+	echo '   <td style="padding-left:  .4em;"></td>';
 	echo '  </tr>';
 	echo '  <tr>';
 	echo '   <td style="padding-right: .3em;"><input id="' . $module . '_timerange_fix" type="radio" name="group"' . (($timestamp_timerange && !$timestamp_now) ? ' checked="checked"' : '') . ' />Interval:</td>';
@@ -155,8 +155,8 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo '    </select>';
 	echo '   </td>';
 	echo '   <td style="padding-right: .3em;">Stop:</td>';
-	echo '   <td style="padding-right: .9em;"><input id="' . $module . '_timerange_fix_date1" type="text" size="10" style="text-align: center;" value="' . strftime('%Y-%m-%d', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module . '_timerange_fix\').checked=true" /> <input id="' . $module . '_timerange_fix_time1" type="text" size="5" style="text-align: center;" value="' . strftime('%H:%M', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module . '_timerange_fix\').checked=true" /></td>';
-	echo '   <td style="padding-right: .9em;"><button onfocus="this.blur()" onclick="javascript:' . $module . '_plot_submit(\'' . $module . '\')">Show Plot</button></td>';
+	echo '   <td style="padding-right: .4em; border-right: 1px solid grey;"><input id="' . $module . '_timerange_fix_date1" type="text" size="10" style="text-align: center;" value="' . strftime('%Y-%m-%d', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module . '_timerange_fix\').checked=true" /> <input id="' . $module . '_timerange_fix_time1" type="text" size="5" style="text-align: center;" value="' . strftime('%H:%M', $timestamp_end) . '" onchange="javascript:document.getElementById(\'' . $module . '_timerange_fix\').checked=true" /></td>';
+	echo '   <td style="padding-left: .4em;"><button onfocus="this.blur()" onclick="javascript:' . $module . '_plot_submit(\'' . $module . '\')">Show Plot</button></td>';
 	echo '  </tr>';
 	echo ' </table>';
 	echo '</form>';
