@@ -79,6 +79,8 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo '    if(document.getElementById(module + "_variable_list").value != "all")' . "\n";
 	echo '    {' . "\n";
 	echo '      document.getElementById(module + "_variables").value = document.getElementById(module + "_variable_list").value;' . "\n";
+	echo '      document.getElementById(module + "_squash").value = "0";' . "\n";
+	echo '      document.getElementById(module + "_renormalize").value = "0";' . "\n";
 	echo '    }' . "\n";
 	echo '    else' . "\n";
 	echo '    {' . "\n";
