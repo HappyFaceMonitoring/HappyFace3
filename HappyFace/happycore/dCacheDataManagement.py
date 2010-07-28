@@ -209,7 +209,7 @@ class dCacheDataManagement(ModuleBase):
 		$class_str = '';
 		$on_disk_ratio = $info['bare_on_disk_files'] * 1.0 / $info['bare_total_files'];
 		if($on_disk_ratio > $data['on_disk_threshold'])
-			$class_str = ' class=ok';
+			$class_str = ' class="ok"';
 
 		if($info['name'] == 'Unassigned')
 			$unassigned = $info;
@@ -224,7 +224,7 @@ class dCacheDataManagement(ModuleBase):
 
 		$class_str = '';
 		if($info['bare_on_disk_files'] * 1.0 / $info['bare_total_files'] > $data['on_disk_threshold'])
-			$class_str = ' class=ok';
+			$class_str = ' class="ok"';
 
 		print('""" + self.PHPArrayToString(details_row) + """');
 	}
