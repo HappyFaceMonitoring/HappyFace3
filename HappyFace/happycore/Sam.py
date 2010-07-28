@@ -338,7 +338,7 @@ class Sam(ModuleBase,PhpDownload):
 	mc_details_row_fail.append("""<tr class="' . $color . '">""")
 	mc_details_row_fail.append(""" <td>' . $results["service_type"] . '</td>""")
 	mc_details_row_fail.append(""" <td>' . $results["service_name"] . '</td>""")
-	mc_details_row_fail.append(""" <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong>' . $results["$service_status"] . '</a></td>""")
+	mc_details_row_fail.append(""" <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong></a> (' . $results["service_status"] . ')</td>""")
 	mc_details_row_fail.append(""" <td>' . $results["type"] . '</td>""")
 	mc_details_row_fail.append("""   <td>' . $results["time"] . '</td>""")
 	mc_details_row_fail.append('  </tr>');
@@ -434,7 +434,7 @@ class Sam(ModuleBase,PhpDownload):
 	    if ($results["status"] != "ok" && $results["status"] != "")
             {
 			$color = "critical";
-			if($results["$service_status"] == "0.5") $color="warning";
+			if($results["service_status"] == "0.5") $color="warning";
 
 			print('""" + self.PHPArrayToString(mc_details_row_fail) + """');
 	    }

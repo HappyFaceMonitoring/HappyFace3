@@ -39,7 +39,7 @@ class TimeMachineController(HTMLOutput):
 	output.append(   '  </table>')
 	output.append(   ' </div>')
 	output.append(   ' <div class="HappyTitleBarElement">')
-	output.append( """  <form id="HistoForm1" class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
+	output.append( """  <form id="HistoForm1" class="HappyTitleBarForm" action="' . $_SERVER["PHP_SELF"] . '" method="get">""")
 	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '    <tr>')
 	output.append(   '     <td>')
@@ -68,7 +68,7 @@ class TimeMachineController(HTMLOutput):
 	output.append(   ' </div>')
 	output.append(   '')
 	output.append(   ' <div class="HappyTitleBarElement">')
-	output.append( """  <form id="HistoForm2" class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
+	output.append( """  <form id="HistoForm2" class="HappyTitleBarForm" action="' . $_SERVER["PHP_SELF"] . '" method="get">""")
 	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '    <tr>')
 	output.append(   '     <td>')
@@ -87,8 +87,8 @@ class TimeMachineController(HTMLOutput):
 	output.append(   '  </form>')
 	output.append(   ' </div>')
 	output.append(   ' <div class="HappyTitleBarElement">')
-	output.append( """  <form class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
-#	output.append( """  <form class="HappyTitleBarForm" action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
+	output.append( """  <form class="HappyTitleBarForm" action="' . $_SERVER["PHP_SELF"] . '" method="get">""")
+#	output.append( """  <form class="HappyTitleBarForm" action="<?php reset_time(); echo $_SERVER["PHP_SELF"]; ?>" method="get">
 	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '    <tr>')
 	output.append(   '     <td>')

@@ -70,8 +70,8 @@ class Plot(ModuleBase):
         for tag in plotsList:
             filename = 'filename'+self.plots[tag]
 #            url = 'url'+self.plots[tag]
-            mc.append("""<a href="' . $archive_dir . '/' . htmlentities($data["""+filename+"""]) . '">""")
-	    mc.append(""" <img alt="" src="' . $archive_dir . '/' . htmlentities($data["""+filename+"""]) . '" style="border: none;" />""")
+            mc.append("""<a href="' . $archive_dir . '/' . htmlentities($data['"""+filename+"""']) . '">""")
+	    mc.append(""" <img alt="" src="' . $archive_dir . '/' . htmlentities($data['"""+filename+"""']) . '" style="border: none;" />""")
 	    mc.append(  '</a>')
             if self.plotPosition == 'v':
                 mc.append('<br />')

@@ -124,10 +124,13 @@ class WebCreator(object):
 
 	# logic to memorize selected tab on auto reload part 1
 	output += """<?php
+			$selectedTab = $selectedMod = "";
+			$initialScroll = -1;
+
 			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; }
 			if (isset($_GET["t"]) && $_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 			if (isset($_GET["scroll"]) && $_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
-			else { $initialScroll = -1; }
+
 			print('  <script type="text/javascript">\n');
 			print('  <!--\n');
 			print('  var selectedTab="'.$selectedTab.'";\n');
@@ -136,7 +139,7 @@ class WebCreator(object):
 			print('  //-->\n');
 			print('  </script>\n');
 		?>"""
-	output += '  <form id="ReloadForm" action="<?php echo $PHP_SELF; ?>" method="get">' + "\n"
+	output += '  <form id="ReloadForm" action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="get">' + "\n"
 	output += '   <div>' + "\n"
 	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo htmlentities($selectedTab); ?>" />' + "\n"
 	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo htmlentities($selectedMod); ?>" />' + "\n"
@@ -169,7 +172,7 @@ class WebCreator(object):
 	output += '  </div>' + "\n"
 
 	# logic to memorize selected tab on auto reload part 2
-	output += '<?php if($historyview) { ?>'
+	output += '<?php if(isset($historyview) && $historyview != "") { ?>'
 	output += '  <script type="text/javascript">' + "\n"
 	output += '  <!--' + "\n"
 	output += '  AutoReload=false;' + "\n"

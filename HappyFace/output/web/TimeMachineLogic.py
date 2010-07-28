@@ -21,17 +21,21 @@ class TimeMachineLogic(object):
 	$server_time = $_SERVER['REQUEST_TIME'];
 
 	# read DN if possible
-    if ( $_SERVER[SSL_CLIENT_CERT])
-    {
-        $cert=openssl_x509_parse($_SERVER[SSL_CLIENT_CERT]);
-        $client_dn=$cert[name];
-    }
-   else
-   {
-        $client_dn=$_SERVER[SSL_CLIENT_S_DN];
-   }
+	if (isset($_SERVER["SSL_CLIENT_CERT"]))
+	{
+	    $cert=openssl_x509_parse($_SERVER["SSL_CLIENT_CERT"]);
+	    $client_dn=$cert["name"];
+	}
+	else if(isset($_SERVER["SSL_CLIENT_S_DN"]))
+	{
+	    $client_dn=$_SERVER["SSL_CLIENT_S_DN"];
+	}
+	else
+	{
+	    $client_dn="";
+	}
    
-	
+
 	# define empty error message string for wrong date / time input
 	$time_error_message = "";
 
