@@ -316,8 +316,8 @@
    /* Prepare the graph area */
    function drawGraphArea($R,$G,$B,$Stripe=FALSE)
     {
-     $this->drawFilledRectangle($this->GArea_X1,$this->GArea_Y1,$this->GArea_X2,$this->GArea_Y2,$R,$G,$B,FALSE);
-     $this->drawRectangle($this->GArea_X1,$this->GArea_Y1,$this->GArea_X2,$this->GArea_Y2,$R-40,$G-40,$B-40);
+     //$this->drawFilledRectangle($this->GArea_X1,$this->GArea_Y1,$this->GArea_X2,$this->GArea_Y2,$R,$G,$B,FALSE);
+     //$this->drawRectangle($this->GArea_X1,$this->GArea_Y1,$this->GArea_X2,$this->GArea_Y2,$R-40,$G-40,$B-40);
 
      if ( $Stripe )
       {

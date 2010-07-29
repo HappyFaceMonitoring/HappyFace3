@@ -46,7 +46,7 @@ function get_options_string($unit)
 // Prints a form to select a timerange and variable to plot
 // variable_list may be empty if $variables is set. if variable_list is given
 // then $variables should be a single variable only.
-function print_plot_timerange_selection($module, $subtable, $timestamp_var, $constraint, $squash, $renormalize, $variable_list, $variables, $timestamp_begin, $timestamp_end, $timestamp_now, $timestamp_timerange, $new_window)
+function print_plot_timerange_selection($module, $subtable, $timestamp_var, $constraint, $squash, $renormalize, $legend, $variable_list, $variables, $timestamp_begin, $timestamp_end, $timestamp_now, $timestamp_timerange, $new_window)
 {
 	// Construct unit and variable selection widgets
 	$variables_arr = explode(',', $variables);
@@ -70,6 +70,9 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	$seconds = $timestamp_end - $timestamp_begin;
 	$timerange_now_unit = convert_seconds(time() - $timestamp_begin);
 	$timerange_fix_unit = convert_seconds($seconds);
+
+	// Default
+	if($legend == '') $legend = 'bottom';
 
 	echo '<script type="text/javascript">' . "\n";
 	echo 'function ' . $module . '_plot_submit(module)' . "\n";
@@ -148,7 +151,11 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo '   </td>';
 	echo '   <td style="padding-right: .3em;">Stop:</td>';
 	echo '   <td style="padding-right: .4em; border-right: 1px solid grey;">now</td>';
-	echo '   <td style="padding-left:  .4em;"></td>';
+	echo '   <td style="padding-left:  .4em;">Legend:';
+	echo '    <input type="radio" name="legend" value="bottom"' . (($legend == 'bottom') ? ' checked="checked"' : '') . ' />bottom';
+	echo '    <input type="radio" name="legend" value="inside"' . (($legend == 'inside') ? ' checked="checked"' : '') . ' />inside';
+	echo '    <input type="radio" name="legend" value="right"' . (($legend == 'right') ? ' checked="checked"' : '') . ' />right';
+	echo '   </td>';
 	echo '  </tr>';
 	echo '  <tr>';
 	echo '   <td style="padding-right: .3em;"><input id="' . $module . '_timerange_fix" type="radio" name="group"' . (($timestamp_timerange && !$timestamp_now) ? ' checked="checked"' : '') . ' />Interval:</td>';

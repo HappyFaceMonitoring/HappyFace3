@@ -27,7 +27,7 @@ $timestamp_var = 'timestamp';
 if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
 	$timestamp_var = verify_column_name($_GET['timestamp_var']);
 
-print_plot_timerange_selection($_GET['module'], $_GET['subtable'], $_GET['timestamp_var'], $_GET['constraint'], $_GET['squash'], $_GET['renormalize'], null, $_GET['variables'], $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false);
+print_plot_timerange_selection($_GET['module'], $_GET['subtable'], $_GET['timestamp_var'], $_GET['constraint'], $_GET['squash'], $_GET['renormalize'], $_GET['legend'], null, $_GET['variables'], $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false);
 
 if(isset($_GET['squash']) && intval($_GET['squash']) != 0)
   $variables = array($_GET['variables']);
@@ -42,7 +42,7 @@ foreach($variables as $variable)
 if(isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0)
 	echo '<p><strong>Trend Plot:</strong> Note that individual variables have been scaled so that they fit into [0,1] on this plot.</p>';
 ?>
-			<p><img alt="" border="2" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities($variable); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timerange=<?php echo htmlentities($_GET["timerange"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>&renormalize=<?php echo htmlentities($_GET['renormalize']); ?>" /></p>
+			<p><img border="0" alt="<?php echo htmlentities($variable); ?> plot" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities($variable); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timerange=<?php echo htmlentities($_GET["timerange"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>&renormalize=<?php echo htmlentities($_GET['renormalize']); ?>&legend=<?php echo htmlentities($_GET['legend']); ?>" /></p>
 
 <?php
 

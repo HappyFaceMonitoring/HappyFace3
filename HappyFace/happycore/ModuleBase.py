@@ -397,7 +397,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    /*** print the HTML output ***/
 	    print('""" + self.PHPArrayToString(html_begin) + """');
 	    print('""" + self.PHPArrayToString(infobox_begin) + """');
-	    print_plot_timerange_selection('""" + self.__module__ + """', '', '', '', 0, 0, array('""" + "','".join(variable_list) + """'), 'status', time() - 48*60*60, time(), 0, 0, true);
+	    print_plot_timerange_selection('""" + self.__module__ + """', '', '', '', 0, 0, 'bottom', array('""" + "','".join(variable_list) + """'), 'status', time() - 48*60*60, time(), 0, 0, true);
 	    print('""" + self.PHPArrayToString(infobox_end) + """');
 
 	    ?>""" + module_content + """<?php

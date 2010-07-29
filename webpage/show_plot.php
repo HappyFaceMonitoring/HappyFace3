@@ -111,6 +111,11 @@ include('plot_common.php');
  }
  $variable_str = implode(',', array_merge($variables, $constraint_vars));
 
+ // Get legend
+ $legend = 'bottom';
+ if(isset($_GET['legend']) && $_GET['legend'] != '')
+   $legend = $_GET['legend'];
+
  $stmt = $dbh->prepare("SELECT $timestamp_var,$variable_str FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end $where_clause ORDER BY $timestamp_var");
  $stmt->bindParam(':timestamp_begin', $timestamp0);
  $stmt->bindParam(':timestamp_end', $timestamp1);
@@ -172,7 +177,8 @@ include('plot_common.php');
    // Dataset definition
    $DataSet = new pData;
 
-   $n_series = 0;
+   $series = array();
+   $serie_names = array();
    foreach($variables as $index => $variable)
    {
      foreach($array["values"][$variable] as $constraint_string => $datapoints)
@@ -189,9 +195,9 @@ include('plot_common.php');
        }
 
        $serie = 'Serie' . $variable . '_' . $constraint_string;
+       $series[] = $serie;
        $DataSet->AddPoint($datapoints, $serie);
        $DataSet->AddSerie($serie);
-       ++$n_series;
 
        if(count($constraint_vars) > 0 && count($variables) > 1)
          $name = "$variable, $constraint_string";
@@ -199,6 +205,8 @@ include('plot_common.php');
          $name = $constraint_string;
        else
          $name = $variable;
+
+       $serie_names[] = $name;
        $DataSet->SetSerieName($name, $serie);
      }
    }
@@ -215,20 +223,149 @@ include('plot_common.php');
    #$DataSet->SetYAxisFormat("time");
    #$DataSet->SetXAxisFormat("metric");
 
-   // Initialise the graph   
-   $Test = new pChart(900,350);
+   // Test graph to measure some metrics
+   $Test = new pChart(1,1);
 
-   // For a trend plot make sure the min and max values don't
-   // stick to the border
-   if($renormalize)
-     $Test->setFixedScale(-0.00, 1.00);
+   // Preferred plot size
+   $plot_width = 900;
+   $plot_height = 350;
 
+   // g graph area
+   $gleft = 50;
+   $gright = 890;
+   $gtop = 30;
+   $gbottom = 250;
+
+   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
+   $LegendLimit = count($series);
+   if($legend == 'inside')
+   {
+     $gheight = $gbottom - $gtop;
+     $LegendSize = $Test->getLegendBoxSize($DataSet->GetDataDescription());
+     $LegendHeight = $LegendSize[1];
+
+     // Make sure legend fits into plot
+     while($LegendHeight > $gheight - 10)
+     {
+       --$LegendLimit;
+       $DataSet->RemoveSerie($series[$LegendLimit]);
+       $DataSet->removeSerieName($series[$LegendLimit]);
+       $LegendTemp = $Test->getLegendBoxSize($DataSet->GetDataDescription());
+       $LegendHeight = $LegendTemp[1];
+     }
+
+     for($j = $LegendLimit; $j < count($series); ++$j)
+     {
+       $DataSet->AddSerie($series[$j]);
+       $DataSet->SetSerieName($serie_names[$j], $series[$j]);
+     }
+
+     // The two extra entries will be used for dummy entries ("+ N more")
+     if($LegendLimit < count($series))
+       $LegendLimit -= 2;
+   }
+   else if($legend == 'right')
+   {
+     $LegendSize = $Test->getLegendBoxSize($DataSet->GetDataDescription());
+     $gright = $gright - $LegendSize[0] - 20;
+     $plot_height = max($plot_height, $LegendSize[1] + 35);
+   }
+   else if($legend == 'bottom')
+   {
+     //$LegendSize = $Test->getLegendBoxSize($DataSet->GetDataDescription());
+     $LegendBoxes = array();
+     $LegendEntryHeight = 0; // The size of the largest legend entry. We make all entries this height so that the entries are not shifted against each other.
+
+     // Deactivate all series
+     for($j = 0; $j < count($series); ++$j)
+     {
+       $DataSet->RemoveSerie($series[$j]);
+       $DataSet->removeSerieName($series[$j]);
+     }
+
+     // Measure each legend entry
+     for($j = 0; $j < count($series); ++$j)
+     {
+       $DataSet->AddSerie($series[$j]);
+       $DataSet->SetSerieName($serie_names[$j], $series[$j]);
+       $LegendBoxes[] = $Test->getLegendBoxSize($DataSet->GetDataDescription());
+       $LegendEntryHeight = max($LegendHeight, $LegendBoxes[count($LegendBoxes)-1][1]);
+       $DataSet->RemoveSerie($series[$j]);
+       $DataSet->removeSerieName($series[$j]);
+     }
+
+     // Activate all series again
+     for($j = 0; $j < count($series); ++$j)
+     {
+       $DataSet->AddSerie($series[$j]);
+       $DataSet->SetSerieName($serie_names[$j], $series[$j]);
+     }
+
+     // Check how many columns we can show simultaneously
+     $PrevLegendWidth = 0;
+     $PrevLegendHeight = 0;
+     for($columns = 1; $columns <= count($series); ++$columns)
+     {
+       // Examine each column
+       $LegendWidth = $LegendHeight = 0;
+       $ColumnPos = array(0);
+       for($column = 0; $column < $columns; ++$column)
+       {
+         $ColumnWidth = 0;
+         $rows = floor( (float)(count($series) + $columns - 1 - $column) / $columns);
+         for($row = 0; $row < $rows; ++$row)
+	   $ColumnWidth = max($ColumnWidth, $LegendBoxes[$row*$columns+$column][0]);
+	 $LegendWidth += $ColumnWidth;
+	 $ColumnPos[] = $LegendWidth;
+	 $LegendHeight = max($LegendHeight, $LegendEntryHeight * $rows);
+       }
+
+       // horizontal graph area is fixed in bottom mode so we can determine
+       // l metrics already at this point - and need to do so to determine
+       // the area that can be occupied by legend columns.
+       $lleft = $gleft - 40;
+       $lright = $gright;
+
+       if($LegendWidth > $lright - $lleft && $PrevLegendWidth > 0 && $PrevLegendHeight > 0)
+       {
+         break;
+       }
+       else
+       {
+         $PrevLegendWidth = $LegendWidth;
+	 $PrevLegendHeight = $LegendHeight;
+	 $PrevColumnPos = $ColumnPos;
+       }
+     }
+
+     $columns = $columns - 1;
+     $LegendWidth = $PrevLegendWidth;
+     $LegendHeight = $PrevLegendHeight;
+     $ColumnPos = $PrevColumnPos;
+
+     // Make place for legend on the bottom
+     //$gbottom = $gbottom - $LegendHeight - 10;
+     $plot_height += $LegendHeight;
+   }
+
+   // More metrics based on the g metrics: l=graph area including axis labels
+   $lleft = $gleft - 40;
+   $lright = $gright;
+   $ltop = $gtop - 20;
+   $lbottom = $gbottom + 90;
+
+   // Create final output plot
+   $Test = new pChart($plot_width, $plot_height);
+
+   // Create color palette
    $hue = 0;
    $mod = 120;
-   for($i = 0; $i < $n_series; ++$i)
+   $palette = array();
+   for($i = 0; $i < count($series); ++$i)
    {
      $rgb = HSV_TO_RGB(fmod(($hue+240.0), 360.0)/360.0, 1.0, 1.0 - 0.3*($i%3));
      $Test->SetColorPalette($i, $rgb['R'], $rgb['G'], $rgb['B']);
+     $palette[] = $rgb;
 
      $hue += $mod;
      if($hue >= 360)
@@ -239,35 +376,101 @@ include('plot_common.php');
      }
    }
 
-   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
-   $LegendSize = $Test->getLegendBoxSize($DataSet->GetDataDescription());
-
    $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",8);
-   $Test->setGraphArea(50,30,850,250);
-   if($n_series > 1) $Test->setGraphArea(50,30,850-$LegendSize[0]-20,250); // put legend to the right of the plot
-   $Test->drawFilledRoundedRectangle(7,7,900,350,5,240,240,240);
-   $Test->drawRoundedRectangle(5,5,900,350,5,230,230,230);
-   $Test->drawGraphArea(255,255,255,TRUE);
-   $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,150,150,150,TRUE,90,2,TRUE,$scale_factor);
+   $Test->setGraphArea($gleft,$gtop,$gright,$gbottom);
+ 
+   // For a trend plot make sure the min and max values don't
+   // stick to the border
+   if($renormalize)
+     $Test->setFixedScale(-0.00, 1.00);
 
    // show Grid if there are less than 48 timestamps
-   if ( count($array["timestamps"]) < 48 ) { $Test->drawGrid(4,TRUE); }
-   
-   // Draw the 0 line   
+   $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,0,0,0,TRUE,90,2,TRUE,$scale_factor);
+   if(count($array["timestamps"]) < 48) $Test->drawGrid(4,FALSE, 220, 220, 220);
+   // Don't use drawGraphArea because this chooses strange colors
+   $Test->drawLine($gleft, 30, $gright, 30, 0,0,0);
+   $Test->drawLine($gright, 30, $gright, $gbottom, 0,0,0);
+   // Draw the 0 line
    $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
    $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
    
    // Draw the line graph
    $Test->drawLineGraph($DataSet->GetData(),$DataSet->GetDataDescription());
    $Test->drawPlotGraph($DataSet->GetData(),$DataSet->GetDataDescription(),3,1,255,255,255);
-   
+
+   // Draw the legend
+   if($legend == 'inside')
+   {
+     if($LegendLimit < count($series))
+     {
+       for($j = $LegendLimit; $j < count($series); ++$j)
+       {
+         $DataSet->RemoveSerie($series[$j]);
+         $DataSet->removeSerieName($series[$j]);
+       }
+
+       $DataSet->AddSerie("dummy1");
+       $DataSet->AddSerie("dummy2");
+       $DataSet->SetSerieName("¨¨", "dummy1"); // Use diaeresis instead of ldots, otherwise the row gets squashed together with the row below
+       $DataSet->SetSerieName(sprintf("+ %d more", count($series)-$LegendLimit), "dummy2");
+     }
+
+     $Test->SetColorPalette($LegendLimit, 255,255,255);
+     $Test->SetColorPalette($LegendLimit+1, 255,255,255);
+
+     $Test->drawLegend(90,35,$DataSet->GetDataDescription(), 255,255,255, -1,-1,-1, -1,-1,-1, TRUE);
+
+     if($LegendLimit < count($series))
+     {
+       for($j < $LegendLimit; $j < count($series); ++$j)
+       {
+         $DataSet->AddSerie($series[$j]);
+         $DataSet->SetSerieName($serie_names[$j], $series[$j]);
+       }
+
+       $DataSet->removeSerieName("dummy1");
+       $DataSet->removeSerieName("dummy2");
+       $DataSet->RemoveSerie("dummy1");
+       $DataSet->RemoveSerie("dummy2");
+     }
+   }
+   else if($legend == 'right')
+   {
+     // TODO: LegendLimit
+     $Test->drawLegend($lright+20,35,$DataSet->GetDataDescription(), -1,-1,-1, -1,-1,-1, -1,-1,-1, FALSE);
+   }
+   else if($legend == 'bottom')
+   {
+     for($j = 0; $j < count($series); ++$j)
+     {
+       $DataSet->RemoveSerie($series[$j]);
+       $DataSet->removeSerieName($series[$j]);
+     }
+
+     for($j = 0; $j < $LegendLimit; ++$j)
+     {
+       $DataSet->AddSerie($series[$j]);
+       $DataSet->SetSerieName($serie_names[$j], $series[$j]);
+
+       $row = floor($j / $columns);
+       $column = $j % $columns;
+       $Test->SetColorPalette(0, $palette[$j]['R'], $palette[$j]['G'], $palette[$j]['B']);
+       $sx = $lleft + (($lright - $lleft) - $LegendWidth)/2;
+       $sy = $lbottom + 10;
+       $Test->drawLegend($sx + $ColumnPos[$column], $sy + $row*$LegendEntryHeight, $DataSet->GetDataDescription(), -1,-1,-1, -1,-1,-1, -1,-1,-1, FALSE);
+
+       $DataSet->RemoveSerie($series[$j]);
+       $DataSet->removeSerieName($series[$j]);
+     }
+ 
+     for($j = 0; $j < count($series); ++$j)
+     {
+       $DataSet->AddSerie($series[$j]);
+       $DataSet->SetSerieName($serie_names[$j], $series[$j]);
+     }
+   }
+
    // Finish the graph
-   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
-   if($n_series > 1)
-     $Test->drawLegend(850-$LegendSize[0],35,$DataSet->GetDataDescription(),255,255,255);
-   else
-     $Test->drawLegend(90,35,$DataSet->GetDataDescription(),255,255,255);
-   $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
    $Test->drawTitle(60,22,"Module: " . $_GET["module"],50,50,50,585);
    $Test->Stroke("plot.png");
 
