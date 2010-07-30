@@ -154,9 +154,9 @@ class dCacheDataManagement(ModuleBase):
 	html.append(  ' </tr>')
 	html.append(  ' <tr>')
 	html.append(  '  <td>Total on disk</td>')
-	html.append("""  <td>' . $data['total_on_disk_files'] . ' (' . ( ($data['bare_total_files'] != 0) ? round($data['total_on_disk_files']*100.0/$data['bare_total_files']) : 0) . '%)</td>""")
-	html.append("""  <td>' . round($data['total_on_disk_size']/1024.0/1024.0/1024.0, 1) . ' (' . ( ($data['bare_total_size'] != 0) ? round($data['total_on_disk_size']*100.0/$data['bare_total_size']) : 0) . '%)</td>""")
-	html.append("""  <td>' . round($data['total_on_disk_size']/1024.0/1024.0/1024.0/1024.0, 1) . ' (' . ( ($data['bare_total_size'] != 0) ? round($data['total_on_disk_size']*100.0/$data['bare_total_size']) : 0) . '%)</td>""")
+	html.append("""  <td>' . $data['total_on_disk_files'] . '</td>""")
+	html.append("""  <td>' . round($data['total_on_disk_size']/1024.0/1024.0/1024.0, 1) . '</td>""")
+	html.append("""  <td>' . round($data['total_on_disk_size']/1024.0/1024.0/1024.0/1024.0, 1) . '</td>""")
 	html.append(  ' </tr>')
 	html.append(  '</table>')
 
@@ -176,7 +176,7 @@ class dCacheDataManagement(ModuleBase):
 	details_row.append("""   <td class="dCacheDataManagementDetailsName">' . htmlentities($info['name']) . '</td>""")
 	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_total_files'] . ' files<br/>' . round($info['bare_total_size']/1024.0/1024.0/1024.0,1) . ' GB</td>""")
 	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_on_disk_files'] . ' files (' . ( ($info['bare_total_files'] != 0) ? round($info['bare_on_disk_files']*100.0/$info['bare_total_files']) : 0) . '%)<br/>' . round($info['bare_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GB (' . (($info['bare_total_size'] != 0) ? round($info['bare_on_disk_size']*100.0/$info['bare_total_size']) : 0) . '%)</td>""")
-	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['total_on_disk_files'] . ' files (' . ( ($info['bare_total_files'] != 0) ? round($info['total_on_disk_files']*100.0/$info['bare_total_files']) : 0) . '%)<br/>' . round($info['total_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GB (' . ( ($info['bare_total_size'] != 0) ? round($info['total_on_disk_size']*100.0/$info['bare_total_size']) : 0) . '%)</td>""")
+	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['total_on_disk_files'] . ' files<br/>' . round($info['total_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GB</td>""")
 	details_row.append(  '  </tr>')
 
 	details_end = []
@@ -187,8 +187,14 @@ class dCacheDataManagement(ModuleBase):
 	details_end.append('  {')
 	details_end.append('    return parseFloat(a.firstChild.nextSibling.nextSibling.nodeValue);')
 	details_end.append('  }')
+	details_end.append('  function sortFetch' + self.__module__ + '2(a,b)')
+	details_end.append('  {')
+	details_end.append('    var re = new RegExp("(([0-9]+)\%\)");')
+	details_end.append('    var match = re.exec(a.firstChild.nodeValue);')
+	details_end.append('    return parseFloat(match[1]);')
+	details_end.append('  }')
 	details_end.append('')
-	details_end.append('  makeTableSortable("' + self.__module__ + '_details_table", [sortFetchText, sortFetch' + self.__module__ + ', sortFetch' + self.__module__ + ', sortFetch' + self.__module__  + ']);')
+	details_end.append('  makeTableSortable("' + self.__module__ + '_details_table", [sortFetchText, sortFetch' + self.__module__ + ', sortFetch' + self.__module__ + '2, sortFetch' + self.__module__  + ']);')
 	details_end.append('</script>')
 
 	module_content = """<?php
