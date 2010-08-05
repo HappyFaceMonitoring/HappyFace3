@@ -23,9 +23,11 @@ class JobsDist(ModuleBase):
         ModuleBase.__init__(self,module_options)
 
         self.variable = self.configService.get("setup", "variable")
-        self.user = self.configService.getDefault("setup", "user", "")
+        self.group = self.configService.getDefault("setup", "group", "")
 
+	self.db_keys["groupname"] = StringCol()
 	self.db_keys["filename"] = StringCol()
+	self.db_values["groupname"] = ""
 	self.db_values["filename"] = ""
 
         self.dsTag = 'xml_source'
@@ -51,21 +53,23 @@ class JobsDist(ModuleBase):
 	for element in root:
 	    if element.tag == "jobs":
 		for child in element:
-                    user = job_state = variable_str = ''
+                    group = job_state = variable_str = ''
 		    # Only count running jobs
 		    for subchild in child:
-		        if subchild.tag == 'user':
-			    user = subchild.text.strip()
+		        if subchild.tag == 'group':
+			    group = subchild.text.strip()
 			if subchild.tag == 'state':
 			    job_state = subchild.text.strip()
 			if subchild.tag == variable:
 			    variable_str = subchild.text.strip()
 
 		    # Check user
-		    if (self.user != '' and user != self.user) or job_state != 'running' or variable_str == '':
+		    if (self.group != '' and group != self.group) or job_state != 'running' or variable_str == '':
 		    	continue
 
 		    values.append(float(variable_str))
+
+	self.db_values["groupname"] = self.group
 
         # create plots for output
 	self.createDistPlot(variable,values,nbins)
@@ -155,7 +159,7 @@ class JobsDist(ModuleBase):
 	plot = []
 	plot.append("""<img src="' . $archive_dir . '/' . $data["filename"] . '" alt=""/>""")
 	noplot = []
-	noplot.append('<h4>There are no CMSPRD jobs running</h4>')
+	noplot.append("<h4>There are no &quot;' . (($data['groupname'] == '') ? '' : ($data['groupname'] . ' ')) . '&quot; jobs running</h4>")
 
 	module_content = """<?php
 

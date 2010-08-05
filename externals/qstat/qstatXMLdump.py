@@ -82,7 +82,13 @@ def callWithTimeout(timeout, command, arg=""):
 
     return status,proc.fromchild.readlines()
 
-
+# Check whether the given chk_group is a subgroup of group
+def checkGroup(chk_group, group, group_table):
+    while chk_group != group:
+        if chk_group == None or chk_group not in group_table:
+	    return False
+        chk_group = group_table[chk_group]
+    return True
 
 if __name__ == '__main__':
 
@@ -91,9 +97,16 @@ if __name__ == '__main__':
     theXMLFile      = '/tmp/qstat.xml'
 #    theLockFile     = '/tmp/qstatXMLdump.lock'
 
-    exprJobSummary  = ['all','cms','cmsprd']
-    exprJobDetails  = ['cms']
+    # Map of group to parent group
+    exprJobSummary  = {'all': None,
+                       'cms': 'all',
+		       'cmsproduction': 'cms',
+		       'cmsother': 'cms',
+		       'dcms': 'cms',
+		       'cmsmcp': 'cmsproduction',
+		       'cmst1p': 'cmsproduction'}
 
+    exprJobDetails  = ['cms']
 
 # Check if process is already running
 #    if os.path.exists(theLockFile):
@@ -196,7 +209,17 @@ if __name__ == '__main__':
         
             theJobInfo[job]['cpueff'] = str(cpuwallratio)
 
-                
+	# Set group by prefix of user
+	if theJobInfo[job]['user'].startswith('cmsmcp'):
+	    theJobInfo[job]['group'] = 'cmsmcp'
+	elif theJobInfo[job]['user'].startswith('cmst1p'):
+	    theJobInfo[job]['group'] = 'cmst1p'
+	elif theJobInfo[job]['user'].startswith('dcms'):
+	    theJobInfo[job]['group'] = 'dcms'
+	elif 'cms' in theJobInfo[job]['user']:
+	    theJobInfo[job]['group'] = 'cmsother'
+	else:
+	    theJobInfo[job]['group'] = 'all'
 
     jobSummary = {}
     theMinRatio = 10
@@ -212,7 +235,7 @@ if __name__ == '__main__':
         jobSummary[expr]['cputime'] = 0
         jobSummary[expr]['ratio'+str(theMinRatio)] = 0
         for job in theJobInfo:
-            if expr.count('all') or theJobInfo[job]['user'].count(expr):
+            if checkGroup(theJobInfo[job]['group'], expr, exprJobSummary):
                 jobSummary[expr]['jobs'] += 1
                 if 'state' in theJobInfo[job].keys():
                     if theJobInfo[job]['state'] == "running":
@@ -262,8 +285,8 @@ if __name__ == '__main__':
 
     for job in theJobInfo:
         userin = False
-        for username in exprJobDetails:
-            if theJobInfo[job]['user'].count(username):
+        for groupname in exprJobDetails:
+            if checkGroup(groupname, theJobInfo[job]['group'], exprJobSummary):
                 userin = True
 
         if userin:
@@ -283,8 +306,10 @@ if __name__ == '__main__':
 
     for vo in jobSummary:
         summary = doc.createElement('summary')
-	if vo != 'all':
-	    summary.setAttribute('group', vo)
+	summary.setAttribute('group', vo)
+	if vo in exprJobSummary:
+	    if exprJobSummary[vo] is not None:
+	        summary.setAttribute('parent', exprJobSummary[vo])
         for entry in jobSummary[vo]:
 	    element = doc.createElement(entry)
 	    node = doc.createTextNode(str(jobSummary[vo][entry]))
