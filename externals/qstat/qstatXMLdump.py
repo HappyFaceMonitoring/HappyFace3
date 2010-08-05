@@ -286,7 +286,7 @@ if __name__ == '__main__':
     for job in theJobInfo:
         userin = False
         for groupname in exprJobDetails:
-            if checkGroup(groupname, theJobInfo[job]['group'], exprJobSummary):
+            if checkGroup(theJobInfo[job]['group'], groupname, exprJobSummary):
                 userin = True
 
         if userin:
