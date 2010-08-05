@@ -1,5 +1,5 @@
 ##############################################
-# Qstat distribution plot
+# Jobs distribution plot
 # at the moment experimental
 # the plot creating part has to be rewritten!!!
 ##############################################
@@ -16,18 +16,19 @@ import matplotlib.pyplot as plt
 #from matplotlib.figure import Figure
 
 
-class QstatDist(ModuleBase):
+class JobsDist(ModuleBase):
 
     def __init__(self,module_options):
 
         ModuleBase.__init__(self,module_options)
 
         self.variable = self.configService.get("setup", "variable")
+        self.user = self.configService.getDefault("setup", "user", "")
 
 	self.db_keys["filename"] = StringCol()
 	self.db_values["filename"] = ""
 
-        self.dsTag = 'qstat_xml_source'
+        self.dsTag = 'xml_source'
 
 	# Split up cputime and walltime into seconds, minutes and hours
 	self.splitnum = 1
@@ -51,7 +52,7 @@ class QstatDist(ModuleBase):
 	    if element.tag == "jobs":
 		for child in element:
                     user = job_state = variable_str = ''
-		    # Only count running CMSPRD jobs
+		    # Only count running jobs
 		    for subchild in child:
 		        if subchild.tag == 'user':
 			    user = subchild.text.strip()
@@ -60,7 +61,8 @@ class QstatDist(ModuleBase):
 			if subchild.tag == variable:
 			    variable_str = subchild.text.strip()
 
-		    if user != "cmsprd" or job_state != 'running' or variable_str == '':
+		    # Check user
+		    if (self.user != '' and user != self.user) or job_state != 'running' or variable_str == '':
 		    	continue
 
 		    values.append(float(variable_str))
@@ -144,8 +146,8 @@ class QstatDist(ModuleBase):
 	axis.set_yticks(np.arange(0,max_bin_height + 5,scale_value))
 
 	
-	fig.savefig(self.archive_dir + "/qstat_dist_" + variable + ".png",dpi=60)
-	self.db_values["filename"] = "qstat_dist_" + variable + ".png"
+	fig.savefig(self.archive_dir + "/jobs_dist_" + variable + ".png",dpi=60)
+	self.db_values["filename"] = "jobs_dist_" + variable + ".png"
         self.archive_columns.append('filename')
 
     def output(self):
