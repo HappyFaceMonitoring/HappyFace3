@@ -36,7 +36,6 @@ class Sam(ModuleBase,PhpDownload):
 
 	
     def process(self):
-
         # run the test
 
 	dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
@@ -158,72 +157,72 @@ class Sam(ModuleBase,PhpDownload):
                                         details["time"] = Time
                                         self.SamResults[ServiceName]["tests"].append(details)
 
-	except Exception, ex:
-	    raise Exception('Could not extract any useful data from the XML source code for the status calculation:\n' + str(ex))
-
-        samGroups = {}
+            samGroups = {}
    
-        self.configService.addToParameter('setup','definition','Definition of Service Groups:'+'<br />')
-        groupConfig = self.configService.getSection('SamGroups')
-        for group in groupConfig.keys():
+            self.configService.addToParameter('setup','definition','Definition of Service Groups:'+'<br />')
+            groupConfig = self.configService.getSection('SamGroups')
+            for group in groupConfig.keys():
 
-            self.configService.addToParameter('setup','definition','*  '+group+': '+self.EscapeHTMLEntities(groupConfig[group])+'<br />')
+                self.configService.addToParameter('setup','definition','*  '+group+': '+self.EscapeHTMLEntities(groupConfig[group])+'<br />')
 
-            samGroups[group] = {}
-            samGroups[group]['ident'] = groupConfig[group]
-            samGroups[group]['nodes'] =[]
-            samGroups[group]['NumWarning'] = 0
-            samGroups[group]['NumError'] = 0
-            samGroups[group]['NumOk'] = 0
-            samGroups[group]['NumTotal'] = 0
-            samGroups[group]['status'] = -1
+                samGroups[group] = {}
+                samGroups[group]['ident'] = groupConfig[group]
+                samGroups[group]['nodes'] =[]
+                samGroups[group]['NumWarning'] = 0
+                samGroups[group]['NumError'] = 0
+                samGroups[group]['NumOk'] = 0
+                samGroups[group]['NumTotal'] = 0
+                samGroups[group]['status'] = -1
             
             
-            if samGroups[group]['ident'].find('Type:') == 0:
-                nodeclass =  samGroups[group]['ident'].replace('Type:','')
-                for service in  self.SamResults.keys():
-                    if  self.SamResults[service]['type'] == nodeclass:
-                        samGroups[group]['nodes'].append(service)
-            else:
-                samGroups[group]['nodes'] = samGroups[group]['ident'].split(',')
-            samGroups[group]['nodes'].sort()
+                if samGroups[group]['ident'].find('Type:') == 0:
+                    nodeclass =  samGroups[group]['ident'].replace('Type:','')
+                    for service in  self.SamResults.keys():
+                        if  self.SamResults[service]['type'] == nodeclass:
+                            samGroups[group]['nodes'].append(service)
+                else:
+                    samGroups[group]['nodes'] = samGroups[group]['ident'].split(',')
+                samGroups[group]['nodes'].sort()
 
-        self.configService.addToParameter('setup','definition','Thresholds:'+'<br />')
-        groupThresholds = self.configService.getSection('SamGroupsThresholds')
-        for val in groupThresholds.keys():
-            self.configService.addToParameter('setup','definition','* '+val+': '+self.EscapeHTMLEntities(groupThresholds[val])+'<br />')
-            tmp = val.split('_')
-            if len(tmp) != 3: self.error_message += "Config parameter "+val+" does not match group_Error/Warning."
-            testCat = tmp[1]
-            testValue = tmp[2]
-            testRef = groupThresholds[val]
+            self.configService.addToParameter('setup','definition','Thresholds:'+'<br />')
+            groupThresholds = self.configService.getSection('SamGroupsThresholds')
+            for val in groupThresholds.keys():
+                self.configService.addToParameter('setup','definition','* '+val+': '+self.EscapeHTMLEntities(groupThresholds[val])+'<br />')
+                tmp = val.split('_')
+                if len(tmp) != 3: self.error_message += "Config parameter "+val+" does not match group_Error/Warning."
+                testCat = tmp[1]
+                testValue = tmp[2]
+                testRef = groupThresholds[val]
 
-            if not samGroups.has_key(tmp[0]): next
-            if not samGroups[ tmp[0] ].has_key(testCat): samGroups[ tmp[0] ][testCat] = []
+                if not samGroups.has_key(tmp[0]): next
+                if not samGroups[ tmp[0] ].has_key(testCat): samGroups[ tmp[0] ][testCat] = []
 
-            tmpThreshold = {}
-            tmpThreshold['value'] = testValue
-            tmpThreshold['condition'] =  str( testRef )[:1]
-            tmpThreshold['threshold'] = float(str(testRef)[1:])
-            samGroups[ tmp[0] ][testCat].append(tmpThreshold)
+                tmpThreshold = {}
+                tmpThreshold['value'] = testValue
+                tmpThreshold['condition'] =  str( testRef )[:1]
+                tmpThreshold['threshold'] = float(str(testRef)[1:])
+                samGroups[ tmp[0] ][testCat].append(tmpThreshold)
 
 
 
 
 
                      
-        for group in samGroups:
-            theGroup = samGroups[group]
-            for service in theGroup['nodes']:
-                if self.SamResults[service]['status'] == 1.0:  theGroup['NumOk'] = theGroup['NumOk']+1
-                elif self.SamResults[service]['status'] == 0.5:  theGroup['NumWarning'] =theGroup['NumWarning']+1
-                elif self.SamResults[service]['status'] == 0.0: theGroup['NumError'] =theGroup['NumError']+1
-            theGroup['NumTotal'] = len( theGroup['nodes'] )
+            for group in samGroups:
+                theGroup = samGroups[group]
+                for service in theGroup['nodes']:
+                    if self.SamResults[service]['status'] == 1.0:  theGroup['NumOk'] = theGroup['NumOk']+1
+                    elif self.SamResults[service]['status'] == 0.5:  theGroup['NumWarning'] =theGroup['NumWarning']+1
+                    elif self.SamResults[service]['status'] == 0.0: theGroup['NumError'] =theGroup['NumError']+1
+                theGroup['NumTotal'] = len( theGroup['nodes'] )
                 
 
-            if self.getGroupStatus(theGroup,'Error') == True: theGroup['status'] = 0.0
-            elif self.getGroupStatus(theGroup,'Warning') == True: theGroup['status'] = 0.5
-            else: theGroup['status'] = 1.0
+                if self.getGroupStatus(theGroup,'Error') == True: theGroup['status'] = 0.0
+                elif self.getGroupStatus(theGroup,'Warning') == True: theGroup['status'] = 0.5
+                else: theGroup['status'] = 1.0
+
+	except Exception, ex:
+	    raise Exception('Could not extract any useful data from the XML source code for the status calculation:\n' + str(ex))
 
             
 
