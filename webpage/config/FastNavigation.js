@@ -57,10 +57,15 @@ function goto(target) {
 		window.scrollTo(0,targetY);
 	}
 	if (selectedMod != "") {
-		document.getElementById('FNImage_'+selectedMod).style.border="solid 1px #696969";
+		document.getElementById('FNImage_'+selectedMod).style.border="solid 1px #000000";
 	}
-	document.getElementById('FNImage_'+target).style.border="solid 1px #000000";
-	selectedMod = target;
+	if (typeof(target) == "string") {
+		if(selectedMod != "") {
+			document.getElementById('FNImage_'+selectedMod).style.border="solid 1px #696969"
+		}
+		document.getElementById('FNImage_'+target).style.border="solid 1px #000000";
+		selectedMod = target;
+	}
 };
 
 /* Get browser type */
