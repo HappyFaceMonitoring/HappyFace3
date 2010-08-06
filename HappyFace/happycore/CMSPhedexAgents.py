@@ -94,6 +94,8 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
         success,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	source_tree, error_message = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
+	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
+
         # parse the details and store it in a special database table
 	details_database = self.__module__ + "_table_details"
 	
@@ -132,9 +134,9 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 
                     label = str(agent.get("label"))
                     details_db_values['version'] = str(agent.get("version"))
-                    details_db_values['host'] = str(agent.get("host"))
+                    details_db_values['host'] = str(element.get("host"))
                     details_db_values['dir'] = str(agent.get("state_dir"))
-                    details_db_values['name'] = str(agent.get("name"))
+                    details_db_values['name'] = str(element.get("name"))
                     details_db_values['label'] = label
 
                     ## store the time the agent has answered the last time
