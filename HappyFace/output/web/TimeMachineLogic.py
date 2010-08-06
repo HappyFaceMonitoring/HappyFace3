@@ -84,11 +84,13 @@ class TimeMachineLogic(object):
 	# define a RED colored time string for the time bar output
 	if ($server_time - $timestamp < 1800) {
 	    $date_message = '<span>' . date("D, d. M Y", $timestamp) . '</span>';
-	    $time_message = '<span>' . date("H:i", $timestamp) . '</span>';
+	    $date_message_short = '<span>' . date("d. M Y", $timestamp) . '</span>';
+	    $time_message = '<span style="font-style: italic;">' . date("H:i", $timestamp) . ' h</span>';
 	}
 	else {
 	    $date_message = '<span style="color:red;">' . date("D, d. M Y", $timestamp) . '</span>';
-	    $time_message = '<span style="color:red;">' . date("H:i", $timestamp) . '</span>';
+	    $date_message_short = '<span style="color:red;">' . date("d. M Y", $timestamp) . '</span>';
+	    $time_message = '<span style="color:red;font-style: italic;">' . date("H:i", $timestamp) . ' h</span>';
 	}
 
 	?>"""

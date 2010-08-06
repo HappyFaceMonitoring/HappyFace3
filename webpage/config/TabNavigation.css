@@ -126,11 +126,14 @@
 }
 .HappyTitleBarElementTable {
 	text-align: center;
-	height:100%;
+	border-collapse: collapse;
+	margin: 1px 0px 0px 0px;
+	height:90%;
 }
 .HappyTitleBarElementTable td {
 	vertical-align: middle;
 }
+
 .HappyTitleBarForm {
 	margin: 6px 0px 0px 0px;
 	padding: 0px;
