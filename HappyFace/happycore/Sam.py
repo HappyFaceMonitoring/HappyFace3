@@ -176,10 +176,11 @@ class Sam(ModuleBase,PhpDownload):
             
             
                 if samGroups[group]['ident'].find('Type:') == 0:
-                    nodeclass =  samGroups[group]['ident'].replace('Type:','')
-                    for service in  self.SamResults.keys():
-                        if  self.SamResults[service]['type'] == nodeclass:
-                            samGroups[group]['nodes'].append(service)
+		    for type in samGroups[group]['ident'].split(','):
+                        nodeclass = type.replace('Type:','')
+                        for service in  self.SamResults.keys():
+                            if  self.SamResults[service]['type'] == nodeclass:
+                                samGroups[group]['nodes'].append(service)
                 else:
                     samGroups[group]['nodes'] = samGroups[group]['ident'].split(',')
                 samGroups[group]['nodes'].sort()
