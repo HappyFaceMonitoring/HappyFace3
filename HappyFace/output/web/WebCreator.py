@@ -35,12 +35,17 @@ class WebCreator(object):
 	logo_image	 = self.config.get('setup','logo_image')
 	histo_step	 = self.config.get('setup','histo_step')
 
+	first_cat	 = ""
+
         for category in self.config.get('setup','categories').split(","):
 
              cat_title   = self.config.get(category,'cat_title')
              cat_type    = self.config.get(category,'cat_type')
              cat_algo    = self.config.get(category,'cat_algo')
              cat_content = ""
+
+	     if first_cat == "":
+		  first_cat = category
 
              for module in self.config.get(category,'modules').split(","):
 
@@ -127,7 +132,7 @@ class WebCreator(object):
 			$selectedTab = $selectedMod = "";
 			$initialScroll = -1;
 
-			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; }
+			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; } else { $selectedTab = '""" + first_cat + """'; }
 			if (isset($_GET["m"]) && $_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 			if (isset($_GET["scroll"]) && $_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
 
@@ -160,7 +165,7 @@ class WebCreator(object):
 	output += '   </ul>' + "\n"
 
 	# input content
-	output += '   <div class="HappyPanelsContentGroup">' + "\n"
+	output += '   <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">' + "\n"
 
 	output += content
 	output += '   </div>' + "\n"

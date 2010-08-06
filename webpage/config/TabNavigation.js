@@ -24,6 +24,8 @@ HappyTab.Widget.HappyPanels = function(element, defTab, defModule, initialScroll
 	HappyTab.Widget.HappyPanels.setOptions(this, opts);
 
 	this.attachBehaviors(initialScroll);
+	document.getElementById(defTab + "_panel").style.visibility = "visible";
+	document.getElementById("HappyPanelsContentGroup").style.visibility = "visible";
 };
 
 HappyTab.Widget.HappyPanels.prototype.getElementChildren = function(element)
@@ -276,9 +278,11 @@ HappyTab.Widget.HappyPanels.prototype.showPanel = function(tab)
 		{
 			if (tabs[i])
 				this.removeClassName(tabs[i], this.tabSelectedClass);
+				tabs[i].style.visibility = "visible";
 			if (panels[i])
 			{
 				this.removeClassName(panels[i], this.panelVisibleClass);
+				panels[i].style.visibility = "visible";
 				panels[i].style.display = "none";
 			}
 		}
