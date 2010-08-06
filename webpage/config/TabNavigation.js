@@ -138,7 +138,12 @@ HappyTab.Widget.HappyPanels.addEventListener = function(element, eventType, hand
 
 HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 {
+	if (selectedMod != "") {
+		document.getElementById('FNImage_'+selectedMod).style.border="solid 1px #696969";
+		selectedMod = '';
+	}
 	this.showPanel(tab);
+
 	document.getElementById('ReloadTab').value=this.getTabCategory(tab);
 	document.getElementById('ReloadMod').value='';
 	document.getElementById('HistoReloadTab1').value=this.getTabCategory(tab);

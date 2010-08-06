@@ -32,7 +32,7 @@ class TimeMachineController(HTMLOutput):
 	output.append(   '  </table>')
 	output.append(   ' </div>')
 	output.append(   ' <div class="HappyTitleBarElement">')
-	output.append(   '  <table border="0" class="HappyTitleBarElementTable" style="cell-padding:0px">')
+	output.append(   '  <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '   <tr>')
 	output.append( """    <td colspan="2"><a href="?action=getxml&amp;date=' . $date_string . '&amp;time=' . $time_string . '"><img src="config/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: bottom;"/></a></td>""")
 	output.append(   '   </tr>')

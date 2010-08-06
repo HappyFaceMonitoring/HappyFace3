@@ -65,7 +65,9 @@ is a way later.
 /* div with the navbar icons */
 .HappyFNnavimg {
 	width:32px;
-	height:32px; 
+	height:34px;
+	text-align: center;
+	vertical-align: bottom;
 	border:0px;
 	right:0px;
 }
@@ -82,6 +84,14 @@ is a way later.
 	/*-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";*/
 	/*filter:Alpha(opacity=60);*/
 	opacity:0.6;
+}
+
+/* the fast nav module status picture */
+.HappyFNnavpic {
+	border: solid 1px #696969;
+}
+.HappyFNnavpic:hover {
+        border: solid 1px #000000;
 }
 
 /* div with the hide FastNav button */

@@ -62,7 +62,7 @@ class CategoryFastNavigation(HTMLOutput):
 
 	        if ($module["category"] == \"""" + category + """\") {
 
-		    $nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"]);
+		    $nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"], $module["module"]);
 
 		    print('""" + self.PHPArrayToString(list_item) + """');
 	        }
