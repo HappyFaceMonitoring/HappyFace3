@@ -37,6 +37,28 @@ class JobsDist(ModuleBase):
 	if self.variable == 'cputime' or self.variable == 'walltime':
 	    self.splitnum = 3
 
+    def getGroupHierarchy(self, root):
+        hierarchy = {}
+        for element in root:
+	    if element.tag == "summaries":
+	        for child in element:
+		    if child.tag == 'summary':
+	                if 'parent' in child.attrib:
+	                    hierarchy[child.attrib['group']] = child.attrib['parent']
+		        else:
+		            hierarchy[child.attrib['group']] = None
+	return hierarchy
+
+    def checkGroup(self, group_chk, group, hierarchy):
+        try:
+            while group_chk != group:
+	        if hierarchy[group_chk] == None:
+	            return False
+	        group_chk = hierarchy[group_chk]
+	    return True
+	except:
+	    return False
+
     def process(self):
 
 	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
@@ -49,6 +71,8 @@ class JobsDist(ModuleBase):
 	values = []
 	variable = self.variable
 	nbins = 20
+
+	hierarchy = self.getGroupHierarchy(root)
 
 	for element in root:
 	    if element.tag == "jobs":
@@ -64,7 +88,7 @@ class JobsDist(ModuleBase):
 			    variable_str = subchild.text.strip()
 
 		    # Check user
-		    if (self.group != '' and group != self.group) or job_state != 'running' or variable_str == '':
+		    if (self.group != '' and not self.checkGroup(group, self.group, hierarchy)) or job_state != 'running' or variable_str == '':
 		    	continue
 
 		    values.append(float(variable_str))
@@ -159,7 +183,7 @@ class JobsDist(ModuleBase):
 	plot = []
 	plot.append("""<img src="' . $archive_dir . '/' . $data["filename"] . '" alt=""/>""")
 	noplot = []
-	noplot.append("<h4>There are no &quot;' . (($data['groupname'] == '') ? '' : ($data['groupname'] . ' ')) . '&quot; jobs running</h4>")
+	noplot.append("<h4>There are no ' . (($data['groupname'] == '') ? '' : ('&quot;' . $data['groupname'] . '&quot; ')) . 'jobs running</h4>")
 
 	module_content = """<?php
 
