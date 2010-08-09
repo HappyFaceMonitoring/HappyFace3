@@ -33,6 +33,7 @@ class Uschi(ModuleBase):
 
 	self.testname_string = self.configService.get('setup','testname_string')
 
+	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
 
         ##############################################################################
         # run the test
