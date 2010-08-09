@@ -91,8 +91,15 @@ is a way later.
 	border: solid 1px #696969;
 }
 .HappyFNnavpic:hover {
-        border: solid 1px #000000;
+        border: solid 1px orange;
 }
+.HappyFNnavpic2 {
+	border: solid 1px orange;
+}
+.HappyFNnavpic2:hover {
+        border: solid 1px orange;
+}
+
 
 /* div with the hide FastNav button */
 .HappyFNtopdiv {

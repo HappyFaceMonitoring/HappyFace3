@@ -139,7 +139,7 @@ HappyTab.Widget.HappyPanels.addEventListener = function(element, eventType, hand
 HappyTab.Widget.HappyPanels.prototype.onTabClick = function(e, tab)
 {
 	if (selectedMod != "") {
-		document.getElementById('FNImage_'+selectedMod).style.border="solid 1px #696969";
+		document.getElementById('FNImage_'+selectedMod).className="HappyFNnavpic";
 		selectedMod = '';
 	}
 	this.showPanel(tab);
