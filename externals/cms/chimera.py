@@ -39,6 +39,7 @@ class Config:
 	self.upload_url = self.get_default(config, 'chimera', 'upload_url', '')
 	self.password = self.get_default(config, 'chimera', 'password', '')
 	self.unassigned_file = self.get_default(config, 'chimera', 'unassigned_file', '')
+	self.max_time = float(self.get_default(config, 'chimera', 'max_time', '-1'))
 
     def get_default(self, parser, section, option, default):
         try:
@@ -210,8 +211,26 @@ def query_chimera_dump(url, last_modified_file):
 
     return [bz2.BZ2File(most_recent_pool_path), bz2.BZ2File(most_recent_dump_path), int(most_recent)]
 
+def store_files(files, filename):
+  f = open(filename, 'w')
+  for file in files:
+      f.write(file + '=' + files[file].dataset + '\n')
+
+def restore_files(filename):
+    f = open(filename, 'r')
+    files = {}
+    for line in f:
+        line = line.strip()
+        if line == '' or line[0] == '#':
+            continue
+        vals = line.split('=', 1)
+        if len(vals) < 2:
+            continue
+        files[vals[0]] = File(dataset = vals[1])
+    return files
+
 # Queries DBS to obtain a mapping from files to dataset
-def query_dataset_files():
+def query_dataset_files(config, time_begin):
     sys.path.append('dbsapi')
     import provider_dbsv2
 
@@ -219,10 +238,55 @@ def query_dataset_files():
 
     paths = set(map(lambda x: x['Path'], api.listBlocks(storage_element_name="cmssrm-fzk.gridka.de")))
 
+    # If a DBS query fails, retry in 1 minute, if it fails again, retry in
+    # 15 minutes, etc. If after the last entry the query still fails then
+    # abort then raise an exception (which aborts the script).
+    retry_time = [1, 15, 60, 120, 600]
+
     files = {}
     for p in paths:
-        for f in map(lambda x: x['LogicalFileName'], api.listDatasetFiles(p)):
-            files[f] = File(dataset = p)
+        retry_index = 0
+        while retry_index < len(retry_time):
+	    try:
+                for f in map(lambda x: x['LogicalFileName'], api.listDatasetFiles(p)):
+                    files[f] = File(dataset = p)
+		break
+	    except Exception as ex:
+		print 'DBS query failed: ' + str(ex)
+		if retry_index+1 >= len(retry_time):
+		    print 'Giving up. Remove the PID file manually before re-running the script.'
+		    raise ex
+
+		# Determine sleeping time. If sleep would take longer than
+		# maximum running time of the script then abort directly now
+		# instead of sleeping.
+		sleep_time = retry_time[retry_index]*60
+		if config.max_time > 0 and time.time() - time_begin + sleep_time > config.max_time*60*60:
+		    raise Exception('Maximum execution time reached')
+
+		print 'Trying again in ' + str(retry_time[retry_index]) + ' minute(s)'
+		# We might want to write files to disk before sleeping,
+		# to avoid eating up the machine's RAM for a long time.
+		if retry_time[retry_index] > 0: #15:
+		    progress_file = os.path.join(config.cache_directory, 'chimera.progress')
+		    print 'Writing current progress to ' + progress_file + '...'
+
+		    try:
+		        store_files(files, progress_file)
+		    except:
+		        print 'Failed to write files to disk. Keeping them in memory while sleeping...'
+		    del files
+		    print 'Sleeping.'
+                    time.sleep(sleep_time)
+		    print 'Restoring progress from ' + progress_file + '...'
+		    files = restore_files(progress_file)
+		    os.unlink(progress_file)
+		else:
+		    print 'Sleeping.'
+                    time.sleep(sleep_time)
+
+	        retry_index += 1
+		print 'Retrying DBS query...'
     return files
 
 def parse_chimera_sizes(file, datasets):
@@ -244,13 +308,14 @@ def parse_chimera_dump(file, datasets):
     parser.parse(file)
     return xml_handler
 
-def write_xml_output(result, filename, timestamp):
+def write_xml_output(result, filename, timestamp, time_begin):
     total_data = {}
 
     f = file(filename, 'w')
     f.write('<datasets>\n')
 
     f.write('\t<time>' + str(timestamp) + '</time>\n')
+    f.write('\t<duration>' + str(int(time.time() - time_begin)) + '</duration>\n')
     for dataset in result.records:
         record = result.records[dataset]
         f.write('\t<dataset name=%s incomplete_sizes=%s>\n' % (xml.sax.saxutils.quoteattr(dataset), xml.sax.saxutils.quoteattr(str(record.incomplete_sizes))))
@@ -276,6 +341,8 @@ def write_unassigned_output(result, filename, timestamp):
     f.close()
 
 def run(config):
+    time_begin = time.time()
+
     # Check whether there is a new chimera dump available
     last_modified_file = os.path.join(config.cache_directory, 'chimera.last_modified')
     chimera = query_chimera_dump(config.input_directory, last_modified_file)
@@ -288,7 +355,7 @@ def run(config):
     sys.stdout.write('New Chimera dump available...\n')
 
     sys.stdout.write('Querying DBS...\n')
-    files = query_dataset_files()
+    files = query_dataset_files(config, time_begin)
     #files = {}
 
     sys.stdout.write('Parsing sizes dump...\n')
@@ -302,7 +369,7 @@ def run(config):
     # Write XML output for HappyFace, chimera[2] is timestamp of chimera dump
     sys.stdout.write('Write and Upload output...\n')
     output_file = os.path.join(config.cache_directory, config.output_file)
-    write_xml_output(result, output_file, chimera[2])
+    write_xml_output(result, output_file, chimera[2], time_begin)
 
     if config.upload_url != '':
         # Upload
@@ -340,11 +407,15 @@ try:
     file(pid_file, 'r').read()
     sys.stdout.write('PID file exists already\n')
 except:
+    file(pid_file, 'w').write(str(os.getpid()))
+#    try:
+    run(cfg)
+#    finally:
+
+    # supposedly do not unlink the PID file in case run throws an exception
+    # so that we do not run into the same problem again in the next cronjob
+    # execution. Instead wait for manual intervention.
     try:
-        file(pid_file, 'w').write(str(os.getpid()))
-        run(cfg)
-    finally:
-        try:
-            os.unlink(pid_file)
-	except:
-	    pass
+        os.unlink(pid_file)
+    except:
+        pass
