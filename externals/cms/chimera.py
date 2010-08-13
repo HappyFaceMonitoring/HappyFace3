@@ -220,17 +220,19 @@ def query_chimera_dump(config, last_modified_file):
 
     most_recent_pool_path = os.path.join(config.input_directory, config.latest_pool)
     most_recent_dump_path = os.path.join(config.input_directory, config.latest_dump)
-    timestamp = os.stat(most_recent_dump_path).st_mtime
+    timestamp = int(os.stat(most_recent_dump_path).st_mtime)
+
+    print 'Old chimera dump file timestamp: ' + str(prev_timestamp)
+    print 'New chimera dump file timestamp: ' + str(timestamp)
 
     most_recent = None
-    print timestamp, prev_timestamp
     if timestamp > prev_timestamp and (most_recent == None or timestamp > most_recent):
         most_recent = timestamp
 
     if most_recent is None:
         return None
 
-    return [open(most_recent_pool_path, 'r'), open(most_recent_dump_path, 'r'), int(most_recent)]
+    return [open(most_recent_pool_path, 'r'), open(most_recent_dump_path, 'r'), most_recent]
 
 def store_files(files, filename):
   f = open(filename, 'w')
