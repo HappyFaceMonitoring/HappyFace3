@@ -22,6 +22,10 @@ os.environ['USER'] = 'hilfeomgcmssoftwarefrickel'
 root = os.path.dirname(os.path.abspath(os.path.normpath(sys.argv[0])))
 sys.path.insert(0, os.path.join(root, 'dbsapi'))
 
+class MaxTimeElapsed(Exception):
+    def __str__(self):
+        return "Maximum execution time reached"
+
 # File in chimera dump.
 class File:
     def __init__(self, size = -1, dataset = None):
@@ -248,10 +252,13 @@ def query_dataset_files(config, time_begin):
         retry_index = 0
         while retry_index < len(retry_time):
 	    try:
+#	        import random
+#		if random.random() > 0.1:
+#		    raise Exception('Fail')
                 for f in map(lambda x: x['LogicalFileName'], api.listDatasetFiles(p)):
                     files[f] = File(dataset = p)
 		break
-	    except Exception as ex:
+	    except Exception, ex:
 		print 'DBS query failed: ' + str(ex)
 		if retry_index+1 >= len(retry_time):
 		    print 'Giving up. Remove the PID file manually before re-running the script.'
@@ -262,7 +269,7 @@ def query_dataset_files(config, time_begin):
 		# instead of sleeping.
 		sleep_time = retry_time[retry_index]*60
 		if config.max_time > 0 and time.time() - time_begin + sleep_time > config.max_time*60*60:
-		    raise Exception('Maximum execution time reached')
+		    raise MaxTimeElapsed()
 
 		print 'Trying again in ' + str(retry_time[retry_index]) + ' minute(s)'
 		# We might want to write files to disk before sleeping,
@@ -408,13 +415,20 @@ try:
     sys.stdout.write('PID file exists already\n')
 except:
     file(pid_file, 'w').write(str(os.getpid()))
-#    try:
-    run(cfg)
-#    finally:
 
     # supposedly do not unlink the PID file in case run throws an exception
     # so that we do not run into the same problem again in the next cronjob
-    # execution. Instead wait for manual intervention.
+    # execution. Instead wait for manual intervention. However, do unlink the
+    # file if the maximum execution time of the script was reached.
+    try:
+        run(cfg)
+    except MaxTimeElapsed, ex:
+        print str(ex)
+        try:
+            os.unlink(pid_file)
+        except:
+            pass
+
     try:
         os.unlink(pid_file)
     except:
