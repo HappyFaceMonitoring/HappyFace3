@@ -44,6 +44,8 @@ class Config:
 	self.password = self.get_default(config, 'chimera', 'password', '')
 	self.unassigned_file = self.get_default(config, 'chimera', 'unassigned_file', '')
 	self.max_time = float(self.get_default(config, 'chimera', 'max_time', '-1'))
+	self.latest_pool = self.get_default(config, 'chimera', 'latest_pool', 'chimera_pool_latest')
+	self.latest_dump = self.get_default(config, 'chimera', 'latest_dump', 'chimera_dump_latest')
 
     def get_default(self, parser, section, option, default):
         try:
@@ -182,38 +184,53 @@ class Handler(xml.sax.ContentHandler):
             self.entry_location = None
             self.entry_name = None
 
-def query_chimera_dump(url, last_modified_file):
+def query_chimera_dump(config, last_modified_file):
     prev_timestamp = 0
     try:
         prev_timestamp = int(file(last_modified_file, 'r').read())
     except:
         pass
 
+#    url = config.input_directory
+#    most_recent = None
+#    most_recent_dump_path = None
+#    most_recent_pool_path = None
+
+#    for filename in os.listdir(url):
+#        # Only scan dumps
+#        if not filename.startswith('chimera_dump'):
+#	    continue
+
+#        path = url + '/' + filename
+#	timestamp = os.stat(path).st_mtime
+#	if timestamp > prev_timestamp and (most_recent == None or timestamp > most_recent):
+#	    # The dump is more recent than the one we scanned the last time
+#	    # Check whether there is also a sizes file.
+#	    pool_filename = 'chimera_pool' + filename[12:]
+#	    pool_path = url + '/' + pool_filename
+#	    if os.path.exists(pool_path):
+#	        most_recent = timestamp
+#	        most_recent_dump_path = path
+#		most_recent_pool_path = pool_path
+
+#    if most_recent is None:
+#        return None
+
+#    return [bz2.BZ2File(most_recent_pool_path), bz2.BZ2File(most_recent_dump_path), int(most_recent)]
+
+    most_recent_pool_path = os.path.join(config.input_directory, config.latest_pool)
+    most_recent_dump_path = os.path.join(config.input_directory, config.latest_dump)
+    timestamp = os.stat(most_recent_dump_path).st_mtime
+
     most_recent = None
-    most_recent_dump_path = None
-    most_recent_pool_path = None
-
-    for filename in os.listdir(url):
-        # Only scan dumps
-        if not filename.startswith('chimera_dump'):
-	    continue
-
-        path = url + '/' + filename
-	timestamp = os.stat(path).st_mtime
-	if timestamp > prev_timestamp and (most_recent == None or timestamp > most_recent):
-	    # The dump is more recent than the one we scanned the last time
-	    # Check whether there is also a sizes file.
-	    pool_filename = 'chimera_pool' + filename[12:]
-	    pool_path = url + '/' + pool_filename
-	    if os.path.exists(pool_path):
-	        most_recent = timestamp
-	        most_recent_dump_path = path
-		most_recent_pool_path = pool_path
+    print timestamp, prev_timestamp
+    if timestamp > prev_timestamp and (most_recent == None or timestamp > most_recent):
+        most_recent = timestamp
 
     if most_recent is None:
         return None
 
-    return [bz2.BZ2File(most_recent_pool_path), bz2.BZ2File(most_recent_dump_path), int(most_recent)]
+    return [open(most_recent_pool_path, 'r'), open(most_recent_dump_path, 'r'), int(most_recent)]
 
 def store_files(files, filename):
   f = open(filename, 'w')
@@ -352,7 +369,7 @@ def run(config):
 
     # Check whether there is a new chimera dump available
     last_modified_file = os.path.join(config.cache_directory, 'chimera.last_modified')
-    chimera = query_chimera_dump(config.input_directory, last_modified_file)
+    chimera = query_chimera_dump(config, last_modified_file)
     if chimera is None:
         sys.stdout.write('Chimera dump not updated since last execution\n')
 	return
