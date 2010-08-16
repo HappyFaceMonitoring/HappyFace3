@@ -93,6 +93,7 @@ def checkGroup(chk_group, group, group_table):
 if __name__ == '__main__':
 
     theQstatCommand = '/usr/pbs/bin/qstat -f'
+#    theQstatCommand = 'cat qstat_out'
     theLogFile      = '/tmp/qstat.log'
     theXMLFile      = '/tmp/qstat.xml'
 #    theLockFile     = '/tmp/qstatXMLdump.lock'
@@ -188,7 +189,10 @@ if __name__ == '__main__':
             theJobInfo[theJobId]['queue'] = fileLine.split(" = ")[1]
 
         if fileLine.count('ctime'):
-            theJobInfo[theJobId]['created'] = fileLine.split(" = ")[1]
+            theJobInfo[theJobId]['created'] = int(time.mktime(time.strptime(fileLine.split(" = ")[1], '%a %b %d %H:%M:%S %Y')))
+        if fileLine.count('start_time') or fileLine.count('stime'):
+            theJobInfo[theJobId]['start'] = int(time.mktime(time.strptime(fileLine.split(" = ")[1], '%a %b %d %H:%M:%S %Y')))
+	    theJobInfo[theJobId]['end'] = 'n/a' # We do not record finished jobs (yet)
 
         if fileLine.count('exec_host'):
             theJobInfo[theJobId]['exec_host'] = fileLine.split(" = ")[1]
@@ -291,11 +295,17 @@ if __name__ == '__main__':
 
         if userin:
             jobNode = doc.createElement("job")
+	    group = None
+	    state = None
             for tag in theJobInfo[job]:
 	        element = doc.createElement(tag)
 	        node = doc.createTextNode(str(theJobInfo[job][tag]))
 	        element.appendChild(node)
                 jobNode.appendChild(element)
+		if tag == 'state': state = str(theJobInfo[job][tag])
+		if tag == 'group': group = str(theJobInfo[job][tag])
+	    if group is not None: jobNode.setAttribute('group', group)
+	    if state is not None: jobNode.setAttribute('status', state)
 
             jobDetails.appendChild(jobNode)
    
