@@ -132,14 +132,14 @@ def HappyFace():
 	        if module == "": continue
 
                 # import module class dynamically
-                modClass = __import__(module)
                 moduleCount += 1
+                print "  "+str(moduleCount)+": "+module
+                modClass = __import__(module)
 	    
                 module_options["category"] = category
 
                 # create a object of the class dynamically
                 modObj_list[module] = getattr(modClass,module)(module_options)
-                print "  "+str(moduleCount)+": "+module
 
         print "HappyFace: Module preparation finished."
 
