@@ -185,25 +185,116 @@ class JobsStatistics(ModuleBase):
 
     def output(self):
 
+	# JavaScript for plotting functionality
+
+	js = []
+	js.append('<script type="text/javascript">')
+	js.append('function ' + self.__module__ + '_get_list_of_checked_elements(id)')
+	js.append('{')
+	js.append('  elems = new Array();')
+	js.append('  for(var i = 0;;++i)')
+	js.append('  {')
+	js.append('    var elem = document.getElementById("' + self.__module__ + '_" + id + "_" + i);')
+	js.append('    if(!elem) break;')
+	js.append('    if(elem.checked) elems.push(elem.value);')
+	js.append('  }')
+	js.append('  return elems.join(",");')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_toggle_checked_elements(id)')
+	js.append('{')
+	js.append('  for(var i = 0;;++i)')
+	js.append('  {')
+	js.append('    var elem = document.getElementById("' + self.__module__ + '_" + id + "_" + i);')
+	js.append('    if(!elem) break;')
+	js.append('    elem.checked = !elem.checked;')
+	js.append('  }')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_toggle_button()')
+	js.append('{')
+	js.append('  ' + self.__module__ + '_toggle_checked_elements("constraint");')
+	js.append('  ' + self.__module__ + '_toggle_checked_elements("variable");')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_col_button(variable)')
+	js.append('{')
+	js.append('  var groups = ' + self.__module__ + '_get_list_of_checked_elements("constraint");')
+	js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "groupname=" + groups;')
+	js.append('  document.getElementById("' + self.__module__ + '_variables").value = variable;')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_row_button(group)')
+	js.append('{')
+	js.append('  var variables = ' + self.__module__ + '_get_list_of_checked_elements("variable");')
+	js.append('  if(variables == "") variables = "total,running,ratio10";')
+	js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "groupname=" + group;')
+	js.append('  document.getElementById("' + self.__module__ + '_variables").value = variables;')
+	js.append('}')
+	js.append('')
+	js.append('function ' + self.__module__ + '_both_button(group)')
+	js.append('{')
+	js.append('  var groups = ' + self.__module__ + '_get_list_of_checked_elements("constraint");')
+	js.append('  var variables = ' + self.__module__ + '_get_list_of_checked_elements("variable");')
+	js.append('  if(variables == "") variables = "total,running,ratio10";')
+	js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "groupname=" + groups;')
+	js.append('  document.getElementById("' + self.__module__ + '_variables").value = variables;')
+	js.append('}')
+	js.append('</script>')
+
 	begin = []
-	begin.append(  '<table class="TableData">')
-	begin.append(  ' <tr class="TableHeader">')
-	begin.append(  '  <td>Group</td>')
-	begin.append(  '  <td>Total jobs</td>')
-	begin.append(  '  <td>Running jobs</td>')
-	begin.append(  '  <td>Jobs with walltime ratio &lt; 10%</td>')
-	begin.append(  ' </tr>')
+	begin.append(  '<form method="get" action="plot_generator.php" onsubmit="javascript:submitFormToWindow(this);">')
+	begin.append(  ' <table style="font: bold 0.9em sans-serif; width:800px; background-color: #ddd; border: 1px #999 solid;">')
+	begin.append(  '  <tr>')
+	begin.append(  '   <td>Start:</td>')
+	begin.append(  '   <td>')
+	begin.append("""    <input name="date0" type="text" size="10" style="text-algin:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
+	begin.append("""    <input name="time0" type="text" size="5" style="text-algin:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
+	begin.append(  '   <td>End:</td>')
+	begin.append(  '   <td>')
+	begin.append("""    <input name="date1" type="text" size="10" style="text-algin:center;" value="' . $date_string . '" />""")
+	begin.append("""    <input name="time1" type="text" size="5" style="text-algin:center;" value="' . $time_string . '" />""")
+	begin.append(  '   </td>')
+	begin.append(  '   <td>')
+	begin.append(  '    <input type="checkbox" name="renormalize" value="1" />Show Trend plot')
+	begin.append(  '   </td>')
+	begin.append(  '   <td>')
+	begin.append(  '    <input type="hidden" name="module" value="' + self.__module__ + '" />')
+	begin.append(  '    <input type="hidden" name="subtable" value="' + self.__module__ + '_table_groups" />')
+	begin.append(  '    <input type="hidden" id="' + self.__module__ + '_constraint" name="constraint" value="" />')
+	begin.append(  '    <input type="hidden" id="' + self.__module__ + '_variables" name="variables" value="" />')
+	begin.append(  '    <input type="hidden" id="' + self.__module__ + '_squash" name="squash" value="1" />')
+	begin.append(  '   </td>')
+	begin.append(  '  </tr>')
+	begin.append(  ' </table>')
+	begin.append(  ' <table class="TableData">')
+	begin.append(  '  <tr class="TableHeader">')
+	begin.append(  '   <td>Group</td>')
+	begin.append("""   <td><input type="checkbox" id=\"""" + self.__module__ + """_variable_0" value="total" checked="checked" />Total jobs</td>""")
+	begin.append("""   <td><input type="checkbox" id=\"""" + self.__module__ + """_variable_1" value="running" checked="checked" />Running jobs</td>""")
+	begin.append("""   <td><input type="checkbox" id=\"""" + self.__module__ + """_variable_2" value="ratio10" checked="checked" />Jobs with wallratio &lt; 10%</td>""")
+	begin.append(  '   <td>Plot jobs</td>')
+	begin.append(  '  </tr>')
+	begin.append(  '  <tr class="TableHeader">')
+	begin.append(  '   <td><input type="button" value="Toggle Selection" onfocus="this.blur()" onclick="' + self.__module__ + '_toggle_button()" /></td>')
+	begin.append("""   <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_col_button(\\\'total\\\')">Plot Col</button></td>""")
+	begin.append("""   <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_col_button(\\\'running\\\')">Plot Col</button></td>""")
+	begin.append("""   <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_col_button(\\\'ratio10\\\')">Plot Col</button></td>""")
+	begin.append("""   <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_both_button()">Plot Selected</button></td>""")
+	begin.append(  '  </tr>')
 
 	row = []
-	row.append(  """ <tr class="' . $status_class . '">""")
-	row.append(    "  <td>' . $info['groupname'] . '</td>")
-	row.append(    "  <td>' . $info['total'] . '</td>")
-	row.append(    "  <td>' . $info['running'] . '</td>")
-	row.append(    "  <td>' . $info['ratio10'] . '</td>")
-	row.append(    ' </tr>')
+	row.append(  """  <tr class="' . $status_class . '">""")
+	row.append(  """   <td><input type="checkbox" id=\"""" + self.__module__ + """_constraint_' . $i . '" value="' . $info['groupname'] . '" checked="checked" />' . $info['groupname'] . '</td>""")
+	row.append(    "   <td>' . $info['total'] . '</td>")
+	row.append(    "   <td>' . $info['running'] . '</td>")
+	row.append(    "   <td>' . $info['ratio10'] . '</td>")
+	row.append(  """   <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_row_button(\\\'' . $info['groupname'] . '\\\')">Plot Row</button></td>""")
+	row.append(    '  </tr>')
 
 	end = []
-	end.append(    '</table>')
+	end.append(    ' </table>')
+	end.append(    '</form>')
 	end.append(    '<br />')
 
 	details_begin = []
@@ -243,9 +334,12 @@ class JobsStatistics(ModuleBase):
 
 	module_content = """<?php
 
+	print('""" + self.PHPArrayToString(js) + """');
 	print('""" + self.PHPArrayToString(begin) + """');
 
 	$details_db_sqlquery = "SELECT * FROM " . $data["groups_database"] . " WHERE timestamp = " . $data["timestamp"];
+
+	$i = 0;
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
 		if($info['status'] >= 1.0)
@@ -256,6 +350,7 @@ class JobsStatistics(ModuleBase):
 			$status_class = 'critical';
 
 		print('""" + self.PHPArrayToString(row) + """');
+		$i++;
 	}
 
 	print('""" + self.PHPArrayToString(end) + """');
