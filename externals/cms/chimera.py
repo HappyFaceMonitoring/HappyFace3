@@ -191,6 +191,11 @@ def query_chimera_dump(config, last_modified_file):
     except:
         pass
 
+# [2010-08-13] The code commented out below looks for compressed XML files in
+# the input directory. However when decompressing them we experienced some
+# python/bzip2 incompatibility which caused the script to abort. So we are
+# using uncompressed XML files now.
+
 #    url = config.input_directory
 #    most_recent = None
 #    most_recent_dump_path = None
