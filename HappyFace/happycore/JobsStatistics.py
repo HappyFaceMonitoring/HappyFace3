@@ -48,6 +48,7 @@ class JobsStatistics(ModuleBase):
 
 	# Note simply "group" doesn't work since it's a reserved SQL keyword
 	groups_db_keys["groupname"] = StringCol()
+	groups_db_keys["parentgroup"] = StringCol()
 	groups_db_keys["total"] = IntCol()
 	groups_db_keys["running"] = IntCol()
 	groups_db_keys["pending"] = IntCol()
@@ -63,8 +64,11 @@ class JobsStatistics(ModuleBase):
 		for child in element:
 		    if child.tag == "summary":
 		        group = 'all'
+			parent = ''
 		        if 'group' in child.attrib:
 			    group = child.attrib['group']
+			if 'parent' in child.attrib:
+			    parent = child.attrib['parent']
 
 			if self.groups is not None and group not in self.groups:
 			    continue
@@ -98,6 +102,7 @@ class JobsStatistics(ModuleBase):
 
 			groups_db_values = {}
 			groups_db_values["groupname"] = group
+			groups_db_values["parentgroup"] = parent
 			groups_db_values["total"] = total
 			groups_db_values["running"] = running
 			groups_db_values["pending"] = pending
@@ -285,7 +290,7 @@ class JobsStatistics(ModuleBase):
 
 	row = []
 	row.append(  """  <tr class="' . $status_class . '">""")
-	row.append(  """   <td><input type="checkbox" id=\"""" + self.__module__ + """_constraint_' . $i . '" value="' . $info['groupname'] . '" checked="checked" />' . $info['groupname'] . '</td>""")
+	row.append(  """   <td style="padding-left: ' . ($indentation*15) . 'px;"><input type="checkbox" id=\"""" + self.__module__ + """_constraint_' . $i . '" value="' . $info['groupname'] . '" checked="checked" />' . $info['groupname'] . '</td>""")
 	row.append(    "   <td>' . $info['total'] . '</td>")
 	row.append(    "   <td>' . $info['running'] . '</td>")
 	row.append(    "   <td>' . $info['ratio10'] . '</td>")
@@ -339,7 +344,7 @@ class JobsStatistics(ModuleBase):
 
 	$details_db_sqlquery = "SELECT * FROM " . $data["groups_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-	$i = 0;
+	$groups = array();
 	foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
 		if($info['status'] >= 1.0)
@@ -349,8 +354,42 @@ class JobsStatistics(ModuleBase):
 		else
 			$status_class = 'critical';
 
+		$info['children'] = array();
+		$groups[$info['groupname']] = $info;
+	}
+
+	// Build hierarchy
+	foreach($groups as $name=>$group)
+	{
+		if($group['parentgroup'] != '')
+			$groups[$group['parentgroup']]['children'][] = $group['groupname'];
+	}
+
+	function """ + self.__module__ + """_show_group($groups, $group, $i, $indentation)
+	{
+		$info = $groups[$group];
+
+		if($info['status'] >= 1.0)
+			$status_class = 'ok';
+		else if($info['status'] >= 0.5)
+			$status_class = 'warning';
+		else
+			$status_class = 'critical';
+
 		print('""" + self.PHPArrayToString(row) + """');
-		$i++;
+
+		++$i;
+
+		foreach($info['children'] as $child)
+			$i = """ + self.__module__ + """_show_group($groups, $child, $i, $indentation+1);
+		return $i;
+	}
+
+	$i = 0;
+	foreach($groups as $name=>$info)
+	{
+		if($info['parentgroup'] == '')
+			$i = """ + self.__module__ + """_show_group($groups, $name, $i, 0);
 	}
 
 	print('""" + self.PHPArrayToString(end) + """');
