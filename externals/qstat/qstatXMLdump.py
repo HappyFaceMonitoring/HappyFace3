@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     theQstatInfo = {}
 
-    theQstatInfo["start"] = time.strftime("%a, %d %b %Y, %H:%M:%S")
+    theQstatInfo["start"] = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
     print "qstatXMLdump.py: Starting qstat"
 
 #    status,out = callWithTimeout(180,'qstat','-f')
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     else:
         print "qstatXMLdump.py: "+theQstatCommand+" finished."
 
-    theQstatInfo["end"]   = time.strftime("%a, %d %b %Y, %H:%M:%S")
+    theQstatInfo["end"] = time.time() #strftime("%a, %d %b %Y, %H:%M:%S")
 
 
     print "qstatXMLdump.py: start processing."
@@ -271,16 +271,24 @@ if __name__ == '__main__':
     jobInfo = doc.createElement("jobinfo")
     doc.appendChild(jobInfo)
 
-    batchSystem = doc.createElement("additional")
-    batchSystem.setAttribute('batchsystem', 'PBS')
-    jobInfo.appendChild(batchSystem)
+    header = doc.createElement("header")
 
-    qstatInfo = doc.createElement("qstatinfo")
-    for tag in theQstatInfo:
-        qstatInfo.setAttribute(tag,str(theQstatInfo[tag]))
-    batchSystem.appendChild(qstatInfo)
-    
+    batch = doc.createElement("batch")
+    text = doc.createTextNode("PBS")
+    batch.appendChild(text)
+    header.appendChild(batch)
 
+    date = doc.createElement("date")
+    text = doc.createTextNode(str(int(theQstatInfo['start'])))
+    date.appendChild(text)
+    header.appendChild(date)
+
+    site = doc.createElement("site")
+    text = doc.createTextNode("T1_DE_KIT")
+    site.appendChild(text)
+    header.appendChild(site)
+
+    jobInfo.appendChild(header)
 
     # Only job details for cms jobs written out
     jobDetails = doc.createElement("jobs")
