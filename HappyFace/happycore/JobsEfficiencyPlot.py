@@ -22,6 +22,11 @@ class JobsEfficiencyPlot(ModuleBase):
 
         ModuleBase.__init__(self,module_options)
 
+        group = self.configService.getDefault("setup", "group", "").strip()
+
+	self.groups = []
+	if group != '': self.groups = group.split(',')
+
 	self.db_keys["filename_eff_plot"] = StringCol()
 	self.db_keys["filename_rel_eff_plot"] = StringCol()
 
@@ -29,6 +34,36 @@ class JobsEfficiencyPlot(ModuleBase):
 	self.db_values["filename_rel_eff_plot"] = ""
 	
         self.dsTag = 'xml_source'
+
+    def getGroupHierarchy(self, root):
+        hierarchy = {}
+        for element in root:
+	    if element.tag == "summaries":
+	        for child in element:
+		    if child.tag == 'summary':
+	                if 'parent' in child.attrib:
+	                    hierarchy[child.attrib['group']] = child.attrib['parent']
+		        else:
+		            hierarchy[child.attrib['group']] = None
+	return hierarchy
+
+    def checkGroup(self, group_chk, group, hierarchy):
+        try:
+            while group_chk != group:
+	        if hierarchy[group_chk] == None:
+	            return False
+	        group_chk = hierarchy[group_chk]
+	    return True
+	except:
+	    return False
+
+    def checkGroups(self, group_chk, groups, hierarchy):
+        if len(groups) == 0: return True
+
+        for group in groups:
+	    if self.checkGroup(group_chk, group, hierarchy):
+	        return True
+	return False
 
     def process(self):
 
@@ -38,6 +73,7 @@ class JobsEfficiencyPlot(ModuleBase):
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
 	root = source_tree.getroot()
+	hierarchy = self.getGroupHierarchy(root)
 
 	# TODO: Provide a common base class which constructs the users array
 	# and the arrays required for JobsDist...
@@ -46,7 +82,7 @@ class JobsEfficiencyPlot(ModuleBase):
 	    if element.tag == "jobs":
 		for child in element:
 
-		    user = job_state = cpuwallratio = ''
+		    user = group = job_state = cpuwallratio = ''
 		    for subchild in child:
 		        if subchild.tag == 'user':
 			    user = subchild.text.strip()
@@ -54,8 +90,14 @@ class JobsEfficiencyPlot(ModuleBase):
 			    job_state = subchild.text.strip()
 			if subchild.tag == 'cpueff':
 			    cpuwallratio = subchild.text.strip()
+			if subchild.tag == 'group':
+			    group = subchild.text.strip()
 
 		    if user == '':
+		        continue
+
+		    # Check group
+		    if not self.checkGroups(group, self.groups, hierarchy):
 		        continue
 
 		    if user not in users:

@@ -23,7 +23,11 @@ class JobsDist(ModuleBase):
         ModuleBase.__init__(self,module_options)
 
         self.variable = self.configService.get("setup", "variable")
-        self.group = self.configService.getDefault("setup", "group", "")
+
+        group = self.configService.getDefault("setup", "group", "").strip()
+
+	self.groups = []
+	if group != '': self.groups = group.split(',')
 
 	self.db_keys["groupname"] = StringCol()
 	self.db_keys["filename"] = StringCol()
@@ -59,6 +63,14 @@ class JobsDist(ModuleBase):
 	except:
 	    return False
 
+    def checkGroups(self, group_chk, groups, hierarchy):
+        if len(groups) == 0: return True
+
+        for group in groups:
+	    if self.checkGroup(group_chk, group, hierarchy):
+	        return True
+	return False
+
     def process(self):
 
 	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
@@ -88,12 +100,15 @@ class JobsDist(ModuleBase):
 			    variable_str = subchild.text.strip()
 
 		    # Check user
-		    if (self.group != '' and not self.checkGroup(group, self.group, hierarchy)) or job_state != 'running' or variable_str == '':
+		    if not self.checkGroups(group, self.groups, hierarchy):
 		    	continue
 
 		    values.append(float(variable_str))
 
-	self.db_values["groupname"] = self.group
+	if len(self.groups) == 0:
+	    self.db_values["groupname"] = ''
+	else:
+	    self.db_values["groupname"] = ', '.join(self.groups)
 
         # create plots for output
 	self.createDistPlot(variable,values,nbins)
