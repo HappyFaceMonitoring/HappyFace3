@@ -47,10 +47,14 @@ class JobsDist(ModuleBase):
 	    if element.tag == "summaries":
 	        for child in element:
 		    if child.tag == 'summary':
+		        group = 'all'
+		        if 'group' in child.attrib:
+			    group = child.attrib['group']
+
 	                if 'parent' in child.attrib:
-	                    hierarchy[child.attrib['group']] = child.attrib['parent']
+	                    hierarchy[group] = child.attrib['parent']
 		        else:
-		            hierarchy[child.attrib['group']] = None
+		            hierarchy[group] = None
 	return hierarchy
 
     def checkGroup(self, group_chk, group, hierarchy):
@@ -100,7 +104,7 @@ class JobsDist(ModuleBase):
 			    variable_str = subchild.text.strip()
 
 		    # Check user
-		    if not self.checkGroups(group, self.groups, hierarchy):
+		    if not self.checkGroups(group, self.groups, hierarchy) or job_state != 'running' or variable_str == '':
 		    	continue
 
 		    values.append(float(variable_str))
