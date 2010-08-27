@@ -132,7 +132,7 @@ class dCacheDataManagement(ModuleBase):
     def output(self):
 
 	html = []
-	html.append(  "<p style=\"font-size:large;\">Chimera dump generated on ' . strftime('%a, %d %b %Y %T %z', $data['chimera_timestamp']) . '</p>")
+	html.append(  "<p style=\"font-size:large; ' . $gen_color . '\">Chimera dump generated on ' . strftime('%a, %d %b %Y %T %z', $data['chimera_timestamp']) . '</p>")
 	html.append(  '<table class="TableData">')
 	html.append(  ' <tr class="TableHeader">')
 	html.append(  '  <td></td>')
@@ -205,6 +205,10 @@ class dCacheDataManagement(ModuleBase):
 	// but we can't do that since we do not update the details table in
 	// every iteration.
 	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " JOIN (SELECT max(timestamp) as mtp FROM " . $data["details_database"] . " WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp ORDER BY name";
+
+	$gen_color = '';
+	if($data['status'] < 1.0)
+		$gen_color = 'font-color: red;';
 
 	print('""" + self.PHPArrayToString(html) + """');
 
