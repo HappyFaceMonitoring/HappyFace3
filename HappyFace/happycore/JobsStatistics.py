@@ -14,9 +14,9 @@ class JobsStatistics(ModuleBase):
 	self.groups = self.configService.get("setup", "groups").split(',')
 	self.rating_groups = self.configService.get("setup", "rating_groups").split(',')
 
-	if len(self.groups) or self.groups[0] == '':
+	if len(self.groups) == 0 or self.groups[0] == '':
 		self.groups = None
-	if len(self.rating_groups) or self.rating_groups[0] == '':
+	if len(self.rating_groups) == 0 or self.rating_groups[0] == '':
 		self.rating_groups = None
 
 	self.db_keys["groups_database"] = StringCol()
@@ -34,6 +34,9 @@ class JobsStatistics(ModuleBase):
 	self.configService.addToParameter('setup', 'definition', '<br />Warning limit: ' + str(self.warning_limit))
 	self.configService.addToParameter('setup', 'definition', '<br />Critical limit: ' + str(self.critical_limit))
 	self.configService.addToParameter('setup', 'definition', '<br />Minimum number of jobs for rating: ' + str(self.min_jobs))
+
+	if self.rating_groups is not None:
+	    self.configService.addToParameter('setup', 'definition', '<br />Rated group(s): ' + ', '.join(self.rating_groups))
 
         dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
@@ -91,14 +94,14 @@ class JobsStatistics(ModuleBase):
 			        ratio10 = int(subchild.text.strip())
 
 			status = 1.0
-			if self.rating_groups is None or group in self.rating_groups:
-			    if running >= self.min_jobs and ratio10 >= running*self.warning_limit:
-			        status = 0.5
-			    if running >= self.min_jobs and ratio10 >= running*self.critical_limit:
-			        status = 0.0
+		        if running >= self.min_jobs and ratio10 >= running*self.warning_limit:
+		            status = 0.5
+			if running >= self.min_jobs and ratio10 >= running*self.critical_limit:
+			    status = 0.0
 
-			if status < self.status:
-			    self.status = status
+			if self.rating_groups is None or group in self.rating_groups:
+			    if status < self.status:
+			        self.status = status
 
 			groups_db_values = {}
 			groups_db_values["groupname"] = group
