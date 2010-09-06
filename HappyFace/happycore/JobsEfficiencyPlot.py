@@ -225,8 +225,8 @@ class JobsEfficiencyPlot(ModuleBase):
 	axis_abs.legend( (p0[0], p1[0], p2[0], p3[0], p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
 
 	
-	fig_abs.savefig(self.archive_dir + "/jobs_eff.png",dpi=60)
-	self.db_values["filename_eff_plot"] = "jobs_eff.png"
+	fig_abs.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_eff.png",dpi=60)
+	self.db_values["filename_eff_plot"] = self.__module__ + "_jobs_eff.png"
 	self.archive_columns.append('filename_eff_plot')
 
 	##########################################################
@@ -246,8 +246,8 @@ class JobsEfficiencyPlot(ModuleBase):
 
 	axis_rel.legend( (rel_p0[0], rel_p1[0], rel_p2[0], rel_p3[0], rel_p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
 
-	fig_rel.savefig(self.archive_dir + "/jobs_rel_eff.png",dpi=60)
-	self.db_values["filename_rel_eff_plot"] = "jobs_rel_eff.png"
+	fig_rel.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_rel_eff.png",dpi=60)
+	self.db_values["filename_rel_eff_plot"] = self.__module__ + "_jobs_rel_eff.png"
 	self.archive_columns.append('filename_rel_eff_plot')
 
     def output(self):

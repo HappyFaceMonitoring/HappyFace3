@@ -193,8 +193,8 @@ class JobsDist(ModuleBase):
 	axis.set_yticks(np.arange(0,max_bin_height + 5,scale_value))
 
 	
-	fig.savefig(self.archive_dir + "/jobs_dist_" + variable + ".png",dpi=60)
-	self.db_values["filename"] = "jobs_dist_" + variable + ".png"
+	fig.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_dist_" + variable + ".png",dpi=60)
+	self.db_values["filename"] = self.__module__ + "_jobs_dist_" + variable + ".png"
         self.archive_columns.append('filename')
 
     def output(self):
