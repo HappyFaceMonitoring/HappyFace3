@@ -169,10 +169,11 @@ class JobsStatistics(ModuleBase):
 			elif state == 'pending': users[user]['pending'] += 1
 			elif state == 'waiting': users[user]['waiting'] += 1
 
-			if cpueff > 80: users[user]['ratio100'] += 1
-			elif cpueff > 30: users[user]['ratio80'] += 1
-			elif cpueff > 10: users[user]['ratio30'] += 1
-			else: users[user]['ratio10'] += 1
+			if state == 'running':
+			    if cpueff > 80: users[user]['ratio100'] += 1
+			    elif cpueff > 30: users[user]['ratio80'] += 1
+			    elif cpueff > 10: users[user]['ratio30'] += 1
+			    else: users[user]['ratio10'] += 1
 
 	        # There should only be one jobs entry
 	        break
