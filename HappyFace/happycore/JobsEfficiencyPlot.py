@@ -216,10 +216,11 @@ class JobsEfficiencyPlot(ModuleBase):
 	p3 = axis_abs.bar(ind, ratio80, width, color='y', bottom = bot30 )
 	p4 = axis_abs.bar(ind, ratio100, width, color='g', bottom = bot80 )
 
+	axis_abs.set_position([0.10,0.2,0.85,0.75])
 	axis_abs.set_ylabel('Number of Jobs')
 	axis_abs.set_title('Job Efficiency (absolute view)')
 	axis_abs.set_xticks(ind+width/2.)
-	axis_abs.set_xticklabels(user_names)
+	axis_abs.set_xticklabels(user_names, rotation='vertical')
 	#if N > 1: axis_abs.set_ylim(1,max_jobs)
 	axis_abs.set_yticks(np.arange(0,max_jobs + 5,scale_value))
 	axis_abs.legend( (p0[0], p1[0], p2[0], p3[0], p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
@@ -238,10 +239,11 @@ class JobsEfficiencyPlot(ModuleBase):
 	rel_p3 = axis_rel.bar(ind, rel_ratio80, width, color='y', bottom = rel_bot30 )
 	rel_p4 = axis_rel.bar(ind, rel_ratio100, width, color='g', bottom = rel_bot80 )
 	
+	axis_rel.set_position([0.10,0.2,0.85,0.75])
 	axis_rel.set_ylabel('fraction in %')
 	axis_rel.set_title('Job Efficiency (relative view)')
 	axis_rel.set_xticks(ind+width/2.)
-	axis_rel.set_xticklabels(user_names)
+	axis_rel.set_xticklabels(user_names, rotation='vertical')
 	axis_rel.set_yticks(np.arange(0,101,10))
 
 	axis_rel.legend( (rel_p0[0], rel_p1[0], rel_p2[0], rel_p3[0], rel_p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
