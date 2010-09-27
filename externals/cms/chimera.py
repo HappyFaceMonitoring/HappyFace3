@@ -40,6 +40,7 @@ class Config:
 	self.input_directory = self.get_default(config, 'chimera', 'input_directory', '')
 	self.cache_directory = self.get_default(config, 'chimera', 'cache_directory', os.path.dirname(filename))
 	self.output_file = self.get_default(config, 'chimera', 'output_file', '')
+	self.log_file = self.get_default(config, 'chimera', 'log_file', 'most_recent_real_run.log')
 	self.upload_url = self.get_default(config, 'chimera', 'upload_url', '')
 	self.password = self.get_default(config, 'chimera', 'password', '')
 	self.unassigned_file = self.get_default(config, 'chimera', 'unassigned_file', '')
@@ -445,6 +446,10 @@ except:
     # execution. Instead wait for manual intervention. However, do unlink the
     # file if the maximum execution time of the script was reached.
     try:
+        # Redirect stdout to log file
+        if cfg.log_file != '':
+	    # Create an unbuffered file so log messages are written immediately
+            sys.stdout = file(os.path.join(cfg.cache_directory, cfg.log_file), 'w', 0)
         run(cfg)
     except MaxTimeElapsed, ex:
         print str(ex)
