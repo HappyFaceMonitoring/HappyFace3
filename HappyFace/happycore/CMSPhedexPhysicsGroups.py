@@ -41,7 +41,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 	PhpDownload.__init__(self)
  
         ## get the instance
-        self.instance = self.configService.get('setup','instance')
+        #self.instance = self.configService.get('setup','instance')
 
         ## read in how much space is entitled to the groups (in TB)
         self.maxSpace = self.configService.get('setup', 'maxSpace')
@@ -55,7 +55,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 
         self.dsTag = 'cmsPhedexGroupUsage_xml_source'
 
-        self.base_url += '/'+self.instance+'/agents'
+        #self.base_url += '/'+self.instance+'/agents'
         self.downloadRequest[self.dsTag] = 'wget|'+self.makeUrl()
 
 
