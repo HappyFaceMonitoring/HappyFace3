@@ -22,7 +22,8 @@ class GetData(object):
         # Ignore args
 	try:
 	    shutil.copy2(url, path + '/' + file)
-	except Exception as ex:
+	#except Exception as ex:
+        except Exception, ex:
 	    raise Exception('Could not copy from ' + url + ': ' + str(ex))
 
 # execute the WGET command to load and store an imagefile and return the stored filename (with relative path)
