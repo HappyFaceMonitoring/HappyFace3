@@ -24,7 +24,7 @@ class PhpPlotDashboardJobSummary(Plot):
 	source_url = self.EscapeHTMLEntities(base_url + '/jobsummary#' + get_params)
 	self.configService.addToParameter('setup', 'source', 'Generated from: <a href="' + source_url + '">' + source_url + '</a><br />')
 
-	self.downloadRequest['plot'] = 'wget|html|--header="Accept: application/image-map"|' + base_url + '/jobsummary-plot-or-table?' + get_params + '|wget|png||<img\\s*src=\"(?P<url>\\S*)\" (\\s*\\S*=\"\\S*\"\\s*)*/>'
+	self.downloadRequest['plot'] = 'wget|html|--header="Accept: application/image-map"|' + base_url + '/jobsummary-plot-or-table?' + get_params + '|wget|png||<img(\\s*\\S*=\"[^\"]*\"\\s*)*\\s*src=\"(?P<url>\\S*)\"(\\s*\\S*=\"[^\"]*\"\\s*)*\\s*/>'
 
     def process(self):
         Plot.process(self)
