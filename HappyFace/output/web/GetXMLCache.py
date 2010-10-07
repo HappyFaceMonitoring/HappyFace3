@@ -10,7 +10,7 @@ class GetXMLCache(object):
 
 	if not os.path.exists(cache_dir):
 	    os.makedirs(cache_dir)
-	os.chmod(cache_dir, 0777)
+            os.chmod(cache_dir, 0777)
 
         # If there is a cached file, and its timestamp is higher than the
 	# timestamp of the latest update and the most recent version was
