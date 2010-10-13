@@ -60,8 +60,8 @@ class dCacheTransfers(ModuleBase):
 		self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
 
 		# TODO: Add definition
-		self.configService.addToParameter('setup', 'definition', 'Speed warning limit: ' + str(self.speed_warning_limit) + ' KB/s<br/>')
-		self.configService.addToParameter('setup', 'definition', 'Speed critical limit: ' + str(self.speed_critical_limit) + ' KB/s<br/>')
+		self.configService.addToParameter('setup', 'definition', 'Speed warning limit: ' + str(self.speed_warning_limit) + ' KiB/s<br/>')
+		self.configService.addToParameter('setup', 'definition', 'Speed critical limit: ' + str(self.speed_critical_limit) + ' KiB/s<br/>')
 		self.configService.addToParameter('setup', 'definition', 'Time warning limit: ' + str(self.time_warning_limit) + ' hours<br/>')
 		self.configService.addToParameter('setup', 'definition', 'Time critical limit: ' + str(self.time_critical_limit) + ' hours<br/>')
 		self.configService.addToParameter('setup', 'definition', 'Rating threshold: ' + str(self.rating_threshold) + ' transfers<br/>')
@@ -165,11 +165,11 @@ class dCacheTransfers(ModuleBase):
 		mc_begin.append("""  <td>' . $data["total_transfers"] . '</td>""")
 		mc_begin.append(  ' </tr>')
 		mc_begin.append(  " <tr>")
-		mc_begin.append(  '  <td>Speed average [KB/s]</td>')
+		mc_begin.append(  '  <td>Speed average [KiB/s]</td>')
 		mc_begin.append("""  <td>' . round($data["speed_average"]) . '</td>""")
 		mc_begin.append(  ' </tr>')
 		mc_begin.append(  " <tr>")
-		mc_begin.append(  '  <td>Standard deviation of speed distribution [KB/s]</td>')
+		mc_begin.append(  '  <td>Standard deviation of speed distribution [KiB/s]</td>')
 		mc_begin.append("""  <td>' . round($data["speed_stdev"]) . '</td>""")
 		mc_begin.append(  ' </tr>')
 		mc_begin.append(  ' <tr>')
@@ -210,8 +210,8 @@ class dCacheTransfers(ModuleBase):
 		mc_begin.append(  '   <td>Host</td>')
 		mc_begin.append(  '   <td>Status</td>')
 		mc_begin.append(  '   <td>Time</td>')
-		mc_begin.append(  '   <td>Trans. [GB]</td>')
-		mc_begin.append(  '   <td>Speed [KB/s]</td>')
+		mc_begin.append(  '   <td>Trans. [GiB]</td>')
+		mc_begin.append(  '   <td>Speed [KiB/s]</td>')
 		mc_begin.append(  '  </tr>')
 
 		mc_detailed_row = []

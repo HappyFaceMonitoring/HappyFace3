@@ -26,12 +26,18 @@ class dCacheInfoPool(dCacheInfo):
         self.decs = self.configService.get('setup','decs')
 
 
-        if self.unit == 'GB':
+	# We still accept GB or TB for backwards compatibility, but their
+	# meaning is (and was) the same as GiB or TiB, respectively, that is
+	# base 1024.
+	if self.unit == 'GB' or self.unit == 'TB':
+		sys.stderr.write('Units GB and TB are deprecated and might be removed in future versions. Please use GiB or TiB instead in %s.\n' % self.__module__)
+
+        if self.unit == 'GiB' or self.unit == 'GB':
             self.fromByteToUnit = 1024*1024*1024
-        elif self.unit == 'TB':
+        elif self.unit == 'TiB' or self.unit == 'TB':
             self.fromByteToUnit = 1024*1024*1024*1024
         else:
-            print 'Warning: unknown unit in '+self.__module__+'. Must be "GB" or "TB". Using "GB" ...'
+            print 'Warning: unknown unit in '+self.__module__+'. Must be "GiB" or "TiB". Using "GiB" ...'
             self.fromByteToUnit = 1024*1024*1024
 
 
@@ -117,7 +123,7 @@ class dCacheInfoPool(dCacheInfo):
             return -1
    
         
-        # make poolAttrib as GB or TB
+        # make poolAttrib as GiB or TiB
         for pool in thePoolInfo.keys():
             for att in self.localAttribs:
                 if att in thePoolInfo[pool]:

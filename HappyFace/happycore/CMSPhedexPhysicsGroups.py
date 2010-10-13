@@ -43,7 +43,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
         ## get the instance
         #self.instance = self.configService.get('setup','instance')
 
-        ## read in how much space is entitled to the groups (in TB)
+        ## read in how much space is entitled to the groups (in TiB)
         self.maxSpace = self.configService.get('setup', 'maxSpace')
 
         ## now read in individual space permissions
@@ -188,14 +188,14 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 	mc_begin.append('<table class="TableData">')
         mc_begin.append(' <tr class="TableHeader">')
 	mc_begin.append('  <td>Group</td>')
-	mc_begin.append('  <td>resident data [TB]</td>')
+	mc_begin.append('  <td>resident data [TiB]</td>')
 	mc_begin.append('  <td>percent of subscribed data</td>')
 	mc_begin.append(' </tr>');
 
 	mc_row = []
         mc_row.append(""" <tr class="' .$service_status_color_flag . '">""")
 	mc_row.append("""  <td>' . $info["phys_group"] . '</td>""")
-	mc_row.append("""  <td>' . $resident_data_TB . '</td>""")
+	mc_row.append("""  <td>' . $resident_data_TiB . '</td>""")
 	mc_row.append("""  <td>' . $resident_data_percent. ' </td>""")
 	mc_row.append(  ' </tr>');
 
@@ -208,8 +208,8 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 	mc_mid.append(  ' <table class="TableDetails">')
 	mc_mid.append(  '  <tr class="TableHeader">')
 	mc_mid.append(  '   <td>Group</td>')
-	mc_mid.append(  '   <td>resident data [TB]</td>')
-	mc_mid.append(  '   <td>subscribed data [TB]</td>')
+	mc_mid.append(  '   <td>resident data [TiB]</td>')
+	mc_mid.append(  '   <td>subscribed data [TiB]</td>')
 	mc_mid.append(  '   <td>resident files</td>')
 	mc_mid.append(  '   <td>subscribed files</td>')
 	mc_mid.append(  '  </tr>')
@@ -217,8 +217,8 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
 	detailed_row = []
 	detailed_row.append("""  <tr class="' .$service_status_color_flag . '">""")
 	detailed_row.append("""   <td>' . $info2["phys_group"] . '</td>""")
-	detailed_row.append("""   <td>' . $resident_data_TB . '</td>""")
-	detailed_row.append("""   <td>' . $subscribed_data_TB . '</td>""")
+	detailed_row.append("""   <td>' . $resident_data_TiB . '</td>""")
+	detailed_row.append("""   <td>' . $subscribed_data_TiB . '</td>""")
 	detailed_row.append("""   <td>' . $resident_files_Nb . '</td>""")
 	detailed_row.append("""   <td>' . $subscribed_files_Nb . '</td>""")
 	detailed_row.append(  '  </tr>')
@@ -245,7 +245,7 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
             else
                 $service_status_color_flag = "ok";
         
-            $resident_data_TB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
+            $resident_data_TiB = round($info["node_bytes"]/(1024*1024*1024*1024),2);
             $resident_data_percent = round(($info["node_bytes"]/$info["dest_bytes"])*100,1);
 
             print('""" + self.PHPArrayToString(mc_row) + """');
@@ -262,8 +262,8 @@ class CMSPhedexPhysicsGroups(ModuleBase,PhpDownload):
             else
                 $service_status_color_flag = "ok";
         
-            $resident_data_TB = round($info2["node_bytes"]/(1024*1024*1024*1024),2);
-            $subscribed_data_TB = round($info2["dest_bytes"]/(1024*1024*1024*1024),2);
+            $resident_data_TiB = round($info2["node_bytes"]/(1024*1024*1024*1024),2);
+            $subscribed_data_TiB = round($info2["dest_bytes"]/(1024*1024*1024*1024),2);
             $resident_files_Nb = $info2["node_files"];
             $subscribed_files_Nb = $info2["dest_files"];
 

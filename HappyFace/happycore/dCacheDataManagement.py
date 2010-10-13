@@ -137,8 +137,8 @@ class dCacheDataManagement(ModuleBase):
 	html.append(  ' <tr class="TableHeader">')
 	html.append(  '  <td></td>')
 	html.append(  '  <td>Number of Files</td>')
-	html.append(  '  <td>Size in GB</td>')
-	html.append(  '  <td>Size in TB</td>')
+	html.append(  '  <td>Size in GiB</td>')
+	html.append(  '  <td>Size in TiB</td>')
 	html.append(  ' </tr>')
 	html.append(  ' <tr>')
 	html.append(  '  <td>Bare total</td>')
@@ -159,6 +159,7 @@ class dCacheDataManagement(ModuleBase):
 	html.append("""  <td>' . round($data['total_on_disk_size']/1024.0/1024.0/1024.0/1024.0, 1) . '</td>""")
 	html.append(  ' </tr>')
 	html.append(  '</table>')
+	html.append(  '<br />')
 
 	details_begin = []
 	details_begin.append("""<input type="button" value="Show/Hide details" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_details\\\');" />""")
@@ -174,9 +175,9 @@ class dCacheDataManagement(ModuleBase):
 	details_row = []
 	details_row.append("""  <tr' . $class_str . '>""")
 	details_row.append("""   <td class="dCacheDataManagementDetailsName">' . htmlentities($info['name']) . '</td>""")
-	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_total_files'] . ' files<br/>' . round($info['bare_total_size']/1024.0/1024.0/1024.0,1) . ' GB</td>""")
-	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_on_disk_files'] . ' files (' . ( ($info['bare_total_files'] != 0) ? round($info['bare_on_disk_files']*100.0/$info['bare_total_files']) : 0) . '%)<br/>' . round($info['bare_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GB (' . (($info['bare_total_size'] != 0) ? round($info['bare_on_disk_size']*100.0/$info['bare_total_size']) : 0) . '%)</td>""")
-	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['total_on_disk_files'] . ' files<br/>' . round($info['total_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GB</td>""")
+	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_total_files'] . ' files<br/>' . round($info['bare_total_size']/1024.0/1024.0/1024.0,1) . ' GiB</td>""")
+	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['bare_on_disk_files'] . ' files (' . ( ($info['bare_total_files'] != 0) ? round($info['bare_on_disk_files']*100.0/$info['bare_total_files']) : 0) . '%)<br/>' . round($info['bare_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GiB (' . (($info['bare_total_size'] != 0) ? round($info['bare_on_disk_size']*100.0/$info['bare_total_size']) : 0) . '%)</td>""")
+	details_row.append("""   <td class="dCacheDataManagementDetailsCell">' . $info['total_on_disk_files'] . ' files<br/>' . round($info['total_on_disk_size']/1024.0/1024.0/1024.0,1) . ' GiB</td>""")
 	details_row.append(  '  </tr>')
 
 	details_end = []
