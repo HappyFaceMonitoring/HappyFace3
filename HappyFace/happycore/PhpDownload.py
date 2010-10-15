@@ -24,7 +24,7 @@ class PhpDownload(object):
 #            self.phpArgs[i[0]] = i[1]
 
 
-    def makeUrl(self):
+    def makeUrl(self, repl_dict = {}):
         if len(self.phpArgs) == 0:
             print "PhpPlot Error: makeUrl called without phpArgs"
             sys.exit()
@@ -46,9 +46,10 @@ class PhpDownload(object):
         # test = 1,5,7 --> test1,test5,test7
         for i in self.phpArgs:
 	    for j in self.phpArgs[i].split(","):
-		argList.append(i+'='+j)
-
-
+	        if i in repl_dict:
+		    argList.append(i+'='+repl_dict[i])
+		else:
+		    argList.append(i+'='+j)
 
         argList.sort()
         downloadString = self.fileType+'||'+self.base_url+"?"+"&".join(argList)
