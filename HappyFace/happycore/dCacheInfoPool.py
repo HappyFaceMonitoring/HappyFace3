@@ -51,8 +51,8 @@ class dCacheInfoPool(dCacheInfo):
         self.poolAttribNames['precious'] = {'name':'Precious Space'             , 'unit':dbAccessUnit}
         self.poolAttribNames['removable'] = {'name':'Removable Space'            , 'unit':dbAccessUnit}
         self.poolAttribNames['poolnumber'] = {'name':'Pools'                      , 'unit':''}
-        self.poolAttribNames['poolwarning'] = {'name':'Pools with status warning ' , 'unit':''}
-        self.poolAttribNames['poolcritical'] = {'name':'Pools with status critical ' , 'unit':''}
+        self.poolAttribNames['poolwarning'] = {'name':'Pools with status warning' , 'unit':''}
+        self.poolAttribNames['poolcritical'] = {'name':'Pools with status critical' , 'unit':''}
 
 
 
@@ -63,9 +63,11 @@ class dCacheInfoPool(dCacheInfo):
 
 
         for entry in self.getRatioVar(''):
-            att = entry.split("/")
-            name = self.poolAttribNames[att[0]]['name']+" / "+ self.poolAttribNames[att[1]]['name']
-            self.poolAttribNames[entry] =  {'name':name , 'unit':'%'}
+	    name = entry
+	    for att in self.poolAttribNames:
+	        name = name.replace(att, self.poolAttribNames[att]['name'])
+
+            self.poolAttribNames[entry] =  {'name': name, 'unit':'%'}
 
 
         for entry in self.poolAttribNames:
@@ -213,8 +215,8 @@ class dCacheInfoPool(dCacheInfo):
         for cutType in self.thresholds.keys():
             if cutType.count(ident) > 0:
                 for cut in self.thresholds[cutType]:
-                    if cut.count('/') > 0:
-                        if not cut in poolAttribsRatios:
+                    if not cut in poolAttribsRatios:
+		        if not cut in ['total', 'used', 'free', 'precious', 'removable']: # Base quantities are already covered
                             poolAttribsRatios[cut] = {}
         return poolAttribsRatios.keys()
 
@@ -226,21 +228,10 @@ class dCacheInfoPool(dCacheInfo):
         exceeded = False
         theThresholds = self.thresholds[cat]
         for check in theThresholds.keys():
-            checkList = check.split("/")
-
-            for val in checkList:
-                if not val in thePoolInfo:
-                    print "Warning: No such variable for limit check in "+self.__module__+": "+val
-                    print "         Return that limit is exceeded."
-                    return True
-
-
-            theRelVal = 0.
-            if len(checkList) == 1:
-                theRelVal = float(thePoolInfo[checkList[0]])
-            elif len(checkList) == 2:
-                try: theRelVal = float(thePoolInfo[checkList[0]])/float(thePoolInfo[checkList[1]])
-                except: theRelVal = 0
+	    try:
+	        theRelVal = eval(check, thePoolInfo, None);
+	    except ZeroDivisionError:
+	        theRelVal = 0.0
 
             theCond = str(theThresholds[check])[:1]
             theRef = float(str(theThresholds[check])[1:])
@@ -252,8 +243,8 @@ class dCacheInfoPool(dCacheInfo):
                 if theRelVal < theRef:
                     exceeded = True
             else:
-                print "Warning: No such condition "+check+" "+theThresholds[check]
-        
+                raise Exception("Warning: No such condition "+check+" "+theThresholds[check])
+
         return exceeded
 
 
@@ -349,10 +340,9 @@ class dCacheInfoPool(dCacheInfo):
             mc_begin.append(' </tr>')
 
         for att in self.globalRatios:
-            entry = att.split("/")
             mc_begin.append(" <tr>")
             mc_begin.append("  <td>" + self.poolAttribNames[att]['webname'] + "</td>")
-            mc_begin.append("  <td>' . (($data['" + entry[1] + "'] == 0.) ? '--' : round(($data['" + entry[0] + "']/$data['" + entry[1] + "'])*100,1)) . '</td>")
+            mc_begin.append("  <td>' . (($d = $meval->Evaluate('" + att + "')) === false ? '--' : round($d*100,1)) . '</td>")
             mc_begin.append(" </tr>")
         mc_begin.append(  "</table>")
         mc_begin.append(  "<br />")
@@ -403,7 +393,7 @@ class dCacheInfoPool(dCacheInfo):
         mc_begin.append('    <td><input type="button" value="Toggle Selection" onfocus="this.blur()" onclick="' + self.__module__ + '_toggle_button()" /></td>')
 
         for att in self.localAttribs:
-            mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_col_button(\\\'""" + att + """\\\')">Plot Col</button></td>""")
+            mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\" """ + self.__module__ + """_col_button(\\\'""" + att + """\\\')">Plot Col</button></td>""")
         for entry in self.localRatios:
 	    mc_begin.append(  '    <td></td>')
 
@@ -417,9 +407,8 @@ class dCacheInfoPool(dCacheInfo):
             mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . round(($sub_data['""" + att + """']),""" + self.decs + """) . '</td>""")
 
         for entry in self.localRatios:
-            att = entry.split("/")
-	    mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . (($sub_data['""" + att[1] + """'] == 0.) ? '--' : round(($sub_data['""" + att[0] +"""']/$sub_data['""" + att[1] + """'])*100,1)) . '</td>""")
-	mc_detailed_row.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_row_button(\\\'' . $sub_data['poolname'] . '\\\')">Plot Row</button></td>""")
+	    mc_detailed_row.append("""    <td class="dCacheInfoPoolTableDetailsRestRow">' . (($d = $local_meval->Evaluate('""" + entry + """')) === false ? '--' : round($d*100,1)) . '</td>""")
+	mc_detailed_row.append("""    <td><button onfocus="this.blur()" onclick=\" """ + self.__module__ + """_row_button(\\\'' . $sub_data['poolname'] . '\\\')">Plot Row</button></td>""")
 	mc_detailed_row.append(  '   </tr>')
 
 	mc_end = []
@@ -428,6 +417,8 @@ class dCacheInfoPool(dCacheInfo):
         mc_end.append('</div>')
 
 	module_content = """<?php
+
+	include_once('evalmath.class.php');
 
         $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
@@ -441,7 +432,22 @@ class dCacheInfoPool(dCacheInfo):
 	// JavaScript for plotting functionality:
 	print('""" + self.PHPArrayToString(js) + """');
 
+	$meval = new EvalMath;
+	$meval->silent_errors = true;
+
+        $meval->Evaluate("poolnumber=" . $data['poolnumber']);
+        $meval->Evaluate("poolcritical=" . $data['poolcritical']);
+        $meval->Evaluate("poolwarning=" . $data['poolwarning']);
+        $meval->Evaluate("total=" . $data['total']);
+        $meval->Evaluate("free=" . $data['free']);
+        $meval->Evaluate("used=" . $data['used']);
+        $meval->Evaluate("precious=" . $data['precious']);
+        $meval->Evaluate("removable=" . $data['removable']);
+
 	print('""" + self.PHPArrayToString(mc_begin) + """');
+
+        $local_meval = new EvalMath;
+        $local_meval->silent_errors = true;
 
         foreach ($dbh->query($details_db_sqlquery) as $count => $sub_data)
         {
@@ -451,6 +457,12 @@ class dCacheInfoPool(dCacheInfo):
                 $c_flag = "warning";
             elseif($sub_data["poolstatus"] == 0.)
                 $c_flag = "critical";
+
+            $local_meval->Evaluate("total=" . $sub_data['total']);
+            $local_meval->Evaluate("free=" . $sub_data['free']);
+            $local_meval->Evaluate("used=" . $sub_data['used']);
+            $local_meval->Evaluate("precious=" . $sub_data['precious']);
+            $local_meval->Evaluate("removable=" . $sub_data['removable']);
 
             print('""" + self.PHPArrayToString(mc_detailed_row) + """');
 	}
