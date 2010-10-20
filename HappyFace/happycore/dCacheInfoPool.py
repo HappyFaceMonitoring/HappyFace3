@@ -384,8 +384,12 @@ class dCacheInfoPool(dCacheInfo):
 	    mc_begin.append("""     <input type="checkbox" id=\"""" + self.__module__ + """_variable_""" + str(index) + """\" value=\"""" + att + """\" checked="checked" />""")
 	    mc_begin.append(  '     ' + self.poolAttribNames[att]["webname"])
 	    mc_begin.append(  '    </td>')
-        for att in self.localRatios:
-            mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">' + self.poolAttribNames[att]["webname"] + "</td>")
+        for index in range(0, len(self.localRatios)):
+	    att = self.localRatios[index]
+            mc_begin.append(  '    <td class="dCacheInfoPoolTableDetailsRestRowHead">')
+	    mc_begin.append("""     <input type="checkbox" id=\"""" + self.__module__ + """_variable_""" + str(index+len(self.localAttribs)) + """\" value=\"""" + att + """\" checked="checked" />""")
+            mc_begin.append(  '     ' + self.poolAttribNames[att]["webname"])
+	    mc_begin.append(  '    </td>')
 	mc_begin.append('     <td>Pool Plot</td>')
         mc_begin.append('   </tr>')
 
@@ -395,7 +399,7 @@ class dCacheInfoPool(dCacheInfo):
         for att in self.localAttribs:
             mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\" """ + self.__module__ + """_col_button(\\\'""" + att + """\\\')">Plot Col</button></td>""")
         for entry in self.localRatios:
-	    mc_begin.append(  '    <td></td>')
+            mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\" """ + self.__module__ + """_col_button(\\\'""" + entry + """\\\')">Plot Col</button></td>""")
 
 	mc_begin.append("""    <td><button onfocus="this.blur()" onclick=\"""" + self.__module__ + """_both_button()">Plot Selected</button></td>""")
 	mc_begin.append('   </tr>')
