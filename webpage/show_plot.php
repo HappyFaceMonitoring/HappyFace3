@@ -2,6 +2,7 @@
 
  # This parses $_GET parameters to obtain timerange to plot
 include('plot_common.php');
+include('evalmath.class.php');
 
  #=====================================
  # DataBase Initialisation
@@ -102,21 +103,18 @@ include('plot_common.php');
 
  # Get variables to plot
  if(isset($_GET['variable']))
-   $variables = array(verify_column_name($_GET['variable']));
+   $variables = array($_GET['variable']);
  if(isset($_GET['variables']))
  {
    $variables = explode(',', $_GET['variables']);
-   for($i = 0; $i < count($variables); ++$i)
-     $variables[$i] = verify_column_name($variables[$i]);
  }
- $variable_str = implode(',', array_merge($variables, $constraint_vars));
 
  // Get legend
  $legend = 'bottom';
  if(isset($_GET['legend']) && $_GET['legend'] != '')
    $legend = $_GET['legend'];
 
- $stmt = $dbh->prepare("SELECT $timestamp_var,$variable_str FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end $where_clause ORDER BY $timestamp_var");
+ $stmt = $dbh->prepare("SELECT * FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end $where_clause ORDER BY $timestamp_var");
  $stmt->bindParam(':timestamp_begin', $timestamp0);
  $stmt->bindParam(':timestamp_end', $timestamp1);
  if(isset($constraint_value))
@@ -130,6 +128,16 @@ include('plot_common.php');
  
  # fill arrays with data if available
  $stmt->execute();
+ $avail_columns = array();
+ for($i = 0; $i < $stmt->columnCount(); ++$i)
+ {
+   $meta = $stmt->getColumnMeta($i);
+   if($meta['native_type'] == 'integer' || $meta['native_type'] == 'float' || $meta['native_type'] == 'double')
+     $avail_columns[] = $meta['name'];
+ }
+
+ $meval = new EvalMath;
+ $meval->silent_errors = true;
  while($data = $stmt->fetch())
  {
    // Check constraints
@@ -146,12 +154,19 @@ include('plot_common.php');
    if($constrained) continue;
    $c_string = implode(',', $c_array);
 
+   foreach($avail_columns as $column)
+     $meval->Evaluate($column . '=' . $data[$column]);
+
    // Add data for each variable
    foreach($variables as $variable)
    {
      if(!isset($array["values"][$variable][$c_string]))
        $array["values"][$variable][$c_string] = array();
-     $array["values"][$variable][$c_string][] = $data[$variable];
+     $value = $meval->Evaluate($variable);
+     if($value !== false)
+       $array["values"][$variable][$c_string][] = $value;
+     else
+       $array["values"][$variable][$c_string][] = -1; // value not set...
    }
 
    $date = date( "d. M, H:i",$data[$timestamp_var]);
