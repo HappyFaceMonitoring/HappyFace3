@@ -188,7 +188,7 @@ class EvalMath {
         while(1) { // 1 Infinite Loop ;)
             $op = substr($expr, $index, 1); // get the first character at the current index
             // find out if we're currently at the beginning of a number/variable/function/parenthesis/operand
-            $ex = preg_match('/^([a-z]\w*\(?|\d+(?:\.\d*)?|\.\d+|\()/', substr($expr, $index), $match);
+            $ex = preg_match('/^([a-z]\w*\(?|\d+(?:\.\d*(e[+-]?\d+)?)?|\.\d+(e[+-]?\d+)?|\()/', substr($expr, $index), $match);
             //===============
             if ($op == '-' and !$expecting_op) { // is it a negation instead of a minus?
                 $stack->push('_'); // put a negation on the stack
