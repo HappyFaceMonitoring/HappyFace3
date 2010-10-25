@@ -107,12 +107,14 @@ class MailObserver(sqlobject.SQLObject):
         message = MIMEText(body)
         message["Subject"] = subject
         message["From"] = "donotreply@physik.rwth-aachen.de"
-        message["To"] = address
+        message["To"] = ", ".join(address.split())
         
         server = SMTP('localhost')
-        if True in [ i in address for i in ["edelhoff","sprenger","kress"] ]:
-            server.sendmail(message["From"], message["To"], message.as_string())
-            print "SENDING:",address, section
+        #server.set_debuglevel(1)
+        if True in [ i in address for i in ["edelhoff","admin"] ]:
+            server.sendmail(message["From"],["matthias.edelhoff@rwth-aachen.de","edelhoff@cern.ch"], message.as_string())
+            print "SENDING: '%s'"%address
+            print "            ",section
         server.quit()
         return True
 
@@ -143,14 +145,20 @@ def makeObservers(config):
     One class (and table) is generated per 'mail_observer:' section
     in the configuration.
     """
+    from observed.usm import UsmUser
+    from observed.usm_grpvo import UsmGroup
+    
     result = {}
     conn = getConnection(config, "stateDbURI")
+    #TODO: do this automatically
+    observedClasses = {"UsmUser":UsmUser, "UsmGroup":UsmGroup}
+    
     for section in filter(lambda x: x.startswith("mail_observer:"),
                           config.sections()):
-        observerName = section[14:]
-        #TODO reade  name for the import from config
-        from observed.usm import UsmUser
-        members = {"observedClass":UsmUser,
+        observedClassName = section.split(":")[1]
+        observerName = section.split(":")[2]
+        
+        members = {"observedClass":observedClasses[observedClassName],
                    "config":config,
                    "section":section,
                    "personalIdentifier":None

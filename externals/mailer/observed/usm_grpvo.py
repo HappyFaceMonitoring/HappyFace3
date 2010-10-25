@@ -1,7 +1,7 @@
 from base import Observed
 import sqlobject
 
-class UsmUser(Observed, sqlobject.SQLObject):
+class UsmGroup(Observed, sqlobject.SQLObject):
     """
     Example of user defined observed table
     
@@ -10,15 +10,15 @@ class UsmUser(Observed, sqlobject.SQLObject):
       o fromDatabase: load column definitions from database
 
     Additional:
-      o hfAddress: name of the address coumn
+      o hfAddress: name of the address column
       o getMap: retrive a map with strings to be used in the templates for mails
     """
     class sqlmeta:
-        table = "usm_users"
+        table = "usm_grpvo"
         fromDatabase = True
 
     #unique identifier to associate a person to a record
-    hfAddress = "email"
+    hfAddress = "adminEmail"#"admin_email"
 
     @classmethod
     def getMap(self, selection):
@@ -26,15 +26,9 @@ class UsmUser(Observed, sqlobject.SQLObject):
         build a map for use in the email template
         """
         result = {}
-        perSite = ["du", "sitedir","site"]
         for selected in selection:
             for column in self.sqlmeta.columns.keys():
-                if column in perSite:
-                    result["%s_%s"%(selected.site, column)] = getattr(selected, column)
-                else:
-                    if column in result and not result[column] ==  getattr(selected, column):
-                        print "WARNING: supposedly parallel rows for '%s' are out of sync: '%s' != '%s'"%(column, result[column], getattr(selected, column))
-                    result[column] = getattr(selected, column)
+                result[column] = getattr(selected, column)
             
         return result
             
