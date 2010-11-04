@@ -437,7 +437,7 @@ pid_file = os.path.join(cfg.cache_directory, 'chimera.py.pid')
 # frequently in a cronjob).
 try:
     file(pid_file, 'r').read()
-    sys.stdout.write('PID file exists already\n')
+    sys.stdout.write('PID file exists already: '+pid_file+'\n')
 except:
     file(pid_file, 'w').write(str(os.getpid()))
 
