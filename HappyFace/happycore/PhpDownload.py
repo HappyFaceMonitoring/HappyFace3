@@ -52,7 +52,7 @@ class PhpDownload(object):
 		    argList.append(i+'='+j)
 
         argList.sort()
-        downloadString = self.fileType+'||'+self.base_url+"?"+"&".join(argList)
+        downloadString = self.fileType+'|--no-check-certificate|'+self.base_url+"?"+"&".join(argList)
 
         return downloadString
 
