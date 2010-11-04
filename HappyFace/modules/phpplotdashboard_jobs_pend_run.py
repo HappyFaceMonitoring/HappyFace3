@@ -6,3 +6,6 @@ class phpplotdashboard_jobs_pend_run(PhpPlotDashboard):
 
         PhpPlotDashboard.__init__(self,module_options)
 
+        # Also load and show the pie chart
+        self.downloadRequest['plot2'] = 'wget|'+self.makeUrl({'type': 'r'})
+
