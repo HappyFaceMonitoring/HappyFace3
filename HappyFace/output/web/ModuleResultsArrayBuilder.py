@@ -2,7 +2,12 @@ import sys, os
 
 class ModuleResultsArrayBuilder(object):
 	
-    def __init__(self):
+    def __init__(self, config):
+
+        try:
+            db_error_msg = config.get('setup', 'db_error_msg');
+	except:
+	    db_error_msg = 'Sorry, cannot access database currently. Please try again later.'
 
 	self.output = """<?php
 
@@ -14,6 +19,11 @@ class ModuleResultsArrayBuilder(object):
 	# create a multi-array $ModuleResultsArray with the results of the modules
 	# will be used by the CategoryStatusLogic (called by CategoryNavigationTab)
 	foreach ($sql_queries as $module=>$query) {
+	    if(!$query)
+	    {
+	        die('""" + db_error_msg + """');
+	    }
+
 	    foreach ($query as $data) {
 		$ModuleResultsArray[$module]["module"]		= $data["module"];
 		$ModuleResultsArray[$module]["mod_title"]	= $data["mod_title"];

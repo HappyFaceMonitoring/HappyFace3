@@ -88,7 +88,7 @@ class WebCreator(object):
 
 	# create an multi-array variable with all important information from the modules:
 	# status, type, weight, category => used by the CategoryStatusLogic
-	output += ModuleResultsArrayBuilder().output
+	output += ModuleResultsArrayBuilder(self.config).output
 	
 	# provides general XML output (this is used for 
 	output += GetXML(self.config).output
