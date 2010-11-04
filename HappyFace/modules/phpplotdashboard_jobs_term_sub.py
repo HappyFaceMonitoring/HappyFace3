@@ -7,5 +7,5 @@ class phpplotdashboard_jobs_term_sub(PhpPlotDashboard):
         PhpPlotDashboard.__init__(self,module_options)
 
         # Also load and show the pie chart
-        self.downloadRequest['plot2'] = 'wget|'+self.makeUrl({'type': 's'})
+        self.downloadRequest['plot2'] = 'wget|'+self.makeUrl({'type': self.configService.get('secondPlot','type')})
 

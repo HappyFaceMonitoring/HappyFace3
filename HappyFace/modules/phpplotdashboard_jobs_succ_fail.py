@@ -7,4 +7,4 @@ class phpplotdashboard_jobs_succ_fail(PhpPlotDashboard):
         PhpPlotDashboard.__init__(self,module_options)
 
 	# Also load and show the pie chart
-        self.downloadRequest['plot2'] = 'wget|'+self.makeUrl({'type': 'nsfp'})
+        self.downloadRequest['plot2'] = 'wget|'+self.makeUrl({'type': self.configService.get('secondPlot','type')})
