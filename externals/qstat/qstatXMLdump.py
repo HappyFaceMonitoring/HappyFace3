@@ -12,7 +12,11 @@
 #
 # Armin Burgmeier <armin@arbur.net> 19.07.2010:
 #   Changed output to match the new common XML format
-
+#
+# Armin Scheurer <armin.scheurer@cern.ch> 05.11.2010:
+#   Write different xml files, if more than one batch 
+#   server is specified. In such a case write as well
+#   a combined xml file.
 
 import sys
 import os
@@ -39,7 +43,6 @@ def getSeconds(inString):
         sys.exit(1)
     return (int(fields[0])*24+int(fields[1]))*60+int(fields[2])                       
 
-
 def uploadFile(theFile):
     theServer = 'http://'+theUploadPw+'@www-ekp.physik.uni-karlsruhe.de/~happyface/upload/in/uploadFile.php'
     theCommand = 'curl -F \"Datei=@'+theFile+'\" '+theServer
@@ -49,39 +52,6 @@ def uploadFile(theFile):
         print "qstatXMLdump.py: Upload error: "+theFile
         sys.exit(1)
 
-def callWithTimeoutChristophe(timeout, *args):
-    old = signal.getsignal(signal.SIGCHLD)
-    try:
-        signal.signal(signal.SIGCHLD, lambda x, y: 0)
-        pid = os.spawnlp(os.P_NOWAIT, args[0], *args)
-        time.sleep(timeout)
-        xpid, status = os.waitpid(pid, os.WNOHANG)
-        if xpid == 0:
-            os.kill(pid, signal.SIGTERM)
-            xpid, status = os.waitpid(pid, 0)
-    finally:
-        signal.signal(signal.SIGCHLD, old)
-
-    return status
-
-
-
-def callWithTimeout(timeout, command, arg=""):
-    old = signal.getsignal(signal.SIGCHLD)
-    try:
-        signal.signal(signal.SIGCHLD, lambda x, y: 0)
-        proc = popen2.Popen3([command,arg],True)
-        pid = proc.pid
-        time.sleep(timeout)
-        xpid, status = os.waitpid(pid, os.WNOHANG)
-        if xpid == 0:
-            os.kill(pid, signal.SIGTERM)
-            xpid, status = os.waitpid(pid, 0)
-    finally:
-        signal.signal(signal.SIGCHLD, old)
-
-    return status,proc.fromchild.readlines()
-
 # Check whether the given chk_group is a subgroup of group
 def checkGroup(chk_group, group, group_table):
     while chk_group != group:
@@ -90,59 +60,16 @@ def checkGroup(chk_group, group, group_table):
         chk_group = group_table[chk_group]
     return True
 
-if __name__ == '__main__':
-
-    theQstatCommand = '/usr/pbs/bin/qstat -f'
-#    theQstatCommand = 'cat qstat_out'
-    theLogFile      = '/tmp/qstat.log'
-    theXMLFile      = '/tmp/qstat.xml'
-#    theLockFile     = '/tmp/qstatXMLdump.lock'
-
-    # Map of group to parent group
-    exprJobSummary  = {'all': None,
-                       'cms': 'all',
-		       'cmsproduction': 'cms',
-		       'cmsother': 'cms',
-		       'dcms': 'cms',
-		       'cmsmcp': 'cmsproduction',
-		       'cmst1p': 'cmsproduction'}
-
-    exprJobDetails  = ['cms']
-
-# Check if process is already running
-#    if os.path.exists(theLockFile):
-#        print "qstatXMLdump.py: process locked by "+theLockFile
-#        print "                 Exit with code 1"
-#        sys.exit(1)
-        
-
-# Create lock file for this job
-#    open(theLockFile,'w').close()
-
-
-    theQstatInfo = {}
-
-    theQstatInfo["start"] = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
-    print "qstatXMLdump.py: Starting qstat"
-
-#    status,out = callWithTimeout(180,'qstat','-f')
-
-    status = 0
-
-    os.system(theQstatCommand+' > '+theLogFile)
-    out = open(theLogFile).readlines()
-
-    if status != 0 :
-        print "qstatXMLdump.py: "+theQstatCommand+" with exitcode != 0."
-        sys.exit(1)
-    else:
-        print "qstatXMLdump.py: "+theQstatCommand+" finished."
-
-    theQstatInfo["end"] = time.time() #strftime("%a, %d %b %Y, %H:%M:%S")
-
+def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
 
     print "qstatXMLdump.py: start processing."
     
+    theQstatInfo = {}
+    theQstatInfo["start"] = startTime
+    theQstatInfo["end"] = stopTime
+
+    out = open(theLogFile).readlines()
+
     theJobInfo = {}
     theJobId = ""
     i = 0
@@ -152,7 +79,6 @@ if __name__ == '__main__':
             theJobId = fileLine
             theJobInfo[theJobId] = {}
             theJobInfo[theJobId]['id'] = fileLine.split(": ")[1]
-
 
         if fileLine.count('Job_Owner'):
             theSplit = fileLine.split(" = ")[1].split("@")
@@ -197,7 +123,6 @@ if __name__ == '__main__':
         if fileLine.count('exec_host'):
             theJobInfo[theJobId]['exec_host'] = fileLine.split(" = ")[1]
 
-
     for job in theJobInfo:
         if 'walltime' in theJobInfo[job].keys() and 'cputime' in theJobInfo[job].keys():
             wallSec = theJobInfo[job]['walltime']
@@ -227,7 +152,6 @@ if __name__ == '__main__':
 
     jobSummary = {}
     theMinRatio = 10
-
 
     for expr in exprJobSummary:
         jobSummary[expr] = {}
@@ -261,10 +185,8 @@ if __name__ == '__main__':
         if jobSummary[expr]['walltime'] > 0:
             jobSummary[expr]['cpueff'] = round(float(jobSummary[expr]['cputime'])/jobSummary[expr]['walltime']*100, 2);
 
-
     print "qstatXMLdump.py: processing finished."
     print "qstatXMLdump.py: start xml output."
-    
 
     doc = Document()
     
@@ -317,8 +239,6 @@ if __name__ == '__main__':
 
             jobDetails.appendChild(jobNode)
    
-
-
     jobSum = doc.createElement("summaries")
     jobInfo.appendChild(jobSum)
 
@@ -335,9 +255,7 @@ if __name__ == '__main__':
             summary.appendChild(element)
  
         jobSum.appendChild(summary)
-    
-       
-    
+             
     # Print our newly created XML
     # print doc.toprettyxml(indent="  ")
 
@@ -349,6 +267,70 @@ if __name__ == '__main__':
 
     uploadFile(theXMLFile)
     
-# Remove lock file    
-#    os.remove(theLockFile)
+
+if __name__ == '__main__':
+
+    theBatchServers = 'pbs3 lrms1'
+    theLockFile     = '/tmp/qstatXMLdump.lock'
+
+    # Map of group to parent group
+    exprJobSummary  = {'all': None,
+                       'cms': 'all',
+		       'cmsproduction': 'cms',
+		       'cmsother': 'cms',
+		       'dcms': 'cms',
+		       'cmsmcp': 'cmsproduction',
+		       'cmst1p': 'cmsproduction'}
+
+    exprJobDetails  = ['cms']
+
+    print "qstatXMLdump.py: Initializing..."
+    print "qstatXMLdump.py: Servers to query: "+theBatchServers
+
+    print "qstatXMLdump.py: Checking lockfile... "
+    # Check if process is already running
+    if os.path.exists(theLockFile):
+        print "qstatXMLdump.py: process locked by "+theLockFile
+        print "                 Exit with code 1"
+        sys.exit(1)
+        
+    print "qstatXMLdump.py: Creating lockfile: "+theLockFile
+    # Create lock file for this job
+    open(theLockFile,'w').close()
+
+    # Execute qstat commands
+    servers = string.split(theBatchServers," ")
+
+    combinedStartTime = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
+
+    for server in servers:
+	print "qstatXMLdump.py: Create output for server: "+server
+	theQstatCommand = '/usr/pbs/bin/qstat -f @'+server
+	theLogFile      = '/tmp/qstat_'+server+'.log'
+	theXMLFile      = '/tmp/qstat_'+server+'.xml'
+
+        startTime = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
+	os.system(theQstatCommand+' > '+theLogFile)
+        stopTime  = time.time() #strftime("%a, %d %b %Y, %H:%M:%S")
+
+	createXMLFile(theLogFile, theXMLFile, startTime, stopTime)
     
+    combinedStopTime = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
+
+    # Create combined information (all servers)
+    print "qstatXMLdump.py: Create combined output for all servers..."
+    theCombinedLogFile = '/tmp/qstat.log'
+    theCombinedXMLFile = '/tmp/qstat.xml'
+
+    os.system('rm -f '+theCombinedLogFile)
+    for server in servers:
+	os.system('cat /tmp/qstat_'+server+'.log >> '+theCombinedLogFile)
+
+    createXMLFile(theCombinedLogFile, theCombinedXMLFile, combinedStartTime, combinedStopTime)
+
+    print "qstatXMLdump.py: Removing lockfile: "+theLockFile
+    # Remove lock file    
+    os.remove(theLockFile)
+
+    print "qstatXMLdump.py: Done."
+
