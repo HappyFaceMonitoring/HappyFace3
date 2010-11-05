@@ -437,21 +437,21 @@ class dCacheInfoPool(dCacheInfo):
 	print('""" + self.PHPArrayToString(js) + """');
 
 	$meval = new EvalMath;
-	$meval->silent_errors = true;
+	$meval->suppress_errors = true;
 
-        $meval->Evaluate("poolnumber=" . $data['poolnumber']);
-        $meval->Evaluate("poolcritical=" . $data['poolcritical']);
-        $meval->Evaluate("poolwarning=" . $data['poolwarning']);
-        $meval->Evaluate("total=" . $data['total']);
-        $meval->Evaluate("free=" . $data['free']);
-        $meval->Evaluate("used=" . $data['used']);
-        $meval->Evaluate("precious=" . $data['precious']);
-        $meval->Evaluate("removable=" . $data['removable']);
+        if(isset($data['poolnumber'])) $meval->Evaluate("poolnumber=" . $data['poolnumber']);
+        if(isset($data['poolcritical'])) $meval->Evaluate("poolcritical=" . $data['poolcritical']);
+        if(isset($data['poolwarning'])) $meval->Evaluate("poolwarning=" . $data['poolwarning']);
+        if(isset($data['total'])) $meval->Evaluate("total=" . $data['total']);
+        if(isset($data['free'])) $meval->Evaluate("free=" . $data['free']);
+        if(isset($data['used'])) $meval->Evaluate("used=" . $data['used']);
+        if(isset($data['precious'])) $meval->Evaluate("precious=" . $data['precious']);
+        if(isset($data['removable'])) $meval->Evaluate("removable=" . $data['removable']);
 
 	print('""" + self.PHPArrayToString(mc_begin) + """');
 
         $local_meval = new EvalMath;
-        $local_meval->silent_errors = true;
+        $local_meval->suppress_errors = true;
 
         foreach ($dbh->query($details_db_sqlquery) as $count => $sub_data)
         {
