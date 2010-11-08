@@ -287,16 +287,16 @@ if __name__ == '__main__':
     print "qstatXMLdump.py: Initializing..."
     print "qstatXMLdump.py: Servers to query: "+theBatchServers
 
-    print "qstatXMLdump.py: Checking lockfile... "
+#    print "qstatXMLdump.py: Checking lockfile... "
     # Check if process is already running
-    if os.path.exists(theLockFile):
-        print "qstatXMLdump.py: process locked by "+theLockFile
-        print "                 Exit with code 1"
-        sys.exit(1)
+#    if os.path.exists(theLockFile):
+#        print "qstatXMLdump.py: process locked by "+theLockFile
+#        print "                 Exit with code 1"
+#        sys.exit(1)
         
-    print "qstatXMLdump.py: Creating lockfile: "+theLockFile
+#    print "qstatXMLdump.py: Creating lockfile: "+theLockFile
     # Create lock file for this job
-    open(theLockFile,'w').close()
+#    open(theLockFile,'w').close()
 
     # Execute qstat commands
     servers = string.split(theBatchServers," ")
@@ -328,9 +328,9 @@ if __name__ == '__main__':
 
     createXMLFile(theCombinedLogFile, theCombinedXMLFile, combinedStartTime, combinedStopTime)
 
-    print "qstatXMLdump.py: Removing lockfile: "+theLockFile
+#    print "qstatXMLdump.py: Removing lockfile: "+theLockFile
     # Remove lock file    
-    os.remove(theLockFile)
+#    os.remove(theLockFile)
 
     print "qstatXMLdump.py: Done."
 
