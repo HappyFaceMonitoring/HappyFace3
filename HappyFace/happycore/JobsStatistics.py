@@ -11,6 +11,9 @@ class JobsStatistics(ModuleBase):
         self.warning_limit = float(self.configService.get("setup","warning_limit"))
         self.critical_limit = float(self.configService.get("setup","critical_limit"))
 
+	self.old_result_warning_limit = float(self.configService.getDefault("setup", "old_result_warning_limit", "1.0"))
+	self.old_result_critical_limit = float(self.configService.getDefault("setup", "old_result_critical_limit", "4.0"))
+
 	self.groups = self.configService.get("setup", "groups").split(',')
 	self.rating_groups = self.configService.get("setup", "rating_groups").split(',')
 
@@ -22,9 +25,15 @@ class JobsStatistics(ModuleBase):
 	self.db_keys["groups_database"] = StringCol()
 	self.db_keys["details_database"] = StringCol()
 	self.db_keys["details_group"] = StringCol()
+	self.db_keys["result_timestamp"] = IntCol()
+	self.db_keys["old_result_warning_limit"] = FloatCol()
+	self.db_keys["old_result_critical_limit"] = FloatCol()
 	self.db_values["groups_database"] = ""
 	self.db_values["details_database"] = ""
 	self.db_values["details_group"] = ""
+	self.db_values["result_timestamp"] = 0
+	self.db_values["old_result_warning_limit"] = self.old_result_warning_limit
+	self.db_values["old_result_critical_limit"] = self.old_result_critical_limit
 
         self.dsTag = 'xml_source'
 
@@ -34,6 +43,8 @@ class JobsStatistics(ModuleBase):
 	self.configService.addToParameter('setup', 'definition', '<br />Warning limit: ' + str(self.warning_limit))
 	self.configService.addToParameter('setup', 'definition', '<br />Critical limit: ' + str(self.critical_limit))
 	self.configService.addToParameter('setup', 'definition', '<br />Minimum number of jobs for rating: ' + str(self.min_jobs))
+	self.configService.addToParameter('setup', 'definition', '<br />Old result warning limit: ' + str(self.old_result_warning_limit) + ' hours')
+	self.configService.addToParameter('setup', 'definition', '<br />Old result critical limit: ' + str(self.old_result_critical_limit) + ' hours')
 
 	if self.rating_groups is not None:
 	    self.configService.addToParameter('setup', 'definition', '<br />Rated group(s): ' + ', '.join(self.rating_groups))
@@ -43,6 +54,22 @@ class JobsStatistics(ModuleBase):
 
 	root = source_tree.getroot()
 
+	# Check input file timestamp
+	date = 0
+	for element in root:
+	    if element.tag == "header":
+	        for child in element:
+		    if child.tag == "date":
+		        date = int(child.text.strip())
+
+	self.db_values["result_timestamp"] = date
+	self.status = 1.0
+	if self.timestamp - date > self.old_result_critical_limit*3600:
+		self.status = 0.0
+	elif self.timestamp - date > self.old_result_warning_limit*3600:
+		self.status = 0.5
+
+	# Obtain group summaries
 	groups_database = self.__module__ + "_table_groups"
 	self.db_values["groups_database"] = groups_database
 
@@ -61,7 +88,6 @@ class JobsStatistics(ModuleBase):
 
 	groups_table = self.table_init(groups_database, groups_db_keys)
 
-	self.status = 1.0
 	for element in root:
 	    if element.tag == "summaries":
 		for child in element:
@@ -193,6 +219,11 @@ class JobsStatistics(ModuleBase):
 	self.subtable_clear(details_table, [], self.holdback_time)
 
     def output(self):
+
+	old_result_warning_message = []
+	old_result_warning_message.append("<p style=\"font-size:large; color: red;\">Input XML was generated more than ' . $data['old_result_warning_limit'] . ' hours in the past</p>")
+	old_result_critical_message = []
+	old_result_critical_message.append("<p style=\"font-size:large; color: red;\">Input XML was generated more than ' . $data['old_result_critical_limit'] . ' hours in the past</p>")
 
 	# JavaScript for plotting functionality
 
@@ -342,6 +373,11 @@ class JobsStatistics(ModuleBase):
 	details_end.append(    '<br />')
 
 	module_content = """<?php
+
+	if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_critical_limit']*3600)
+		print('""" + self.PHPArrayToString(old_result_critical_message) + """');
+	elseif($data['timestamp'] - $data['result_timestamp'] > $data['old_result_warning_limit']*3600)
+		print('""" + self.PHPArrayToString(old_result_warning_message) + """');
 
 	print('""" + self.PHPArrayToString(js) + """');
 	print('""" + self.PHPArrayToString(begin) + """');

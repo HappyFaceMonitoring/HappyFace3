@@ -22,6 +22,8 @@ class JobsDist(ModuleBase):
 
         ModuleBase.__init__(self,module_options)
 
+	self.old_result_warning_limit = float(self.configService.getDefault('setup', 'old_result_warning_limit', '1.0'))
+	self.old_result_critical_limit = float(self.configService.getDefault('setup', 'old_result_critical_limit', '4.0'))
         self.variable = self.configService.get("setup", "variable")
 
         group = self.configService.getDefault("setup", "group", "").strip()
@@ -31,8 +33,17 @@ class JobsDist(ModuleBase):
 
 	self.db_keys["groupname"] = StringCol()
 	self.db_keys["filename"] = StringCol()
+
+	self.db_keys["result_timestamp"] = IntCol()
+	self.db_keys["old_result_warning_limit"] = FloatCol()
+	self.db_keys["old_result_critical_limit"] = FloatCol()
+
 	self.db_values["groupname"] = ""
 	self.db_values["filename"] = ""
+
+	self.db_values["result_timestamp"] = 0
+	self.db_values["old_result_warning_limit"] = self.old_result_warning_limit
+	self.db_values["old_result_critical_limit"] = self.old_result_critical_limit
 
         self.dsTag = 'xml_source'
 
@@ -78,6 +89,8 @@ class JobsDist(ModuleBase):
     def process(self):
 
 	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
+	self.configService.addToParameter('setup', 'definition', '<br />Old result warning limit: ' + str(self.old_result_warning_limit) + ' hours')
+	self.configService.addToParameter('setup', 'definition', '<br />Old result critical limit: ' + str(self.old_result_critical_limit) + ' hours')
 
         dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
@@ -89,6 +102,21 @@ class JobsDist(ModuleBase):
 	nbins = 20
 
 	hierarchy = self.getGroupHierarchy(root)
+
+	# Check input file timestamp
+	date = 0
+	for element in root:
+	    if element.tag == "header":
+	        for child in element:
+		    if child.tag == "date":
+		        date = int(child.text.strip())
+
+	self.db_values["result_timestamp"] = date
+	self.status = 1.0
+#	if self.timestamp - date > self.old_result_critical_limit*3600:
+#	    self.status = 0.0
+#	elif self.timestamp - date > self.old_result_warning_limit*3600:
+#	    self.status = 0.5
 
 	for element in root:
 	    if element.tag == "jobs":
@@ -114,9 +142,8 @@ class JobsDist(ModuleBase):
 	else:
 	    self.db_values["groupname"] = ', '.join(self.groups)
 
-        # create plots for output
+	# create plots for output
 	self.createDistPlot(variable,values,nbins)
-        self.status = 1.0
 
     def createDistPlot(self,variable,values,nbins):
 
@@ -199,12 +226,22 @@ class JobsDist(ModuleBase):
 
     def output(self):
 
+        old_result_warning_message = []
+	old_result_warning_message.append("<p style=\"font-size: large; color: red;\">Input XML was generated more than ' . $data['old_result_warning_limit'] . ' hours in the past</p>")
+        old_result_critical_message = []
+	old_result_critical_message.append("<p style=\"font-size: large; color: red;\">Input XML was generated more than ' . $data['old_result_critical_limit'] . ' hours in the past</p>")
+
 	plot = []
 	plot.append("""<img src="' . $archive_dir . '/' . $data["filename"] . '" alt=""/>""")
 	noplot = []
 	noplot.append("<h4>There are no ' . (($data['groupname'] == '') ? '' : ('&quot;' . $data['groupname'] . '&quot; ')) . 'jobs running</h4>")
 
 	module_content = """<?php
+
+	if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_critical_limit']*3600)
+	    print('""" + self.PHPArrayToString(old_result_critical_message) + """');
+	if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_warning_limit']*3600)
+	    print('""" + self.PHPArrayToString(old_result_warning_message) + """');
 
 	$tm = localtime($data['timestamp']);
 	$year = $tm[5] + 1900; // PHP gives year since 1900
