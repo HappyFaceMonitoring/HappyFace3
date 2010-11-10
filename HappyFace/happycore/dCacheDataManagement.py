@@ -209,7 +209,7 @@ class dCacheDataManagement(ModuleBase):
 
 	$gen_color = '';
 	if($data['status'] < 1.0)
-		$gen_color = 'font-color: red;';
+		$gen_color = 'color: red;';
 
 	print('""" + self.PHPArrayToString(html) + """');
 
