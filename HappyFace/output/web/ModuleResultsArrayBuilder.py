@@ -20,9 +20,7 @@ class ModuleResultsArrayBuilder(object):
 	# will be used by the CategoryStatusLogic (called by CategoryNavigationTab)
 	foreach ($sql_queries as $module=>$query) {
 	    if(!$query)
-	    {
-	        die('""" + db_error_msg + """');
-	    }
+	        throw new Exception('""" + db_error_msg + """');
 
 	    foreach ($query as $data) {
 		$ModuleResultsArray[$module]["module"]		= $data["module"];

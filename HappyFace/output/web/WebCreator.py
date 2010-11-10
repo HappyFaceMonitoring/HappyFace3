@@ -66,41 +66,15 @@ class WebCreator(object):
 	# this should be used to get validated PHP hrefs (only cosmetics ;-) )
 	output += '<?php ini_set("arg_separator.output","&amp;"); ?>'
 
+	output += '<?php' + "\n"
+	output += '    include("plot_timerange_select.php");' + "\n"
+	output += '?>'
+
 	# provides the logic for the timestamp definition
 	output += TimeMachineLogic(histo_step).output
 	
 	# Deliver XML from cache if possible
 	output += GetXMLCache(self.config, self.timestamp).output
-
-	# initiate the database
-	output += '<?php' + "\n"
-	output += '    /*** connect to SQLite database ***/' + "\n"
-	output += '    $dbh = new PDO("sqlite:HappyFace.db");' + "\n"
-	output += '?>'
-
-	# initiate the database
-	output += '<?php' + "\n"
-	output += '    include("plot_timerange_select.php");' + "\n"
-	output += '?>'
-
-	# SQL call routines for all active modules
-	output += SQLCallRoutines(self.config).output
-
-	# create an multi-array variable with all important information from the modules:
-	# status, type, weight, category => used by the CategoryStatusLogic
-	output += ModuleResultsArrayBuilder(self.config).output
-	
-	# provides general XML output (this is used for 
-	output += GetXML(self.config).output
-
-	# provides a function for the category status
-	output += CategoryStatusLogic().output
-
-	# provides a function for the category status symbol
-	output += CategoryStatusSymbolLogic(self.theme).output
-
-	# provides a function for the module status symbol
-	output += ModuleStatusSymbolLogic(self.theme).output
 
 	#######################################################
 
@@ -154,8 +128,54 @@ class WebCreator(object):
 	output += '   </div>' + "\n"
 	output += '  </form>' + "\n"
 
+	# Great try/catch block to catch errors during database access
+	output += '<?php try { ?>'
+
+	# initiate the database
+	output += '<?php' + "\n"
+	output += '    /*** connect to SQLite database ***/' + "\n"
+	output += '    $dbh = new PDO("sqlite:HappyFace.db");' + "\n"
+	output += '?>'
+
+	# SQL call routines for all active modules
+	output += SQLCallRoutines(self.config).output
+
+	# create an multi-array variable with all important information from the modules:
+	# status, type, weight, category => used by the CategoryStatusLogic
+	output += ModuleResultsArrayBuilder(self.config).output
+	
+	# provides general XML output (this is used for 
+	output += GetXML(self.config).output
+
+	# provides a function for the category status
+	output += CategoryStatusLogic().output
+
+	# provides a function for the category status symbol
+	output += CategoryStatusSymbolLogic(self.theme).output
+
+	# provides a function for the module status symbol
+	output += ModuleStatusSymbolLogic(self.theme).output
+
 	# time bar on the top of the website, input forms for time control
 	output += TimeMachineController(logo_image).output
+
+	# Catch any exception during installation and treat them as fatal
+	# (for example database connection failure).
+	output += '<?php } catch(Exception $e) {'
+	output += '  print($e->getMessage() . "\n"); ?>'
+	output += ' </body>' + "\n"
+	output += '</html>' + "\n"
+	output += '<?php exit(1); } ?>'
+
+	# Disable Auto Reload on history view (only if there was no error,
+	# always auto-reload on error so that we retry in).
+	output += '<?php if(isset($historyview) && $historyview != "") { ?>'
+	output += '  <script type="text/javascript">' + "\n"
+	output += '  <!--' + "\n"
+	output += '  AutoReload=false;' + "\n"
+	output += '  //-->' + "\n"
+	output += '  </script>' + "\n"
+	output += '<?php } ?>'
 
 	output += '  <div id="HappyPanels1" class="HappyPanels">' + "\n"
 
@@ -175,16 +195,6 @@ class WebCreator(object):
 	# include layer to hide content when scrolling
 	output += '  <div class="HappySolidLayer">' + "\n"
 	output += '  </div>' + "\n"
-
-	# logic to memorize selected tab on auto reload part 2
-	output += '<?php if(isset($historyview) && $historyview != "") { ?>'
-	output += '  <script type="text/javascript">' + "\n"
-	output += '  <!--' + "\n"
-	output += '  AutoReload=false;' + "\n"
-	output += '  //-->' + "\n"
-	output += '  </script>' + "\n"
-
-	output += '<?php } ?>'
 
 	# some javascripts for website navigation
 	output += '  <script type="text/javascript">' + "\n"
