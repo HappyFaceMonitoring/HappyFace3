@@ -19,6 +19,7 @@ class GetXMLCache(object):
 
 	if(isset($_GET['action']) && $_GET['action'] == 'getxml' && $timestamp >= """ + str(timestamp) + """)
 	{
+		$xml_output = true;
 		$xml_cache_file = 'cache/HappyFace.xml';
 		$stat_result = @stat($xml_cache_file);
 		$xml_timestamp = """ + str(timestamp) + """;

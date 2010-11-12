@@ -78,6 +78,8 @@ class WebCreator(object):
 
 	#######################################################
 
+	output += '<?php if(!isset($xml_output)) { ?>' + "\n"
+
 	# start with HTML output
 	output += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' + "\n"
 	output += '<html xmlns="http://www.w3.org/1999/xhtml">' + "\n"
@@ -129,7 +131,7 @@ class WebCreator(object):
 	output += '  </form>' + "\n"
 
 	# Great try/catch block to catch errors during database access
-	output += '<?php try { ?>'
+	output += '<?php } try { ?>'
 
 	# initiate the database
 	output += '<?php' + "\n"
@@ -144,14 +146,14 @@ class WebCreator(object):
 	# status, type, weight, category => used by the CategoryStatusLogic
 	output += ModuleResultsArrayBuilder(self.config).output
 	
-	# provides general XML output (this is used for 
-	output += GetXML(self.config).output
-
 	# provides a function for the category status
 	output += CategoryStatusLogic().output
 
 	# provides a function for the category status symbol
 	output += CategoryStatusSymbolLogic(self.theme).output
+
+	# provides general XML output
+	output += GetXML(self.config).output
 
 	# provides a function for the module status symbol
 	output += ModuleStatusSymbolLogic(self.theme).output
@@ -162,10 +164,11 @@ class WebCreator(object):
 	# Catch any exception during installation and treat them as fatal
 	# (for example database connection failure).
 	output += '<?php } catch(Exception $e) {'
-	output += '  print($e->getMessage() . "\n"); ?>'
+	output += '  print($e->getMessage() . "\n");'
+	output += '  if(!isset($xml_output)) { ?>'
 	output += ' </body>' + "\n"
 	output += '</html>' + "\n"
-	output += '<?php exit(1); } ?>'
+	output += '<?php } exit(1); } ?>'
 
 	# Disable Auto Reload on history view (only if there was no error,
 	# always auto-reload on error so that we retry in).

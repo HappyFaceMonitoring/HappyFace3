@@ -107,7 +107,7 @@ class GetXML(object):
 	    return $xml;
 	}
 
-	if (isset($_REQUEST['action']) && $_REQUEST['action']=="getxml")
+	if (isset($xml_output))
 	{
 		$xml_data = getCatStatusXML($ModuleResultsArray);
 
