@@ -374,10 +374,13 @@ class JobsStatistics(ModuleBase):
 
 	module_content = """<?php
 
-	if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_critical_limit']*3600)
-		print('""" + self.PHPArrayToString(old_result_critical_message) + """');
-	elseif($data['timestamp'] - $data['result_timestamp'] > $data['old_result_warning_limit']*3600)
-		print('""" + self.PHPArrayToString(old_result_warning_message) + """');
+	if(isset($data['old_result_critical_limit']) && isset($data['old_result_warning_limit']))
+	{
+		if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_critical_limit']*3600)
+			print('""" + self.PHPArrayToString(old_result_critical_message) + """');
+		elseif($data['timestamp'] - $data['result_timestamp'] > $data['old_result_warning_limit']*3600)
+			print('""" + self.PHPArrayToString(old_result_warning_message) + """');
+	}
 
 	print('""" + self.PHPArrayToString(js) + """');
 	print('""" + self.PHPArrayToString(begin) + """');
