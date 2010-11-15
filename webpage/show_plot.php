@@ -137,7 +137,7 @@ include('evalmath.class.php');
  }
 
  $meval = new EvalMath;
- $meval->silent_errors = true;
+ $meval->suppress_errors = true;
  while($data = $stmt->fetch())
  {
    // Check constraints
@@ -155,7 +155,12 @@ include('evalmath.class.php');
    $c_string = implode(',', $c_array);
 
    foreach($avail_columns as $column)
-     $meval->Evaluate($column . '=' . $data[$column]);
+   {
+     if(!isset($data[$column]) || $data[$column] == '')
+       $meval->Evaluate($column . '= -1'); // value not available in DB
+     else
+       $meval->Evaluate($column . '=' . floatval($data[$column]));
+   }
 
    // Add data for each variable
    foreach($variables as $variable)
@@ -166,7 +171,7 @@ include('evalmath.class.php');
      if($value !== false)
        $array["values"][$variable][$c_string][] = $value;
      else
-       $array["values"][$variable][$c_string][] = -1; // value not set...
+       $array["values"][$variable][$c_string][] = -2; // value not computable (division by zero, ...)
    }
 
    $date = date( "d. M, H:i",$data[$timestamp_var]);
