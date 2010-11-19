@@ -132,17 +132,32 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    My_DB_Class = type(tableName, (SQLObject,), table_keys)
 	    My_DB_Class.createTable(ifNotExists=True)	
 
-	    for key in filter(lambda x: x not in avail_keys, table_keys.keys()):
-                if key != "index":
-	            try: DBProxy.sqlmeta.addColumn(table_keys[key].__class__(key), changeSchema=True)
-		    except: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__
+            new_columns = filter(lambda x: x not in avail_keys, table_keys.keys())
+
+            if len(new_columns) > 0:
+	        connection = sqlhub.processConnection
+                dbObject = connection.getConnection()
+	        cursor = dbObject.cursor()
+
+	        for key in new_columns:
+                    if key != "index":
+	                try:
+			    DBProxy.sqlmeta.addColumn(table_keys[key].__class__(key), changeSchema=False)
+
+			    # It is also possible to create the new column by setting changeSchema to True
+			    # above. However, this is VERY slow for large SQLite databases.
+			    # This is why we run an ALTER TABLE query manually here, which is
+			    # much faster (returns almost instantly).
+			    sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
+			    cursor.execute('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, key, sqlType))
+		        except Exception, ex: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__ + ": " + str(ex)
 
         except:
 	    My_DB_Class = type(tableName, (SQLObject,), table_keys)
 	    My_DB_Class.createTable(ifNotExists=True)
-
-	# unlock the database access
-	self.lock.release()
+	finally:
+	    # unlock the database access
+	    self.lock.release()
 	
 	return My_DB_Class
 
