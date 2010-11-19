@@ -147,6 +147,11 @@ for table in source_tables:
 			# Copy archive files
 			columns = filter(lambda x: x.startswith('filename') or x == 'eff_plot' or x == 'rel_eff_plot', columns)
 			for column in columns:
+				# If this column was newly added then the source
+				# database may not contain an entry for it, so
+				# skip it in this case.
+				if row[column] is None: continue
+
 				timestamp = row['timestamp']
 				tm = time.localtime(timestamp)
 
