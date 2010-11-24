@@ -34,8 +34,6 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
         ModuleBase.__init__(self,module_options)
 	PhpDownload.__init__(self)
 
-
-
         ## to,from
         self.getInverseDirection()
 
@@ -94,6 +92,7 @@ class CMSPhedexErrorLog(ModuleBase,PhpDownload):
 
 
     def process(self):
+        self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
 	self.configService.addToParameter('setup', 'definition', '<br />Minimum number of failed transfers for rating: ' + str(self.errorThreshold))
 	self.configService.addToParameter('setup', 'definition', '<br />Warning limit for destination errors: ' + str(int(round(self.destWarning))) + '%')
 	self.configService.addToParameter('setup', 'definition', '<br />Critical limit for destination errors: ' + str(int(round(self.destCritical))) + '%')

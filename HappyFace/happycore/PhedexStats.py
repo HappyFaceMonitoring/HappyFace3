@@ -24,6 +24,8 @@ class PhedexStats(ModuleBase):
 
     def process(self):
 
+        self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
+
         dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
