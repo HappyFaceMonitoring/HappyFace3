@@ -109,7 +109,7 @@ class JobsDist(ModuleBase):
 	    if element.tag == "header":
 	        for child in element:
 		    if child.tag == "date":
-		        date = int(child.text.strip())
+		        date = int(float(child.text.strip()))
 
 	self.db_values["result_timestamp"] = date
 	self.status = 1.0
