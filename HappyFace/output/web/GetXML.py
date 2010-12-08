@@ -107,7 +107,7 @@ class GetXML(object):
 	    return $xml;
 	}
 
-	if (isset($xml_output))
+	if (isset($xml_output) && $xml_output)
 	{
 		$xml_data = getCatStatusXML($ModuleResultsArray);
 

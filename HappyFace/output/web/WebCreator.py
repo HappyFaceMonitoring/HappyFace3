@@ -78,7 +78,7 @@ class WebCreator(object):
 
 	#######################################################
 
-	output += '<?php if(!isset($xml_output)) { ?>' + "\n"
+	output += '<?php if(!isset($xml_output) || !$xml_output) { ?>' + "\n"
 
 	# start with HTML output
 	output += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' + "\n"
@@ -165,7 +165,7 @@ class WebCreator(object):
 	# (for example database connection failure).
 	output += '<?php } catch(Exception $e) {'
 	output += '  print($e->getMessage() . "\n");'
-	output += '  if(!isset($xml_output)) { ?>'
+	output += '  if(!isset($xml_output) || !$xml_output) { ?>'
 	output += ' </body>' + "\n"
 	output += '</html>' + "\n"
 	output += '<?php } exit(1); } ?>'
