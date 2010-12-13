@@ -22,16 +22,30 @@ class GetXMLCache(object):
 	{
 		// Deliver file from cache
 		$xml_cache_file = 'cache/HappyFace.xml';
-		$stat_result = @stat($xml_cache_file);
-		$xml_timestamp = """ + str(timestamp) + """;
-		$xml_cache_uptodate = ($stat_result && $stat_result['mtime'] > $xml_timestamp);
-
-		if($xml_cache_uptodate)
+		$xml_file_handle = fopen($xml_cache_file, 'r');
+		if($xml_file_handle && flock($xml_file_handle, LOCK_SH))
 		{
-			header('Content-Type: text/xml');
-			$xml_data = file_get_contents($xml_cache_file);
-			print $xml_data;
-			exit;
+			$stat_result = fstat($xml_file_handle);
+			$xml_timestamp = """ + str(timestamp) + """;
+			$xml_cache_uptodate = ($stat_result && $stat_result['mtime'] > $xml_timestamp);
+
+			if($xml_cache_uptodate)
+			{
+				header('Content-Type: text/xml');
+//				$xml_data = stream_get_contents($xml_file_handle);
+//				print $xml_data;
+				fpassthru($xml_file_handle);
+			}
+
+			flock($xml_file_handle, LOCK_UN);
+			fclose($xml_file_handle);
+
+			if($xml_cache_uptodate)
+				exit;
+		}
+		else
+		{
+			$xml_cache_uptodate = false;
 		}
 	}
 

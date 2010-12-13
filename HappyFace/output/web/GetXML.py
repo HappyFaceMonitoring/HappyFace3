@@ -114,23 +114,17 @@ class GetXML(object):
 		// Write cache if it is not up to date (see GetXMLCache.py)
 		if(isset($xml_cache_file) && !$xml_cache_uptodate)
 		{
-			// Sometimes it seems that the written XML file has
-			// some garbage at the end. We do not know exactly
-			// why but maybe this is because of a larger
-			// previous file that is not properly truncated. So as
-			// a safety measure we delete the previous XML file
-			// before writing the new one.
-			@unlink($xml_cache_file);
-
 			$fh = fopen($xml_cache_file, 'w');
-			if($fh)
+			if($fh && flock($fh, LOCK_EX))
 			{
+				ftruncate($fh, 0); // just to make sure
 				fwrite($fh, $xml_data);
+				flock($fh, LOCK_UN);
 				fclose($fh);
 			}
 			else
 			{
-				print 'Failed to write XML cache!';
+				print 'Failed to write or lock XML cache!';
 				exit;
 			}
 		}
