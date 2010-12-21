@@ -440,8 +440,8 @@
           }
         }
 
-       if ( $this->VMax > preg_replace('/\.[0-9]+/','',$this->VMax) )
-        $this->VMax = preg_replace('/\.[0-9]+/','',$this->VMax)+1;
+       if ( $this->VMax > preg_replace('/\.[0-9]+/','', sprintf('%f', $this->VMax)) )
+        $this->VMax = preg_replace('/\.[0-9]+/','',sprintf('%f', $this->VMax))+1;
 
        /* If all values are the same */
        if ( $this->VMax == $this->VMin )
@@ -664,8 +664,8 @@
           }
         }
 
-       if ( $this->VMax > preg_replace('/\.[0-9]+/','',$this->VMax) )
-        $this->VMax = preg_replace('/\.[0-9]+/','',$this->VMax)+1;
+       if ( $this->VMax > preg_replace('/\.[0-9]+/','', sprintf('%f', $this->VMax)) )
+        $this->VMax = preg_replace('/\.[0-9]+/','',sprintf('%f', $this->VMax))+1;
 
        $DataRange = $this->VMax - $this->VMin;
        if ( $DataRange == 0 ) { $DataRange = .1; }
@@ -771,8 +771,8 @@
           }
         }
 
-       if ( $this->VXMax > preg_replace('/\.[0-9]+/','',$this->VXMax) )
-        $this->VXMax = preg_replace('/\.[0-9]+/','',$this->VXMax)+1;
+       if ( $this->VMax > preg_replace('/\.[0-9]+/','', sprintf('%f', $this->VMax)) )
+        $this->VMax = preg_replace('/\.[0-9]+/','',sprintf('%f', $this->VMax))+1;
 
        $DataRange = $this->VMax - $this->VMin;
        if ( $DataRange == 0 ) { $DataRange = .1; }
