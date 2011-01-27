@@ -270,7 +270,7 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
 
 if __name__ == '__main__':
 
-    theBatchServers = 'pbs3 lrms1'
+    theBatchServers = 'lrms3 lrms1'
     theLockFile     = '/tmp/qstatXMLdump.lock'
 
     # Map of group to parent group
