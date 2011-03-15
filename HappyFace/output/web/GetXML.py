@@ -112,6 +112,8 @@ class GetXML(object):
 		$xml_data = getCatStatusXML($ModuleResultsArray);
 
 		// Write cache if it is not up to date (see GetXMLCache.py)
+		// Also make sure not to write the cache file if not the latest
+		// file is requested (in which case $xml_cache_file is not set).
 		if(isset($xml_cache_file) && !$xml_cache_uptodate)
 		{
 			$fh = fopen($xml_cache_file, 'w');

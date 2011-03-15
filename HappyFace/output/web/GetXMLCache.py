@@ -34,15 +34,15 @@ class GetXMLCache(object):
 	# requested, then deliver it instead of doing a database query.
 	self.output += """
 	$xml_output = isset($_GET['action']) && $_GET['action'] == 'getxml';
-	$xml_cache_file = "cache/HappyFace_$custom_id.xml";
-	if($xml_output && $timestamp >= """ + str(timestamp) + """)
+	$xml_timestamp = """ + str(timestamp) + """;
+	if($xml_output && $timestamp >= $xml_timestamp)
 	{
 		// Deliver file from cache
+		$xml_cache_file = "cache/HappyFace_$custom_id.xml";
 		$xml_file_handle = fopen($xml_cache_file, 'r');
 		if($xml_file_handle && flock($xml_file_handle, LOCK_SH))
 		{
 			$stat_result = fstat($xml_file_handle);
-			$xml_timestamp = """ + str(timestamp) + """;
 			$xml_cache_uptodate = ($stat_result && $stat_result['mtime'] > $xml_timestamp);
 
 			if($xml_cache_uptodate)
