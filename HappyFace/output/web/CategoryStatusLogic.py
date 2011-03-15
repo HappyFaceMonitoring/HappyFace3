@@ -37,8 +37,9 @@ class CategoryStatusLogic(object):
 		        $mod_status = $module["status"];
 			$mod_weight = $module["weight"];
 			$mod_type = $module["mod_type"];
-		    
-			if ($mod_status != -1 && $mod_type != "unrated") {
+
+			# if module status -1, -2, unrated type, don't take module into account for category status calculation		    
+			if ($mod_status != -1 && $mod_type != "unrated" && $mod_status != -2) {
 			    $sum_weighted_status += $mod_status * $mod_weight;
 			    $sum_weight += $mod_weight;
 			}
@@ -60,7 +61,7 @@ class CategoryStatusLogic(object):
 		        $mod_status = $module["status"];
 			$mod_type = $module["mod_type"];
 
-			if ($this->cat_status == -1) { $this->cat_status = $mod_status; }
+			if ($this->cat_status == -1 && $mod_status != -2) { $this->cat_status = $mod_status; }
 			else {
 			    if ($mod_status < $this->cat_status && $mod_status >= 0 && $mod_type != "unrated") {
 				$this->cat_status = $mod_status;
@@ -77,6 +78,25 @@ class CategoryStatusLogic(object):
 
 	# function for the Category Status, called by the CategoryStatusSymbolLogic part
 	function getCatStatus($category, $cat_algo, $ModuleResultsArray) {
+
+	    # if category not set accessible -> set category status -2
+	    if (isCategoryAccessible($category)==false) {
+            	return -2;
+            }
+
+            # if all modules of category have status -2, set category to -2 
+	    $all_modules_blocked=1;
+            foreach ($ModuleResultsArray as $module) {
+		if ($module["category"] == $category) {
+	               	$mod_status = $module["status"];
+			if ($mod_status != -2) {
+			    $all_modules_blocked=0;
+			}
+		}
+	    }
+	    if ($all_modules_blocked==1) { 
+		return -2; 
+	    }
 
 	    # create instance of the class CatStatusRating
 	    $cat_status_object = new CatStatusRating($category, $cat_algo, $ModuleResultsArray);

@@ -391,35 +391,45 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	self.indentation = 5
 	output = """<?php
 
-	/*** $sql_strings contains all SQL queries, created in SQLCallRoutines.py ***/
-	foreach ($dbh->query($sql_command_strings['""" + self.__module__ + """']) as $data)
-	{
-	    $status_symbol = getModStatusSymbol($data["status"], $data["mod_type"]);
-	    $error_message = "";
-	    if ( $data['error_message'] != "" )
-	    {
-	        $error_message = '\n <tr><td></td><td><h4 style="color:red;">' . nl2br(htmlentities($data["error_message"])) .'</h4></td></tr>';
-	    }
-	    if ($server_time - $data["timestamp"] < 1800)
-	    {
-	        $mod_time_message = '<span style="color:#999; font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
-	    }
-	    else
-	    {
-	        $mod_time_message = '<span style="color:#FF6666;font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
-	    }
+	if(isModuleAccessible('"""+self.__module__+"""')==true) {
 
-	    /*** print the HTML output ***/
-	    print('""" + self.PHPArrayToString(html_begin) + """');
-	    print('""" + self.PHPArrayToString(infobox_begin) + """');
-	    print_plot_timerange_selection('""" + self.__module__ + """', '', '', '', 0, 0, 'bottom', array('""" + "','".join(variable_list) + """'), 'status', time() - 48*60*60, time(), 0, 0, true);
-	    print('""" + self.PHPArrayToString(infobox_end) + """');
-
-	    ?>""" + module_content + """<?php
-
-	    print('""" + self.PHPArrayToString(html_end) + """');
+		/*** $sql_strings contains all SQL queries, created in SQLCallRoutines.py ***/
+		foreach ($dbh->query($sql_command_strings['""" + self.__module__ + """']) as $data) {
+			$status_symbol = getModStatusSymbol($data["status"], $data["mod_type"]);
+			$error_message = "";
+			if ( $data['error_message'] != "" ) {
+				$error_message = '\n <tr><td></td><td><span style="color:red;">' . nl2br(htmlentities($data["error_message"])) .'</span></td></tr>';
+			}
+			if ($server_time - $data["timestamp"] < 1800) {
+				$mod_time_message = '<span style="color:#999; font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
+			} else {
+				$mod_time_message = '<span style="color:#FF6666;font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
+			}				
+			/*** print the HTML output ***/
+			print('""" + self.PHPArrayToString(html_begin) + """');
+			print('""" + self.PHPArrayToString(infobox_begin) + """');
+			print_plot_timerange_selection('""" + self.__module__ + """', '', '', '', 0, 0, 'bottom', array('""" + "','".join(variable_list) + """'), 'status', time() - 48*60*60, time(), 0, 0, true);
+			print('""" + self.PHPArrayToString(infobox_end) + """');
+			?>""" + module_content + """<?php
+			print('""" + self.PHPArrayToString(html_end) + """');
+		}
+	} else {
+		global $hideIcons;
+		if($hideIcons == false) {
+			/*** $sql_strings contains all SQL queries, created in SQLCallRoutines.py ***/
+			foreach ($dbh->query($sql_command_strings['""" + self.__module__ + """']) as $data) {
+				$status_symbol = getModStatusSymbol("-2", $data["mod_type"]);
+				if ($server_time - $data["timestamp"] < 1800) {
+					$mod_time_message = '<span style="color:#999; font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
+				} else {
+					$mod_time_message = '<span style="color:#FF6666;font: bold 0.7em sans-serif;">' . date("D, d. M Y, H:i", $data["timestamp"]) . '</span>';
+				}				
+				print('""" + self.PHPArrayToString(html_begin) + """');
+				print('<span style="color:red;">The module content is blocked due to insufficient access rights!</span>');
+				print('""" + self.PHPArrayToString(html_end) + """');
+			}
+		}
 	}
-
 	?>"""
 
 	self.indentation = 8

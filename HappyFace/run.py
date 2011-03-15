@@ -209,6 +209,18 @@ def HappyFace():
 
                 # sync the module css files to the wepage directory
                 cssService.syncCssFiles()
+
+		# clear XML cache (note that the cache is invalidated anyway
+		# but this makes sure old cache files are cleaned up in case
+		# they are no longer used, for example if modules are added or removed
+		try:
+		    for f in os.listdir(output_dir + '/cache'):
+			try:
+		            os.unlink(os.path.join(output_dir, 'cache', f))
+			except Exception, ex:
+			    pass
+		except:
+		    pass
     
                 # save webpage output file
                 try:

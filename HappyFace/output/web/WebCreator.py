@@ -11,6 +11,7 @@ from SQLCallRoutines import *
 from ModuleResultsArrayBuilder import *
 from GetXML import *
 from GetXMLCache import *
+from AccessCheckGenerator import *
 
 class WebCreator(object):
     def __init__(self,config,modObj_list,timestamp):
@@ -31,11 +32,12 @@ class WebCreator(object):
         content 	 = ""
 	category_id	 = 0
 
-	web_title	 = self.config.get('setup','web_title')
-	logo_image	 = self.config.get('setup','logo_image')
-	histo_step	 = self.config.get('setup','histo_step')
+	web_title	    = self.config.get('setup','web_title')
+	logo_image	    = self.config.get('setup','logo_image')
+	theDocumentationURL = self.config.get('setup','docu_url')
+	histo_step	    = self.config.get('setup','histo_step')
 
-	first_cat	 = ""
+	all_cat_title	 = []
 
         for category in self.config.get('setup','categories').split(","):
 
@@ -44,8 +46,8 @@ class WebCreator(object):
              cat_algo    = self.config.get(category,'cat_algo')
              cat_content = ""
 
-	     if first_cat == "":
-		  first_cat = category
+	     all_cat_title.append('"%s"' % str(category))
+	     php_all_cat_title = "array(" + ", ".join(all_cat_title) + ")"
 
              for module in self.config.get(category,'modules').split(","):
 
@@ -73,6 +75,12 @@ class WebCreator(object):
 	# provides the logic for the timestamp definition
 	output += TimeMachineLogic(histo_step).output
 	
+	# code for certificate access checking
+        AccessCheckGen = AccessCheckGenerator()
+        output += AccessCheckGen.getOutputIconVar()
+        output += AccessCheckGen.getOutputCertificatArray()
+        output += AccessCheckGen.getOutputPhpCheckFunctions()
+
 	# Deliver XML from cache if possible
 	output += GetXMLCache(self.config, self.timestamp).output
 
@@ -108,7 +116,15 @@ class WebCreator(object):
 			$selectedTab = $selectedMod = "";
 			$initialScroll = -1;
 
-			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; } else { $selectedTab = '""" + first_cat + """'; }
+			if (isset($_GET["t"]) && $_GET["t"] != "") { $selectedTab = $_GET["t"]; } 
+			else { 
+				$php_all_cat_title = """ + php_all_cat_title + """;
+				for( $i = 0; $i < sizeof($php_all_cat_title ); $i++) {
+					if( isCategoryAccessible($php_all_cat_title[$i]) == true ) {
+						if( $selectedTab == "" ) { $selectedTab = $php_all_cat_title[$i]; } 
+					}
+				}
+			}
 			if (isset($_GET["m"]) && $_GET["m"] != "") { $selectedMod = $_GET["m"]; }
 			if (isset($_GET["scroll"]) && $_GET["scroll"] != "") { $initialScroll = intval($_GET["scroll"]); }
 
@@ -159,7 +175,7 @@ class WebCreator(object):
 	output += ModuleStatusSymbolLogic(self.theme).output
 
 	# time bar on the top of the website, input forms for time control
-	output += TimeMachineController(logo_image).output
+	output += TimeMachineController(logo_image, theDocumentationURL).output
 
 	# Catch any exception during installation and treat them as fatal
 	# (for example database connection failure).

@@ -405,3 +405,12 @@ function HappyHistoNav(direction, timestamp) {
 	document.getElementById('HistoNavTime').value=theNewTime;
 	document.getElementById('HistoForm1').submit();
 }
+
+/* function to hide/show the certificate information div */
+function HappyCertInfo(task) {
+	if(task == "over") {
+		document.getElementById('HappyCertInfoDiv').style.visibility="visible";
+	} else {
+		document.getElementById('HappyCertInfoDiv').style.visibility="hidden";
+	}
+}

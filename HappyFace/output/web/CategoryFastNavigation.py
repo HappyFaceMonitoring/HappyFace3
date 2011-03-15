@@ -62,9 +62,11 @@ class CategoryFastNavigation(HTMLOutput):
 
 	        if ($module["category"] == \"""" + category + """\") {
 
-		    $nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"], $module["module"]);
-
-		    print('""" + self.PHPArrayToString(list_item) + """');
+		    global $hideIcons;
+		    if ($module["status"] != -2 || $hideIcons==false) {
+			$nav_symbol = getModNavSymbol($module["status"], $module["mod_type"], $module["mod_title"], $module["module"]);
+	 		print('""" + self.PHPArrayToString(list_item) + """');
+		    }
 	        }
 	    }
 	    print('""" + self.PHPArrayToString(list_end) + """');

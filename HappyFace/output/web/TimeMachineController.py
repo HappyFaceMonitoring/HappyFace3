@@ -4,7 +4,7 @@ from HTMLOutput import *
 
 class TimeMachineController(HTMLOutput):
 
-    def __init__(self, logo_image):
+    def __init__(self, logo_image, theDocumentationURL):
 	HTMLOutput.__init__(self, 2)
 
 	rev = subprocess.Popen(['svnversion', '../'], 0, None, None, subprocess.PIPE).stdout.read().strip()
@@ -34,10 +34,11 @@ class TimeMachineController(HTMLOutput):
 	output.append(   ' <div class="HappyTitleBarElement">')
 	output.append(   '  <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '   <tr>')
-	output.append( """    <td colspan="2"><a href="?action=getxml&amp;date=' . $date_string . '&amp;time=' . $time_string . '"><img src="config/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: bottom;"/></a></td>""")
+	output.append( """    <td colspan="2"><a href="?action=getxml&amp;date=' . $date_string . '&amp;time=' . $time_string . '" onfocus="this.blur()"><img src="config/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: bottom;"/></a></td>""")
 	output.append(   '   </tr>')
         output.append(   '   <tr>')
-	output.append( """    <td><img src="config/images/empty_icon.gif" width="15" height="13" alt="Lock icon" style="border: none; vertical-align: bottom;"/></td><td><img src="config/images/empty_icon.gif" width="15" height="13" alt="Placeholder icon" style="border: none; vertical-align: bottom;"/></td>""")
+	output.append( """    <td><img src="' . $lock_icon . '" onmouseover="javascript:HappyCertInfo(\\\'over\\\');" onmouseout="javascript:HappyCertInfo(\\\'out\\\');" width="15" height="13" alt="Lock icon" style="border: none; vertical-align: bottom;"/></td>""")
+        output.append( """    <td><a href=" """ + theDocumentationURL + """ " onfocus="this.blur()"><img src="config/images/help_icon.gif" width="15" height="13" alt="Help icon" style="border: none; vertical-align: bottom;"/></a></td>""")
         output.append(   '   </tr>')
  	output.append(   '  </table>')
 	output.append(   ' </div>')
@@ -101,7 +102,6 @@ class TimeMachineController(HTMLOutput):
 	output.append(   ' </div>')
 	output.append(   ' <div class="HappyTitleBarElement">')
 	output.append( """  <form class="HappyTitleBarForm" action="' . $PHP_SELF . '" method="get">""")
-#	output.append( """  <form class="HappyTitleBarForm" action="<?php reset_time(); echo $PHP_SELF; ?>" method="get">
 	output.append(   '   <table border="0" class="HappyTitleBarElementTable">')
 	output.append(   '    <tr>')
 	output.append(   '     <td>')
@@ -131,6 +131,26 @@ class TimeMachineController(HTMLOutput):
 	end.append(      '</div>')
 
 	out = """<?php
+
+	if ($_SERVER[SSL_CLIENT_VERIFY] == "SUCCESS") {
+		$lock_icon = "config/images/lock_icon_on.gif";
+		print('<div id="HappyCertInfoDiv">
+			Used browser certificate for authentication:
+			<br />
+			<span style="color:#FF9900;">'.$_SERVER[SSL_CLIENT_S_DN].'</span>
+			<br /><br />
+			Certificate authority:
+			<br />
+			<span style="color:#FF9900;">'.$_SERVER['SSL_CLIENT_I_DN'].'</span>
+		       </div>');
+	} else {
+		$lock_icon = "config/images/lock_icon_off.gif";
+		print('<div id="HappyCertInfoDiv">
+			No browser authentication credentials found or non-https web access.
+			<br />
+			Using standard HappyFace display mode.
+		       </div>');
+	}
 
 	print('""" + self.PHPArrayToString(output) + """');
 	reset_time();

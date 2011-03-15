@@ -14,6 +14,7 @@ class CategoryNavigationTab(HTMLOutput):
 	output.append('    <div style="text-align:center;">')
 	output.append("     ' . getCatStatusSymbolForCategory('" + category + "','" + cat_type + "','" + cat_algo + "', $ModuleResultsArray) . '")
 	output.append("     ' . getCatIndexSymbolForCategory('" + category + "', $ModuleResultsArray) . '")
+	output.append("     ' . getCatLockSymbolForCategory('" + category + "', $ModuleResultsArray) . '")
 	output.append('    </div>')
 	output.append('   </td>')
 	output.append('  </tr>')
@@ -27,6 +28,14 @@ class CategoryNavigationTab(HTMLOutput):
 	output.append(' </table>')
 	output.append('</li>')
 
-	out = """<?php print('""" + self.PHPArrayToString(output) + """'); ?>"""
+	out = """<?php 
+		global $hideIcons;
+		if (getCatStatus("""+category+""","""+cat_algo+""",$ModuleResultsArray) == -2 && $hideIcons==true) {
+			print('<li style="width:0px;height:0px;"></li>');
+                }
+		else {
+			print('""" + self.PHPArrayToString(output) + """');
+		}
+	      ?>"""
 
 	self.output = out

@@ -31,6 +31,10 @@ class ModuleResultsArrayBuilder(object):
 		$ModuleResultsArray[$module]["category"]	= $data["category"];
                 $ModuleResultsArray[$module]["timestamp"]	= $data["timestamp"];
 	    }
+	    # If the module is locked its status is set to -2
+	    if (isModuleAccessible($ModuleResultsArray[$module]["module"])==false) {
+		$ModuleResultsArray[$module]["status"] = -2;
+	    }
 	}
 
 	?>"""
