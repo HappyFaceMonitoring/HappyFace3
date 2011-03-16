@@ -1,6 +1,6 @@
 from Plot import *
 from PhpDownload import *
-
+from time import time
 
 class PhpPlotCMSPhedex(Plot,PhpDownload):
 
@@ -15,6 +15,8 @@ class PhpPlotCMSPhedex(Plot,PhpDownload):
         
         globalVars['plot_type'] = self.configService.get('setup','plot_type')
         globalVars['instance'] = self.configService.get('setup','instance')
+        globalVars['start'] = str(int(time()-3600*int(self.configService.get('setup','duration'))))
+        globalVars['end'] = str(int(time()))
 
 
 
