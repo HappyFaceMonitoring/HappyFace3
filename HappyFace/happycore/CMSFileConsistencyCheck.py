@@ -128,19 +128,20 @@ class CMSFileConsistencyCheck(ModuleBase):
 	my_subtable_class = self.table_init( self.details_database, details_db_keys )
 
         # Fill in the values:
-	details_db_values = {}
+	details_db_value_list = []
 
         for data in root:
             if data.tag == "details":
                 for element in data.iter():
                     if element.tag == "file":
                         element_attrib = element.attrib
+	                details_db_values = {}
                         details_db_values["lfn"] =  element_attrib["name"]
                         details_db_values["status"] =  element_attrib["status"]
                         details_db_values["dataset"] =  element_attrib["dataset"]
-                        # write details to databse
-
-                        self.table_fill( my_subtable_class, details_db_values )
+			details_db_value_list.append(details_db_values)
+        # write details to databse
+        self.table_fill_many( my_subtable_class, details_db_value_list)
 
         ################################
         # Rating algorithm
