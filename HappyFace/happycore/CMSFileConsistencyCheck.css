@@ -1,0 +1,6 @@
+/* CSS file for the HappyFace module: quick_consistency_check */
+
+p.quick_consistency_checkWarningMessage { 
+  font-weight: bold; 
+  color:#ff0000
+}
