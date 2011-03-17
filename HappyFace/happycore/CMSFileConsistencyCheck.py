@@ -127,21 +127,41 @@ class CMSFileConsistencyCheck(ModuleBase):
 
 	my_subtable_class = self.table_init( self.details_database, details_db_keys )
 
-        # Fill in the values:
-	details_db_value_list = []
+	# Obtain timestamp of previous run of the dump script
+	cur_timestamp = time.strptime(self.db_values['starttime'])
+	class main_table(SQLObject):
+	    class sqlmeta:
+	        table = self.database_table
+		registry = self.__module__
+	    timestamp = IntCol()
+            starttime = StringCol()
 
-        for data in root:
-            if data.tag == "details":
-                for element in data.iter():
-                    if element.tag == "file":
-                        element_attrib = element.attrib
-	                details_db_values = {}
-                        details_db_values["lfn"] =  element_attrib["name"]
-                        details_db_values["status"] =  element_attrib["status"]
-                        details_db_values["dataset"] =  element_attrib["dataset"]
-			details_db_value_list.append(details_db_values)
-        # write details to databse
-        self.table_fill_many( my_subtable_class, details_db_value_list)
+	prev_timestamp = None
+	try:
+	    prev_row = list(main_table.select(orderBy=DESC(main_table.q.timestamp))[0:1])
+	    if len(prev_row) > 0:
+	        prev_timestamp = time.strptime(prev_row[0].starttime)
+	except:
+	    pass
+
+	# Only record details if changed since previous run
+	if cur_timestamp is None or prev_timestamp is None or cur_timestamp > prev_timestamp:
+            # Fill in the values:
+	    details_db_value_list = []
+
+            for data in root:
+                if data.tag == "details":
+                    for element in data.iter():
+                        if element.tag == "file":
+                            element_attrib = element.attrib
+	                    details_db_values = {}
+                            details_db_values["lfn"] =  element_attrib["name"]
+                            details_db_values["status"] =  element_attrib["status"]
+                            details_db_values["dataset"] =  element_attrib["dataset"]
+	                    details_db_value_list.append(details_db_values)
+            # write details to databse
+            self.table_fill_many(my_subtable_class, details_db_value_list)
+	    self.subtable_clear(my_subtable_class, [], self.holdback_time)
 
         ################################
         # Rating algorithm
@@ -357,7 +377,7 @@ class CMSFileConsistencyCheck(ModuleBase):
 
         print('""" + self.PHPArrayToString(mc_begin) + """');
         
-        $details_db_sqlquery = "SELECT dataset, count(distinct lfn) as files FROM """+self.details_database+""" WHERE timestamp = " . $data["timestamp"] . " group by dataset";
+        $details_db_sqlquery = "SELECT dataset, count(distinct lfn) as files FROM """+self.details_database+""" JOIN (SELECT max(timestamp) as mtp FROM """ +  self.details_database + """ WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp GROUP BY dataset";
         
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
@@ -366,7 +386,7 @@ class CMSFileConsistencyCheck(ModuleBase):
 
         print('""" + self.PHPArrayToString(mc_mid) + """');
 
-        $details_db_sqlquery = "SELECT * FROM """+self.details_database+""" WHERE timestamp = " . $data["timestamp"];
+        $details_db_sqlquery = "SELECT * FROM """+self.details_database+""" JOIN (SELECT max(timestamp) as mtp FROM """ + self.details_database + """ WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp";
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
             print('""" + self.PHPArrayToString(mc_detailed_files) + """');

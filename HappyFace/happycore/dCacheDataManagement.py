@@ -107,6 +107,7 @@ class dCacheDataManagement(ModuleBase):
 	class main_table(SQLObject):
 	    class sqlmeta:
 	        table = self.database_table
+	        registry = self.__module__
 	    timestamp = IntCol()
 	    chimera_timestamp = IntCol()
 
