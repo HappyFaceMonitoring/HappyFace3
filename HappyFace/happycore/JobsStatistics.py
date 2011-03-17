@@ -297,7 +297,7 @@ class JobsStatistics(ModuleBase):
 	begin.append("""    <input name="time1" type="text" size="5" style="text-algin:center;" value="' . $time_string . '" />""")
 	begin.append(  '   </td>')
 	begin.append(  '   <td align="right">')
-	begin.append(  '    <input type="checkbox" name="renormalize" value="1" />Show Trend plot')
+	begin.append(  '    <input type="checkbox" name="renormalize" value="1" style="vertical-algin: middle; margin: 0px;" />&nbsp;Show Trend plot')
 	begin.append(  '    <input type="hidden" name="module" value="' + self.__module__ + '" />')
 	begin.append(  '    <input type="hidden" name="subtable" value="' + self.__module__ + '_table_groups" />')
 	begin.append(  '    <input type="hidden" id="' + self.__module__ + '_constraint" name="constraint" value="" />')
