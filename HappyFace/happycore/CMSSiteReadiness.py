@@ -121,7 +121,6 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		mc_row_end.append(      ' </tr>')
 
 		mc_end = []
-		mc_end.append(' </tr>')
 		mc_end.append('</table>')
 		mc_end.append('<br />')
 
