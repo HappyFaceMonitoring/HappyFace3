@@ -52,6 +52,8 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		"""
 		# run the test
 
+		self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.downloadRequest[self.dsTag]))
+
 		success,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 		source_tree, error_message = HTMLParsing().parse_htmlfile_lxml(sourceFile)
 
@@ -128,12 +130,13 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 
                 $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
 
-                print('""" + self.PHPArrayToString(mc_begin) + """');
-
 		$condition = "start";
 
                 foreach ($dbh->query($details_db_sqlquery) as $info)
                 {
+		    if($condition == "start") {
+			print('""" + self.PHPArrayToString(mc_begin) + """');
+		    }
                     if ($info["cond_color"] == "green")
                         $service_status_color_flag = "ok";
                     else if ($info["cond_color"] == "red")
@@ -146,7 +149,7 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
                         $service_status_color_flag = "undefined";
 
 		    if($info["readiness_cond"] != $condition) {
-		        if($condition != "start") {
+ 		        if($condition != "start") {
 		            print('""" + self.PHPArrayToString(mc_row_end) + """');
 		        }
 		        print('""" + self.PHPArrayToString(mc_row_begin) + """');
@@ -161,7 +164,10 @@ class CMSSiteReadiness(ModuleBase,PhpDownload):
 		    }
 	        }
 
-                print('""" + self.PHPArrayToString(mc_end) + """');
+	        if($condition != "start") {
+	            print('""" + self.PHPArrayToString(mc_row_end) + """');
+ 	            print('""" + self.PHPArrayToString(mc_end) + """');
+	        }
 
 		?>"""
 
