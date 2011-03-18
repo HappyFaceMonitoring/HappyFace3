@@ -10,7 +10,12 @@ from XMLParsing import *
 from numpy import array
 import numpy as np
 import matplotlib
-matplotlib.use("cairo.png")
+# The warn=False statement hides the matplotlib warning displayed during
+# a HF run if more than one module are configured using the same base class.
+# Problem description: a warning is displayed if matplotlib.use() is called
+# after matplotlib.pyplot was imported. However this is always the case if
+# more than one modules inheriting from this base class are instanciated.
+matplotlib.use("cairo.png", warn=False)
 import matplotlib.pyplot as plt
 #from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 #from matplotlib.figure import Figure
