@@ -376,9 +376,9 @@ class CMSFileConsistencyCheck(ModuleBase):
 	}
 
         print('""" + self.PHPArrayToString(mc_begin) + """');
-        
-        $details_db_sqlquery = "SELECT dataset, count(distinct lfn) as files FROM """+self.details_database+""" JOIN (SELECT max(timestamp) as mtp FROM """ +  self.details_database + """ WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp GROUP BY dataset";
-        
+       
+        $details_db_sqlquery = "SELECT dataset, count(distinct lfn) as files FROM """+self.details_database+""" JOIN (SELECT max(timestamp) as mtp FROM """ +  self.details_database + """ WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp WHERE timestamp >= " . strtotime($data['endtime']) . " GROUP BY dataset";
+
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
             print('""" + self.PHPArrayToString(mc_detailed_datasets) + """');
@@ -386,7 +386,7 @@ class CMSFileConsistencyCheck(ModuleBase):
 
         print('""" + self.PHPArrayToString(mc_mid) + """');
 
-        $details_db_sqlquery = "SELECT * FROM """+self.details_database+""" JOIN (SELECT max(timestamp) as mtp FROM """ + self.details_database + """ WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp";
+        $details_db_sqlquery = "SELECT * FROM """+self.details_database+""" JOIN (SELECT max(timestamp) as mtp FROM """ + self.details_database + """ WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp WHERE timestamp >= " . strtotime($data['endtime']);
         foreach ($dbh->query($details_db_sqlquery) as $info)
        	{
             print('""" + self.PHPArrayToString(mc_detailed_files) + """');
