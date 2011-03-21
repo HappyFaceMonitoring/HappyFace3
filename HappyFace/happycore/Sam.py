@@ -21,8 +21,6 @@ class Sam(ModuleBase,PhpDownload):
 
         self.db_keys["details_database_summary"] = StringCol()
 	self.db_values["details_database_summary"] = ""
-
-
 	
 	self.report_url	= self.configService.get('setup','report_url')
 	
@@ -31,15 +29,13 @@ class Sam(ModuleBase,PhpDownload):
         self.downloadRequest[self.dsTag] = 'wgetXmlRequest|'+self.makeUrl()
         self.blacklist = self.configService.getDefault('setup','blacklist',"").split(",")
 
-        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br />')
+        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br />')	
 
-
-	
     def process(self):
         # run the test
 
-	dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
         self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
+	dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 
 	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
