@@ -12,13 +12,13 @@
 
        <RDF:li>
           <RDF:Description>
-            <em:version>2.0</em:version>
+            <em:version>2.1</em:version>
             <em:targetApplication>
               <RDF:Description>
                 <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
                 <em:minVersion>0.7</em:minVersion>
                 <em:maxVersion>9.9.*</em:maxVersion>
-                <em:updateLink>https://ekptrac.physik.uni-karlsruhe.de/public/HappyFace/trunk/externals/plugins/firefox/happyface_2.0.xpi</em:updateLink>
+                <em:updateLink>https://ekptrac.physik.uni-karlsruhe.de/public/HappyFace/trunk/externals/plugins/firefox/happyface_2.1.xpi</em:updateLink>
               </RDF:Description>
             </em:targetApplication>
           </RDF:Description>
