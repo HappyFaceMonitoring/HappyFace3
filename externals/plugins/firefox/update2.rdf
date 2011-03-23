@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <!-- This Description resource includes all the update and compatibility information for
+       a single add-on with the id happyface@ph2.physik.uni-goettingen.de. You can list multiple
+       add-ons information in the same RDF file. -->
+  <RDF:Description about="urn:mozilla:extension:happyface@ph2.physik.uni-goettingen.de">
+    <em:updates>
+      <RDF:Seq>
+
+       <RDF:li>
+          <RDF:Description>
+            <em:version>2.0</em:version>
+            <em:targetApplication>
+              <RDF:Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>0.7</em:minVersion>
+                <em:maxVersion>9.9.*</em:maxVersion>
+                <em:updateLink>https://ekptrac.physik.uni-karlsruhe.de/public/HappyFace/trunk/externals/plugins/firefox/happyface_2.1.xpi</em:updateLink>
+              </RDF:Description>
+            </em:targetApplication>
+          </RDF:Description>
+        </RDF:li>
+
+      </RDF:Seq>
+    </em:updates>
+
+  </RDF:Description>
+</RDF:RDF>
