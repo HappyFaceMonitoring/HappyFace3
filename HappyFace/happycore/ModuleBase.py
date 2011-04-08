@@ -320,10 +320,21 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    sys.stderr.write(self.__module__ + ': ' + msg + '\n' + 'wget output was:\n\n' + ex.stderr + '\n')
 	    traceback.print_exc()
 	except Exception, ex:
+	    # Prevent downloaded files from deletion, fur further inspection
+	    fail_list = []
+            for dl in self.getDownloadRequests():
+	        try:
+	            error,filename = self.downloadService.getFile(dl)
+		    self.downloadService.keepFile(dl)
+		    fail_list.append(os.path.basename(filename))
+		except:
+		    # Should not happen since download errors should be catched in the except block above
+		    raise
+
 	    self.status = -1.0
 	    msg = str(ex).strip()
-	    self.error_message = msg
-	    sys.stderr.write(self.__module__ + ': ' + msg + '\n')
+	    self.error_message = msg + '\n\nThe downloaded file(s) have been preserved for inspection:\n' + '\n'.join(fail_list)
+	    sys.stderr.write(self.__module__ + ': ' + self.error_message + '\n')
 	    traceback.print_exc()
 	    return -1
 

@@ -8,7 +8,7 @@ from HTMLOutput import *
 
 class DownloadService(HTMLOutput):
 
-    def __init__(self, subdir):
+    def __init__(self, subdir, tmp_keepalive):
         HTMLOutput.__init__(self)
 
         self.subdir = subdir
@@ -21,10 +21,14 @@ class DownloadService(HTMLOutput):
         # previous runs
         first = True
         for entry in os.listdir(subdir):
-            if first:
-                first = False
-                print 'DownloadService: Cleaning tmp directory'
-            os.unlink(os.path.join(subdir, entry))
+	    filename = os.path.join(subdir, entry)
+
+	    # Clear tmp entries when older than tmp_keepalive
+	    if tmp_keepalive < 0 or time() - os.stat(filename).st_mtime > tmp_keepalive:
+                if first:
+                    first = False
+                    print 'DownloadService: Cleaning tmp directory'
+                os.unlink(os.path.join(subdir, entry))
 
 
     def add(self, downloadstring):
@@ -79,6 +83,11 @@ class DownloadService(HTMLOutput):
         if len(self.downloadTags.keys()) > 0:
             print "DownloadService: deleting tmp files"
         for i in self.downloadTags.keys():
+	    # If the module processing failed the downloaded file is kept
+	    # for inspection.
+	    if self.downloadTags[i].getKeep():
+	        continue
+
 	    try:
                 os.remove(self.downloadTags[i].getFilePath())
 	    except:
@@ -109,6 +118,8 @@ class DownloadService(HTMLOutput):
 	    return 'N/A'
         return '<a href="' + self.EscapeHTMLEntities(url) + '">' + self.EscapeHTMLEntities(url) + '</a>'
 
+    def keepFile(self, downloadString):
+        self.downloadTags[downloadString].setKeep()
 
 
     def copyFile(self,downloadstring,destfile):

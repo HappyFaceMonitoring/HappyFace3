@@ -33,9 +33,14 @@ class DownloadTag(Thread):
         self.finished = False
         self.error = None
         self.curIndex = 0
+	self.keep = False
 
         self.dataFetcher = GetData()
-        
+
+    def setKeep(self):
+        self.keep = True
+    def getKeep(self):
+        return self.keep
 
     def download(self):
         while self.curIndex < len(self.program):

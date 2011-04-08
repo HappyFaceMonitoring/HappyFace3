@@ -59,6 +59,15 @@ def HappyFace():
     # get paths from config files
     output_dir	= config.get('setup','output_dir')
     tmp_dir     = config.get('setup','tmp_dir')
+    try:
+        tmp_keepalive = int(config.get('setup', 'tmp_keepalive'))
+    except:
+        # default
+        tmp_keepalive = 7
+
+    # convert to seconds:
+    if tmp_keepalive > 0:
+        tmp_keepalive = tmp_keepalive * 24 * 60 * 60
 
     # create timestamp (unixtime), set seconds to "0"
     time_tuple = localtime() 
@@ -146,7 +155,7 @@ def HappyFace():
         # Preparation of Download and CSS Service.
         # Selecting all files for download.
         # Prepare list of needed css files for the webpage.
-        downloadService = DownloadService(tmp_dir)
+        downloadService = DownloadService(tmp_dir, tmp_keepalive)
         cssService = CssService(output_dir,'config/modules')
     
         for module in modObj_list.keys():
