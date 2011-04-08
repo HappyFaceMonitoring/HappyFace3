@@ -59,7 +59,7 @@ class JobsStatistics(ModuleBase):
 	for element in root:
 	    if element.tag == "header":
 	        for child in element:
-		    if child.tag == "date":
+		    if child.tag == "date" and child.text is not None:
 		        date = int(float(child.text.strip()))
 
 	self.db_values["result_timestamp"] = date
@@ -108,15 +108,15 @@ class JobsStatistics(ModuleBase):
 			waiting = 0
 			ratio10 = 0
 			for subchild in child:
-			    if subchild.tag == 'jobs':
+			    if subchild.tag == 'jobs' and subchild.text is not None:
 			        total = int(subchild.text.strip())
-			    if subchild.tag == 'running':
+			    if subchild.tag == 'running' and subchild.text is not None:
 			        running = int(subchild.text.strip())
-			    if subchild.tag == 'pending':
+			    if subchild.tag == 'pending' and subchild.text is not None:
 			        pending = int(subchild.text.strip())
-			    if subchild.tag == 'waiting':
+			    if subchild.tag == 'waiting' and subchild.text is not None:
 			        waiting = int(subchild.text.strip())
-			    if subchild.tag == 'ratio10':
+			    if subchild.tag == 'ratio10' and subchild.text is not None:
 			        ratio10 = int(subchild.text.strip())
 
 			status = 1.0
@@ -179,11 +179,11 @@ class JobsStatistics(ModuleBase):
 			cpueff = 0.0
 
 			for subchild in child:
-			    if subchild.tag == 'user':
+			    if subchild.tag == 'user' and subchild.text is not None:
 			        user = subchild.text.strip()
-			    if subchild.tag == 'state':
+			    if subchild.tag == 'state' and subchild.text is not None:
 			        state = subchild.text.strip()
-			    if subchild.tag == 'cpueff':
+			    if subchild.tag == 'cpueff' and subchild.text is not None:
 			        cpueff = float(subchild.text.strip())
 
 			if user == '' or state == '': continue

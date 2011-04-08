@@ -113,7 +113,7 @@ class JobsDist(ModuleBase):
 	for element in root:
 	    if element.tag == "header":
 	        for child in element:
-		    if child.tag == "date":
+		    if child.tag == "date" and child.text is not None:
 		        date = int(float(child.text.strip()))
 
 	self.db_values["result_timestamp"] = date
@@ -129,11 +129,11 @@ class JobsDist(ModuleBase):
                     group = job_state = variable_str = ''
 		    # Only count running jobs
 		    for subchild in child:
-		        if subchild.tag == 'group':
+		        if subchild.tag == 'group' and subchild.text is not None:
 			    group = subchild.text.strip()
-			if subchild.tag == 'state':
+			if subchild.tag == 'state' and subchild.text is not None:
 			    job_state = subchild.text.strip()
-			if subchild.tag == variable:
+			if subchild.tag == variable and subchild.text is not None:
 			    variable_str = subchild.text.strip()
 
 		    # Check user
