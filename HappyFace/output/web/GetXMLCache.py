@@ -39,7 +39,7 @@ class GetXMLCache(object):
 	{
 		// Deliver file from cache
 		$xml_cache_file = "cache/HappyFace_$custom_id.xml";
-		$xml_file_handle = fopen($xml_cache_file, 'r');
+		$xml_file_handle = @fopen($xml_cache_file, 'r');
 		if($xml_file_handle && flock($xml_file_handle, LOCK_SH))
 		{
 			$stat_result = fstat($xml_file_handle);

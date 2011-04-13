@@ -74,7 +74,7 @@ class AccessCheckGenerator(object):
 
         # generates the php code which fills on page load $accessSect[sectName] with the certificates required for 'sectName'
         phpstring = '<?php $accessSect=array(); ?>'
-        phpstring = '<?php $accessCerts=array();'
+        phpstring += '<?php $accessCerts=array();'
         for sectInfo in self.accessesSects:
               for uc in sectInfo[1]:
                   phpstring += '$accessCerts[] = array("'+uc[0]+'","'+uc[1]+'");'
@@ -102,11 +102,12 @@ class AccessCheckGenerator(object):
         phpFuncCheckAccess+= '    {'
         phpFuncCheckAccess+= '       if (isCategoryAccessible($categoryName) == false) return false;'
         phpFuncCheckAccess+= '    }'
+	phpFuncCheckAccess+= "    if (is_null($accessMod)) { return true; }"
 	phpFuncCheckAccess+= "    if (!array_key_exists($moduleName, $accessMod)) { return true; }"
         phpFuncCheckAccess+= "    if (in_array(array('*', '*'), $accessMod[$moduleName])) { return true; }"
-        phpFuncCheckAccess+= "    if (in_array(array($_SERVER[SSL_CLIENT_S_DN], $_SERVER[SSL_CLIENT_I_DN]), $accessMod[$moduleName])) return true;"
-        phpFuncCheckAccess+= "    if (in_array(array('*', $_SERVER[SSL_CLIENT_I_DN]), $accessMod[$moduleName])) return true;"
-        phpFuncCheckAccess+= "    if (in_array(array($_SERVER[SSL_CLIENT_S_DN], '*'), $accessMod[$moduleName])) return true;"
+        phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], $_SERVER['SSL_CLIENT_I_DN']), $accessMod[$moduleName])) return true;"
+        phpFuncCheckAccess+= "    if (in_array(array('*', $_SERVER['SSL_CLIENT_I_DN']), $accessMod[$moduleName])) return true;"
+        phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], '*'), $accessMod[$moduleName])) return true;"
         phpFuncCheckAccess+= '    return false;'
         phpFuncCheckAccess+= '}'
         # php function that checks if a category is accessible
@@ -115,9 +116,9 @@ class AccessCheckGenerator(object):
         phpFuncCheckAccess+= '    global $accessSect;'
 	phpFuncCheckAccess+= "    if (!array_key_exists($categoryName, $accessSect)) { return true; }"
         phpFuncCheckAccess+= "    if (in_array(array('*', '*'), $accessSect[$categoryName])) { return true; }"
-        phpFuncCheckAccess+= "    if (in_array(array($_SERVER[SSL_CLIENT_S_DN], $_SERVER[SSL_CLIENT_I_DN]), $accessSect[$categoryName])) return true;"
-        phpFuncCheckAccess+= "    if (in_array(array('*', $_SERVER[SSL_CLIENT_I_DN]), $accessSect[$categoryName])) return true;"
-        phpFuncCheckAccess+= "    if (in_array(array($_SERVER[SSL_CLIENT_S_DN], '*'), $accessSect[$categoryName])) return true;"
+        phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], $_SERVER['SSL_CLIENT_I_DN']), $accessSect[$categoryName])) return true;"
+        phpFuncCheckAccess+= "    if (in_array(array('*', $_SERVER['SSL_CLIENT_I_DN']), $accessSect[$categoryName])) return true;"
+        phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], '*'), $accessSect[$categoryName])) return true;"
         phpFuncCheckAccess+= '    return false;'
         phpFuncCheckAccess+= '}'
         phpFuncCheckAccess+= ' ?>'

@@ -30,7 +30,7 @@ class CategoryNavigationTab(HTMLOutput):
 
 	out = """<?php 
 		global $hideIcons;
-		if (getCatStatus("""+category+""","""+cat_algo+""",$ModuleResultsArray) == -2 && $hideIcons==true) {
+		if (getCatStatus('"""+category+"""','"""+cat_algo+"""',$ModuleResultsArray) == -2 && $hideIcons==true) {
 			print('<li style="width:0px;height:0px;"></li>');
                 }
 		else {

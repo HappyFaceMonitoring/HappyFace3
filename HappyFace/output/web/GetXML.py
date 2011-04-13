@@ -116,7 +116,7 @@ class GetXML(object):
 		// file is requested (in which case $xml_cache_file is not set).
 		if(isset($xml_cache_file) && !$xml_cache_uptodate)
 		{
-			$fh = fopen($xml_cache_file, 'w');
+			$fh = @fopen($xml_cache_file, 'w');
 			if($fh && flock($fh, LOCK_EX))
 			{
 				ftruncate($fh, 0); // just to make sure
