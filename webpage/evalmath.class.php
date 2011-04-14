@@ -210,6 +210,7 @@ class EvalMath {
                 $expecting_op = false;
             //===============
             } elseif ($op == ')' and $expecting_op) { // ready to close a parenthesis?
+	        $expectingOperand = false;
                 while (($o2 = $stack->pop()) != '(') { // pop off the stack back to the last (
                     if (is_null($o2)) return $this->trigger("unexpected ')'");
                     else $output[] = $o2;
@@ -382,6 +383,9 @@ class EvalMathStack {
     }
     
     function last($n=1) {
+	    if($this->count-$n < 0) {
+		    return null;
+	    }
         return $this->stack[$this->count-$n];
     }
 }
