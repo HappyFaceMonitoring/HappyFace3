@@ -63,7 +63,7 @@ if($variable == "status")
 	$prev_status = -1;
 	$accum_status = 0.0;
 	$accum_timestamp = 0.0;
-	$availabality = 0.0;
+	$availability = 0.0;
 
 	$stmt->execute();
 	while($data = $stmt->fetch())
