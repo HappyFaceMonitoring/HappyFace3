@@ -228,7 +228,7 @@ class CMSFileConsistencyCheck(ModuleBase):
         mc_begin.append(  ' </tr>')
         mc_begin.append(""" <tr'.$duration_color.'>""")
         mc_begin.append(  '  <td>Duration:</td>')
-        mc_begin.append("""  <td>'.secondsToWords_""" + self.__module__ + """($data["duration"]).'<br />warning limit: '.$data["warning_limit"].' hours</td>""")
+        mc_begin.append("""  <td>'.secondsToWords_""" + self.__module__ + """($data["duration"]).'<br />warning limit: '.$data["duration_warning_limit"].' hours</td>""")
         mc_begin.append(  ' </tr>')
         mc_begin.append(  ' <tr>')
         mc_begin.append(  '  <td>Total size:</td>')
