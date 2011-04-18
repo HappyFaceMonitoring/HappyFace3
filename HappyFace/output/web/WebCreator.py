@@ -136,7 +136,7 @@ class WebCreator(object):
 			print('  //-->\n');
 			print('  </script>\n');
 		?>"""
-	output += '  <form id="ReloadForm" action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="get">' + "\n"
+	output += '  <form id="ReloadForm" action="<?php echo $_SERVER["SCRIPT_NAME"]; ?>" method="get">' + "\n"
 	output += '   <div>' + "\n"
 	output += '    <input type="hidden" id="ReloadTab" name="t" value="<?php echo htmlentities($selectedTab); ?>" />' + "\n"
 	output += '    <input type="hidden" id="ReloadMod" name="m" value="<?php echo htmlentities($selectedMod); ?>" />' + "\n"
