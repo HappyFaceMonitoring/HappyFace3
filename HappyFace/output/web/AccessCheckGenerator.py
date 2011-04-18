@@ -91,7 +91,7 @@ class AccessCheckGenerator(object):
         phpFuncCheckAccess+= 'function isModuleAccessible($moduleName, $categoryName = "")'
         phpFuncCheckAccess+= '{   global $accessMod; global $ModuleResultsArray;'
         phpFuncCheckAccess+= '    if($categoryName == "")'
-        phpFuncCheckAccess+= '    foreach ($ModuleResultsArray as $module)'
+        phpFuncCheckAccess+= '    foreach ((array) $ModuleResultsArray as $module)'
         phpFuncCheckAccess+= '    {'
         phpFuncCheckAccess+= '       if ($module["module"]==$moduleName)'
         phpFuncCheckAccess+= '       {'

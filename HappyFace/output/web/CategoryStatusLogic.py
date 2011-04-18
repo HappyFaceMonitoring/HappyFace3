@@ -30,7 +30,7 @@ class CategoryStatusLogic(object):
 	    	$sum_weighted_status = 0;
 		$sum_weight = 0;
 	    
-	        foreach ($ModuleResultsArray as $module) {
+	        foreach ((array) $ModuleResultsArray as $module) {
 
                     if ($module["category"] == $category) {
 
@@ -54,7 +54,7 @@ class CategoryStatusLogic(object):
 	    # "worst" rating category algorithm, the worst mod_status (0.0..1.0) is the cat_status
 	    function worst($category, $ModuleResultsArray) {
 
-	        foreach ($ModuleResultsArray as $module) {
+		foreach ((array) $ModuleResultsArray as $module) {
 
 	            if ($module["category"] == $category) {
 
@@ -86,7 +86,7 @@ class CategoryStatusLogic(object):
 
             # if all modules of category have status -2, set category to -2 
 	    $all_modules_blocked=1;
-            foreach ($ModuleResultsArray as $module) {
+            foreach ((array) $ModuleResultsArray as $module) {
 		if ($module["category"] == $category) {
 	               	$mod_status = $module["status"];
 			if ($mod_status != -2) {

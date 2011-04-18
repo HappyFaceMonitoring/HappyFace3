@@ -37,7 +37,7 @@ class CategoryStatusSymbolLogic(object):
 
             $indexstatus = 'ok';
 
-	    foreach ($ModuleResultsArray as $module) {
+	    foreach ((array) $ModuleResultsArray as $module) {
 		if ($module["category"] == $category) {
 		    $mod_status = $module["status"];
 		    if ($mod_status == -1) {

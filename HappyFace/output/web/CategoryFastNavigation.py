@@ -58,7 +58,7 @@ class CategoryFastNavigation(HTMLOutput):
 	if ( is_array($ModuleResultsArray) ) {
 	    print('""" + self.PHPArrayToString(list_begin) + """');
 
-	    foreach ($ModuleResultsArray as $module) {
+	    foreach ((array) $ModuleResultsArray as $module) {
 
 	        if ($module["category"] == \"""" + category + """\") {
 
