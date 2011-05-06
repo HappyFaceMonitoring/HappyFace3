@@ -124,15 +124,15 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	            table = tableName
 	            fromDatabase = True
 
+	        My_DB_Class = type(tableName, (SQLObject,), table_keys)
+	        My_DB_Class.createTable(ifNotExists=True)	
+
 	        DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
-		    
+
 	        avail_keys = []
 	        for key in DBProxy.sqlmeta.columns.keys():
 	            avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
 	    
-	        My_DB_Class = type(tableName, (SQLObject,), table_keys)
-	        My_DB_Class.createTable(ifNotExists=True)	
-
                 new_columns = filter(lambda x: x not in avail_keys, table_keys.keys())
 
                 if len(new_columns) > 0:
