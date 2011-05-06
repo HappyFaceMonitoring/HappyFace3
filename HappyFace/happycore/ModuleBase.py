@@ -118,43 +118,44 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	# lock object enables exclusive access to the database
 	self.lock.acquire()
 	
-	try:
-	    class sqlmeta:
-	        table = tableName
-	        fromDatabase = True
+	try: # separate try for finally block so we are compatible with Python 2.4
+            try:
+	        class sqlmeta:
+	            table = tableName
+	            fromDatabase = True
 
-	    DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
+	        DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
 		    
-	    avail_keys = []
-	    for key in DBProxy.sqlmeta.columns.keys():
-	        avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
+	        avail_keys = []
+	        for key in DBProxy.sqlmeta.columns.keys():
+	            avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
 	    
-	    My_DB_Class = type(tableName, (SQLObject,), table_keys)
-	    My_DB_Class.createTable(ifNotExists=True)	
+	        My_DB_Class = type(tableName, (SQLObject,), table_keys)
+	        My_DB_Class.createTable(ifNotExists=True)	
 
-            new_columns = filter(lambda x: x not in avail_keys, table_keys.keys())
+                new_columns = filter(lambda x: x not in avail_keys, table_keys.keys())
 
-            if len(new_columns) > 0:
-	        connection = sqlhub.processConnection
-                dbObject = connection.getConnection()
-	        cursor = dbObject.cursor()
+                if len(new_columns) > 0:
+	            connection = sqlhub.processConnection
+                    dbObject = connection.getConnection()
+	            cursor = dbObject.cursor()
 
-	        for key in new_columns:
-                    if key != "index":
-	                try:
-			    DBProxy.sqlmeta.addColumn(table_keys[key].__class__(key), changeSchema=False)
+	            for key in new_columns:
+                        if key != "index":
+	                    try:
+			        DBProxy.sqlmeta.addColumn(table_keys[key].__class__(key), changeSchema=False)
 
-			    # It is also possible to create the new column by setting changeSchema to True
-			    # above. However, this is VERY slow for large SQLite databases.
-			    # This is why we run an ALTER TABLE query manually here, which is
-			    # much faster (returns almost instantly).
-			    sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
-			    cursor.execute('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, key, sqlType))
-		        except Exception, ex: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__ + ": " + str(ex)
+			        # It is also possible to create the new column by setting changeSchema to True
+			        # above. However, this is VERY slow for large SQLite databases.
+			        # This is why we run an ALTER TABLE query manually here, which is
+			        # much faster (returns almost instantly).
+			        sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
+			        cursor.execute('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, key, sqlType))
+		            except Exception, ex: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__ + ": " + str(ex)
 
-        except:
-	    My_DB_Class = type(tableName, (SQLObject,), table_keys)
-	    My_DB_Class.createTable(ifNotExists=True)
+            except:
+	        My_DB_Class = type(tableName, (SQLObject,), table_keys)
+	        My_DB_Class.createTable(ifNotExists=True)
 	finally:
 	    # unlock the database access
 	    self.lock.release()
@@ -219,7 +220,8 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
 	self.lock.acquire()
 
-	try:
+	try: # separate try for finally block so we are compatible with Python 2.4
+            try:
 		old_data = My_DB_Class.select( My_DB_Class.q.timestamp <= time_limit)
 
 		for row in old_data:
@@ -240,25 +242,25 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
 			output_dir = self.archive_dir
 			while os.path.basename(output_dir) != 'archive':
-				output_dir = os.path.dirname(output_dir)
+			    output_dir = os.path.dirname(output_dir)
 
 			archive_dir = output_dir + "/" + str(time_tuple.tm_year) + "/" + ('%02d' % time_tuple.tm_mon) + "/" + ('%02d' % time_tuple.tm_mday) + "/" + str(timestamp)
 			file = archive_dir + '/' + file
 
 			try:
-				# Remove archived files
-				os.unlink(file)
-				# Remove empty directories (note this throws if a
-				# directory attempted to be removed is not empty).
-				dir = archive_dir
-				while dir != output_dir:
-					os.rmdir(dir)
-					dir = os.path.dirname(dir)
+			    # Remove archived files
+			    os.unlink(file)
+			    # Remove empty directories (note this throws if a
+			    # directory attempted to be removed is not empty).
+			    dir = archive_dir
+			    while dir != output_dir:
+			        os.rmdir(dir)
+				dir = os.path.dirname(dir)
 			except:
-				pass
+			    pass
 
 		My_DB_Class.deleteMany(My_DB_Class.q.timestamp <= time_limit)
-	except Exception, ex:
+	    except Exception, ex:
 		print 'Failed to clear table: ' + str(ex)
 	        traceback.print_exc()
 	finally:
