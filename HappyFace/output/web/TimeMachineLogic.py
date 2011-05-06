@@ -30,14 +30,14 @@ class TimeMachineLogic(object):
 	    $historyview = "true";
 	
 	    # build timestamp array
-	    $ta = date_parse($_GET["date"] . " " . $_GET["time"]);
+	    $ta = strtotime($_GET["date"] . " " . $_GET["time"]);
 
 	    # check if date / time input has the right format
 	    # if the input is ok, define new $timestamp variable for the SQL queries
-	    if ($ta["error_count"] == 0 && checkdate($ta["month"],$ta["day"],$ta["year"]) == 1 ) {
+	    if ($ta !== false && $ta !== -1) {
 		$date_string = $_GET["date"];
 		$time_string = $_GET["time"];
-		$timestamp = mktime( $ta["hour"],$ta["minute"],0,$ta["month"],$ta["day"],$ta["year"] );
+		$timestamp = $ta;
 
 		# for future inputs, print error message and go back to current server time
 		if ($timestamp - $server_time > 0) {
