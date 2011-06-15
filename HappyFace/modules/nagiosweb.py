@@ -152,7 +152,7 @@ class nagiosweb(ModuleBase, ModuleHelper):
             $tableall = '""" + self.htmlMessage('There are no services.', 'error') + """';
 
         if($tableofflinecount == 0)
-            $tableall = '""" + self.htmlMessage('All services are ok.', 'ok') + """';
+            $tableoffline = '""" + self.htmlMessage('All services are ok.', 'ok') + """';
         else
             $tableoffline .= '""" + self.htmlMessage('\'.$tableofflinecount.\' services are not ok.', 'warning') + """';
         

@@ -1,17 +1,18 @@
 from ModuleBase import *
+from ModuleHelper import *
 from lxml import etree as ET
 
 
-class dcache_info_pool_space_token(ModuleBase):
+class dcache_info_pool_space_token(ModuleBase, ModuleHelper):
 
     def __init__(self,module_options):
 
         # inherits from the ModuleBase Class
         ModuleBase.__init__(self,module_options)
 	
-	self.dcache_poolinfo_xml = self.configService.get('downloadservice', 'dcache_poolinfo_xml')
-	self.disks               = eval('%s' % self.configService.get('setup', 'spacetokens'))
-	self.unit                = self.configService.get('setup','unit')
+        self.dcache_poolinfo_xml = self.configService.get('downloadservice', 'dcache_poolinfo_xml')
+        self.disks               = eval('%s' % self.configService.get('setup', 'spacetokens'))
+        self.unit                = self.configService.get('setup','unit')
 
         try:
             self.global_warning = float(self.configService.get('setup', 'global_warning'))
@@ -38,23 +39,25 @@ class dcache_info_pool_space_token(ModuleBase):
             self.local_critical = 5
 
 
-	self.total_size = 0
-	self.free_size = 0
-	self.used = 0
-	self.fromByteToUnit = 0
+        self.total_size = 0
+        self.free_size = 0
+        self.used = 0
+        self.fromByteToUnit = 0
         
-	self.db_keys["message"] = StringCol()
-	self.db_values["message"] = ''
-	
+        self.db_keys["message"] = StringCol()
+        self.db_values["message"] = ''
+        
     def run(self):
-	    
-	if self.unit == 'GiB':
+        
+        content = '\n'.join(self.fetchDownload('dcache_poolinfo_xml'))
+        
+        if self.unit == 'GiB':
             self.fromByteToUnit = 1024*1024*1024
         elif self.unit == 'TiB':
             self.fromByteToUnit = 1024*1024*1024*1024
         elif self.unit == 'PiB':
             self.fromByteToUnit = 1024*1024*1024*1024*1024
-	if self.unit == 'GB':
+        if self.unit == 'GB':
             self.fromByteToUnit = 1000*1000*1000
         elif self.unit == 'TB':
             self.fromByteToUnit = 1000*1000*1000*1000
@@ -65,15 +68,15 @@ class dcache_info_pool_space_token(ModuleBase):
             self.unit = 'GB'
             self.fromByteToUnit = 1000*1000*1000
 	
-	try:
-            result, status = parse_xml(self.dcache_poolinfo_xml, self.disks, self.unit, self.fromByteToUnit, self.global_warning, self.global_critical, self.local_warning, self.local_critical)
+        try:
+            result, status = parse_xml(content, self.disks, self.unit, self.fromByteToUnit, self.global_warning, self.global_critical, self.local_warning, self.local_critical)
             
             self.status = status
             if status == -1:
                 self.error_message += result
             else:
                 self.db_values["message"] = result
-    	except:
+        except:
             self.error_message += "Error parsing html data: %s\n" % str(self.dcache_poolinfo_xml)
             self.status = -1;
             
@@ -81,12 +84,12 @@ class dcache_info_pool_space_token(ModuleBase):
 	
         module_content = '<?php  echo $data["message"]  ?>'
         
-	return self.PHPOutput(module_content)
+        return self.PHPOutput(module_content)
 
 
 # helper function
-def parse_xml(url, disks, unit, fromByteToUnit, global_warning, global_critical, local_warning, local_critical):
-    eTree = ET.parse(url)
+def parse_xml(content, disks, unit, fromByteToUnit, global_warning, global_critical, local_warning, local_critical):
+    eTree = ET.fromstring(content)
     status = 1.0
 
     result = '<table class="TableData">\n'
