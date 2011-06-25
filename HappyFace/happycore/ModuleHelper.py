@@ -573,8 +573,12 @@ class SearchElement(HTMLParser):
 
         # if already found beginning of this tag
         if (self.foundTag != '') and (tag == self.foundTag):
-            # .. remember depth
-            self.tagDepth += 1
+            if(tag == 'p'):
+                # p-tags are often not closed. next p tag closes the one before
+                self.handle_endtag(tag)
+            else:
+                # .. remember depth
+                self.tagDepth += 1
 
         if self.foundTag != '':
             return
