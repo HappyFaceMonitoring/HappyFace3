@@ -4,7 +4,7 @@ import subprocess
 import os
 import re
 from threading import Thread
-
+import socket
 
 # class that performs an asynchronous ping
 class PingHost(Thread):
@@ -97,16 +97,25 @@ class NameHost(Thread):
             self.ip = ''
 
             # issue the host lookup
-            proc = subprocess.Popen(['host', self.host], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except:
-            self.name_status = 'fail'
-            self.name_long = self.host
-            self.ip = ''
+            self.result = socket.gethostbyaddr(self.host)
+            self.ip = self.result[2][0]
+            self.name_long = self.result[0]
+            self.name_status = 'ok'
             return
+        except:
+            try:
+                # sometimes socket.gethostbyaddr will not resolve
+                # then, we fall back to the slow method: starting host command
+		              proc = subprocess.Popen(['host', self.host], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            except:
+                self.name_status = 'fail'
+                self.name_long = self.host
+                self.ip = ''
+                return
 
         # fet the output of the process
         proc_out = proc.stdout.read().strip()
-        #proc_err = proc.stderr.read().strip()
+        proc_err = proc.stderr.read().strip()
 
         # ... and retrieve relevant information form the output
         match = re.search('is an alias for (.*).', proc_out)

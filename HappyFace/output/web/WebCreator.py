@@ -109,7 +109,7 @@ class WebCreator(object):
 	output += ' </head>' + "\n"
 	
 	# body
-	output += ' <body onload="javascript:HappyReload(300)">' + "\n"
+	output += ' <body onload="javascript:HappyReload(300);HappyChangedDisplayWidth();">' + "\n"
 
 	# logic to memorize selected tab on auto reload part 1
 	output += """<?php
@@ -199,7 +199,7 @@ class WebCreator(object):
 	output += '  <div id="HappyPanels1" class="HappyPanels">' + "\n"
 
 	# input navigation
-	output += '   <ul class="HappyPanelsTabGroup">' + "\n"
+	output += '   <ul class="HappyPanelsTabGroup" id="HappyPanelsTabs">' + "\n"
 	output += navigation
 	output += '   </ul>' + "\n"
 

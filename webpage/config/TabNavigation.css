@@ -35,6 +35,7 @@
 	border-left: solid 1px #999;
 	border-right: solid 0px #999;
 	border-bottom: solid 1px #999;
+	background-color: white;
 }
 
 /* Container for the each tab button */
@@ -42,12 +43,12 @@
 	position: relative;
 	float: left;
 	padding: 4px 10px;
-	margin: 0px 0px 0px 0px;
+	margin: 0px 0px -1px 0px;
 	font: bold 0.7em sans-serif;
 	background-color: #DDD;
 	list-style: none;
 	border-left: solid 0px #CCC;
-	border-bottom: solid 0px #999;
+	border-bottom: solid 1px #999;
 	border-top: solid 1px #999;
 	border-right: solid 1px #999;
 	cursor: pointer;
@@ -62,7 +63,7 @@
 /* Look & feel of the selected tab button */
 .HappyPanelsTabSelected {
 	background-color: #FFFFFF;
-	border-bottom: 0px solid #FFF;
+	border-bottom: 1px solid #FFF;
 }
 
 /* Look & feel of links within the tab button */
@@ -110,6 +111,7 @@
 	border-right: solid 0px #999;
 	border-bottom: solid 0px #999;
 	border-top: solid 0px #999;
+	overflow: hidden;
 }
 .HappyTitleBarElement {
 	float: left;
@@ -133,6 +135,18 @@
 .HappyTitleBarElementTable td {
 	vertical-align: middle;
 	padding: 0px;
+}
+
+.HappyTitleBarElement input[type="submit"], .HappyTitleBarElement button {
+ background-color: #8c8c8c;
+ border: 1px solid #adadad;
+ padding: 2px 4px;;
+}
+
+.HappyTitleBarElement input[type="text"] {
+ background-color: white;
+ border: 1px solid #adadad;
+ padding: 2px;
 }
 
 .HappyTitleBarForm {

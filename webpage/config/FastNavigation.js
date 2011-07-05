@@ -91,9 +91,9 @@ function getFNSize(fn_id) {
 	var browser = getBrowser();
 	
 	if (browser == "IE7" | browser == "IE8") {
-		var fnSize=document.documentElement.clientHeight-150;
+		var fnSize=document.documentElement.clientHeight-document.getElementById(fn_id).offsetTop-20;
 	} else {	
-		var fnSize=window.innerHeight-150;
+		var fnSize=window.innerHeight-document.getElementById(fn_id).offsetTop-20;
 	}
 
 	/* Set a minimum size for the FastNav bar */

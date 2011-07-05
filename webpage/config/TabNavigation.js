@@ -414,3 +414,40 @@ function HappyCertInfo(task) {
 		document.getElementById('HappyCertInfoDiv').style.visibility="hidden";
 	}
 }
+
+
+// helper function, it returns all elements with the given className
+function getElementsByClassName(className, tag, elm){
+	var testClass = new RegExp("(^|\\s)" + className + "(\\s|$)");
+	var tag = tag || "*";
+	var elm = elm || document;
+	var elements = (tag == "*" && elm.all)? elm.all : elm.getElementsByTagName(tag);
+	var returnElements = [];
+	var current;
+	var length = elements.length;
+	for(var i=0; i<length; i++){
+		current = elements[i];
+		if(testClass.test(current.className)){
+			returnElements.push(current);
+		}
+	}
+	return returnElements;
+}
+ 
+
+// handle the movement of the content if the width of the window
+// gets so small, that the navigation becomes multilined
+function HappyChangedDisplayWidth() {
+		
+		document.getElementById('HappyPanelsContentGroup').style.top = ((parseInt (document.getElementById('HappyPanelsTabs').clientHeight))-100)+'px';
+				
+		fastnavigations = getElementsByClassName('HappyFNnav')
+		for( var k=0; k<fastnavigations.length; k++ ) {
+			fastnavigations[k].style.marginTop = ((parseInt (document.getElementById('HappyPanelsTabs').clientHeight))-100)+'px';;
+			getFNSize(fastnavigations[k].id)
+		}
+}
+
+
+// always check for changed navigation height
+window.onresize = HappyChangedDisplayWidth;

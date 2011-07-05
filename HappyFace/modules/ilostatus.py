@@ -89,7 +89,7 @@ class ilostatus(ModuleBase, ModuleHelper):
             
             # to avoid starting to many pings at the same time,
             # we take a short break
-            time.sleep(0.08)
+            time.sleep(0.10)
             
         for e in self.enclosures:
             enc = self.enclosures[e]
@@ -107,7 +107,7 @@ class ilostatus(ModuleBase, ModuleHelper):
 
             # to avoid starting to many pings at the same time,
             # we take a short break
-            time.sleep(0.08)
+            time.sleep(0.10)
 
         # wait for all pings and namings to finish
         time.sleep(8)

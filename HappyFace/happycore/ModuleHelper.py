@@ -524,7 +524,7 @@ Show <select onchange="javascript: """
 
         return ret
 
-    def rawDataPHP(self, phpvar_from, phpvar_to, phpvar_keys = '$_keys'):
+    def rawDataPHP(self, phpvar_from, phpvar_to, phpvar_keys = '$_keys', name_key = 'name_short'):
 
         return """
         """ + phpvar_to + """ = '
@@ -534,7 +534,7 @@ Show <select onchange="javascript: """
         foreach (""" + phpvar_from + """ as $_entry)
         {
             """ + phpvar_to + """ .= '
-<b>'.$_entry['name_short'].'</b>
+<b>'.$_entry['""" + name_key + """'].'</b>
 ';
             foreach ($_entry as $_key => $_value)
             {

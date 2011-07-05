@@ -131,9 +131,9 @@ class hwpingtest(ModuleBase, ModuleHelper):
             # to avoid starting to many pings at the same time,
             # we take a short break
             if self.fastpings:
-                time.sleep(0.02)
+                time.sleep(0.03)
             else:
-                time.sleep(0.06)
+                time.sleep(0.08)
 
             stat += 1
             self.printstatusbar(stat/maxstat)
