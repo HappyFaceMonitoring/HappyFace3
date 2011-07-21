@@ -4,6 +4,7 @@
 import sys, os
 import traceback
 from time import time, localtime, mktime
+from stat import *
 import signal
 import thread
 import ConfigParser
@@ -93,15 +94,42 @@ def HappyFace():
 
             signal.signal(signal.SIGTERM, signal_handler)
             signal.signal(signal.SIGINT, signal_handler)
-
+            psid=os.getpid()
+            print "Current HappyFace process-id: ",psid
             # Check for lockfile existence
             try:
-	        os.close(os.open(lockfile, os.O_CREAT | os.O_EXCL))
+                ifile=os.open(lockfile, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+                os.write(ifile,str(psid)+"\n")
+                os.close(ifile)
 	    except:
-                sys.stdout.write('Lock file exists. Is there another HappyFace instance running? Aborting ...\n')
-	        # Prevent outer try block from removing the lock file
-	        lockfile = ''
-	        sys.exit(-1)
+                sys.stdout.write('Lock file exists. Checking age ...\n')
+                # Prevent outer try block from removing the lock file 
+                age=os.stat(lockfile)[ST_CTIME]
+                timestamp = int(mktime(localtime()))
+                diff=timestamp-age
+                print "Lockfile age: ",diff,"s"
+                maxAge=60*5;
+                if (diff>maxAge):
+                    print "Lock file older than ",maxAge," checking if process still exist..."
+                    try:
+                        rfile=open(lockfile,'r')
+                        opid=rfile.readline()
+                        print "Original Happyface: ",opid
+                        dingens=os.getpgid(int(opid))
+                        print "Original HF process still running, exiting..."
+                    except:
+                        print "Old HF process does not exist anymore. Removing lockfile..."
+                        os.remove(lockfile)
+                        lockfile = ''
+                        sys.exit(-1)
+                    print "Old HF process still running. Exiting here..."
+                    lockfile = ''
+                    sys.exit(-1)
+                else:
+                    print "Lockfile not older than ",maxAge,"s letting other HF instance relax..."
+                    # Prevent outer try block from removing the lock file
+                    lockfile = ''
+                    sys.exit(-1)
 
             # try to initiate / create the database
             database = output_dir + "/HappyFace.db"
