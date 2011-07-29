@@ -4,7 +4,7 @@ import os
 import sys
 import re
 import subprocess
-
+import time
 
 class LogMessages(ModuleBase):
 
@@ -21,6 +21,8 @@ class LogMessages(ModuleBase):
         self.rules = []
         rulecount = 1
         cont = True
+
+        self.setDEFAULTconfig()
 
         while cont:
             # go on reading until rule does not exist
@@ -462,3 +464,12 @@ class LogMessages(ModuleBase):
         # a hidden table
 
         return self.PHPOutput(module_content)
+
+    def setDEFAULTconfig(self):
+        # add current date to config file
+        localtime = time.localtime(time.time())
+        self.configService.set('DEFAULT','_DAY',localtime[2])
+        self.configService.set('DEFAULT','_YEAR',localtime[0])
+        self.configService.set('DEFAULT','_MONTH',localtime[1])
+        month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        self.configService.set('DEFAULT','_MONTHalpha',month[localtime[1]-1])
