@@ -105,9 +105,11 @@ class AccessCheckGenerator(object):
 	phpFuncCheckAccess+= "    if (is_null($accessMod)) { return true; }"
 	phpFuncCheckAccess+= "    if (!array_key_exists($moduleName, $accessMod)) { return true; }"
         phpFuncCheckAccess+= "    if (in_array(array('*', '*'), $accessMod[$moduleName])) { return true; }"
+        phpFuncCheckAccess+= "    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {"
         phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], $_SERVER['SSL_CLIENT_I_DN']), $accessMod[$moduleName])) return true;"
         phpFuncCheckAccess+= "    if (in_array(array('*', $_SERVER['SSL_CLIENT_I_DN']), $accessMod[$moduleName])) return true;"
         phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], '*'), $accessMod[$moduleName])) return true;"
+        phpFuncCheckAccess+= '    }'
         phpFuncCheckAccess+= '    return false;'
         phpFuncCheckAccess+= '}'
         # php function that checks if a category is accessible
@@ -116,9 +118,11 @@ class AccessCheckGenerator(object):
         phpFuncCheckAccess+= '    global $accessSect;'
 	phpFuncCheckAccess+= "    if (!array_key_exists($categoryName, $accessSect)) { return true; }"
         phpFuncCheckAccess+= "    if (in_array(array('*', '*'), $accessSect[$categoryName])) { return true; }"
+        phpFuncCheckAccess+= "    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {"
         phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], $_SERVER['SSL_CLIENT_I_DN']), $accessSect[$categoryName])) return true;"
         phpFuncCheckAccess+= "    if (in_array(array('*', $_SERVER['SSL_CLIENT_I_DN']), $accessSect[$categoryName])) return true;"
         phpFuncCheckAccess+= "    if (in_array(array($_SERVER['SSL_CLIENT_S_DN'], '*'), $accessSect[$categoryName])) return true;"
+        phpFuncCheckAccess+= '    }'
         phpFuncCheckAccess+= '    return false;'
         phpFuncCheckAccess+= '}'
         phpFuncCheckAccess+= ' ?>'
