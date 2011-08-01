@@ -105,7 +105,7 @@ class nagiosweb(ModuleBase, ModuleHelper):
         """ + self.unpackArrayPHP('$data["nagios_list"]', '$services', '$keys') + """
 
         // create raw view from $services
-        """ + self.rawDataPHP('$services', '$div_raw') + """
+        """ + self.rawDataPHP('$services', '$div_raw', '$_keys', 'service_name') + """
 
         // create table views from $services
         // sort first
