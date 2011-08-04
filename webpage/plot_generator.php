@@ -23,16 +23,51 @@ function verify_column_name($name)
   return $name;
 }
 
+// use presets for get-data
 $timestamp_var = 'timestamp';
+$module = '';
+$subtable = '';
+$constraint = '';
+$squash = 0;
+$renormalize = '';
+$legend = '';
+$variables = '';
+
+// now insert actuall,verified get-data if available
 if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
 	$timestamp_var = verify_column_name($_GET['timestamp_var']);
 
-print_plot_timerange_selection($_GET['module'], $_GET['subtable'], $_GET['timestamp_var'], $_GET['constraint'], $_GET['squash'], $_GET['renormalize'], $_GET['legend'], null, $_GET['variables'], $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false);
+if(isset($_GET['module']) && $_GET['module'] != '')
+    $module = verify_column_name($_GET['module']);
+
+$module_table = verify_column_name($_GET['module'] . '_table');
+if(isset($_GET['subtable']) && $_GET['subtable'] != '')
+    $module_table = verify_column_name($_GET['subtable']);
+
+if(isset($_GET['constraint']) && $_GET['constraint'] != '')
+    $constraint = $_GET['constraint'];
+
+if(isset($_GET['renormalize']) && $_GET['renormalize'] != '')
+    $renormalize = $_GET['renormalize'];
+
+if(isset($_GET['legend']) && $_GET['legend'] != '')
+    $legend = $_GET['legend'];
+
+if(isset($_GET['variables']))
+    $variables = $_GET['variables'];
 
 if(isset($_GET['squash']) && intval($_GET['squash']) != 0)
-  $variables = array($_GET['variables']);
+{
+    $squash = intval($_GET['squash']);
+}
+
+print_plot_timerange_selection($module, $module_table, $timestamp_var, $constraint, $squash, $renormalize, $legend, null, $variables, $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false);
+
+# create the variables array just now, the previous function call expects the raw string
+if($squash != 0)
+    $variables = array($variables);
 else
-  $variables = explode(',', $_GET['variables']);
+    $variables = explode(',', $variables);
 
 foreach($variables as $variable)
 {
@@ -51,9 +86,6 @@ if($variable == "status")
 	// Show statistics for status
 	$dbh = new PDO("sqlite:HappyFace.db");
 
-	$module_table = verify_column_name($_GET['module'] . '_table');
-	if(isset($_GET['subtable']) && $_GET['subtable'] != '')
-		$module_table = verify_column_name($_GET['subtable']);
 
 	$stmt = $dbh->prepare("SELECT DISTINCT $timestamp_var,status FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end ORDER BY $timestamp_var");
 	$stmt->bindParam(':timestamp_begin', $timestamp0);
