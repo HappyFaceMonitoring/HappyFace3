@@ -216,7 +216,7 @@ include('evalmath.class.php');
 
        $serie = 'Serie' . $variable . '_' . $constraint_string;
        $series[] = $serie;
-       $DataSet->AddPoint($datapoints, $serie);
+       @$DataSet->AddPoint($datapoints, $serie);
        $DataSet->AddSerie($serie);
 
        if(count($constraint_vars) > 0 && count($variables) > 1)
@@ -230,8 +230,8 @@ include('evalmath.class.php');
        $DataSet->SetSerieName($name, $serie);
      }
    }
- 
-   $DataSet->AddPoint($array["timestamps"],"SerieTime");
+
+   @$DataSet->AddPoint($array["timestamps"],"SerieTime");
    $DataSet->SetAbsciseLabelSerie("SerieTime");
 
    if(count($variables) <= 1)
@@ -255,6 +255,9 @@ include('evalmath.class.php');
    $gright = 890;
    $gtop = 30;
    $gbottom = 250;
+
+    // preset value, it might not be set later! ... and preset NOT to 0
+    $LegendHeight = 16;
 
    $Test->setFontProperties("config/pChart/Fonts/tahoma.ttf",10);
    $LegendLimit = count($series);
@@ -405,7 +408,7 @@ include('evalmath.class.php');
      $Test->setFixedScale(-0.00, 1.00);
 
    // show Grid if there are less than 48 timestamps
-   $Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,0,0,0,TRUE,90,2,TRUE,$scale_factor);
+   @$Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_START0,0,0,0,TRUE,90,2,TRUE,$scale_factor);
    if(count($array["timestamps"]) < 48) $Test->drawGrid(4,FALSE, 220, 220, 220);
    // Don't use drawGraphArea because this chooses strange colors
    $Test->drawLine($gleft, 30, $gright, 30, 0,0,0);
