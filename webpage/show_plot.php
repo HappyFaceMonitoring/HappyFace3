@@ -58,7 +58,7 @@ include('evalmath.class.php');
 
  $renormalize = isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0;
  $extra_title = '';
- if(isset($_GET['extra_title']))
+ if(isset($_GET['extra_title']) and $_GET['extra_title'] != '')
    $extra_title = ',  '.$_GET['extra_title'];
 
  # Get timestamp variable to show
