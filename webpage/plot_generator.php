@@ -32,6 +32,7 @@ $squash = 0;
 $renormalize = '';
 $legend = '';
 $variables = '';
+$extra_title = '';
 
 // now insert actuall,verified get-data if available
 if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
@@ -56,12 +57,15 @@ if(isset($_GET['legend']) && $_GET['legend'] != '')
 if(isset($_GET['variables']))
     $variables = $_GET['variables'];
 
+if(isset($_GET['extra_title']))
+    $extra_title = $_GET['extra_title'];
+
 if(isset($_GET['squash']) && intval($_GET['squash']) != 0)
 {
     $squash = intval($_GET['squash']);
 }
 
-print_plot_timerange_selection($module, $module_table, $timestamp_var, $constraint, $squash, $renormalize, $legend, null, $variables, $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false);
+print_plot_timerange_selection($module, $module_table, $timestamp_var, $constraint, $squash, $renormalize, $legend, null, $variables, $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false, $extra_title);
 
 # create the variables array just now, the previous function call expects the raw string
 if($squash != 0)
@@ -77,7 +81,7 @@ foreach($variables as $variable)
 if(isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0)
 	echo '<p><strong>Trend Plot:</strong> Note that individual variables have been scaled so that they fit into [0,1] on this plot.</p>';
 ?>
-			<p><img border="0" alt="<?php echo htmlentities($variable); ?> plot" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities(str_replace('+', '%2B', $variable)); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timerange=<?php echo htmlentities($_GET["timerange"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>&renormalize=<?php echo htmlentities($_GET['renormalize']); ?>&legend=<?php echo htmlentities($_GET['legend']); ?>" /></p>
+			<p><img border="0" alt="<?php echo htmlentities($variable); ?> plot" src="show_plot.php?module=<?php echo htmlentities($_GET["module"]); ?>&subtable=<?php echo htmlentities($_GET["subtable"]); ?>&variables=<?php echo htmlentities(str_replace('+', '%2B', $variable)); ?>&date0=<?php echo htmlentities($_GET["date0"]); ?>&time0=<?php echo htmlentities($_GET["time0"]); ?>&date1=<?php echo htmlentities($_GET["date1"]); ?>&time1=<?php echo htmlentities($_GET["time1"]); ?>&timerange=<?php echo htmlentities($_GET["timerange"]); ?>&timestamp_var=<?php echo htmlentities($timestamp_var); ?>&constraint=<?php echo htmlentities($_GET['constraint']); ?>&renormalize=<?php echo htmlentities($_GET['renormalize']); ?>&legend=<?php echo htmlentities($_GET['legend']);?>&extra_title=<?php echo htmlentities($extra_title); ?>" /></p>
 
 <?php
 

@@ -57,6 +57,9 @@ include('evalmath.class.php');
  }
 
  $renormalize = isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0;
+ $extra_title = '';
+ if(isset($_GET['extra_title']))
+   $extra_title = ',  '.$_GET['extra_title'];
 
  # Get timestamp variable to show
  $timestamp_var = 'timestamp';
@@ -70,35 +73,39 @@ include('evalmath.class.php');
  $where_clause = "";
  $constraint_vars = array();
  $constraint_values = array();
+ $constraint_direct_values = array();
  if(isset($_GET['constraint']) && $_GET['constraint'] != '')
  {
-   $comp = explode('=', $_GET['constraint'], 2);
-   if(count($comp) == 2 && $comp[1] != '')
-   {
-     $constraint_var = verify_column_name($comp[0]);
-     $comp = explode(',', $comp[1]);
+    foreach(explode(';', $_GET['constraint']) as $constraint)
+    {
+        $comp = explode('=', $constraint, 2);
+        if(count($comp) == 2 && $comp[1] != '')
+        {
+            $constraint_var = verify_column_name($comp[0]);
+            $comp = explode(',', $comp[1]);
 
-     // If constraint is on one column only then just select it via a WHERE clause
-     // Otherwise exclude manually later.
-     if(count($comp) == 1)
-     {
-       $constraint_value = $comp[0];
-       $where_clause = "AND $constraint_var = :constraint_value";
-     }
-     else
-     {
-       $constraint_vars[] = $constraint_var;
-       $constraint_values[$constraint_var] = $comp; // constrain this var to the given values
-     }
-   }
-   else
-   {
-     // make a separate plot for each value of this var but don't constrain
-     if(count($comp) == 2)
-       $constraint_vars[] = verify_column_name($comp[0]);
-     else
-       $constraint_vars[] = verify_column_name($_GET['constraint']);
-   }
+            // If constraint is on one column only then just select it via a WHERE clause
+            // Otherwise exclude manually later.
+            if(count($comp) == 1)
+            {
+            $constraint_direct_values[] = $comp[0];
+            $where_clause = $where_clause."AND $constraint_var = :constraint_value".count($constraint_direct_values)." ";
+            }
+            else
+            {
+            $constraint_vars[] = $constraint_var;
+            $constraint_values[$constraint_var] = $comp; // constrain this var to the given values
+            }
+        }
+        else
+        {
+            // make a separate plot for each value of this var but don't constrain
+            if(count($comp) == 2)
+            $constraint_vars[] = verify_column_name($comp[0]);
+            else
+            $constraint_vars[] = verify_column_name($constraint);
+        }
+    }
  }
 
  # Get variables to plot
@@ -117,8 +124,8 @@ include('evalmath.class.php');
  $stmt = $dbh->prepare("SELECT * FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end $where_clause ORDER BY $timestamp_var");
  $stmt->bindParam(':timestamp_begin', $timestamp0);
  $stmt->bindParam(':timestamp_end', $timestamp1);
- if(isset($constraint_value))
-   $stmt->bindParam(':constraint_value', $constraint_value);
+ for($i=0; $i < count($constraint_direct_values); $i++)
+   $stmt->bindParam(':constraint_value'.($i+1), $constraint_direct_values[$i]);
 
  # create empty arrays 
  $array["values"] = array();
@@ -131,11 +138,11 @@ include('evalmath.class.php');
  $avail_columns = array();
  for($i = 0; $i < $stmt->columnCount(); ++$i)
  {
-   $meta = $stmt->getColumnMeta($i);
+     $meta = $stmt->getColumnMeta($i);
    if($meta['native_type'] == 'integer' || $meta['native_type'] == 'float' || $meta['native_type'] == 'double')
      $avail_columns[] = $meta['name'];
  }
-
+ 
  $meval = new EvalMath;
  $meval->suppress_errors = true;
  while($data = $stmt->fetch())
@@ -494,7 +501,7 @@ include('evalmath.class.php');
    }
 
    // Finish the graph
-   $Test->drawTitle(60,22,"Module: " . $_GET["module"],50,50,50,585);
+   $Test->drawTitle(60,22,"Module: " . $_GET["module"] . $extra_title,50,50,50,585);
    $Test->Stroke("plot.png");
 
  } else {

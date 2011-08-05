@@ -46,7 +46,7 @@ function get_options_string($unit)
 // Prints a form to select a timerange and variable to plot
 // variable_list may be empty if $variables is set. if variable_list is given
 // then $variables should be a single variable only.
-function print_plot_timerange_selection($module, $subtable, $timestamp_var, $constraint, $squash, $renormalize, $legend, $variable_list, $variables, $timestamp_begin, $timestamp_end, $timestamp_now, $timestamp_timerange, $new_window)
+function print_plot_timerange_selection($module, $subtable, $timestamp_var, $constraint, $squash, $renormalize, $legend, $variable_list, $variables, $timestamp_begin, $timestamp_end, $timestamp_now, $timestamp_timerange, $new_window, $extra_title='')
 {
 	// Construct unit and variable selection widgets
 	$variables_arr = explode(',', $variables);
@@ -125,6 +125,7 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo '    <input type="hidden" name="subtable" value="' . htmlentities($subtable) . '" />';
 	echo '    <input type="hidden" name="timestamp_var" value="' . htmlentities($timestamp_var) . '" />';
 	echo '    <input type="hidden" name="constraint" value="' . htmlentities($constraint) . '" />';
+    echo '    <input type="hidden" name="extra_title" value="' . htmlentities($extra_title) . '" />';
 	echo '    <input type="hidden" name="squash" id="' . $module . '_plot_squash" value="' . htmlentities($squash) . '" />';
 	echo '    <input type="hidden" name="renormalize" id="' . $module . '_plot_renormalize" value="' . htmlentities($renormalize) . '" />';
 	echo '    <input type="hidden" name="variables" id="' . $module . '_plot_variables" value="' . htmlentities($variables) . '" />';
