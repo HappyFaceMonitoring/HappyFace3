@@ -149,15 +149,42 @@ class dCacheMoverInfo(ModuleBase):
         js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "job=" + job + ";pool=" + pool;')
         js.append('  document.getElementById("' + self.__module__ + '_extra_title").value = "Pool: " + pool + ",  Job: " + job;')
         js.append('}')
+       
+        js.append('''
+        // hide all pools from the table where the given job is not queueing
+        function '''+self.__module__ + '''_hide_pools_from_table(show_only_job)
+        {
+            var table = document.getElementById("'''+self.__module__ + '''_details_table").getElementsByTagName("tbody")[0];
+            var rows = table.rows;
+            var tag = "tag"+show_only_job;
+            
+            for(var i=0; rows[i]; i++)
+            {
+                if(rows[i].getAttribute("class").indexOf("TableHeader") != -1)
+                    continue;
+                if(show_only_job == "")
+                    rows[i].setAttribute("style", "");
+                else
+                {
+                    if(rows[i].getAttribute("class").indexOf(tag) == -1)
+                        rows[i].setAttribute("style", "display:none");
+                    else
+                        rows[i].setAttribute("style", "");
+                }
+            }
+        }
+        ''')
         js.append('</script>')
-
+        
         mc_overview_begin = []
         mc_overview_begin.append('<table class="TableData">')
+        mc_overview_begin.append('<tbody>')
         mc_overview_begin.append(' <tr class="TableHeader">')
         mc_overview_begin.append('  <th>Job</th>')
         mc_overview_begin.append('  <th>Active</th>')
         mc_overview_begin.append('  <th>Max</th>')
         mc_overview_begin.append('  <th>Queued</th>')
+        mc_overview_begin.append('  <th>Filter Pools</th>')
         mc_overview_begin.append(' </tr>')
         
         mc_overview_row = []
@@ -166,10 +193,18 @@ class dCacheMoverInfo(ModuleBase):
         mc_overview_row.append("  <td>'.$job['a'].'</td>")
         mc_overview_row.append("  <td>'.$job['m'].'</td>")
         mc_overview_row.append("  <td>'.$job['q'].'</td>")
+        mc_overview_row.append("  <td><input type=\"button\" name=\"filter_jobs\" value=\"only queueing '.$job['job'].'\" onclick=\"" + self.__module__ + "_hide_pools_from_table(\\''.$job['job'].'\\')\" /></td>")
         mc_overview_row.append(' </tr>')
         
         mc_overview_end = []
+        mc_overview_end.append('</tbody>')
+        mc_overview_end.append('<tfoot>')
+        mc_overview_end.append(" <tr>")
+        mc_overview_end.append("  <td colspan=\"4\"></td>")
+        mc_overview_end.append("  <td><input type=\"button\" name=\"all_jobs\" value=\"show all pools\" onclick=\"" + self.__module__ + "_hide_pools_from_table(\\'\\')\" /></td>")
+        mc_overview_end.append(' </tr>')
         mc_overview_end.append('</table>')
+        mc_overview_end.append('</tfoot>')
         mc_overview_end.append('<br />')
         
         mc_detailed_begin = []
@@ -211,7 +246,7 @@ class dCacheMoverInfo(ModuleBase):
         mc_detailed_begin.append('  </tr>')
 
         mc_detailed_head_row = []
-        mc_detailed_head_row.append(" <tr class=\"'.$jobStatus.'\">")
+        mc_detailed_head_row.append(" <tr class=\"'.$jobStatus.$queuedJobs.'\">")
         mc_detailed_head_row.append("  <td rowspan=\"'.$numJobs.'\" class=\"'.$poolStatus.'\">'.$detail['pool'].'</td>")
         mc_detailed_head_row.append("  <td>'.$detail['job'].'</td>")
         mc_detailed_head_row.append("  <td>'.$detail['active'].'</td>")
@@ -220,7 +255,7 @@ class dCacheMoverInfo(ModuleBase):
         mc_detailed_head_row.append("  <td><button onfocus=\"this.blur()\" onclick=\"" + self.__module__ + "_plot_button(\\''.$detail['pool'].'\\', \\''.$detail['job'].'\\')\">Plot</button></td>")
         mc_detailed_head_row.append(' </tr>')
         mc_detailed_row = []
-        mc_detailed_row.append(" <tr class=\"'.$jobStatus.'\">")
+        mc_detailed_row.append(" <tr class=\"'.$jobStatus.$queuedJobs.'\">")
         mc_detailed_row.append("  <td>'.$detail['job'].'</td>")
         mc_detailed_row.append("  <td>'.$detail['active'].'</td>")
         mc_detailed_row.append("  <td>'.$detail['max'].'</td>")
@@ -264,26 +299,51 @@ class dCacheMoverInfo(ModuleBase):
 
         print('""" + self.PHPArrayToString(mc_detailed_begin) + """');
         $prevPool = ''; // required for rowspan
-        foreach ($dbh->query($detailed_sqlquery) as $detail)
+        $cache = array(); // cache all job data per pool before processing them
+        $detailedData = $dbh->query($detailed_sqlquery)->fetchAll();
+        $detailedData[] = array('pool'=>'', 'job'=>'', 'active'=>0, 'max'=>0, 'queued'=>0, 'pool_queue'=>0); // add sentinel
+        $prevPool = $detailedData[0]['pool'];
+        foreach ($detailedData as $uncachedDetail)
         {
-            $jobStatus = 'ok';
-            if($detail['queued'] >= $data['critical_queue_threshold'])
-                $jobStatus = 'critical';
-            elseif($detail['queued'] > 0)
-                $jobStatus = 'warning';
-            if($prevPool == $detail['pool'])
-            
-                print('""" + self.PHPArrayToString(mc_detailed_row) + """'); 
-            else
+            if($prevPool != $uncachedDetail['pool'])
             {
-                $poolStatus = 'ok';
-                if($detail['pool_queue'] >= $data['critical_queue_threshold'])
-                    $poolStatus = 'critical';
-                elseif($detail['pool_queue'] > 0)
-                    $poolStatus = 'warning';
-                print('""" + self.PHPArrayToString(mc_detailed_head_row) + """'); 
-                $prevPool = $detail['pool'];
+                // captain, we got data. all your pools are belong to us
+                $prevPool = $uncachedDetail['pool'];
+                
+                // get all the pools jobs that have queued transfers
+                $queuedJobs = '';
+                foreach($cache as $detail)
+                {
+                    if($detail['queued'] > 0)
+                        $queuedJobs = $queuedJobs.' tag'.$detail['job'];
+                }
+                for($i = 0; $i < count($cache); $i++)
+                {
+                    $detail = $cache[$i];
+                    
+                    $jobStatus = 'ok';
+                    if($detail['queued'] >= $data['critical_queue_threshold'])
+                        $jobStatus = 'critical';
+                    elseif($detail['queued'] > 0)
+                        $jobStatus = 'warning';
+                    
+                    if($i == 0)
+                    {
+                        $poolStatus = 'ok';
+                        if($detail['pool_queue'] >= $data['critical_queue_threshold'])
+                            $poolStatus = 'critical';
+                        elseif($detail['pool_queue'] > 0)
+                            $poolStatus = 'warning';
+                        print('""" + self.PHPArrayToString(mc_detailed_head_row) + """');
+                    }
+                    else
+                        print('""" + self.PHPArrayToString(mc_detailed_row) + """'); 
+                }
+                
+                // clear cache for next pool
+                $cache = array();
             }
+            $cache[] = $uncachedDetail;
         }
         print('""" + self.PHPArrayToString(mc_detailed_end) + """');
 
