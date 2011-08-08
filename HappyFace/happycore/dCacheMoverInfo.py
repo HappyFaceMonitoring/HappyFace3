@@ -19,6 +19,8 @@ class dCacheMoverInfo(ModuleBase):
 
     def process(self):
         
+        self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest('queue_info_html')))
+        
         self.job_info_database = self.__module__ + '_job_info_database'
         self.db_values['job_info_database'] = self.job_info_database
         job_info_db_keys = {}
