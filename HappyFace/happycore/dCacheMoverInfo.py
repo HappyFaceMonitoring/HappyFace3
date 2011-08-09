@@ -157,6 +157,7 @@ class dCacheMoverInfo(ModuleBase):
             var table = document.getElementById("'''+self.__module__ + '''_details_table").getElementsByTagName("tbody")[0];
             var rows = table.rows;
             var tag = "tag"+show_only_job;
+            document.getElementById("''' + self.__module__+ '''_detailed").setAttribute("style", "");
             
             for(var i=0; rows[i]; i++)
             {
