@@ -10,6 +10,9 @@ class dCacheMoverInfo(ModuleBase):
         self.db_keys['job_info_database'] = StringCol()
         self.db_values['job_info_database'] = ''
         
+        self.db_keys['job_summary_database'] = StringCol()
+        self.db_values['job_summary_database'] = ''
+        
         self.watch_jobs = self.configService.get('setup', 'watch_jobs').split(',')
         
         self.critical_queue_threshold = self.configService.get('setup', 'critical_queue_threshold')
@@ -32,6 +35,16 @@ class dCacheMoverInfo(ModuleBase):
         job_info_db_keys['queued'] = IntCol()
         
         job_info_table = self.table_init(self.job_info_database, job_info_db_keys)
+        
+        self.job_summary_database = self.__module__ + '_job_summary_database'
+        self.db_values['job_summary_database'] = self.job_summary_database
+        job_summary_db_keys = {}
+        job_summary_db_keys['job'] = StringCol()
+        job_summary_db_keys['active'] = IntCol()
+        job_summary_db_keys['max'] = IntCol()
+        job_summary_db_keys['queued'] = IntCol()
+        
+        job_summary_table = self.table_init(self.job_summary_database, job_summary_db_keys)
         
         class TableRowExtractor(HTMLParser.HTMLParser):
             '''
@@ -110,10 +123,13 @@ class dCacheMoverInfo(ModuleBase):
         num_queuing_pools = 0
         has_critical_queue = False
         
+        job_transfers_sum = {} # calculate sums over all pools
+        
         for pool,value in pool_list.iteritems():
             job_has_queue = False
             # Add all the job-values that interesst us to database as a new row per job
             for job in self.watch_jobs:
+                if not job in job_transfers_sum: job_transfers_sum[job] = [0, 0, 0]
                 job_info_db_values = {}
                 job_info_db_values['pool'] = pool
                 job_info_db_values['domain'] = value[0]
@@ -122,6 +138,10 @@ class dCacheMoverInfo(ModuleBase):
                 job_info_db_values['max'] = int(value[1][job][1])
                 job_info_db_values['queued'] = int(value[1][job][2])
                 job_info_db_value_list.append(job_info_db_values)
+                
+                job_transfers_sum[job][0] += job_info_db_values['active']
+                job_transfers_sum[job][1] += job_info_db_values['max']
+                job_transfers_sum[job][2] += job_info_db_values['queued']
 
                 if int(value[1][job][2]) > 0:
                     job_has_queue = True
@@ -137,6 +157,10 @@ class dCacheMoverInfo(ModuleBase):
                 
         self.table_fill_many(job_info_table, job_info_db_value_list)
         self.subtable_clear(job_info_table, [], self.holdback_time)
+        
+        job_summary_db_value_list = [{'job':job, 'active':v[0], 'max':v[1], 'queued':v[2]} for job,v in job_transfers_sum.iteritems()]
+        self.table_fill_many(job_summary_table, job_summary_db_value_list)
+        self.subtable_clear(job_summary_table, [], self.holdback_time)
 
 
 
@@ -148,6 +172,11 @@ class dCacheMoverInfo(ModuleBase):
         js.append('{')
         js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "job=" + job + ";pool=" + pool;')
         js.append('  document.getElementById("' + self.__module__ + '_extra_title").value = "Pool: " + pool + ",  Job: " + job;')
+        js.append('}')
+        js.append('function ' + self.__module__ + '_plot_summary_button(job)')
+        js.append('{')
+        js.append('  document.getElementById("' + self.__module__ + '_sum_constraint").value = "job=" + job')
+        js.append('  document.getElementById("' + self.__module__ + '_sum_extra_title").value = "Job: " + job;')
         js.append('}')
        
         js.append('''
@@ -178,6 +207,31 @@ class dCacheMoverInfo(ModuleBase):
         js.append('</script>')
         
         mc_overview_begin = []
+        mc_overview_begin.append('<form method="get" action="plot_generator.php" onsubmit="javascript:submitFormToWindow(this);">')
+        mc_overview_begin.append(  '<table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border: 1px #999 solid;">')
+        mc_overview_begin.append(  ' <tr>')
+        mc_overview_begin.append(  '  <td>Start:</td>')
+        mc_overview_begin.append(  '  <td>')
+        mc_overview_begin.append("""   <input name="date0" type="text" size="10" style="text-align:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
+        mc_overview_begin.append("""   <input name="time0" type="text" size="5" style="text-align:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
+        mc_overview_begin.append(  '  </td>')
+        mc_overview_begin.append(  '  <td>End:</td>')
+        mc_overview_begin.append(  '  <td>')
+        mc_overview_begin.append("""   <input name="date1" type="text" size="10" style="text-align:center;" value="' . $date_string . '" />""")
+        mc_overview_begin.append("""   <input name="time1" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />""")
+        mc_overview_begin.append(  '  </td>')
+        mc_overview_begin.append(  '  <td align="right">')
+        mc_overview_begin.append(  '   <input type="checkbox" name="renormalize" value="1" style="vertical-align: middle; margin: 0px;" />&nbsp;Show Trend plot')
+        mc_overview_begin.append(  '   <input type="hidden" name="module" value="'+ self.__module__ + '" />')
+        mc_overview_begin.append(  '   <input type="hidden" name="subtable" value="' + self.job_summary_database + '" />')
+        mc_overview_begin.append(  '   <input type="hidden" name="variables" value="active,max,queued" />')
+        mc_overview_begin.append(  '   <input type="hidden" name="squash" value="1" />')
+        mc_overview_begin.append(  '   <input type="hidden" name="legend" value="right" />')
+        mc_overview_begin.append(  '   <input type="hidden" id="'+self.__module__ + '_sum_constraint' + '" name="constraint" value="" />')
+        mc_overview_begin.append(  '   <input type="hidden" id="'+self.__module__ + '_sum_extra_title' + '" name="extra_title" value="" />')
+        mc_overview_begin.append(  '  </td>')
+        mc_overview_begin.append(  ' </tr>')
+        mc_overview_begin.append(  '</table>')
         mc_overview_begin.append('<table class="TableData">')
         mc_overview_begin.append('<tbody>')
         mc_overview_begin.append(' <tr class="TableHeader">')
@@ -185,15 +239,17 @@ class dCacheMoverInfo(ModuleBase):
         mc_overview_begin.append('  <th>Active</th>')
         mc_overview_begin.append('  <th>Max</th>')
         mc_overview_begin.append('  <th>Queued</th>')
+        mc_overview_begin.append('  <th>Plot</th>')
         mc_overview_begin.append('  <th>Filter Pools</th>')
         mc_overview_begin.append(' </tr>')
         
         mc_overview_row = []
         mc_overview_row.append(" <tr class=\"'.$jobStatus.'\">")
         mc_overview_row.append("  <td>'.$job['job'].'</td>")
-        mc_overview_row.append("  <td>'.$job['a'].'</td>")
-        mc_overview_row.append("  <td>'.$job['m'].'</td>")
-        mc_overview_row.append("  <td>'.$job['q'].'</td>")
+        mc_overview_row.append("  <td>'.$job['active'].'</td>")
+        mc_overview_row.append("  <td>'.$job['max'].'</td>")
+        mc_overview_row.append("  <td>'.$job['queued'].'</td>")
+        mc_overview_row.append("  <td><button onfocus=\"this.blur()\" onclick=\"" + self.__module__ + "_plot_summary_button(\\''.$job['job'].'\\')\">Plot</button></td>")
         mc_overview_row.append("  <td><input type=\"button\" name=\"filter_jobs\" value=\"only queueing '.$job['job'].'\" onclick=\"" + self.__module__ + "_hide_pools_from_table(\\''.$job['job'].'\\')\" /></td>")
         mc_overview_row.append(' </tr>')
         
@@ -201,11 +257,12 @@ class dCacheMoverInfo(ModuleBase):
         mc_overview_end.append('</tbody>')
         mc_overview_end.append('<tfoot>')
         mc_overview_end.append(" <tr>")
-        mc_overview_end.append("  <td colspan=\"4\"></td>")
+        mc_overview_end.append("  <td colspan=\"5\"></td>")
         mc_overview_end.append("  <td><input type=\"button\" name=\"all_jobs\" value=\"show all pools\" onclick=\"" + self.__module__ + "_hide_pools_from_table(\\'\\')\" /></td>")
         mc_overview_end.append(' </tr>')
-        mc_overview_end.append('</table>')
         mc_overview_end.append('</tfoot>')
+        mc_overview_end.append('</table>')
+        mc_overview_end.append('</form>')
         mc_overview_end.append('<br />')
         
         mc_detailed_begin = []
@@ -273,7 +330,7 @@ class dCacheMoverInfo(ModuleBase):
         
         print('""" + self.PHPArrayToString(js) + """');
         
-        $overview_sqlquery = "SELECT job, sum(`active`) as a, sum(`max`) as m, sum(`queued`) as q FROM " . $data["job_info_database"] . " WHERE timestamp = " . $data["timestamp"] . " GROUP BY job";
+        $overview_sqlquery = "SELECT job, `active`, `max`, `queued` FROM " . $data["job_summary_database"] . " WHERE timestamp = " . $data["timestamp"];
         $detailed_sqlquery = "SELECT db.pool, db.job, db.active, db.`max`, db.queued, sub.pool_queue
                 FROM " . $data["job_info_database"] . " db
                 INNER JOIN
@@ -288,9 +345,9 @@ class dCacheMoverInfo(ModuleBase):
         foreach ($dbh->query($overview_sqlquery) as $job)
         {
             $jobStatus = 'ok';
-            if($job['q'] >= $data['critical_queue_threshold'])
+            if($job['queued'] >= $data['critical_queue_threshold'])
                 $jobStatus = 'critical';
-            elseif($job['q'] > 0)
+            elseif($job['queued'] > 0)
                 $jobStatus = 'warning';
             print('""" + self.PHPArrayToString(mc_overview_row) + """');
             $numJobs += 1;
