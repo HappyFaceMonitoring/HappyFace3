@@ -38,13 +38,17 @@ class DBWrapper(object):
         # watch out for reserved SQL keywords in column names and prefix them
         # with an underscore if dbName is not set. See comment of reserved_names
         # for more info.
+        real_keys = {}
         for key in table_keys.iterkeys():
+            real_keys[key] = key
             if key in self.reserved_names and '_kw' in table_keys[key].__dict__:
                 try:
                     if len(table_keys[key].__dict__['_kw']['dbName']) == 0:
                         table_keys[key].__dict__['_kw']['dbName'] = '_'+key
+                        real_keys[key] = '_'+key
                 except:
                     table_keys[key].__dict__['_kw']['dbName'] = '_'+key
+                    real_keys[key] = '_'+key
             
         
         try: # separate try for finally block so we are compatible with Python 2.4
@@ -61,8 +65,7 @@ class DBWrapper(object):
                 avail_keys = []
                 for key in DBProxy.sqlmeta.columns.iterkeys():
                     avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
-                new_columns = dict( (key, col.dbName) for key,col in DBProxy.sqlmeta.columns.iteritems() if col.dbName not in avail_keys)
-
+                new_columns = dict( (key, real) for key,real in real_keys.iteritems() if real not in avail_keys)
                 if len(new_columns) > 0:
                     connection = sqlhub.processConnection
                     dbObject = connection.getConnection()
