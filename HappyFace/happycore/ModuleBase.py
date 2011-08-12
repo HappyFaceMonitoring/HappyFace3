@@ -2,6 +2,7 @@ import os, sys, re, time
 import traceback
 import ConfigParser
 import GetData
+import DBWrapper
 
 from HTMLOutput import *
 
@@ -14,9 +15,10 @@ from ConfigService import *
 # basic class for all test modules
 #########################################################
 class ModuleBase(Thread,DataBaseLock,HTMLOutput):
-
     def __init__(self, module_options):
 	HTMLOutput.__init__(self, 8)
+        
+        self.dbwrapper = DBWrapper.SelectedDBWrapper()
 
         # Configuration Service to read in all config parameters
         self.configService = ConfigService()
@@ -108,101 +110,17 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 
 
     def table_init(self,tableName,table_keys):
-
-	# timestamp will always be saved
-    	table_keys["timestamp"] = IntCol()
-
-	# create an index for the timestap column for faster access
-	table_keys["index"] = DatabaseIndex('timestamp')
-	
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
-	
-	try: # separate try for finally block so we are compatible with Python 2.4
-            try:
-	        class sqlmeta:
-	            table = tableName
-	            fromDatabase = True
-
-	        My_DB_Class = type(tableName, (SQLObject,), table_keys)
-	        My_DB_Class.createTable(ifNotExists=True)	
-
-	        DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
-
-	        avail_keys = []
-	        for key in DBProxy.sqlmeta.columns.keys():
-	            avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
-	    
-                new_columns = filter(lambda x: x not in avail_keys, table_keys.keys())
-
-                if len(new_columns) > 0:
-	            connection = sqlhub.processConnection
-                    dbObject = connection.getConnection()
-	            cursor = dbObject.cursor()
-
-	            for key in new_columns:
-                        if key != "index":
-	                    try:
-			        DBProxy.sqlmeta.addColumn(table_keys[key].__class__(key), changeSchema=False)
-
-			        # It is also possible to create the new column by setting changeSchema to True
-			        # above. However, this is VERY slow for large SQLite databases.
-			        # This is why we run an ALTER TABLE query manually here, which is
-			        # much faster (returns almost instantly).
-			        sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
-			        cursor.execute('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, key, sqlType))
-		            except Exception, ex: print "Failing at adding new column: \"" + str(key) + "\" in the module " + self.__module__ + ": " + str(ex)
-
-            except:
-	        My_DB_Class = type(tableName, (SQLObject,), table_keys)
-	        My_DB_Class.createTable(ifNotExists=True)
-	finally:
-	    # unlock the database access
-	    self.lock.release()
-	
-	return My_DB_Class
+        return self.dbwrapper.table_init(tableName, table_keys)
 
     def table_fill(self,My_DB_Class,table_values):
-	table_values["timestamp"] = self.timestamp
+        table_values["timestamp"] = self.timestamp
+        self.dbwrapper.table_fill(My_DB_Class, table_values)
 
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
-
-	try:
-	    My_DB_Class(**table_values)
-	finally:
-	    # unlock the database access
-	    self.lock.release()
-
-    # This should be used instead of table_fill if many rows are to be inserted
-    # since this is much faster than calling table_fill multiple times.
+    
     def table_fill_many(self, My_DB_Class, table_values):
-	# lock object enables exclusive access to the database
-	self.lock.acquire()
-
-	try:
-            for value in table_values:
-	        value['timestamp'] = self.timestamp
-
-            # Inserting using SQLObject is quite slow, so we use executemany
-	    # directly within a transaction which is faster by at least
-	    # a factor 10. See also this for a comparison between various APIs:
-	    # http://pyinsci.blogspot.com/2007/07/fastest-python-database-interface.html
-
-	    # TODO: I am not sure how sqlite-specific this code is, maybe
-	    # needs to be changed/adapted for other DBMSes if we switch one day.
-	    connection = sqlhub.processConnection
-            dbObject = connection.getConnection()
-	    cursor = dbObject.cursor()
-
-	    name = My_DB_Class.sqlmeta.table
-	    columns = My_DB_Class.sqlmeta.columns
-
-	    cursor.execute('BEGIN')
-	    cursor.executemany('INSERT INTO ' + name + '(' + ','.join(columns) + ') VALUES (' + ','.join(map(lambda x: ':'+x, columns)) + ')', table_values)
-	    cursor.execute('COMMIT')
-	finally:
-	    self.lock.release()
+        for value in table_values:
+            value['timestamp'] = self.timestamp
+        self.dbwrapper.table_fill_many(My_DB_Class, table_values)
 
     # This should be called by modules to set up their subtables for clearing
     # They can't call table_clear directly because they would otherwise exceed
@@ -212,61 +130,11 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
         self.clear_tables.append({'table_class': DB_Class, 'archive_columns': archive_columns, 'holdback_time': holdback_time})
 
     def table_clear(self, My_DB_Class, archive_columns, holdback_time):
-
-	if holdback_time == -1:
-	    return
-
-	time_limit = self.timestamp - 24 * 3600 * holdback_time
-
-	self.lock.acquire()
-
-	try: # separate try for finally block so we are compatible with Python 2.4
-            try:
-		old_data = My_DB_Class.select( My_DB_Class.q.timestamp <= time_limit)
-
-		for row in old_data:
-		    for column in archive_columns:
-		        file = getattr(row,column)
-
-			# If Download failed the column might be empty. We don't
-			# have anything to do in that case.
-			if file is None:
-			    break
-
-			# Find archive directory for this file
-			# TODO: This is a bit of a hack as we are not supposed to know
-			# anything about the archive directory structure... should find
-			# a better solution for this
-			timestamp = row.timestamp
-			time_tuple = time.localtime(timestamp)
-
-			output_dir = self.archive_dir
-			while os.path.basename(output_dir) != 'archive':
-			    output_dir = os.path.dirname(output_dir)
-
-			archive_dir = output_dir + "/" + str(time_tuple.tm_year) + "/" + ('%02d' % time_tuple.tm_mon) + "/" + ('%02d' % time_tuple.tm_mday) + "/" + str(timestamp)
-			file = archive_dir + '/' + file
-
-			try:
-			    # Remove archived files
-			    os.unlink(file)
-			    # Remove empty directories (note this throws if a
-			    # directory attempted to be removed is not empty).
-			    dir = archive_dir
-			    while dir != output_dir:
-			        os.rmdir(dir)
-				dir = os.path.dirname(dir)
-			except:
-			    pass
-
-		My_DB_Class.deleteMany(My_DB_Class.q.timestamp <= time_limit)
-	    except Exception, ex:
-		print 'Failed to clear table: ' + str(ex)
-	        traceback.print_exc()
-	finally:
-		self.lock.release()
-
-	print 'Table "' + My_DB_Class.sqlmeta.table + '" of module "' + self.__module__ + '" is cleared with a holdback time value of: ' + str(holdback_time) + ' days; clearing all data from before ' + time.strftime("%c", time.localtime(time_limit))
+        if holdback_time == -1:
+            return
+        time_limit = self.timestamp - 24 * 3600 * holdback_time
+        self.dbwrapper.table_clear(My_DB_Class, archive_columns, self.archive_dir, time_limit)
+        print 'Table "' + My_DB_Class.sqlmeta.table + '" of module "' + self.__module__ + '" is cleared with a holdback time value of: ' + str(holdback_time) + ' days; clearing all data from before ' + time.strftime("%c", time.localtime(time_limit))
 
     def processDB(self):
 

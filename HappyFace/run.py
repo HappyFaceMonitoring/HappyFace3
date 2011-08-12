@@ -8,6 +8,7 @@ from stat import *
 import signal
 import thread
 import ConfigParser
+import re
 
 # for SQL database functionality
 # has to be installed on the running system, 
@@ -21,6 +22,8 @@ sys.path.insert(0, os.path.expandvars('./modules/examples'))
 if os.path.exists('./local/modules'):
     sys.path.insert(0, os.path.expandvars('./local/modules'))
 sys.path.insert(0, os.path.expandvars('./output/web'))
+
+import DBWrapper
 
 # import output module, e.g. website creator
 from WebCreator import *
@@ -130,16 +133,26 @@ def HappyFace():
                     # Prevent outer try block from removing the lock file
                     lockfile = ''
                     sys.exit(-1)
+             
+            # get database wrapper
+            dbWrapperModule = __import__(config.get('setup', 'db_wrapper_module'))
+            DBWrapper.SelectedDBWrapper = dbWrapperModule.__dict__[config.get('setup', 'db_wrapper_class')]
 
             # try to initiate / create the database
-            database = output_dir + "/HappyFace.db"
+            connection_string = config.get('setup', 'db_connection')
+            # fetch special directory path
+            result = re.match(r'(\w+://)\./(.+)', connection_string)
+            if result is not None:
+                connection_string = result.group(1) + os.path.join(os.getcwd(), output_dir, result.group(2))
+            print connection_string
             try:
                 # has to be the full path
-                connection_string = 'sqlite:' + os.getcwd() + "/" + database
+                #connection_string = 'sqlite:' + os.getcwd() + "/" + database
+                #connection_string = 'postgres://postgres:katze123@localhost/happyface'
                 connection = connectionForURI(connection_string)
                 sqlhub.processConnection = connection
             except Exception, ex:
-                raise Exception('Could not initiate or create the database ' + os.getcwd() + "/" + database + ': ' + str(ex))
+                raise Exception('Could not initiate or create the database ' + connection_string + ': ' + str(ex))
 
             # definition of the global timeout
             timeout        =  int(config.get('setup','timeout_module'))
