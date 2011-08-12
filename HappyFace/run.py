@@ -144,11 +144,7 @@ def HappyFace():
             result = re.match(r'(\w+://)\./(.+)', connection_string)
             if result is not None:
                 connection_string = result.group(1) + os.path.join(os.getcwd(), output_dir, result.group(2))
-            print connection_string
             try:
-                # has to be the full path
-                #connection_string = 'sqlite:' + os.getcwd() + "/" + database
-                #connection_string = 'postgres://postgres:katze123@localhost/happyface'
                 connection = connectionForURI(connection_string)
                 sqlhub.processConnection = connection
             except Exception, ex:
