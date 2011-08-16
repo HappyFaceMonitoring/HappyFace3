@@ -330,8 +330,8 @@ class dCacheMoverInfo(ModuleBase):
         
         print('""" + self.PHPArrayToString(js) + """');
         
-        $overview_sqlquery = "SELECT job, `active`, `max`, `queued` FROM " . $data["job_summary_database"] . " WHERE timestamp = " . $data["timestamp"];
-        $detailed_sqlquery = "SELECT db.pool, db.job, db.active, db.`max`, db.queued, sub.pool_queue
+        $overview_sqlquery = "SELECT job, active, max, queued FROM " . $data["job_summary_database"] . " WHERE timestamp = " . $data["timestamp"];
+        $detailed_sqlquery = "SELECT db.pool, db.job, db.active, db.max, db.queued, sub.pool_queue
                 FROM " . $data["job_info_database"] . " db
                 INNER JOIN
                 (
