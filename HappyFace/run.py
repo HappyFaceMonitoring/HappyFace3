@@ -276,7 +276,19 @@ def HappyFace():
                         f.close()
                     except Exception, ex:
                         raise Exception('Could not create final output ' + output_dir + '/index.php:' + str(ex))
-
+                    
+                    # initiate the database
+                    databaseConfigFile =  '<?php' + "\n"
+                    databaseConfigFile += '    /*** connect to database ***/' + "\n"
+                    databaseConfigFile += '    $dbh = new PDO("' + ','.join(DBWrapper.SelectedDBWrapper().getPHPConnectionConfig(connection_string)) + "\");\n"
+                    databaseConfigFile += '?>'
+                    try:
+                        f = open(os.path.join(output_dir, 'database.inc.php') ,'w')
+                        f.write(databaseConfigFile)
+                        f.close()
+                    except Exception, ex:
+                        raise Exception('Could not create database connect script ' + os.path.join(output_dir, 'database.inc.php')+ ':' + str(ex))
+                    
                     print "HappyFace: Web page building finished." 
 
             print "HappyFace: Output processing finished." 

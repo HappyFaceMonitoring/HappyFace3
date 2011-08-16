@@ -186,10 +186,22 @@ class DBWrapper(object):
                 traceback.print_exc()
         finally:
                 self.lock.release()
+    
+    def getPHPConnectionConfig(self, connectionString):
+        """
+        This function returns an array of arguments passed to the PDO constructor.
+        Derived classes should convert the connection string for a database backend to valid arguments.
+        This method here just a dummy, passing the connectionString argument as first parameter.
+        """
+        return [connectionString]
 
 class SQLiteWrapper(DBWrapper):
     def table_fill_many(self, My_DB_Class, table_values):
         self.__table_fill_many__(My_DB_Class, table_values, placeholder_fmt=':%s')
+    
+    def getPHPConnectionConfig(self, connectionString):
+        result = re.match("sqlite://(.+)", connectionString)
+        return ["sqlite:"+result.group(1)]
 
 class PostgresWrapper(DBWrapper):
     def __init__(self):
@@ -197,6 +209,32 @@ class PostgresWrapper(DBWrapper):
         self.reserved_names.extend(['user'])
     def table_fill_many(self, My_DB_Class, table_values):
         self.__table_fill_many__(My_DB_Class, table_values, placeholder_fmt='%%(%s)s')
+    
+    def getPHPConnectionConfig(self, connectionString):
+        parameters = {}
+        # default parameters, if applicable
+        parameters['port'] = 5432
+        
+        result = re.match("postgres://([^@]*)@?([^/]+)/(.+)", connectionString)
+        if result is None:
+            print PostgresWrapper.__module__+": Cannot parse connection string to extract PHP parameters"
+        user_part = result.group(1)
+        host_part = result.group(2)
+        dbName = result.group(3)
+        
+        
+        try: parameters["user"] = user_part.split(":")[0]
+        except: pass
+        try: parameters["password"] = user_part.split(":")[1]
+        except: pass
+        try: parameters["host"] = host_part.split(":")[0]
+        except: pass
+        try: parameters["port"] = host_part.split(":")[1]
+        except: pass
+        
+        parameters['dbname'] = dbName
+        
+        return ["pgsql:" + ";".join([key+"="+str(value) for key,value in parameters.iteritems()]) ]
 
 # This variable contains the DBWrapper that is used by all modules
 SelectedDBWrapper = None

@@ -151,8 +151,8 @@ class WebCreator(object):
 
 	# initiate the database
 	output += '<?php' + "\n"
-	output += '    /*** connect to SQLite database ***/' + "\n"
-	output += '    $dbh = new PDO("sqlite:HappyFace.db");' + "\n"
+	output += '    /*** connect to database ***/' + "\n"
+	output += '    include("database.inc.php");' + "\n"
 	output += '?>'
 
 	# SQL call routines for all active modules
