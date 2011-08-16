@@ -88,7 +88,7 @@ if(isset($_GET['renormalize']) && intval($_GET['renormalize']) != 0)
 if($variable == "status")
 {
 	// Show statistics for status
-	$dbh = new PDO("sqlite:HappyFace.db");
+	include("database.inc.php");
 
 
 	$stmt = $dbh->prepare("SELECT DISTINCT $timestamp_var,status FROM $module_table WHERE $timestamp_var >= :timestamp_begin AND $timestamp_var <= :timestamp_end ORDER BY $timestamp_var");

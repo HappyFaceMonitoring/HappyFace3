@@ -7,7 +7,7 @@ include('evalmath.class.php');
  #=====================================
  # DataBase Initialisation
  # connect to SQLite database
- $dbh = new PDO("sqlite:HappyFace.db");
+ include("database.inc.php");
 
  // Quick'n'dirty check to avoid SQL injection attacks on column names.
  // Unfortunately preparated statements do not work on table or column names
@@ -139,7 +139,7 @@ include('evalmath.class.php');
  for($i = 0; $i < $stmt->columnCount(); ++$i)
  {
      $meta = $stmt->getColumnMeta($i);
-   if($meta['native_type'] == 'integer' || $meta['native_type'] == 'float' || $meta['native_type'] == 'double')
+   if(strpos($meta['native_type'], 'integer') !== FALSE || $meta['native_type'] == 'float' || $meta['native_type'] == 'double' || strpos($meta['native_type'], 'int') !== FALSE)
      $avail_columns[] = $meta['name'];
  }
  
