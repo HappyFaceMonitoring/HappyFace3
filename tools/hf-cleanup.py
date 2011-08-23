@@ -5,22 +5,26 @@ import sys
 import time
 import getopt
 import shutil
-import sqlite3
+import re
+import itertools
+from sqlobject import *
+import ConfigParser
 
 def help():
 	print(
-'''hf-cleanup [options] <Happyface Database File>
+'''hf-cleanup [options] <HappyFace directory>
 
 This script performs three steps to clean up the HappyFace database:
 1) It removes old entries of existing modules
 2) It removes any remaining data belonging to modules no longer in use
-3) It optimizes the database file
+3) It optimizes the database file (SQLite only, using VACUUM command)
 
 Possible options are:
 
 --start=TIMESTAMP	if given only erase database entries recorded after TIMESTAMP
 --end=TIMESTAMP		if given only erase database entries recorded before TIMESTAMP
 --modules=MODULES	specifies a comma-separated list of modules to clean up
+--force                 cleanup tables that are not correctly referenced
 
 All three options only affect the first of the three steps explained above.
 If TIMESTAMP for --start or --end is lower then it is interpreted as the
@@ -36,20 +40,20 @@ confirmed at the prompt).
 
 Examples:
 
-./hf-cleanup HappyFace.db
+./hf-cleanup 
 Erases the complete HappyFace database.
 
-./hf-cleanup --modules=qstat HappyFace.db
+./hf-cleanup --modules=qstat ../HappyFace
 Erases all entries for the qstat module from the HappyFace database.
 
-./hf-cleanup --end=100 HappyFace.db
+./hf-cleanup --end=100 ../HappyFace
 Removes all entries from the HappyFace database that are older than 100 days.
 
-./hf-cleanup --end=1279626292 HappyFace.db
+./hf-cleanup --end=1279626292 ../HappyFace
 Removes all entries from the HappyFace database from before
 Tue Jul 20 13:45 CEST 2010.
 
-./hf-cleanup --modules=none HappyFace.db
+./hf-cleanup --modules=none ../HappyFace
 Skips the first of the three steps (this could also be achieved by answering q
 at the first prompt).''')
 
@@ -60,32 +64,35 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 	   plots in archive directory"""
 
 	print 'Cleaning ' + table_name + '...'
+	
+        # remeber that we cleaned this table globally
+        #global cleaned_table_list
+        visited_table_list.append(table_name)
 
-	# Construct WHERE clause to query the data in the specified range
-	start_cond = ''
-	end_cond = ''
-	if start >= 0:
-		start_cond = 'timestamp>=%d' % start
-	if end >= 0:
-		end_cond = 'timestamp<=%d' % end
+        # Construct WHERE clause to query the data in the specified range
+        table = sqlbuilder.table.__getattr__(table_name)
+        where_clause = sqlbuilder.SQLTrueClauseClass()
+        if start >= 0:
+            where_clause = where_clause & (table.timestamp >= start)
+        if end >= 0:
+            where_clause = where_clause & (table.timestamp <= end)
+        
+	cursor = conn.cursor()
+	
+	class sqlmeta:
+		table = table_name
+		fromDatabase = True
 
-	where_clause = ''
-	if start_cond and end_cond:
-		where_clause = 'WHERE %s AND %s' % (start_cond, end_cond)
-	elif start_cond:
-		where_clause = 'WHERE %s' % start_cond
-	elif end_cond:
-		where_clause = 'WHERE %s' % end_cond
-
-	rows = conn.execute("SELECT * FROM %s %s ORDER BY timestamp" % (table_name, where_clause))
-
+	DBProxy = type(table_name + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
+	columns = [k.dbName for k in DBProxy.sqlmeta.columnList if k!='index']
+        
+        select_query = sqlbuilder.Select([table.__getattr__(col) for col in columns], where=where_clause)
+        rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
+	
 	# Remember all subtables so we can also clear them in the end
 	subtables = []
 	for row in rows:
-
-		# Get column names and values except ID
-		columns = map(lambda x: x[0], rows.description)
-
+		row = dict( itertools.izip(columns, row) )
 		for column in columns:
 			if column.startswith('filename') or column == 'eff_plot' or column == 'rel_eff_plot':
 				timestamp = row['timestamp']
@@ -116,21 +123,23 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 					subtables.append(row[column])
 
 	if not drop:
-		result = conn.execute("DELETE FROM %s %s" % (table_name, where_clause))
+		result = cursor.execute("DELETE FROM %s WHERE %s" % (table_name, where_clause))
 	else:
-		result = conn.execute("DROP TABLE %s" % (table_name))
+		result = cursor.execute("DROP TABLE %s" % (table_name))
 	conn.commit()
 
 	if recurse_subtables:
 	    for subtable in subtables:
 		cleanup_table(conn, hfdir, subtable, start, end, drop, recurse_subtables)
+		
 
 start = -1
 end = -1
 modules = ''
 source = ''
+force_cleanup = False
 
-optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'modules=', 'help'])
+optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'modules=', 'help', 'force'])
 options = dict(optlist)
 if '-h' in options or '--help' in options:
 	help()
@@ -151,6 +160,9 @@ if '--end' in options:
 if '--modules' in options:
 	modules = options['--modules']
 
+if '--force' in options:
+    force_cleanup = True
+
 if len(args) != 1:
 	sys.stderr.write('%s [--start=timestamp or number of days from today] [--end=timestamp or number of days from today] [--modules=module1,module2,...] <HappyFace Database>\n' % sys.argv[0])
 	sys.exit(-1)
@@ -160,13 +172,34 @@ if modules != '':
 	allowed_modules = modules.split(',')
 
 source = args[0]
-dirname = os.path.dirname(source)
-conn = sqlite3.connect(source)
-conn.row_factory = sqlite3.Row
+dirname = source
+
+sys.path.insert(0, os.path.join(os.getcwd(), dirname))
+sys.path.insert(0, os.path.join(os.getcwd(), dirname, "happycore"))
 
 # cfg files to examine if module is not explicitely given, in increasing order of priority
-cfg_files = [dirname + '/../HappyFace/run.cfg',
-             dirname + '/../HappyFace/local/cfg/run.local']
+cfg_files = [os.path.join(dirname, 'run.cfg'),
+             os.path.join(dirname, 'local/cfg/run.local')]
+
+config = ConfigParser.ConfigParser()
+for file in cfg_files:
+	try: config.readfp(open(file))
+	except IOError:
+		print "Cannot read cfg file %s" % file
+
+# try to initiate / create the database
+connection_string = config.get('setup', 'db_connection')
+# fetch special directory path
+result = re.match(r'(\w+://)\./(.+)', connection_string)
+if result is not None:
+    connection_string = result.group(1) + os.path.join(os.getcwd(), config.get("setup", "output_dir"), result.group(2))
+sqlhub.processConnection = connectionForURI(connection_string)
+conn = sqlhub.processConnection.getConnection()
+cursor = conn.cursor()
+
+# get database wrapper
+dbWrapperModule = __import__(config.get('setup', 'db_wrapper_module'))
+dbWrapper = dbWrapperModule.__dict__[config.get('setup', 'db_wrapper_class')]()
 
 categories = []
 modules = {}
@@ -199,6 +232,9 @@ for file in cfg_files:
 	except:
 		pass
 
+# we will remember all tables that were cleared here
+visited_table_list = []
+
 # TODO: Avoid code duplication below
 answers = ['a','q','c','s','y','n', '?']
 all = False
@@ -222,11 +258,16 @@ for category in categories:
 			    print 'y: Clean up this module'
 			    print 'n: Do not clean up this module'
 			    answer = None
-
+                
+                if none:
+                    visited_table_list.append(module + '_table')
+                    break
+                
 		if all or all_cat:
 			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
 		elif answer == 'q':
 			none = True
+			visited_table_list.append(module + '_table')
 			break
 		elif answer == 'a':
 			all = True
@@ -238,20 +279,18 @@ for category in categories:
 			break
 		elif answer == 'y':
 			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
+                else:
+                    visited_table_list.append(module + '_table')
 	if(none): break
 
 # Check for tables not associated with a module
-cursor = conn.cursor()
-cursor.execute('SELECT name FROM sqlite_master WHERE type="table"')
-rows = cursor.fetchall() # Fetch all to avoid a lock on the table
-
+table_list = dbWrapper.listOfTables()
 answers = ['a','q','y','n', '?']
 
 all = False
 n_rows = 0
 print 'Tables no longer referenced in configuration:'
-for row in rows:
-	table = row['name']
+for table in table_list:
 
 	has_module = True
 	for module in module_list:
@@ -288,18 +327,59 @@ for row in rows:
 if n_rows == 0:
 	print '\tNone'
 
-answers = ['y','n', '?']
-answer = None
-while answer not in answers:
-	sys.stdout.write('VACUUM? [' + ''.join(answers) + '] ')
-	answer = sys.stdin.readline()
-	if answer == '': answer = '?'
-	if answer[-1] == '\n': answer = answer[:-1]
 
-	if answer == '?':
-	    print 'y: Run the SQLite VACUUM command to free disk space'
-	    print 'n: Do not run the VACUUM command'
-	    answer = None
+# are there still unvisited tables left in the database?
+unvisited_table_list = [tbl for tbl in table_list if tbl not in visited_table_list]
+if len(unvisited_table_list) > 0 and not force_cleanup:
+    print """WARNING: The following %i tables exist in the database
+and follow *not* the module paradigm for subtables!
+Please contact the responsible module developer.""" % len(unvisited_table_list)
+    for tbl in unvisited_table_list:
+        print "\t- " + tbl
+    print "\nHint: Use the --force argument to cleanup these tables, too"
+elif len(unvisited_table_list) > 0 and force_cleanup:
+    print "There are %i not correctly referenced tables, cleaning up now" % len(unvisited_table_list)
+    all = False
+    for table in unvisited_table_list:
+        answer = None
+        while (not all) and not answer in answers:
+            sys.stdout.write('\tClean up table "' + table + '"? [' + ''.join(answers) + '] ')
+            answer = sys.stdin.readline()
+            if answer == '': answer = '?'
+            if answer[-1] == '\n': answer = answer[:-1]
 
-if answer == 'y':
-	cursor.execute('VACUUM')
+            if answer == '?':
+                print 'a: Clean up all unreferenced tables'
+                print 'q: Do not clean up any unreferenced table'
+                print 'y: Clean up this unreferenced table'
+                print 'n: Do not clean up this unreferenced table'
+                answer = None
+
+        if all or all_cat:
+                cleanup_table(conn, dirname, table, start, end, False, False)
+        elif answer == 'q':
+                break
+        elif answer == 'a':
+                all = True
+                cleanup_table(conn, dirname, table, start, end, False, False)
+        elif answer == 'y':
+                cleanup_table(conn, dirname, table, start, end, False, False)
+    
+# Only ask for VACUUM with SQLite
+if config.get("setup", "db_connection").find("sqlite") != -1:
+    answers = ['y','n', '?']
+    answer = None
+    while answer not in answers:
+            sys.stdout.write('VACUUM? [' + ''.join(answers) + '] ')
+            answer = sys.stdin.readline()
+            if answer == '': answer = '?'
+            if answer[-1] == '\n': answer = answer[:-1]
+
+            if answer == '?':
+                print 'y: Run the SQLite VACUUM command to free disk space'
+                print 'n: Do not run the VACUUM command'
+                answer = None
+
+    if answer == 'y':
+            cursor = conn.cursor()
+            cursor.execute('VACUUM')
