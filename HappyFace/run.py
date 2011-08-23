@@ -123,6 +123,11 @@ def HappyFace():
                     except:
                         print "Old HF process does not exist anymore. Removing lockfile..."
                         os.remove(lockfile)
+                        #create a new type of file, which helps to track the issue.
+                        #it contains the pid of the removed lockfile in the filename. 
+                        #use timestamp of file creation
+                        removedPidLock=str(lockfile+'_old_'+str(int(opid)))
+                        os.open(removedPidLock,os.O_CREAT)
                         lockfile = ''
                         sys.exit(-1)
                     print "Old HF process still running. Exiting here..."
