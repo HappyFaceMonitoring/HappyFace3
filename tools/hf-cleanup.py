@@ -85,12 +85,10 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 
 	DBProxy = type(table_name + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
 	columns = [k.dbName for k in DBProxy.sqlmeta.columnList if k!='index']
-        
+
         select_query = sqlbuilder.Select([table.__getattr__(col) for col in columns], where=where_clause)
         rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
 	
-	# Remember all subtables so we can also clear them in the end
-	subtables = []
 	for row in rows:
 		row = dict( itertools.izip(columns, row) )
 		for column in columns:
@@ -118,9 +116,6 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 						# but it was interrupted before it could clear up
 						# the DB entries
 						pass
-			if 'database' in column and not row[column] in subtables:
-				if row[column] is not None and row[column] != '':
-					subtables.append(row[column])
 
 	if not drop:
 		result = cursor.execute("DELETE FROM %s WHERE %s" % (table_name, where_clause))
@@ -129,9 +124,17 @@ def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
 	conn.commit()
 
 	if recurse_subtables:
-	    for subtable in subtables:
-		cleanup_table(conn, hfdir, subtable, start, end, drop, recurse_subtables)
-		
+            # try to find all subtables, throughout all time
+            # This is the imporvement to the old mechanism of finding subtables.
+            subtables = []
+            for col in columns:
+                if 'database' not in col:
+                    continue
+                select_query = sqlbuilder.Select([table.__getattr__(col)], distinct=True)
+                rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
+                subtables += (row[0] for row in rows if row[0] != '' and row[0] is not None)
+            for subtable in subtables:
+                cleanup_table(conn, hfdir, subtable, start, end, drop, recurse_subtables)
 
 start = -1
 end = -1
@@ -336,7 +339,7 @@ and follow *not* the module paradigm for subtables!
 Please contact the responsible module developer.""" % len(unvisited_table_list)
     for tbl in unvisited_table_list:
         print "\t- " + tbl
-    print "\nHint: Use the --force argument to cleanup these tables, too"
+    print "Hint: Use the --force argument to cleanup these tables, too"
 elif len(unvisited_table_list) > 0 and force_cleanup:
     print "There are %i not correctly referenced tables, cleaning up now" % len(unvisited_table_list)
     all = False
@@ -370,7 +373,11 @@ if config.get("setup", "db_connection").find("sqlite") != -1:
     answers = ['y','n', '?']
     answer = None
     while answer not in answers:
-            sys.stdout.write('VACUUM? [' + ''.join(answers) + '] ')
+            sys.stdout.write('''
+SQLite VACUUM rebuilds the database-file to reduce its
+size. This may take very long, but cleaning-only will
+not reduce the database size!
+Do you want to VACUUM? [''' + ''.join(answers) + '] ')
             answer = sys.stdin.readline()
             if answer == '': answer = '?'
             if answer[-1] == '\n': answer = answer[:-1]
