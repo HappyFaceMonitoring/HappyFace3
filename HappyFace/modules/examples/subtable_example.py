@@ -12,8 +12,9 @@ class subtable_example(ModuleBase):
 
 	# title of the subtable has to be lowercased!!!
 	# of course it is possible to create more than one subtable if necessary
-        self.db_keys["subtable"] = StringCol()
-        self.db_values["subtable"] = self.__module__ + "_whatever_subtable"
+	# By convention the name contains 'database' for automatic scripts to work.
+        self.db_keys["subtable_database"] = StringCol()
+        self.db_values["subtable_database"] = self.__module__ + "_whatever_subtable"
 	
     def process(self):
 
@@ -28,7 +29,7 @@ class subtable_example(ModuleBase):
 	# ===================================================================================
 	# initialisation of the table class with "table_init"(name_of_the_table, table_keys)
 	# an addition of new columns (keys) into existing tables is now possible
-	my_subtable_class = self.table_init( self.db_values["subtable"], sub_keys )
+	my_subtable_class = self.table_init( self.db_values["subtable_database"], sub_keys )
 	# ===================================================================================
 	
 	sub_values_list = []
@@ -68,7 +69,7 @@ class subtable_example(ModuleBase):
 	<?php
 		# ===========================================================================
 		# definition of the sql query for the subtable (depending on the saved script running timestamp)
-		$my_sqlquery = "SELECT * FROM " . $data["subtable"] . " WHERE timestamp = " . $data["timestamp"];
+		$my_sqlquery = "SELECT * FROM " . $data["subtable_database"] . " WHERE timestamp = " . $data["timestamp"];
 		
 		print('<table width="480" border="1">');
 		print('<tr><td>number</td><td>square</td><td>square root</td></tr>');
