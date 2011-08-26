@@ -8,9 +8,15 @@ class DBWrapper(object):
     Mother of all wrappers
     """
     
-    def __init__(self):
+    def listOfTables(self):
+        return []
+    
+    def __init__(self, dbConnection = None):
         object.__init__(self)
         self.lock = DataBaseLock().lock
+        
+        if dbConnection is None: self.dbConnection = sqlhub.processConnection
+        else: self.dbConnection = dbConnection
         
         # Store a reserved SQL keywords that cannot be used as column names.
         # NOTE: This is mostly for a workaround because SQLObject does not
@@ -67,7 +73,7 @@ class DBWrapper(object):
                     avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
                 new_columns = dict( (key, real) for key,real in real_keys.iteritems() if real not in avail_keys)
                 if len(new_columns) > 0:
-                    connection = sqlhub.processConnection
+                    connection = self.dbConnection
                     dbObject = connection.getConnection()
                     cursor = dbObject.cursor()
 
@@ -121,7 +127,7 @@ class DBWrapper(object):
 
             # TODO: I am not sure how sqlite-specific this code is, maybe
             # needs to be changed/adapted for other DBMSes if we switch one day.
-            connection = sqlhub.processConnection
+            connection = self.dbConnection
             dbObject = connection.getConnection()
             cursor = dbObject.cursor()
 
@@ -202,6 +208,13 @@ class SQLiteWrapper(DBWrapper):
     def getPHPConnectionConfig(self, connectionString):
         result = re.match("sqlite://(.+)", connectionString)
         return ["sqlite:"+result.group(1)]
+    
+    def listOfTables(self):
+        conn = self.dbConnection.getConnection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT name FROM sqlite_master WHERE type="table"')
+        rows = cursor.fetchall() # Fetch all to avoid a lock on the table
+        return [row[0] for row in rows]
 
 class PostgresWrapper(DBWrapper):
     def __init__(self):
