@@ -4,6 +4,7 @@ import re
 from threading import Thread
 from HTMLParser import HTMLParser
 
+__anonymous_function_counter = 0
 
 # a class that provides some simple methods which are required by many modules
 class ModuleHelper(object):
@@ -298,7 +299,7 @@ class ModuleHelper(object):
         sorting = sorting.split(';')
 
         ret = """
-        uasort(""" + phpvar_table + """, function($a, $b) { """
+        function serviceSortingCondition_%i($a, $b) { """ % __anonymous_function_counter
 
         for entry in sorting:
             asc = 1
@@ -317,8 +318,11 @@ class ModuleHelper(object):
             """
 
         ret += """
-            return 0; });
-        """
+            return 0;
+        }
+        uasort(""" + phpvar_table + """, serviceSortingCondition_%i);
+        """ % __anonymous_function_counter
+        __anonymous_function_counter += 1
         return ret
 
     def beginTablePHP(self, display, phpvar_to):
