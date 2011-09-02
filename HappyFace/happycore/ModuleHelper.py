@@ -4,8 +4,6 @@ import re
 from threading import Thread
 from HTMLParser import HTMLParser
 
-__anonymous_function_counter = 0
-
 # a class that provides some simple methods which are required by many modules
 class ModuleHelper(object):
     def __init__(self):
@@ -297,10 +295,8 @@ class ModuleHelper(object):
         # display is a return value from readTable config:
         sorting = display[1]
         sorting = sorting.split(';')
-
-        ret = """
-        function serviceSortingCondition_%i($a, $b) { """ % __anonymous_function_counter
-
+        
+        function_code = ""
         for entry in sorting:
             asc = 1
             if entry.lower().endswith('(asc)'):
@@ -309,7 +305,7 @@ class ModuleHelper(object):
                 entry = entry[0:-6]
                 asc = -1
 
-            ret += """
+            function_code += """
             if(array_key_exists("""+self.toPHPStr(entry)+""", $a))
             {
                 $c = strnatcasecmp($a["""+self.toPHPStr(entry)+"""], $b["""+self.toPHPStr(entry)+"""]);
@@ -317,12 +313,13 @@ class ModuleHelper(object):
             }
             """
 
-        ret += """
+        function_code += """
             return 0;
-        }
-        uasort(""" + phpvar_table + """, serviceSortingCondition_%i);
-        """ % __anonymous_function_counter
-        __anonymous_function_counter += 1
+        """
+
+        ret = """
+        uasort(""" + phpvar_table + """, create_function('$a, $b', """ + self.toPHPStr(function_code) + """));
+        """
         return ret
 
     def beginTablePHP(self, display, phpvar_to):
