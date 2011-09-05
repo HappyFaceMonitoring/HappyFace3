@@ -210,7 +210,7 @@ class dCacheDataManagement(ModuleBase):
 	// Other modules simply use WHERE timestamp=$data['timestamp'] here
 	// but we can't do that since we do not update the details table in
 	// every iteration.
-	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " JOIN (SELECT max(timestamp) as mtp FROM " . $data["details_database"] . " WHERE timestamp <= " . $data["timestamp"] . ") ON timestamp=mtp ORDER BY name";
+	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " dat JOIN (SELECT max(timestamp) as mtp FROM " . $data["details_database"] . " WHERE timestamp <= " . $data["timestamp"] . ") t ON dat.timestamp=t.mtp ORDER BY dat.name";
 
 	$gen_color = '';
 	if($data['status'] < 1.0)
