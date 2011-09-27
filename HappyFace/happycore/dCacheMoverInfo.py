@@ -14,6 +14,7 @@ class dCacheMoverInfo(ModuleBase):
         self.db_values['job_summary_database'] = ''
         
         self.watch_jobs = self.configService.get('setup', 'watch_jobs').split(',')
+        self.pool_match_regex = self.configService.get('setup', 'pool_match_regex')
         
         self.critical_queue_threshold = self.configService.get('setup', 'critical_queue_threshold')
         self.db_keys['critical_queue_threshold'] = StringCol()
@@ -101,7 +102,7 @@ class dCacheMoverInfo(ModuleBase):
                 name, domain = r[0][2], r[1][2]
                 
                 # Only CMS read-tape pools
-                if not re.search(r'rT_cms$', name):
+                if not re.search(self.pool_match_regex, name):
                     #print 'Discard', name
                     continue
                 values = {}
