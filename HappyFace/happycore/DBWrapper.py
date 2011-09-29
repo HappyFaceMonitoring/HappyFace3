@@ -63,10 +63,10 @@ class DBWrapper(object):
                     table = tableName
                     fromDatabase = True
 
-                My_DB_Class = type(tableName, (SQLObject,), table_keys)
-                My_DB_Class.createTable(ifNotExists=True)       
+                My_DB_Class = type(tableName, (SQLObject,), dict([('_connection',self.dbConnection)]+table_keys.items()))
+                My_DB_Class.createTable(ifNotExists=True)
 
-                DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
+                DBProxy = type(tableName + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta, _connection=self.dbConnection))
 
                 avail_keys = []
                 for key in DBProxy.sqlmeta.columns.iterkeys():
@@ -214,11 +214,12 @@ class SQLiteWrapper(DBWrapper):
         cursor = conn.cursor()
         cursor.execute('SELECT name FROM sqlite_master WHERE type="table"')
         rows = cursor.fetchall() # Fetch all to avoid a lock on the table
+        cursor.close()
         return [row[0] for row in rows]
 
 class PostgresWrapper(DBWrapper):
-    def __init__(self):
-        DBWrapper.__init__(self)
+    def __init__(self, dbConnection=None):
+        DBWrapper.__init__(self, dbConnection)
         self.reserved_names.extend(['user'])
     def table_fill_many(self, My_DB_Class, table_values):
         self.__table_fill_many__(My_DB_Class, table_values, placeholder_fmt='%%(%s)s')
