@@ -201,49 +201,49 @@ def HappyFace():
             downloadService = DownloadService(tmp_dir, tmp_keepalive)
             cssService = CssService(output_dir,'config/modules')
     
-            for module in modObj_list.keys():
-                for downloadTag in modObj_list[module].getDownloadRequests():
+            for module in modObj_list.itervalues():
+                for downloadTag in module.getDownloadRequests():
                     downloadService.add(downloadTag)
             
-                cssService.add(modObj_list[module].getCssRequests())
+                cssService.add(module.getCssRequests())
 
             # Start parallel download of all specified files
             downloadService.download(timeoutDownload)
 
             # parallel execution of the modules (threading)
             # see therefore: http://www.wellho.net/solutions/python-python-threads-a-first-example.html
-            for module in modObj_list.keys():
+            for module in modObj_list.itervalues():
                 # make downloadService available for each module
-                modObj_list[module].setDownloadService(downloadService)
+                module.setDownloadService(downloadService)
                 # execute the object in a thread
-                modObj_list[module].start()
+                module.start()
 
             print "HappyFace: Start module processing." 
 
             # wait till all modules are finished OR till the global timeout
-            for module in modObj_list.keys():
+            for module in modObj_list.itervalues():
 	        if timeout == -1:
-	            modObj_list[module].join()
+	            module.join()
 		    continue
 	
                 start = int(time())
-                modObj_list[module].join(timeout)
+                module.join(timeout)
                 timeout -= int(time()) - start
                 if timeout < 1:
                     break
 
 
-            for module in modObj_list.keys():
-                if modObj_list[module].isAlive() == True:
-                    modObj_list[module]._Thread__stop()
-                    modObj_list[module].error_message += "\nCould not execute module in time, "\
-                                                         + modObj_list[module].__module__ \
+            for module in modObj_list.itervalues():
+                if module.isAlive() == True:
+                    module._Thread__stop()
+                    module.error_message += "\nCould not execute module in time, "\
+                                                         + module.__module__ \
                                                         + " aborting ...\n"
-                    sys.stdout.write(modObj_list[module].error_message)
+                    sys.stdout.write(module.error_message)
 
                 # store results (or pre-defined values if timeout) to DB
                 # if enabled, erase old data from the DB
-                modObj_list[module].processDB()
+                module.processDB()
 
             print "HappyFace: Module processing finished." 
 
