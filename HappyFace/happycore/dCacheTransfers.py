@@ -51,7 +51,7 @@ class dCacheTransfers(ModuleBase):
 		details_db_keys['host'] = StringCol()
 		details_db_keys['status_text'] = StringCol()
 		details_db_keys['since'] = IntCol()
-		details_db_keys['transferred'] = DecimalCol()
+		details_db_keys['transferred'] = DecimalCol(size=10, precision=0)
 		details_db_keys['speed'] = FloatCol()
 		details_db_keys['status'] = FloatCol()
 
