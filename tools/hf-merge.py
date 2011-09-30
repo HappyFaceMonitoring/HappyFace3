@@ -31,6 +31,7 @@ def help():
     --from-wrapper=<Path/To/Module.Class>   class to use as a wrapper for the output database
     --into-archive=<Path/To/Archive>        destination archive directory
     --from-archive=<Path/To/Archive>        source archive directory
+    --no-archive                            does not copy archive, usefull for db-migration
 
     If --start and/or --end are given then only database entries in the specified
     timerange are merged. If you want to merge the complete database then you do
@@ -49,8 +50,9 @@ IntoWrapper = None
 FromWrapper = None
 dest_dirname = None
 source_dirname = None
+do_not_cpy_archive = False
 
-optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'into-wrapper=', 'from-wrapper=', 'into=', 'from-archive=', 'into-archive=', 'help'])
+optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'into-wrapper=', 'from-wrapper=', 'into=', 'from-archive=', 'into-archive=', 'no-archive', 'help'])
 options = dict(optlist)
 if '-h' in options or '--help' in options:
     help()
@@ -69,12 +71,15 @@ if '--into-archive' in options:
 if '--from-archive' in options:
     source_dirname = options['--from-archive']
 
-if dest_dirname is None:
-    sys.stderr.write('No destination archive specified. Try --help for more information."\n')
-    sys.exit(-1)
-if source_dirname is None:
-    sys.stderr.write('No source archive specified. Try --help for more information."\n')
-    sys.exit(-1)
+if '--no-archive' in options:
+    do_not_cpy_archive = True
+else:
+    if dest_dirname is None:
+        sys.stderr.write('No destination archive specified. Use --no-archive or specify! Try --help for more information."\n')
+        sys.exit(-1)
+    if source_dirname is None:
+        sys.stderr.write('No source archive specified. Use --no-archive or specify! Try --help for more information."\n')
+        sys.exit(-1)
 
 if '--into-wrapper' in options:
     path, modwrapper = os.path.split(options['--into-wrapper'])
@@ -220,6 +225,9 @@ for table_name in source_tables:
             
             # Copy archive files
             columns_archive = filter(lambda x: x.startswith('filename') or x == 'eff_plot' or x == 'rel_eff_plot', columns)
+            if do_not_cpy_archive:
+                columns_archive = [] # no iterations in following loop
+
             for column in columns_archive:
                 # If this column was newly added then the source
                 # database may not contain an entry for it, so
