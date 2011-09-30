@@ -190,7 +190,13 @@ for table_name in source_tables:
                 table_keys = {}
                 for col, col_obj in SrcTable.sqlmeta.columns.iteritems():
                     col = styles.mixedToUnder(col)
-                    table_keys[col] = globals()[col_obj.__class__.__name__[2:]]()
+                    if col_obj.__class__.__name__ == "SOCol":
+                        print "\n\tColumn %s not properly recognized! Use string" % col
+                        table_keys[col] = StringCol()
+                    elif col != "datasource":
+                        table_keys[col] = globals()[col_obj.__class__.__name__[2:]]()
+                    else:
+                        table_keys[col] = StringCol() # for some reason never recognized as StringCol (only Col?!)
                 trans.commit()
                 dest_wrapper.table_init(table_name, table_keys)
                 trans.commit()

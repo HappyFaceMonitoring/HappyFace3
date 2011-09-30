@@ -56,7 +56,6 @@ class DBWrapper(object):
                     table_keys[key].__dict__['_kw']['dbName'] = '_'+key
                     real_keys[key] = '_'+key
             
-        
         try: # separate try for finally block so we are compatible with Python 2.4
             try:
                 class sqlmeta:
@@ -73,9 +72,6 @@ class DBWrapper(object):
                     avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
                 new_columns = dict( (key, real) for key,real in real_keys.iteritems() if real not in avail_keys)
                 if len(new_columns) > 0:
-                    connection = self.dbConnection
-                    dbObject = connection.getConnection()
-                    cursor = dbObject.cursor()
 
                     for key, real_key in new_columns.iteritems():
                         if key != "index":
@@ -87,7 +83,7 @@ class DBWrapper(object):
                                 # This is why we run an ALTER TABLE query manually here, which is
                                 # much faster (returns almost instantly).
                                 sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
-                                cursor.execute('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, real_key, sqlType))
+                                self.dbConnection.query('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, real_key, sqlType))
                             except Exception, ex: print "Failing at adding new column: \"" + str(real_key) + "\" in the module " + self.__module__ + ": " + str(ex)
 
             except Exception, e:
