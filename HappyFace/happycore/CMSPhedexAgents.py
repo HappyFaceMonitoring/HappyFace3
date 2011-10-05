@@ -119,6 +119,7 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
 	root = source_tree.getroot()
         
         agentStatusList = []
+        agentLabelList  = []
         if root.get("request_timestamp"):
             request_time = float(root.get("request_timestamp"))
         else:
@@ -131,8 +132,10 @@ class CMSPhedexAgents(ModuleBase,PhpDownload):
                 for agent in data_branch:
                     
                     time_update = float(agent.get("time_update"))
-
                     label = str(agent.get("label"))
+                    if label in agentLabelList:
+                        continue
+                    agentLabelList.append(label)
                     details_db_values['version'] = str(agent.get("version"))
                     details_db_values['host'] = str(element.get("host"))
                     details_db_values['dir'] = str(agent.get("state_dir"))
