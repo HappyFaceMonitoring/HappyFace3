@@ -1,6 +1,7 @@
 import sys
 import os
 import filecmp
+import shutil
 
 
 class CssService(object):
@@ -28,11 +29,11 @@ class CssService(object):
         for i in self.getFileListeRemove():
             print "CssService: Removing file from css web dir"
             print "    "+i
-            os.system('rm -f '+i)
+            os.remove(i)
         for i in self.getFileListCopy():
             print "CssService: Adding file to css web dir"
             print "    "+i
-            os.system('cp -f '+i+' '+self.dirPath)
+            shutil.copy(i, self.dirPath)
 
     def getFileListeRemove(self):
         removalList = []

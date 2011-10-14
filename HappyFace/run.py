@@ -80,7 +80,7 @@ def HappyFace():
     # create archive directory for binary files
     archive_dir = output_dir + "/archive/" + str(time_tuple.tm_year) + "/" + ('%02d' % time_tuple.tm_mon) + "/" + ('%02d' % time_tuple.tm_mday) + "/" + str(timestamp)
     try:
-        os.system("mkdir -p " + archive_dir)
+        os.makedirs(archive_dir)
     except:
         sys.stdout.write('Could not create archive directory ' + archive_dir + ', aborting ...\n')
         sys.exit(-1)

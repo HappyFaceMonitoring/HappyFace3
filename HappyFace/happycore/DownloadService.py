@@ -1,7 +1,7 @@
 from GetData import *
 import random
 import sys
-import os
+import os,shutil
 from time import time, localtime, mktime
 from DownloadTag import *
 from HTMLOutput import *
@@ -125,8 +125,7 @@ class DownloadService(HTMLOutput):
     def copyFile(self,downloadstring,destfile):
         self.checkDownload(downloadstring)
         localFile = self.downloadTags[downloadstring].getFilePath()
-	# TODO: Use python file copy function instead
-        ret = os.system('cp '+localFile+' '+destfile)
+        ret = shutil.copy(localFile, destfile)
 
     def checkDownload(self,downloadstring):
         if downloadstring in self.downloadTags:

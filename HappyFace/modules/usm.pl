@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # written by Philip Sauerland (sauerland@physik.rwth-aachen.de)
 # last modification: 2010.01.26
