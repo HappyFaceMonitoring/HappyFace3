@@ -97,71 +97,11 @@ class T1Prodmon(ModuleBase):
     def output(self):
         js = []
         js.append('<script type="text/javascript">')
-        js.append('function ' + self.__module__ + '_plot_button(pool, job)')
-        js.append('{')
-        js.append('  document.getElementById("' + self.__module__ + '_constraint").value = "job=" + job + ";pool=" + pool;')
-        js.append('  document.getElementById("' + self.__module__ + '_extra_title").value = "Pool: " + pool + ",  Job: " + job;')
-        js.append('}')
-        js.append('function ' + self.__module__ + '_plot_summary_button(job)')
-        js.append('{')
-        js.append('  document.getElementById("' + self.__module__ + '_sum_constraint").value = "job=" + job')
-        js.append('  document.getElementById("' + self.__module__ + '_sum_extra_title").value = "Job: " + job;')
-        js.append('}')
-       
-        js.append('''
-        // hide all pools from the table where the given job is not queueing
-        function '''+self.__module__ + '''_hide_pools_from_table(show_only_job)
-        {
-            var table = document.getElementById("'''+self.__module__ + '''_details_table").getElementsByTagName("tbody")[0];
-            var rows = table.rows;
-            var tag = "tag"+show_only_job;
-            document.getElementById("''' + self.__module__+ '''_detailed").setAttribute("style", "");
-            
-            for(var i=0; rows[i]; i++)
-            {
-                if(rows[i].getAttribute("class").indexOf("TableHeader") != -1)
-                    continue;
-                if(show_only_job == "")
-                    rows[i].setAttribute("style", "");
-                else
-                {
-                    if(rows[i].getAttribute("class").indexOf(tag) == -1)
-                        rows[i].setAttribute("style", "display:none");
-                    else
-                        rows[i].setAttribute("style", "");
-                }
-            }
-        }
-        ''')
         js.append('</script>')
         
         mc_table_begin = []
-        mc_table_begin.append('<form method="get" action="plot_generator.php" onsubmit="javascript:submitFormToWindow(this);">')
+        #mc_table_begin.append('<form method="get" action="plot_generator.php" onsubmit="javascript:submitFormToWindow(this);">')
         mc_table_begin.append(  "<h4>'.$title.'</h4>")
-        mc_table_begin.append(  '<table style="font: bold 0.7em sans-serif; width:800px; background-color: #ddd; border: 1px #999 solid;">')
-        mc_table_begin.append(  ' <tr>')
-        mc_table_begin.append(  '  <td>Start:</td>')
-        mc_table_begin.append(  '  <td>')
-        mc_table_begin.append("""   <input name="date0" type="text" size="10" style="text-align:center;" value="' . strftime("%Y-%m-%d", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
-        mc_table_begin.append("""   <input name="time0" type="text" size="5" style="text-align:center;" value="' . strftime("%H:%M", strtotime("$date_string $time_string") - 48*60*60) . '" />""")
-        mc_table_begin.append(  '  </td>')
-        mc_table_begin.append(  '  <td>End:</td>')
-        mc_table_begin.append(  '  <td>')
-        mc_table_begin.append("""   <input name="date1" type="text" size="10" style="text-align:center;" value="' . $date_string . '" />""")
-        mc_table_begin.append("""   <input name="time1" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />""")
-        mc_table_begin.append(  '  </td>')
-        mc_table_begin.append(  '  <td align="right">')
-        mc_table_begin.append(  '   <input type="checkbox" name="renormalize" value="1" style="vertical-align: middle; margin: 0px;" />&nbsp;Show Trend plot')
-        mc_table_begin.append(  '   <input type="hidden" name="module" value="'+ self.__module__ + '" />')
-        mc_table_begin.append(  '   <input type="hidden" name="subtable" value="" />')
-        mc_table_begin.append(  '   <input type="hidden" name="variables" value="active,max,queued" />')
-        mc_table_begin.append(  '   <input type="hidden" name="squash" value="1" />')
-        mc_table_begin.append(  '   <input type="hidden" name="legend" value="right" />')
-        mc_table_begin.append(  '   <input type="hidden" id="'+self.__module__ + '_sum_constraint' + '" name="constraint" value="" />')
-        mc_table_begin.append(  '   <input type="hidden" id="'+self.__module__ + '_sum_extra_title' + '" name="extra_title" value="" />')
-        mc_table_begin.append(  '  </td>')
-        mc_table_begin.append(  ' </tr>')
-        mc_table_begin.append(  '</table>')
         mc_table_begin.append('<table class="TableData">')
         mc_table_begin.append('<tbody>')
         
@@ -182,7 +122,7 @@ class T1Prodmon(ModuleBase):
         mc_table_end = []
         mc_table_end.append('</tbody>')
         mc_table_end.append('</table>')
-        mc_table_end.append('</form>')
+        #mc_table_end.append('</form>')
         mc_table_end.append('<br />')
         
         mc_detailed_begin = []
