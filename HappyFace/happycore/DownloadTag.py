@@ -100,7 +100,7 @@ class DownloadTag(Thread):
         self.finished = True
 
     def getFilePath(self):
-        return './'+self.archive_dir+'/'+self.localFile
+        return os.path.join(self.archive_dir, self.localFile)
 
     def getUrl(self):
         # Final URL has not yet been resolved, maybe because the regex did not match
