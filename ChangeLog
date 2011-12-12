@@ -1,0 +1,20 @@
+
+# Bugfix: a leading ./ added to download path
+Author: Gregor Vollmer
+In some usecases a leading ./ was added to the file-path
+of an downloaded file, causing HappyFace to fail if an
+absolute path to the temporary is used.
+
+# Code Cleanup: Removed system-calls and used python-functions instead
+Author: Gregor Vollmer
+In several places system-calls were used to create directories
+and move files, which is bad style and a potential security risk.
+These were removed and replaced by functions from the Python
+shutil and os packages.
+
+# Code Cleanup: Use conventional Magic-Line
+Author: Gregor Vollmer
+Some script tools used a magic-line to start the python interpreter
+that did not match the proposed method. I changed it to use the
+standard env-tool.
+
