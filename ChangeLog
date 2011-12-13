@@ -20,3 +20,13 @@
     Some script tools used a magic-line to start the python interpreter
     that did not match the proposed method. I changed it to use the
     standard env-tool.
+
+  # New Feature: matplotlib-backend configurable
+    Author: Gregor Vollmer
+    It is now possible to specify the backend of matplotlib in the run.cfg
+    or the run.local. As an example, by setting
+        matplotlib_backend = agg
+    matplotlib's own AGG backend will be used. The HappyFace default is
+        matplotlib_backend = cairo.png
+    If matplotlib is not installed on the system or no module uses it, this
+    has no effect on HappyFace.
