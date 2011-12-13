@@ -157,17 +157,8 @@ def HappyFace():
 
             # try to initiate / create the database
             connection_string = config.get('setup', 'db_connection')
-            # fetch special directory path
-            result = re.match(r'(\w+://)([^/].+)', connection_string)
-            if result is not None:
-                if result.group(1) == "sqlite://":
-                    if result.group(2).startswith("./"):
-                        path = result.group(2)[2:]
-                    else:
-                        path = result.group(2)
-                    connection_string = result.group(1) + os.path.join(os.getcwd(), output_dir, path)
             try:
-                connection = connectionForURI(connection_string)
+                connection = DBWrapper.SelectedDBWrapper.connectionForURI(connection_string, os.path.join(os.getcwd(), output_dir))
                 sqlhub.processConnection = connection
             except Exception, ex:
                 raise Exception('Could not initiate or create the database ' + connection_string + ': ' + str(ex))

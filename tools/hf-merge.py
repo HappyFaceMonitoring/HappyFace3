@@ -108,8 +108,8 @@ if len(args) < 1:
     sys.exit(-1)
 source = args[0]
 
-source_conn = connectionForURI(source)
-dest_conn = connectionForURI(dest)
+source_conn = FromWrapper.connectionForURI(source, '')
+dest_conn = IntoWrapper.connectionForURI(dest, '')
 dest_conn.autoCommit = False
 trans = dest_conn.transaction()
 source_wrapper = FromWrapper(source_conn)

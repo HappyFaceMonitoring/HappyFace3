@@ -7,6 +7,15 @@ class DBWrapper(object):
     """
     Mother of all wrappers
     """
+
+    @classmethod
+    def connectionForURI(cls, connection_string, output_dir=""):
+        """ The default implementation just hands the connection_string over
+            to the similarily called SQLObject method. Normaly, a specific wrapper
+            would not change this, only if special path manipulations are feasable,
+            as it is with relative paths for SQLite.
+        """
+        return connectionForURI(connection_string)
     
     def listOfTables(self):
         return []
@@ -198,9 +207,14 @@ class DBWrapper(object):
         return [connectionString]
 
 class SQLiteWrapper(DBWrapper):
+    @classmethod
+    def connectionForURI(cls, connection_string, output_dir=""):
+        result = re.match(r'(\w+://)(.+)', connection_string)
+        return connectionForURI(result.group(1)+os.path.join(os.path.join(output_dir, result.group(2))))
+
     def table_fill_many(self, My_DB_Class, table_values):
         self.__table_fill_many__(My_DB_Class, table_values, placeholder_fmt=':%s')
-    
+
     def getPHPConnectionConfig(self, connectionString):
         result = re.match("sqlite://(.+)", connectionString)
         return ["sqlite:"+result.group(1)]
