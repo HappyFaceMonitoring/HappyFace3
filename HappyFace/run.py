@@ -158,9 +158,14 @@ def HappyFace():
             # try to initiate / create the database
             connection_string = config.get('setup', 'db_connection')
             # fetch special directory path
-            result = re.match(r'(\w+://)\./(.+)', connection_string)
+            result = re.match(r'(\w+://)([^/].+)', connection_string)
             if result is not None:
-                connection_string = result.group(1) + os.path.join(os.getcwd(), output_dir, result.group(2))
+                if result.group(1) == "sqlite://":
+                    if result.group(2).startswith("./"):
+                        path = result.group(2)[2:]
+                    else:
+                        path = result.group(2)
+                    connection_string = result.group(1) + os.path.join(os.getcwd(), output_dir, path)
             try:
                 connection = connectionForURI(connection_string)
                 sqlhub.processConnection = connection
@@ -297,7 +302,7 @@ def HappyFace():
                     # initiate the database
                     databaseConfigFile =  '<?php' + "\n"
                     databaseConfigFile += '    /*** connect to database ***/' + "\n"
-                    databaseConfigFile += '    $dbh = new PDO("' + ','.join(DBWrapper.SelectedDBWrapper().getPHPConnectionConfig(connection_string)) + "\");\n"
+                    databaseConfigFile += '    $dbh = new PDO("' + ','.join(DBWrapper.SelectedDBWrapper().getPHPConnectionConfig(config.get('setup', 'db_connection'))) + "\");\n"
                     databaseConfigFile += '?>'
                     try:
                         f = open(os.path.join(output_dir, 'database.inc.php') ,'w')
