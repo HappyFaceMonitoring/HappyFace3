@@ -68,6 +68,18 @@ def HappyFace():
     except:
         # default
         tmp_keepalive = 7
+    
+    # try to import matplotlib - if possible
+    # If we can import, pass the wanted backend
+    try:
+        import matplotlib
+        try:
+            matplotlib.use(config.get('setup', 'matplotlib_backend'))
+        except Exception,e:
+            print "Cannot specify matplotlib backend",str(e)
+    except Exception,e:
+        #print "NO MATPLOTLIB"
+        pass
 
     # convert to seconds:
     if tmp_keepalive > 0:
