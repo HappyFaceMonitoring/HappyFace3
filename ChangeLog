@@ -17,4 +17,3 @@ Author: Gregor Vollmer
 Some script tools used a magic-line to start the python interpreter
 that did not match the proposed method. I changed it to use the
 standard env-tool.
-
