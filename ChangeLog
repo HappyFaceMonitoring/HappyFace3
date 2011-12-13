@@ -30,3 +30,11 @@
         matplotlib_backend = cairo.png
     If matplotlib is not installed on the system or no module uses it, this
     has no effect on HappyFace.
+
+  # Bugfix: Smoother handling of relative paths to SQLite Databases
+    Author: Gregor Vollmer
+    For technical reasons, a relative path to an SQLite database is
+    resolved to an absolute path within Python and used to be passed
+    to PHP in that form, causing issues in some setups.
+    Now, a relative path is passed to PHP as a relative path.
+
