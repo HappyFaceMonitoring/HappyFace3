@@ -1,6 +1,6 @@
 # ChangeLog for HappyFace
 
-* HappyFace_CE_v3.0 (add date once we release)
+* HappyFace_CE_v3.0 (14.12.2011)
 
   # Bugfix: a leading ./ added to download path
     Author: Gregor Vollmer
