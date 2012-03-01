@@ -95,14 +95,18 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 
 			# Determining waiting time
 			time_tuple_now = gmtime(self.timestamp)
-			year_now = strftime('%Y',time_tuple_now)
-			year_now = str(int(year_now)+1)
-			time_tuple_req = strptime(year_now+"."+request['started'],"%Y.%m.%d %H:%M:%S")
+			year_req = strftime('%Y',time_tuple_now)
+			# commented out line below. Is not save for leap years. 
+			# still trying to understand what it did, further fixes with year_now +1 below.
+			# year_now = str(int(year_now)+1)
+			time_tuple_req = strptime(year_req+"."+request['started'],"%Y.%m.%d %H:%M:%S")
 			time_diff = self.timestamp - mktime(time_tuple_req)
 
 			# Check if year has been determind correctly by requiring time stamp of staging max one day in future
 			if time_diff < -60*60*24:
-				year_now = str(int(year_now)-1)
+				# ok, we now guessed the wrong year above. should only happen around 
+				# silvester, thus the correct year is 1 year less
+				year_req = str(int(year_req)-1)
 				time_tuple_req = strptime(year_now+"."+request['started'],"%Y.%m.%d %H:%M:%S")
 				time_diff = self.timestamp - mktime(time_tuple_req)
 
