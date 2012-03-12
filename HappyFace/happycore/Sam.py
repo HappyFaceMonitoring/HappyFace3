@@ -12,54 +12,54 @@ class Sam(ModuleBase,PhpDownload):
 
         # definition of the database table keys and pre-defined values
 
-	self.db_keys["details_database"] = StringCol()
-	self.db_keys["site"] =	StringCol()
-	
-	self.db_values["details_database"] = ""
-	self.db_values["site"] = ""
+        self.db_keys["details_database"] = StringCol()
+        self.db_keys["site"] =        StringCol()
+        
+        self.db_values["details_database"] = ""
+        self.db_values["site"] = ""
 
 
         self.db_keys["details_database_summary"] = StringCol()
-	self.db_values["details_database_summary"] = ""
-	
-	self.report_url	= self.configService.get('setup','report_url')
-	
+        self.db_values["details_database_summary"] = ""
+        
+        self.report_url        = self.configService.get('setup','report_url')
+        
         self.dsTag = 'sam_xml_source'
 
         self.downloadRequest[self.dsTag] = 'wgetXmlRequest|'+self.makeUrl()
         self.blacklist = self.configService.getDefault('setup','blacklist',"").split(",")
 
-        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br />')	
+        self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br />')        
 
     def process(self):
         # run the test
 
         self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
-	dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
+        dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
 
-	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
-	# parse the details and store it in a special database table
-	details_database = self.__module__ + "_table_details"
-	self.db_values["details_database"] = details_database
+        # parse the details and store it in a special database table
+        details_database = self.__module__ + "_table_details"
+        self.db_values["details_database"] = details_database
 
-	details_database_summary = self.__module__ + "_table_details_summary"
-	self.db_values["details_database_summary"] = details_database_summary
+        details_database_summary = self.__module__ + "_table_details_summary"
+        self.db_values["details_database_summary"] = details_database_summary
 
-	details_db_keys = {}
-	details_db_value_list = []
+        details_db_keys = {}
+        details_db_value_list = []
 
-	details_db_keys["service_type"] = StringCol()
-	details_db_keys["service_name"] = StringCol()
-	details_db_keys["service_status"] = StringCol()
-	details_db_keys["status"] = StringCol()
-	details_db_keys["url"] = StringCol()
-	details_db_keys["age"] = StringCol()
-	details_db_keys["type"] = StringCol()
-	details_db_keys["time"] = StringCol()
+        details_db_keys["service_type"] = StringCol()
+        details_db_keys["service_name"] = StringCol()
+        details_db_keys["service_status"] = StringCol()
+        details_db_keys["status"] = StringCol()
+        details_db_keys["url"] = StringCol()
+        details_db_keys["age"] = StringCol()
+        details_db_keys["type"] = StringCol()
+        details_db_keys["time"] = StringCol()
 
-	details_summary_db_keys = {}
-	details_summary_db_value_list = []
+        details_summary_db_keys = {}
+        details_summary_db_value_list = []
 
         details_summary_db_keys["name"] = StringCol()
         details_summary_db_keys["nodes"] = StringCol()
@@ -68,61 +68,61 @@ class Sam(ModuleBase,PhpDownload):
         subtable_details = self.table_init( self.db_values["details_database"], details_db_keys )
         subtable_summary = self.table_init( self.db_values["details_database_summary"], details_summary_db_keys )
 
-	sn = {}
-	tests = {}
-	
-	ServiceName = ""
-	ServiceStatus = ""
-	Status = ""
-	Url = ""
-	Age = ""
-	Type = ""
-	Time = ""
+        sn = {}
+        tests = {}
+        
+        ServiceName = ""
+        ServiceStatus = ""
+        Status = ""
+        Url = ""
+        Age = ""
+        Type = ""
+        Time = ""
 
 
 
-	root = source_tree.getroot()
+        root = source_tree.getroot()
 
         self.SamResults = {}
-	
-	try:
-	    for element in root:
-		if element.tag == "data": data_branch = element
+        
+        try:
+            for element in root:
+                if element.tag == "data": data_branch = element
 
-	    for element in data_branch:
-		for item in element:
-		    if item.tag == "Services": services = item
-		    if item.tag == "VOName": self.db_values["site"] = item.text
+            for element in data_branch:
+                for item in element:
+                    if item.tag == "Services": services = item
+                    if item.tag == "VOName": self.db_values["site"] = item.text
 
 
-	    for services_item in services:
+            for services_item in services:
 
-		for services_prop in services_item:
-		    if services_prop.tag == "ServiceType":
-			ServiceType = services_prop.text
+                for services_prop in services_item:
+                    if services_prop.tag == "ServiceType":
+                        ServiceType = services_prop.text
 
-		    if services_prop.tag == "ServiceNames":
-			sn = services_prop
+                    if services_prop.tag == "ServiceNames":
+                        sn = services_prop
 
-			for sn_item in sn:
-				
-			    for sn_prop in sn_item:
-				if sn_prop.tag == "ServiceName":
-				    ServiceName = sn_prop.text
+                        for sn_item in sn:
+                                
+                            for sn_prop in sn_item:
+                                if sn_prop.tag == "ServiceName":
+                                    ServiceName = sn_prop.text
 
 
                             if ServiceName in self.blacklist: continue
 
 
-			    for sn_prop in sn_item:
-				if sn_prop.tag == "ServiceStatus":
-				    ServiceStatus = sn_prop.text
+                            for sn_prop in sn_item:
+                                if sn_prop.tag == "ServiceStatus":
+                                    ServiceStatus = sn_prop.text
 
 
 
-			    if ServiceStatus == str(1): service_status = 1.
-			    elif ServiceStatus == str(-1) : service_status = 0.
-			    else : service_status = 0.5
+                            if ServiceStatus == str(1): service_status = 1.
+                            elif ServiceStatus == str(-1) : service_status = 0.
+                            else : service_status = 0.5
 
                             self.SamResults[ServiceName] = {}
                             self.SamResults[ServiceName]["name"] = ServiceName
@@ -131,19 +131,19 @@ class Sam(ModuleBase,PhpDownload):
                             self.SamResults[ServiceName]["tests"] = []
                             
 
-			    for sn_prop in sn_item:
-				if sn_prop.tag == "Tests":
-				    tests = sn_prop
+                            for sn_prop in sn_item:
+                                if sn_prop.tag == "Tests":
+                                    tests = sn_prop
 
-				    for tests_item in tests:
-					    
-					for tests_prop in tests_item:
+                                    for tests_item in tests:
+                                            
+                                        for tests_prop in tests_item:
 
-					    if tests_prop.tag == "Status": Status = tests_prop.text
-					    elif tests_prop.tag == "Url": Url = tests_prop.text
-					    elif tests_prop.tag == "Age": Age = tests_prop.text
-					    elif tests_prop.tag == "Type": Type = tests_prop.text
-					    elif tests_prop.tag == "Time": Time = tests_prop.text
+                                            if tests_prop.tag == "Status": Status = tests_prop.text
+                                            elif tests_prop.tag == "Url": Url = tests_prop.text
+                                            elif tests_prop.tag == "Age": Age = tests_prop.text
+                                            elif tests_prop.tag == "Type": Type = tests_prop.text
+                                            elif tests_prop.tag == "Time": Time = tests_prop.text
 
                                         details = {}
                                         details["status"] = Status
@@ -172,7 +172,7 @@ class Sam(ModuleBase,PhpDownload):
             
             
                 if samGroups[group]['ident'].find('Type:') == 0:
-		    for type in samGroups[group]['ident'].split(','):
+                    for type in samGroups[group]['ident'].split(','):
                         nodeclass = type.replace('Type:','')
                         for service in  self.SamResults.keys():
                             if  self.SamResults[service]['type'] == nodeclass:
@@ -218,8 +218,8 @@ class Sam(ModuleBase,PhpDownload):
                 elif self.getGroupStatus(theGroup,'Warning') == True: theGroup['status'] = 0.5
                 else: theGroup['status'] = 1.0
 
-	except Exception, ex:
-	    raise Exception('Could not extract any useful data from the XML source code for the status calculation:\n' + str(ex))
+        except Exception, ex:
+            raise Exception('Could not extract any useful data from the XML source code for the status calculation:\n' + str(ex))
 
             
 
@@ -228,14 +228,14 @@ class Sam(ModuleBase,PhpDownload):
         for service in theNodes:
             serviceInfo =  self.SamResults[service]
 
-	    details_db_values = {}
+            details_db_values = {}
             details_db_values["service_type"] = serviceInfo['type'] 
             details_db_values["service_name"] = serviceInfo['name']
             details_db_values["service_status"] = serviceInfo['status']
             for test in  serviceInfo['tests']:
                 for i in test.keys():
                     details_db_values[i] = test[i]
-		details_db_value_list.append(details_db_values.copy())
+                details_db_value_list.append(details_db_values.copy())
         self.table_fill_many( subtable_details , details_db_value_list )
 
         worstGroupStatus = 99.0
@@ -261,8 +261,8 @@ class Sam(ModuleBase,PhpDownload):
         if worstGroupStatus != 99.0: self.status = worstGroupStatus
         else: self.status = -1
              
-	self.subtable_clear(subtable_details, [], self.holdback_time)
-	self.subtable_clear(subtable_summary, [], self.holdback_time)
+        self.subtable_clear(subtable_details, [], self.holdback_time)
+        self.subtable_clear(subtable_summary, [], self.holdback_time)
 
     def getGroupStatus(self,theGroup,type):
           if not theGroup.has_key(type): return False
@@ -288,92 +288,92 @@ class Sam(ModuleBase,PhpDownload):
 
         # this module_content string will be executed by a print('') PHP command
         # all information in the database are available via a $data["key"] call
-	mc_group_begin = []
+        mc_group_begin = []
         mc_group_begin.append('<strong>Group status:</strong>')
-	mc_group_begin.append('<br />')
+        mc_group_begin.append('<br />')
         mc_group_begin.append('<table class="TableData">');
 
-	mc_group_row = []
-	mc_group_row.append(""" <tr class="' .$service_status_color_flag . '">""")
-	mc_group_row.append("""  <td>' . $info["name"] . '</td>""")
-	mc_group_row.append("""  <td>' . $info["nodes"] . '</td>""")
-	mc_group_row.append(  ' </tr>')
+        mc_group_row = []
+        mc_group_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+        mc_group_row.append("""  <td>' . $info["name"] . '</td>""")
+        mc_group_row.append("""  <td>' . $info["nodes"] . '</td>""")
+        mc_group_row.append(  ' </tr>')
 
-	mc_group_end = []
-	mc_group_end.append(  '</table>')
-	mc_group_end.append(  '<br />')
+        mc_group_end = []
+        mc_group_end.append(  '</table>')
+        mc_group_end.append(  '<br />')
 
-	mc_service_begin = []
-	mc_service_begin.append('<strong>Individual service status:</strong>')
-	mc_service_begin.append('<br />')
-	mc_service_begin.append('<table class="TableData">');
+        mc_service_begin = []
+        mc_service_begin.append('<strong>Individual service status:</strong>')
+        mc_service_begin.append('<br />')
+        mc_service_begin.append('<table class="TableData">');
 
-	mc_service_row = []
-	mc_service_row.append(""" <tr class="' .$service_status_color_flag . '">""")
-	mc_service_row.append("""  <td>' . $info["service_type"] . '</td>""")
-	mc_service_row.append("""  <td>' . $info["service_name"] . '</td>""")
-	mc_service_row.append(  ' </tr>')
+        mc_service_row = []
+        mc_service_row.append(""" <tr class="' .$service_status_color_flag . '">""")
+        mc_service_row.append("""  <td>' . $info["service_type"] . '</td>""")
+        mc_service_row.append("""  <td>' . $info["service_name"] . '</td>""")
+        mc_service_row.append(  ' </tr>')
 
-	mc_service_end = []
-	mc_service_end.append('</table>')
-	mc_service_end.append('<br />')
+        mc_service_end = []
+        mc_service_end.append('</table>')
+        mc_service_end.append('<br />')
 
-	mc_details_begin = []
-	mc_details_begin.append( """<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_failed_result\\\');" />""")
-	mc_details_begin.append(   '<div class="DetailedInfo" id="' + self.__module__+ '_failed_result" style="display:none;">')
-	mc_details_begin.append(   ' <table class="TableDetails">')
-	mc_details_begin.append(   '  <tr class="TableHeader">')
-	mc_details_begin.append(   '   <td>Element Type</td>')
-	mc_details_begin.append(   '   <td>Element Name</td>')
-	mc_details_begin.append(   '   <td>Status</td>')
-	mc_details_begin.append(   '   <td>Test Name</td>')
-	mc_details_begin.append(   '   <td>Test Time</td>')
-	mc_details_begin.append(   '  </tr>')
+        mc_details_begin = []
+        mc_details_begin.append( """<input type="button" value="error/warning results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__+ """_failed_result\\\');" />""")
+        mc_details_begin.append(   '<div class="DetailedInfo" id="' + self.__module__+ '_failed_result" style="display:none;">')
+        mc_details_begin.append(   ' <table class="TableDetails">')
+        mc_details_begin.append(   '  <tr class="TableHeader">')
+        mc_details_begin.append(   '   <td>Element Type</td>')
+        mc_details_begin.append(   '   <td>Element Name</td>')
+        mc_details_begin.append(   '   <td>Status</td>')
+        mc_details_begin.append(   '   <td>Test Name</td>')
+        mc_details_begin.append(   '   <td>Test Time</td>')
+        mc_details_begin.append(   '  </tr>')
 
-	mc_details_row_fail = []
-	mc_details_row_fail.append("""<tr class="' . $color . '">""")
-	mc_details_row_fail.append(""" <td>' . $results["service_type"] . '</td>""")
-	mc_details_row_fail.append(""" <td>' . $results["service_name"] . '</td>""")
-	mc_details_row_fail.append(""" <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong></a> (' . $results["service_status"] . ')</td>""")
-	mc_details_row_fail.append(""" <td>' . $results["type"] . '</td>""")
-	mc_details_row_fail.append("""   <td>' . $results["time"] . '</td>""")
-	mc_details_row_fail.append('  </tr>');
+        mc_details_row_fail = []
+        mc_details_row_fail.append("""<tr class="' . $color . '">""")
+        mc_details_row_fail.append(""" <td>' . $results["service_type"] . '</td>""")
+        mc_details_row_fail.append(""" <td>' . $results["service_name"] . '</td>""")
+        mc_details_row_fail.append(""" <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong></a> (' . $results["service_status"] . ')</td>""")
+        mc_details_row_fail.append(""" <td>' . $results["type"] . '</td>""")
+        mc_details_row_fail.append("""   <td>' . $results["time"] . '</td>""")
+        mc_details_row_fail.append('  </tr>');
 
-	mc_details_mid = []
-	mc_details_mid.append(     ' </table>')
-	mc_details_mid.append(     '</div>')
-	mc_details_mid.append(     '<br />')
+        mc_details_mid = []
+        mc_details_mid.append(     ' </table>')
+        mc_details_mid.append(     '</div>')
+        mc_details_mid.append(     '<br />')
 
-	mc_details_mid.append(   """<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__ + """_success_result\\\');" />""")
-	mc_details_mid.append(     '<div class="DetailedInfo" id="' + self.__module__+ '_success_result" style="display:none;">')
-	mc_details_mid.append(     ' <table class="TableDetails">')
-	mc_details_mid.append(     '  <tr class="TableHeader">')
-	mc_details_mid.append(     '   <td>Element Type</td>')
-	mc_details_mid.append(     '   <td>Element Name</td>')
-	mc_details_mid.append(     '   <td>Status</td>')
-	mc_details_mid.append(     '   <td>Test Name</td>')
-	mc_details_mid.append(     '   <td>Test Time</td>')
-	mc_details_mid.append(     '  </tr>')
+        mc_details_mid.append(   """<input type="button" value="successful results" onfocus="this.blur()" onclick="show_hide(\\\'""" + self.__module__ + """_success_result\\\');" />""")
+        mc_details_mid.append(     '<div class="DetailedInfo" id="' + self.__module__+ '_success_result" style="display:none;">')
+        mc_details_mid.append(     ' <table class="TableDetails">')
+        mc_details_mid.append(     '  <tr class="TableHeader">')
+        mc_details_mid.append(     '   <td>Element Type</td>')
+        mc_details_mid.append(     '   <td>Element Name</td>')
+        mc_details_mid.append(     '   <td>Status</td>')
+        mc_details_mid.append(     '   <td>Test Name</td>')
+        mc_details_mid.append(     '   <td>Test Time</td>')
+        mc_details_mid.append(     '  </tr>')
 
-	mc_details_row_ok = []
-	mc_details_row_ok.append(  '  <tr class="ok">')
-	mc_details_row_ok.append("""   <td>' . $results["service_type"] . '</td>""")
-	mc_details_row_ok.append("""   <td>' . $results["service_name"] . '</td>""")
-	mc_details_row_ok.append("""   <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong></a></td>""")
-	mc_details_row_ok.append("""   <td>' . $results["type"] . '</td>""")
-	mc_details_row_ok.append("""   <td>' . $results["time"] . '</td>""")
-	mc_details_row_ok.append(  '  </tr>')
+        mc_details_row_ok = []
+        mc_details_row_ok.append(  '  <tr class="ok">')
+        mc_details_row_ok.append("""   <td>' . $results["service_type"] . '</td>""")
+        mc_details_row_ok.append("""   <td>' . $results["service_name"] . '</td>""")
+        mc_details_row_ok.append("""   <td><a href="' . $results["url"] . '"><strong>' . $results["status"] . '</strong></a></td>""")
+        mc_details_row_ok.append("""   <td>' . $results["type"] . '</td>""")
+        mc_details_row_ok.append("""   <td>' . $results["time"] . '</td>""")
+        mc_details_row_ok.append(  '  </tr>')
 
-	mc_details_end = []
-	mc_details_end.append(' </table>')
-	mc_details_end.append('</div>')
-	mc_details_end.append('<br />');
+        mc_details_end = []
+        mc_details_end.append(' </table>')
+        mc_details_end.append('</div>')
+        mc_details_end.append('<br />');
 
         module_content = """<?php
 
-	$details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
-	$details_summary_db_sqlquery = "SELECT * FROM " . $data["details_database_summary"] . " WHERE timestamp = " . $data["timestamp"];
-	$temp_element = "";
+        $details_db_sqlquery = "SELECT * FROM " . $data["details_database"] . " WHERE timestamp = " . $data["timestamp"];
+        $details_summary_db_sqlquery = "SELECT * FROM " . $data["details_database_summary"] . " WHERE timestamp = " . $data["timestamp"];
+        $temp_element = "";
 
         $GroupCount=0;
         foreach($dbh->query($details_summary_db_sqlquery) as $info)   
@@ -382,73 +382,73 @@ class Sam(ModuleBase,PhpDownload):
         }
 
         if ($GroupCount != 0)
-	{
-	    print('""" + self.PHPArrayToString(mc_group_begin) + """');
-	
-	    foreach ($dbh->query($details_summary_db_sqlquery) as $info)
-       	    {
-	        if ($info["status"] == "1.")
-	            $service_status_color_flag = "ok";
+        {
+            print('""" + self.PHPArrayToString(mc_group_begin) + """');
+        
+            foreach ($dbh->query($details_summary_db_sqlquery) as $info)
+                   {
+                if ($info["status"] == "1.")
+                    $service_status_color_flag = "ok";
                 elseif ($info["status"] == "0.5")
-	            $service_status_color_flag = "warning";
-	        else
-		    $service_status_color_flag = "critical";
+                    $service_status_color_flag = "warning";
+                else
+                    $service_status_color_flag = "critical";
 
-#	        print('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
-	        print('""" + self.PHPArrayToString(mc_group_row) + """');
-	    }
+#                print('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["name"] . '</strong></td><td><strong>' . $info["nodes"] . '</strong></td></tr>');
+                print('""" + self.PHPArrayToString(mc_group_row) + """');
+            }
 
-	    print('""" + self.PHPArrayToString(mc_group_end) + """');
-	}
+            print('""" + self.PHPArrayToString(mc_group_end) + """');
+        }
 
         print('""" + self.PHPArrayToString(mc_service_begin) + """');
-	
-	foreach ($dbh->query($details_db_sqlquery) as $info)
-       	{
-	    if ($temp_element != $info["service_name"])
-	    {
-		if ($info["service_status"] == "1.")
-		    $service_status_color_flag = "ok";
-                elseif ($info["service_status"] == "0.5")
-		    $service_status_color_flag = "warning";
-		else
-		    $service_status_color_flag = "critical";
-
-#		print('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
-
-		print('""" + self.PHPArrayToString(mc_service_row) + """');
-	    }
-	    $temp_element = $info["service_name"];
-	}
-
-	print('""" + self.PHPArrayToString(mc_service_end) + """');
-
-	print('""" + self.PHPArrayToString(mc_details_begin) + """');
-	
-	foreach ($dbh->query($details_db_sqlquery) as $results)
-	{
-	    if ($results["status"] != "ok" && $results["status"] != "")
+        
+        foreach ($dbh->query($details_db_sqlquery) as $info)
+               {
+            if ($temp_element != $info["service_name"])
             {
-			$color = "critical";
-			if($results["service_status"] == "0.5") $color="warning";
+                if ($info["service_status"] == "1.")
+                    $service_status_color_flag = "ok";
+                elseif ($info["service_status"] == "0.5")
+                    $service_status_color_flag = "warning";
+                else
+                    $service_status_color_flag = "critical";
 
-			print('""" + self.PHPArrayToString(mc_details_row_fail) + """');
-	    }
-	}
+#                print('<tr class="' .$service_status_color_flag . '"><td><strong>' . $info["service_type"] . '</strong></td><td><strong>' . $info["service_name"] . '</strong></td></tr>');
 
-	print('""" + self.PHPArrayToString(mc_details_mid) + """');
+                print('""" + self.PHPArrayToString(mc_service_row) + """');
+            }
+            $temp_element = $info["service_name"];
+        }
 
-	foreach ($dbh->query($details_db_sqlquery) as $results)
-	{
-	    if ($results["status"] == "ok")
-	    {
-		print('""" + self.PHPArrayToString(mc_details_row_ok) + """');
-	    }
-	}
+        print('""" + self.PHPArrayToString(mc_service_end) + """');
 
-	print('""" + self.PHPArrayToString(mc_details_end) + """');
+        print('""" + self.PHPArrayToString(mc_details_begin) + """');
+        
+        foreach ($dbh->query($details_db_sqlquery) as $results)
+        {
+            if ($results["status"] != "ok" && $results["status"] != "")
+            {
+                        $color = "critical";
+                        if($results["service_status"] == "0.5") $color="warning";
 
-	?>"""
+                        print('""" + self.PHPArrayToString(mc_details_row_fail) + """');
+            }
+        }
+
+        print('""" + self.PHPArrayToString(mc_details_mid) + """');
+
+        foreach ($dbh->query($details_db_sqlquery) as $results)
+        {
+            if ($results["status"] == "ok")
+            {
+                print('""" + self.PHPArrayToString(mc_details_row_ok) + """');
+            }
+        }
+
+        print('""" + self.PHPArrayToString(mc_details_end) + """');
+
+        ?>"""
 
         return self.PHPOutput(module_content)
 
