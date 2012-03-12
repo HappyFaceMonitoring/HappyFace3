@@ -3,11 +3,17 @@ from DownloadTag import *
 from XMLParsing import *
 from PhpDownload import *
 
+import json
+
 
 class Sam(ModuleBase,PhpDownload):
 
     def __init__(self, module_options):
         ModuleBase.__init__(self, module_options)
+        
+        #force download of data in JSON format
+        self.configService.addToParameter('phpArgs','output','json')   
+        
         PhpDownload.__init__(self)
 
         # definition of the database table keys and pre-defined values
@@ -24,9 +30,10 @@ class Sam(ModuleBase,PhpDownload):
         
         self.report_url        = self.configService.get('setup','report_url')
         
-        self.dsTag = 'sam_xml_source'
-
+        self.dsTag = 'sam_json_source'
+        
         self.downloadRequest[self.dsTag] = 'wgetXmlRequest|'+self.makeUrl()
+        print self.downloadRequest[self.dsTag]
         self.blacklist = self.configService.getDefault('setup','blacklist',"").split(",")
 
         self.configService.addToParameter('setup','definition','Blacklist: '+', '.join(self.blacklist)+'<br />')        
@@ -36,8 +43,8 @@ class Sam(ModuleBase,PhpDownload):
 
         self.configService.addToParameter('setup','source',self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
         dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
-
-        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        with open(sourceFile, 'r') as f:
+            data_object = json.loads(f.read())
 
         # parse the details and store it in a special database table
         details_database = self.__module__ + "_table_details"
@@ -54,7 +61,6 @@ class Sam(ModuleBase,PhpDownload):
         details_db_keys["service_status"] = StringCol()
         details_db_keys["status"] = StringCol()
         details_db_keys["url"] = StringCol()
-        details_db_keys["age"] = StringCol()
         details_db_keys["type"] = StringCol()
         details_db_keys["time"] = StringCol()
 
@@ -68,90 +74,33 @@ class Sam(ModuleBase,PhpDownload):
         subtable_details = self.table_init( self.db_values["details_database"], details_db_keys )
         subtable_summary = self.table_init( self.db_values["details_database_summary"], details_summary_db_keys )
 
-        sn = {}
-        tests = {}
-        
-        ServiceName = ""
-        ServiceStatus = ""
-        Status = ""
-        Url = ""
-        Age = ""
-        Type = ""
-        Time = ""
-
-
-
-        root = source_tree.getroot()
-
         self.SamResults = {}
         
         try:
-            for element in root:
-                if element.tag == "data": data_branch = element
-
-            for element in data_branch:
-                for item in element:
-                    if item.tag == "Services": services = item
-                    if item.tag == "VOName": self.db_values["site"] = item.text
-
-
-            for services_item in services:
-
-                for services_prop in services_item:
-                    if services_prop.tag == "ServiceType":
-                        ServiceType = services_prop.text
-
-                    if services_prop.tag == "ServiceNames":
-                        sn = services_prop
-
-                        for sn_item in sn:
-                                
-                            for sn_prop in sn_item:
-                                if sn_prop.tag == "ServiceName":
-                                    ServiceName = sn_prop.text
-
-
-                            if ServiceName in self.blacklist: continue
-
-
-                            for sn_prop in sn_item:
-                                if sn_prop.tag == "ServiceStatus":
-                                    ServiceStatus = sn_prop.text
-
-
-
-                            if ServiceStatus == str(1): service_status = 1.
-                            elif ServiceStatus == str(-1) : service_status = 0.
-                            else : service_status = 0.5
-
-                            self.SamResults[ServiceName] = {}
-                            self.SamResults[ServiceName]["name"] = ServiceName
-                            self.SamResults[ServiceName]["type"] = ServiceType
-                            self.SamResults[ServiceName]["status"] = service_status
-                            self.SamResults[ServiceName]["tests"] = []
-                            
-
-                            for sn_prop in sn_item:
-                                if sn_prop.tag == "Tests":
-                                    tests = sn_prop
-
-                                    for tests_item in tests:
-                                            
-                                        for tests_prop in tests_item:
-
-                                            if tests_prop.tag == "Status": Status = tests_prop.text
-                                            elif tests_prop.tag == "Url": Url = tests_prop.text
-                                            elif tests_prop.tag == "Age": Age = tests_prop.text
-                                            elif tests_prop.tag == "Type": Type = tests_prop.text
-                                            elif tests_prop.tag == "Time": Time = tests_prop.text
-
-                                        details = {}
-                                        details["status"] = Status
-                                        details["url"] = (self.report_url + Url.__str__()).replace('&','&amp;')
-                                        details["age"] = Age
-                                        details["type"] = Type
-                                        details["time"] = Time
-                                        self.SamResults[ServiceName]["tests"].append(details)
+            for group in data_object[0]['groups']:
+                for service in group['services']:
+                    name = service['hostname']
+                    if name in self.blacklist:
+                        continue
+                    self.SamResults[name] = {}
+                    self.SamResults[name]["name"] = name
+                    self.SamResults[name]["type"] = service['flavour']
+                    query_base = 'hostName=' + name + '&flavour=' + self.SamResults[name]["type"]
+                    service_status = 1
+                    self.SamResults[name]["tests"] = []
+                    for metric in service['metrics']:
+                        details = {}
+                        details["status"] = metric['status'].lower()
+                        if details["status"] == 'missing' and service_status > 0.5:
+                            service_status = 0.5
+                        elif details["status"] == 'critical' and service_status > 0.0:
+                            service_status = -1.0
+                        
+                        details["url"] = self.report_url + '?' + query_base + '&metric=' + metric['name'] + '&timeStamp=' + metric['exec_time']
+                        details["type"] = metric['name']
+                        details["time"] = metric['exec_time']
+                        self.SamResults[name]["tests"].append(details)
+                    self.SamResults[name]["status"] = service_status
 
             samGroups = {}
    
@@ -263,7 +212,7 @@ class Sam(ModuleBase,PhpDownload):
              
         self.subtable_clear(subtable_details, [], self.holdback_time)
         self.subtable_clear(subtable_summary, [], self.holdback_time)
-
+    
     def getGroupStatus(self,theGroup,type):
           if not theGroup.has_key(type): return False
           for check in theGroup[type]:
