@@ -94,7 +94,7 @@ class Sam(ModuleBase,PhpDownload):
                         if details["status"] == 'missing' and service_status > 0.5:
                             service_status = 0.5
                         elif details["status"] == 'critical' and service_status > 0.0:
-                            service_status = -1.0
+                            service_status = 0.0
                         
                         details["url"] = self.report_url + '?' + query_base + '&metric=' + metric['name'] + '&timeStamp=' + metric['exec_time']
                         details["type"] = metric['name']
@@ -106,7 +106,7 @@ class Sam(ModuleBase,PhpDownload):
    
             self.configService.addToParameter('setup','definition','Definition of Service Groups:'+'<br />')
             groupConfig = self.configService.getSection('SamGroups')
-            for group in groupConfig.keys():
+            for group in groupConfig.iterkeys():
 
                 self.configService.addToParameter('setup','definition','*  '+group+': '+self.EscapeHTMLEntities(groupConfig[group])+'<br />')
 
@@ -132,7 +132,7 @@ class Sam(ModuleBase,PhpDownload):
 
             self.configService.addToParameter('setup','definition','Thresholds:'+'<br />')
             groupThresholds = self.configService.getSection('SamGroupsThresholds')
-            for val in groupThresholds.keys():
+            for val in groupThresholds.iterkeys():
                 self.configService.addToParameter('setup','definition','* '+val+': '+self.EscapeHTMLEntities(groupThresholds[val])+'<br />')
                 tmp = val.split('_')
                 if len(tmp) != 3: self.error_message += "Config parameter "+val+" does not match group_Error/Warning."
@@ -189,9 +189,7 @@ class Sam(ModuleBase,PhpDownload):
 
         worstGroupStatus = 99.0
         if len(samGroups) > 0:
-            for group in samGroups:
-                theGroup = samGroups[group]
-
+            for group,theGroup in samGroups.iteritems():
                 details_summary_db_values = {}
                 details_summary_db_values["name"] = group
                 details_summary_db_values["nodes"] = ', '.join(theGroup['nodes'])
