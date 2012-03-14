@@ -160,14 +160,14 @@ for table_name in source_tables:
     columns = map(lambda x: x[0][1:] if x[0][0] == '_' else x[0], merge_rows.description)
     columns = filter(lambda x: x != 'id', columns)
     # col name escaping (see wrapper docs)
-    columns = map(lambda x: '_'+x if x in dest_wrapper.reserved_names else x, columns)
-    
+    #columns = map(lambda x: '_'+x if x in dest_wrapper.reserved_names else x, columns)
+
     try:
         # Create table in destination if not present
 #        if not table_name in dest_tables:
         meta = type(table_name+"_meta", (), dict(table=table_name, fromDatabase = True))
         SrcTable = type(table_name+"_mainproxy", (SQLObject,), dict(_connection=source_conn, sqlmeta=meta))
-        #import pdb;pdb.set_trace()
+        
         table_keys = {}
         for col, col_obj in SrcTable.sqlmeta.columns.iteritems():
             col = styles.mixedToUnder(col)
@@ -178,14 +178,16 @@ for table_name in source_tables:
                 table_keys[col] = globals()[col_obj.__class__.__name__[2:]]()
             else:
                 table_keys[col] = StringCol() # for some reason never recognized as StringCol (only Col?!)
+        
         trans.commit()
-        dest_wrapper.table_init(table_name, table_keys)
+        DstTable = dest_wrapper.table_init(table_name, table_keys)
         trans.commit()
         copied_files = []
         dest_tables.append(table_name)
     except Exception,e:
         print "Cannot create table '%s': %s" % (table_name, str(e))
         continue
+    
     
     n_rows = 0
     n_total_rows = 0
@@ -200,7 +202,6 @@ for table_name in source_tables:
                 print '\r%d/%d %s... %.1f%%, copied rows %i' % (index, n_source_tables, table_name, n_total_rows*100.0 / counted_rows, n_rows),
             try:
                 trans.begin()
-                print "begin"
             except AssertionError:
                 pass
 
@@ -224,9 +225,6 @@ for table_name in source_tables:
             if timestamps[row['timestamp']]:
                 continue
 
-            column_names = ','.join(columns)
-            column_values = ','.join(['?']*len(columns))
-            
             # Copy archive files
             columns_archive = filter(lambda x: x.startswith('filename') or x == 'eff_plot' or x == 'rel_eff_plot', columns)
             if do_not_cpy_archive:
@@ -266,10 +264,9 @@ for table_name in source_tables:
                         raise ex
                 
             n_rows+=1
-
+            
             # Copy database entry
-            insert = sqlbuilder.Insert(table_name, values=row)
-            trans.query(dest_conn.sqlrepr(insert))
+            dest_wrapper.table_fill(DstTable, row)
             
             if n_rows%commit_block_size == 0:
                 trans.commit()

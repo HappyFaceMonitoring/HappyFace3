@@ -79,9 +79,10 @@ class DBWrapper(object):
                 avail_keys = []
                 for key in DBProxy.sqlmeta.columns.iterkeys():
                     avail_keys.append( re.sub('[A-Z]', lambda x: '_' + x.group(0).lower(), key) )
-                new_columns = dict( (key, real) for key,real in real_keys.iteritems() if real not in avail_keys)
-                if len(new_columns) > 0:
 
+                new_columns = dict( (key, real) for key,real in real_keys.iteritems() if real not in avail_keys)
+                
+                if len(new_columns) > 0:
                     for key, real_key in new_columns.iteritems():
                         if key != "index":
                             try:
@@ -91,12 +92,17 @@ class DBWrapper(object):
                                 # above. However, this is VERY slow for large SQLite databases.
                                 # This is why we run an ALTER TABLE query manually here, which is
                                 # much faster (returns almost instantly).
-                                sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
-                                self.dbConnection.query('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, real_key, sqlType))
+                                self.dbConnection.query('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, real_key, table_keys[key]._sqlType()))
                             except Exception, ex: print "Failing at adding new column: \"" + str(real_key) + "\" in the module " + self.__module__ + ": " + str(ex)
 
             except Exception, e:
                 print 'Failed to create table %s: %s' % (tableName, e)
+                traceback.print_exc()
+            
+            try:
+                self.fixColumnTypes(My_DB_Class)
+            except Exception, e:
+                print 'Failed to check and fix column types on table %s: %s' % (tableName, e)
                 traceback.print_exc()
         finally:
             # unlock the database access
@@ -107,9 +113,17 @@ class DBWrapper(object):
     def table_fill(self, My_DB_Class, table_values):
         # lock object enables exclusive access to the database
         self.lock.acquire()
-
+        self.checkAndFixColumnBoundaries(My_DB_Class, table_values)
         try:
             My_DB_Class(**table_values)
+        except Exception, e:
+            msg = str(e).lower()
+            if 'int' in msg or 'range' in msg or 'dataerror' in msg:
+                print "Oh noes"
+                print table_values
+                raise e
+            else:
+                raise e
         finally:
             # unlock the database access
             self.lock.release()
@@ -205,6 +219,34 @@ class DBWrapper(object):
         This method here just a dummy, passing the connectionString argument as first parameter.
         """
         return [connectionString]
+        
+    def fixColumnTypes(self, DbClass):
+        '''
+        Check if the SQL type of each column matches the type used by
+        the module definition. If not, alter the table to match the
+        preset type.
+        The method MUST NOT narrow down the range of valid values,
+        e.g. convert BIGINT -> INT. The typeNarrowingOccurs() - method can be used
+        to check that.
+        '''
+    
+    def typeNarrowingOccurs(self, srcType, targetType):
+        '''
+        Check if the range of valid values would be narrowed when
+        the types would be converted and return True in that case.
+        The SO-Type names have to be passed!
+        '''
+        if srcType == 'BIGINT' and targetType == 'INT': return True
+        if srcType == 'BIGINT' and targetType == 'SMALLINT': return True
+        if srcType == 'INT'    and targetType == 'SMALLINT': return True
+        return False
+    
+    def checkAndFixColumnBoundaries(self, My_DB_Class, table_values):
+        '''
+        Check if the values cannot be inserted to the given database table
+        because of type range restraits. If that occurs, try to fix it by
+        altering the column type.
+        '''
 
 class SQLiteWrapper(DBWrapper):
     @classmethod
@@ -228,9 +270,23 @@ class SQLiteWrapper(DBWrapper):
         return [row[0] for row in rows]
 
 class PostgresWrapper(DBWrapper):
+    so_type_to_postgres = {
+        'INT': 'integer',
+        'BIGINT': 'bigint',
+    }
+    postgres_type_to_so = {
+        'integer': 'INT',
+        'bigint': 'BIGINT',
+    }
     def __init__(self, dbConnection=None):
         DBWrapper.__init__(self, dbConnection)
         self.reserved_names.extend(['user'])
+        
+        # store retrieved schemata for repeated checkAndFixColumnBoundaries() calls.
+        # Only a few cols are saved, since usually only integer-cols need checking,
+        # so you cannot rely on the cached schema to contain every column.
+        self.schema_cache = {}
+        
     def table_fill_many(self, My_DB_Class, table_values):
         self.__table_fill_many__(My_DB_Class, table_values, placeholder_fmt='%%(%s)s')
     
@@ -259,6 +315,44 @@ class PostgresWrapper(DBWrapper):
         parameters['dbname'] = dbName
         
         return ["pgsql:" + ";".join([key+"="+str(value) for key,value in parameters.iteritems()]) ]
-
+        
+    def fixColumnTypes(self, DbClass):
+        try:
+            conn = self.dbConnection.getConnection()
+            code_type = dict((col,obj._sqlType()) for col,obj in DbClass.sqlmeta.columns.iteritems())
+            cursor = conn.cursor()
+            cursor.execute("select column_name,data_type from information_schema.columns where table_name='%s'" % DbClass.sqlmeta.table)
+            for col, database_type in cursor.fetchall():
+                if col not in code_type:
+                    continue
+                if code_type[col] in self.so_type_to_postgres:
+                    narrowing = self.typeNarrowingOccurs(self.postgres_type_to_so[database_type], code_type[col])
+                    if self.so_type_to_postgres[code_type[col]] != database_type and not narrowing:
+                        print "Change type of column %s to %s to avoid range conflict" % (col, code_type[col])
+                        cursor.execute('ALTER TABLE %s ALTER COLUMN %s TYPE %s' % (DbClass.sqlmeta.table, col, code_type[col]))
+        finally:
+            cursor.close()
+    
+    def checkAndFixColumnBoundaries(self, My_DB_Class, table_values):
+        columns = {}
+        table_name = My_DB_Class.sqlmeta.table
+        if table_name in self.schema_cache:
+            columns = self.schema_cache[table_name]
+        else:
+            # save integer columns, changing column naming style
+            columns = dict((styles.mixedToUnder(col),obj) for col,obj in My_DB_Class.sqlmeta.columns.iteritems() if obj.__class__.__name__ == "SOIntCol")
+            self.schema_cache[table_name] = columns
+        cols_to_remove = []
+        for col, col_obj in self.schema_cache[table_name].iteritems():
+            # 'heuristically' use the a bigger column when close to limit.
+            # This is not a hack! It is a feature request from Andreas.
+            #if (col_obj._postgresType().lower() in ("int", "smallint")) and table_values[col] > 210000000:
+            if table_values[col] > 2e9:
+                print "Change type of column %s to bigint to avoid range conflict" % (col)
+                self.dbConnection.query('ALTER TABLE %s ALTER COLUMN %s TYPE bigint' % (My_DB_Class.sqlmeta.table, col))
+                # with bigint, there shouldn't be any trouble, mark for removal from cache
+                cols_to_remove.append(col)
+        for col in cols_to_remove:
+            del self.schema_cache[table_name][col]
 # This variable contains the DBWrapper that is used by all modules
 SelectedDBWrapper = None
