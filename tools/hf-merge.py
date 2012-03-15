@@ -5,40 +5,57 @@ import sys
 import time
 import getopt
 import shutil
+import datetime
 from sqlobject import *
 
 def help():
     print(
-    '''hf-merge [options] --into-wrapper=<Path/To/Module.Class> --from-wrapper=<Path/To/Module.Class> --into=<Connect String> <Source Connect String>
+    '''hf-merge [options] --into-wrapper=<Path/To/Module.Class> --from-wrapper=<Path/To/Module.Class> --into=<Connect String> --from=<Connect String>
 
-    This tool merges one HappyFace instance into another. This can be useful if
-    you shut your main instance down for maintenance and run a secondary instance
-    during that time. Using this script you can merge the data of the secondary
-    instance into the main instance so that you can remove the secondary instance
-    afterwards without losing data.
+This tool merges one HappyFace instance into another. This can be useful if
+you shut your main instance down for maintenance and run a secondary instance
+during that time. Using this script you can merge the data of the secondary
+instance into the main instance so that you can remove the secondary instance
+afterwards without losing data.
 
+CONNECTION STRING:
     The connection string has the format:
         scheme://[user[:password]@]host[:port]/database[?parameters]
 
     Source and more info: http://sqlobject.org/SQLObject.html#declaring-a-connection
 
-    The following options are possible:
+PARAMETERS:
+    The following parameters are mandatory:
+        --into=FILE        Connection string to a HappyFace database to merge into
+        --from=FILE        Connection string to a HappyFace database, used as merge source
 
-    --into=FILE        Database file of the HappyFace instance to merge into
-    --start=TIMESTAMP    if given only merge database entries recorded after TIMESTAMP
-    --end=TIMESTAMP        if given only merge database entries recorded before TIMESTAMP
-    --into-wrapper=<Path/To/Module.Class>   class to use as a wrapper for the input database
-    --from-wrapper=<Path/To/Module.Class>   class to use as a wrapper for the output database
-    --into-archive=<Path/To/Archive>        destination archive directory
-    --from-archive=<Path/To/Archive>        source archive directory
-    --no-archive                            does not copy archive, usefull for db-migration
+    The following parameters are optional:
+        --help                                  show this help message
+        --start=TIMESTAMP                       if given only merge database entries recorded after TIMESTAMP
+        --end=TIMESTAMP                         if given only merge database entries recorded before TIMESTAMP
+        --into-wrapper=<Path/To/Module.Class>   class to use as a wrapper for the input database
+        --from-wrapper=<Path/To/Module.Class>   class to use as a wrapper for the output database
+        --into-archive=<Path/To/Archive>        destination archive directory
+        --from-archive=<Path/To/Archive>        source archive directory
+        --no-archive                            does not copy archive, usefull for db-migration
 
     If --start and/or --end are given then only database entries in the specified
     timerange are merged. If you want to merge the complete database then you do
     not need to specify them. Entries which are already contained in the
-    destination database already will not be overwritten. Note that the --into
-    option and at least one of --into-wrapper or --from-wrapper is required. If only
-    one wrapper is specified, it is used for both databases.
+    destination database already will not be overwritten.
+
+    Note that at least one of --into-wrapper or --from-wrapper is required.
+    If only one wrapper is specified, it is used for both databases.
+
+EXAMPLE:
+    An example to migrate from SQLite3 to Postgres without copying the archive files,
+    called from within the tools directory of a HF instance.
+
+        python hf-merge.py --from-wrapper=../HappyFace/happycore/DBWrapper.SQLiteWrapper \\
+        --into-wrapper=../HappyFace/happycore/DBWrapper.PostgresWrapper \\
+        --no-archive \\
+        --into=postgres://DBUSER:PASSWORD@HOST/DBNAME \\
+        --from=sqlite://$(pwd)/../webpage/HappyFace.db
     ''')
     sys.exit(0)
 
@@ -52,7 +69,7 @@ dest_dirname = None
 source_dirname = None
 do_not_cpy_archive = False
 
-optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'into-wrapper=', 'from-wrapper=', 'into=', 'from-archive=', 'into-archive=', 'no-archive', 'help'])
+optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'into-wrapper=', 'from-wrapper=', 'from=', 'into=', 'from-archive=', 'into-archive=', 'no-archive', 'help'])
 options = dict(optlist)
 if '-h' in options or '--help' in options:
     help()
@@ -63,7 +80,12 @@ if '--end' in options:
 if '--into' in options:
     dest = options['--into']
 else:
-    sys.stderr.write('No merge destination given. Use --into="<HappyFace.db>"\n')
+    sys.stderr.write('No merge destination given. Use --into="<CONNECT STRING>", see --help for more information\n')
+    sys.exit(-1)
+if '--from' in options:
+    source = options['--from']
+else:
+    sys.stderr.write('No merge source given. Use --from="<CONNECT STRING>", see --help for more information\n')
     sys.exit(-1)
 
 if '--into-archive' in options:
@@ -102,11 +124,6 @@ if FromWrapper is None: FromWrapper = IntoWrapper
 if IntoWrapper is None and FromWrapper is None:
     sys.stderr.write('No database wrapper specified. Try --help for more information."\n')
     sys.exit(-1)
-
-if len(args) < 1:
-    sys.stderr.write('%s --start=timestamp --end=timestamp --into=<HappyFace Destination Database> <HappyFace Source Database>\n' % sys.argv[0])
-    sys.exit(-1)
-source = args[0]
 
 source_conn = FromWrapper.connectionForURI(source, '')
 dest_conn = IntoWrapper.connectionForURI(dest, '')
@@ -288,5 +305,11 @@ for table_name in source_tables:
         sys.stdout.write('merged %d/%d rows%s\n' % (n_rows, n_total_rows, create_table))
     else:
         sys.stdout.write('No entries in specified time range\n')
-print missing_files
+
+if len(missing_files) > 0:
+    print "\nThere were files missing when copying the archive"
+    for timestamp, num_files in missing_files.iteritems():
+        archive_date = datetime.date.fromtimestamp(timestamp)
+        print "  %i files in archive '%i/%i/%i/%i'" % (num_files, archive_date.year, archive_date.month, archive_date.day, timestamp)
 trans.commit(close=True)
+print "\nMerging databases done"
