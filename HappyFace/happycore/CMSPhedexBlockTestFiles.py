@@ -1,16 +1,8 @@
-##############################################
-# Quick Consistency Check module 
-# Created: N.Ratnikova 29-11-2009.
-##############################################
 
 from ModuleBase import *
 from XMLParsing import *
-################################################################
-# Module to store and display results of Quick Consistency Check
-# produced by quickConsistencyCheck script.
-#################################################################
+
 class CMSPhedexBlockTestFiles(ModuleBase):
-    # Defines keys for the module database tables.
     def __init__(self,module_options):
         ModuleBase.__init__(self,module_options)
         
@@ -20,6 +12,7 @@ class CMSPhedexBlockTestFiles(ModuleBase):
         self.db_keys["request_timestamp"] = IntCol()
         self.db_keys["filename_blocktest"] = StringCol()
         self.db_keys["details_database"] = StringCol()
+        self.db_keys["input_xml_age_limit"] = IntCol()
 
         self.details_database = self.__module__ + "_details_database"
         
@@ -32,12 +25,8 @@ class CMSPhedexBlockTestFiles(ModuleBase):
         self.db_values["failed_total_files"] = 0
         self.db_values["request_timestamp"] = 0
         self.db_values["filename_blocktest"] = ''
+        self.db_values["input_xml_age_limit"] = int(self.configService.get("setup", "input_xml_age_limit"))
         
-        """
-        Downloads input source xml file.
-        Parses xml document and saves data in the database.
-        Defines algorithm for module status.
-        """
         dl_error,sourceFile = self.downloadService.getFile(self.downloadRequest[self.dsTag])
         
         if dl_error != "":
@@ -115,18 +104,18 @@ class CMSPhedexBlockTestFiles(ModuleBase):
             self.subtable_clear(details_table, [], self.holdback_time)
 
         else:
+            # we have old data, just copy them all over
             self.db_values['details_database'] = self.details_database
             self.db_values["failed_blocks"] = previous_result.failed_blocks
             self.db_values["failed_total_files"] = previous_result.failed_total_files
             self.db_values["request_timestamp"] = previous_result.request_timestamp
+            # we do not keep archive file, leave filename empty
             self.db_values["filename_blocktest"] = ''
         
         if self.db_values["failed_total_files"] > 0 or self.db_values["failed_blocks"] > 0:
             self.status = 0.0
         
 
-    # Creates module contents for the web page, filling in
-    # the data from the database.
     def output(self):
         js = []
         js.append('<script type="text/javascript">')
@@ -225,6 +214,12 @@ class CMSPhedexBlockTestFiles(ModuleBase):
         $month = sprintf('%02d', $tm[4] + 1); // PHP uses 0-11, Python uses 1-12
         $day = sprintf('%02d', $tm[3]);
         $archive_dir = "archive/$year/$month/$day/" . $timestamp;
+        
+        if($data["request_timestamp"]+($data['input_xml_age_limit']*24*60*60) < $data["timestamp"])
+        {
+            print("<p style=\\\"font-size:large; color: red;\\\">Input XML was generated more than ".$data['input_xml_age_limit']." days in the past</p>");
+        }
+        
         print('""" + self.PHPArrayToString(mc_overview) + """');
 
         $details_sqlquery = "SELECT block, fails, time_reported FROM " . $data["details_database"] . " WHERE request_timestamp = " . $data["request_timestamp"];
