@@ -178,7 +178,7 @@ class CMSPhedexBlockTestFiles(ModuleBase):
         mc_overview.append(' </tr>')
         
         mc_overview.append(" <tr>")
-        mc_overview.append("  <td>'.$data['request_timestamp'].'</td>")
+        mc_overview.append("  <td>'.strftime('%Y-%m-%d %H:%M', $data['request_timestamp']).'</td>")
         mc_overview.append("  <td>'.$data['failed_blocks'].'</td>")
         mc_overview.append("  <td>'.$data['failed_total_files'].'</td>")
         mc_overview.append(' </tr>')
@@ -202,7 +202,7 @@ class CMSPhedexBlockTestFiles(ModuleBase):
         mc_detailed_row.append(" <tr style=\\'background-color:'.$color.'\\'>")
         mc_detailed_row.append("  <td>'.$detail['block'].'</td>")
         mc_detailed_row.append("  <td>'.$detail['fails'].'</td>")
-        mc_detailed_row.append("  <td>'.$detail['time_reported'].'</td>")
+        mc_detailed_row.append("  <td>'.strftime('%Y-%m-%d %H:%M', $detail['time_reported']).'</td>")
         mc_detailed_row.append(' </tr>')
         
         
