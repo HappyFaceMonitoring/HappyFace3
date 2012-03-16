@@ -92,7 +92,8 @@ class DBWrapper(object):
                                 # above. However, this is VERY slow for large SQLite databases.
                                 # This is why we run an ALTER TABLE query manually here, which is
                                 # much faster (returns almost instantly).
-                                self.dbConnection.query('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, real_key, table_keys[key]._sqlType()))
+                                sqlType = {IntCol: 'INT', StringCol: 'TEXT', UnicodeCol: 'TEXT', FloatCol: 'FLOAT'}[table_keys[key].__class__]
+                                self.dbConnection.query('ALTER TABLE %s ADD COLUMN %s %s' % (tableName, real_key, sqlType))
                             except Exception, ex: print "Failing at adding new column: \"" + str(real_key) + "\" in the module " + self.__module__ + ": " + str(ex)
 
             except Exception, e:
