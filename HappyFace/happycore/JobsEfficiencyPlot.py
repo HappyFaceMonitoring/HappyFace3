@@ -24,301 +24,301 @@ class JobsEfficiencyPlot(ModuleBase):
         import matplotlib.pyplot as plt
         self.plt = plt
 
-	self.old_result_warning_limit = float(self.configService.getDefault("setup", "old_result_warning_limit", "1.0"))
-	self.old_result_critical_limit = float(self.configService.getDefault("setup", "old_result_critical_limit", "4.0"))
+        self.old_result_warning_limit = float(self.configService.getDefault("setup", "old_result_warning_limit", "1.0"))
+        self.old_result_critical_limit = float(self.configService.getDefault("setup", "old_result_critical_limit", "4.0"))
 
-	self.groups = []
-	if group != '': self.groups = group.split(',')
+        self.groups = []
+        if group != '': self.groups = group.split(',')
 
-	self.db_keys["filename_eff_plot"] = StringCol()
-	self.db_keys["filename_rel_eff_plot"] = StringCol()
+        self.db_keys["filename_eff_plot"] = StringCol()
+        self.db_keys["filename_rel_eff_plot"] = StringCol()
 
-	self.db_keys["result_timestamp"] = IntCol()
-	self.db_keys["old_result_warning_limit"] = FloatCol()
-	self.db_keys["old_result_critical_limit"] = FloatCol()
+        self.db_keys["result_timestamp"] = IntCol()
+        self.db_keys["old_result_warning_limit"] = FloatCol()
+        self.db_keys["old_result_critical_limit"] = FloatCol()
 
-	self.db_values["filename_eff_plot"] = ""
-	self.db_values["filename_rel_eff_plot"] = ""
+        self.db_values["filename_eff_plot"] = ""
+        self.db_values["filename_rel_eff_plot"] = ""
 
-	self.db_values["result_timestamp"] = 0
-	self.db_values["old_result_warning_limit"] = self.old_result_warning_limit
-	self.db_values["old_result_critical_limit"] = self.old_result_critical_limit
-	
+        self.db_values["result_timestamp"] = 0
+        self.db_values["old_result_warning_limit"] = self.old_result_warning_limit
+        self.db_values["old_result_critical_limit"] = self.old_result_critical_limit
+        
         self.dsTag = 'xml_source'
 
     def getGroupHierarchy(self, root):
         hierarchy = {}
         for element in root:
-	    if element.tag == "summaries":
-	        for child in element:
-		    if child.tag == 'summary':
-		        group = 'all'
-		        if 'group' in child.attrib:
-			    group = child.attrib['group']
+            if element.tag == "summaries":
+                for child in element:
+                    if child.tag == 'summary':
+                        group = 'all'
+                        if 'group' in child.attrib:
+                            group = child.attrib['group']
 
-	                if 'parent' in child.attrib:
-	                    hierarchy[group] = child.attrib['parent']
-		        else:
-		            hierarchy[group] = None
-	return hierarchy
+                        if 'parent' in child.attrib:
+                            hierarchy[group] = child.attrib['parent']
+                        else:
+                            hierarchy[group] = None
+        return hierarchy
 
     def checkGroup(self, group_chk, group, hierarchy):
         try:
             while group_chk != group:
-	        if hierarchy[group_chk] == None:
-	            return False
-	        group_chk = hierarchy[group_chk]
-	    return True
-	except:
-	    return False
+                if hierarchy[group_chk] == None:
+                    return False
+                group_chk = hierarchy[group_chk]
+            return True
+        except:
+            return False
 
     def checkGroups(self, group_chk, groups, hierarchy):
         if len(groups) == 0: return True
 
         for group in groups:
-	    if self.checkGroup(group_chk, group, hierarchy):
-	        return True
-	return False
+            if self.checkGroup(group_chk, group, hierarchy):
+                return True
+        return False
 
     def process(self):
 
-	self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
-	self.configService.addToParameter('setup', 'definition', '<br />Old result warning limit: ' + str(self.old_result_warning_limit) + ' hours')
-	self.configService.addToParameter('setup', 'definition', '<br />Old result critical limit: ' + str(self.old_result_critical_limit) + ' hours')
+        self.configService.addToParameter('setup', 'source', self.downloadService.getUrlAsLink(self.getDownloadRequest(self.dsTag)))
+        self.configService.addToParameter('setup', 'definition', '<br />Old result warning limit: ' + str(self.old_result_warning_limit) + ' hours')
+        self.configService.addToParameter('setup', 'definition', '<br />Old result critical limit: ' + str(self.old_result_critical_limit) + ' hours')
 
         dl_error,sourceFile = self.downloadService.getFile(self.getDownloadRequest(self.dsTag))
-	source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
+        source_tree,xml_error = XMLParsing().parse_xmlfile_lxml(sourceFile)
 
-	root = source_tree.getroot()
-	hierarchy = self.getGroupHierarchy(root)
+        root = source_tree.getroot()
+        hierarchy = self.getGroupHierarchy(root)
 
-	# Check input file timestamp
-	date = 0
-	for element in root:
-	    if element.tag == "header":
-	        for child in element:
-		    if child.tag == "date":
-		        date = int(float(child.text.strip()))
+        # Check input file timestamp
+        date = 0
+        for element in root:
+            if element.tag == "header":
+                for child in element:
+                    if child.tag == "date":
+                        date = int(float(child.text.strip()))
 
-	self.db_values["result_timestamp"] = date
-	self.status = 1.0
-#	if self.timestamp - date > self.old_result_critical_limit*3600:
-#	    self.status = 0.0
-#	elif self.timestamp - date > self.old_result_warning_limit*3600:
-#	    self.status = 0.5
+        self.db_values["result_timestamp"] = date
+        self.status = 1.0
+#        if self.timestamp - date > self.old_result_critical_limit*3600:
+#            self.status = 0.0
+#        elif self.timestamp - date > self.old_result_warning_limit*3600:
+#            self.status = 0.5
 
-	# TODO: Provide a common base class which constructs the users array
-	# and the arrays required for JobsDist...
-	users = {}
-	for element in root:
-	    if element.tag == "jobs":
-		for child in element:
+        # TODO: Provide a common base class which constructs the users array
+        # and the arrays required for JobsDist...
+        users = {}
+        for element in root:
+            if element.tag == "jobs":
+                for child in element:
 
-		    user = group = job_state = cpuwallratio = ''
-		    for subchild in child:
-		        if subchild.tag == 'user':
-			    user = subchild.text.strip()
-			if subchild.tag == 'state':
-			    job_state = subchild.text.strip()
-			if subchild.tag == 'cpueff':
-			    cpuwallratio = subchild.text.strip()
-			if subchild.tag == 'group':
-			    group = subchild.text.strip()
+                    user = group = job_state = cpuwallratio = ''
+                    for subchild in child:
+                        if subchild.tag == 'user':
+                            user = subchild.text.strip()
+                        if subchild.tag == 'state':
+                            job_state = subchild.text.strip()
+                        if subchild.tag == 'cpueff':
+                            cpuwallratio = subchild.text.strip()
+                        if subchild.tag == 'group':
+                            group = subchild.text.strip()
 
-		    if user == '':
-		        continue
+                    if user == '':
+                        continue
 
-		    # Check group
-		    if not self.checkGroups(group, self.groups, hierarchy):
-		        continue
+                    # Check group
+                    if not self.checkGroups(group, self.groups, hierarchy):
+                        continue
 
-		    if user not in users:
-			users[user] = {}
+                    if user not in users:
+                        users[user] = {}
 
-			users[user]["total"] = 0
-			users[user]["running"] = 0
-			users[user]["waiting"] = 0
-			users[user]["queue"] = 0
-			users[user]["ratio100"] = 0
-			users[user]["ratio80"] = 0
-			users[user]["ratio30"] = 0
-			users[user]["ratio10"] = 0
+                        users[user]["total"] = 0
+                        users[user]["running"] = 0
+                        users[user]["waiting"] = 0
+                        users[user]["queue"] = 0
+                        users[user]["ratio100"] = 0
+                        users[user]["ratio80"] = 0
+                        users[user]["ratio30"] = 0
+                        users[user]["ratio10"] = 0
 
-		    users[user]["total"] += 1
+                    users[user]["total"] += 1
 
-		    if job_state == 'pending': users[user]["queue"] = users[user]["queue"] + 1
-		    if job_state == 'waiting': users[user]["waiting"] = users[user]["waiting"] + 1
-		    if job_state == 'running':
+                    if job_state == 'pending': users[user]["queue"] = users[user]["queue"] + 1
+                    if job_state == 'waiting': users[user]["waiting"] = users[user]["waiting"] + 1
+                    if job_state == 'running':
                         users[user]["running"] += 1
                         # sometimes there is no "cpuwallratio" variable for running jobs
                         if cpuwallratio != '':
                             if float(cpuwallratio) > 80:
-			        users[user]["ratio100"] += 1
+                                users[user]["ratio100"] += 1
                             elif float(cpuwallratio) > 30:
-			        users[user]["ratio80"] += 1
+                                users[user]["ratio80"] += 1
                             elif float(cpuwallratio) > 10:
-			        users[user]["ratio30"] += 1
+                                users[user]["ratio30"] += 1
                             else:
-			        users[user]["ratio10"] += 1
+                                users[user]["ratio10"] += 1
 
-	################################################################
-	### AT THE MOMENT: QUICK AND DIRTY
-	### inspired by: http://matplotlib.sourceforge.net/examples/pylab_examples/bar_stacked.html
+        ################################################################
+        ### AT THE MOMENT: QUICK AND DIRTY
+        ### inspired by: http://matplotlib.sourceforge.net/examples/pylab_examples/bar_stacked.html
 
-	### muss bei gelegenheit ueberschrieben werden
-	### saubere initialisierung der "figure", "canvas", ...
-	### striktere definitionen der plot-eigenschaften, verschieben der legende
-	### verringerung von code durch auslagerung von funktionen
+        ### muss bei gelegenheit ueberschrieben werden
+        ### saubere initialisierung der "figure", "canvas", ...
+        ### striktere definitionen der plot-eigenschaften, verschieben der legende
+        ### verringerung von code durch auslagerung von funktionen
 
-	N = len(users)
+        N = len(users)
 
-	### break image creation if there are no user stats about batch jobs
-	if N == 0:
-	    return
+        ### break image creation if there are no user stats about batch jobs
+        if N == 0:
+            return
 
-	user_names = []
-	total = []
-	
-	ratio100 = []; ratio80 = []; ratio30 = []; ratio10 = []; queue = []
-	rel_ratio100 = []; rel_ratio80 = []; rel_ratio30 = []; rel_ratio10 = []; rel_queue = []
+        user_names = []
+        total = []
+        
+        ratio100 = []; ratio80 = []; ratio30 = []; ratio10 = []; queue = []
+        rel_ratio100 = []; rel_ratio80 = []; rel_ratio30 = []; rel_ratio10 = []; rel_queue = []
 
-	for user in users:
-	    user_names.append(user)
-	    total.append(float(users[user]["total"]))
-	    ratio100.append(float(users[user]["ratio100"]))
-	    ratio80.append(float(users[user]["ratio80"]))
-	    ratio30.append(float(users[user]["ratio30"]))
-	    ratio10.append(float(users[user]["ratio10"]))
-	    queue.append(float(users[user]["queue"]))
+        for user in users:
+            user_names.append(user)
+            total.append(float(users[user]["total"]))
+            ratio100.append(float(users[user]["ratio100"]))
+            ratio80.append(float(users[user]["ratio80"]))
+            ratio30.append(float(users[user]["ratio30"]))
+            ratio10.append(float(users[user]["ratio10"]))
+            queue.append(float(users[user]["queue"]))
 
-	max_jobs = max(total)
+        max_jobs = max(total)
         scale_value = max_jobs // 10
         if scale_value == 0: scale_value = 5
 
 
-	bot_queue = queue
-	bot10 = array(queue) + array(ratio10)
-	bot30 = array(queue) + array(ratio10) + array(ratio30)
-	bot80 =	array(queue) + array(ratio10) + array(ratio30) + array(ratio80)
+        bot_queue = queue
+        bot10 = array(queue) + array(ratio10)
+        bot30 = array(queue) + array(ratio10) + array(ratio30)
+        bot80 =        array(queue) + array(ratio10) + array(ratio30) + array(ratio80)
 
-	for user in users:
-	    if users[user]["total"] != 0:
-		rel_ratio100.append( round(float(users[user]["ratio100"]) * 100. / float(users[user]["total"]),1) )
-		rel_ratio80.append( round(float(users[user]["ratio80"]) * 100. / float(users[user]["total"]),1) )
-		rel_ratio30.append( round(float(users[user]["ratio30"]) * 100. / float(users[user]["total"]),1) )
-		rel_ratio10.append( round(float(users[user]["ratio10"]) * 100. / float(users[user]["total"]),1) )
-		rel_queue.append( round(float(users[user]["queue"]) * 100. / float(users[user]["total"]),1) )
-	    else:
-		rel_ratio100.append(0); rel_ratio80.append(0); rel_ratio30.append(0); rel_ratio10.append(0)
+        for user in users:
+            if users[user]["total"] != 0:
+                rel_ratio100.append( round(float(users[user]["ratio100"]) * 100. / float(users[user]["total"]),1) )
+                rel_ratio80.append( round(float(users[user]["ratio80"]) * 100. / float(users[user]["total"]),1) )
+                rel_ratio30.append( round(float(users[user]["ratio30"]) * 100. / float(users[user]["total"]),1) )
+                rel_ratio10.append( round(float(users[user]["ratio10"]) * 100. / float(users[user]["total"]),1) )
+                rel_queue.append( round(float(users[user]["queue"]) * 100. / float(users[user]["total"]),1) )
+            else:
+                rel_ratio100.append(0); rel_ratio80.append(0); rel_ratio30.append(0); rel_ratio10.append(0)
 
-	rel_bot_queue = rel_queue
-	rel_bot10 = array(rel_queue) + array(rel_ratio10)
-	rel_bot30 = array(rel_queue) + array(rel_ratio10) + array(rel_ratio30)
-	rel_bot80 = array(rel_queue) + array(rel_ratio10) + array(rel_ratio30) + array(rel_ratio80)
+        rel_bot_queue = rel_queue
+        rel_bot10 = array(rel_queue) + array(rel_ratio10)
+        rel_bot30 = array(rel_queue) + array(rel_ratio10) + array(rel_ratio30)
+        rel_bot80 = array(rel_queue) + array(rel_ratio10) + array(rel_ratio30) + array(rel_ratio80)
 
 
 
-	ind = np.arange(N)    # the x locations for the groups
-	width = 0.36       # the width of the bars: can also be len(x) sequence
+        ind = np.arange(N)    # the x locations for the groups
+        width = 0.36       # the width of the bars: can also be len(x) sequence
 
-	fig_abs = self.plt.figure()
-	fig_rel = self.plt.figure()
+        fig_abs = self.plt.figure()
+        fig_rel = self.plt.figure()
 
-	#canvas_abs = FigureCanvas(fig_abs)
-	#canvas_rel = FigureCanvas(fig_rel)
+        #canvas_abs = FigureCanvas(fig_abs)
+        #canvas_rel = FigureCanvas(fig_rel)
 
-	axis_abs = fig_abs.add_subplot(111)
-	axis_rel = fig_rel.add_subplot(111)
-	
+        axis_abs = fig_abs.add_subplot(111)
+        axis_rel = fig_rel.add_subplot(111)
+        
         #if N > 1: axis_abs.set_yscale('log')
-	
-	##########################################################
-	# create first plot, absolute view
-	
-	p0 = axis_abs.bar(ind, queue,   width, color='violet')
-	p1 = axis_abs.bar(ind, ratio10,   width, color='r', bottom = bot_queue)
-	p2 = axis_abs.bar(ind, ratio30, width, color='orange', bottom = bot10 )
-	p3 = axis_abs.bar(ind, ratio80, width, color='y', bottom = bot30 )
-	p4 = axis_abs.bar(ind, ratio100, width, color='g', bottom = bot80 )
+        
+        ##########################################################
+        # create first plot, absolute view
+        
+        p0 = axis_abs.bar(ind, queue,   width, color='violet')
+        p1 = axis_abs.bar(ind, ratio10,   width, color='r', bottom = bot_queue)
+        p2 = axis_abs.bar(ind, ratio30, width, color='orange', bottom = bot10 )
+        p3 = axis_abs.bar(ind, ratio80, width, color='y', bottom = bot30 )
+        p4 = axis_abs.bar(ind, ratio100, width, color='g', bottom = bot80 )
 
-	axis_abs.set_position([0.10,0.2,0.85,0.75])
-	axis_abs.set_ylabel('Number of Jobs')
-	axis_abs.set_title('Job Efficiency (absolute view)')
-	axis_abs.set_xticks(ind+width/2.)
-	axis_abs.set_xticklabels(user_names, rotation='vertical')
-	#if N > 1: axis_abs.set_ylim(1,max_jobs)
-	axis_abs.set_yticks(np.arange(0,max_jobs + 5,scale_value))
-	axis_abs.legend( (p0[0], p1[0], p2[0], p3[0], p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
+        axis_abs.set_position([0.10,0.2,0.85,0.75])
+        axis_abs.set_ylabel('Number of Jobs')
+        axis_abs.set_title('Job Efficiency (absolute view)')
+        axis_abs.set_xticks(ind+width/2.)
+        axis_abs.set_xticklabels(user_names, rotation='vertical')
+        #if N > 1: axis_abs.set_ylim(1,max_jobs)
+        axis_abs.set_yticks(np.arange(0,max_jobs + 5,scale_value))
+        axis_abs.legend( (p0[0], p1[0], p2[0], p3[0], p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
 
-	
-	fig_abs.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_eff.png",dpi=60)
-	self.db_values["filename_eff_plot"] = self.__module__ + "_jobs_eff.png"
-	self.archive_columns.append('filename_eff_plot')
+        
+        fig_abs.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_eff.png",dpi=60)
+        self.db_values["filename_eff_plot"] = self.__module__ + "_jobs_eff.png"
+        self.archive_columns.append('filename_eff_plot')
 
-	##########################################################
-	# create second plot, relative view
+        ##########################################################
+        # create second plot, relative view
 
-	rel_p0 = axis_rel.bar(ind, rel_queue,   width, color='violet')
-	rel_p1 = axis_rel.bar(ind, rel_ratio10,   width, color='r', bottom = rel_bot_queue)
-	rel_p2 = axis_rel.bar(ind, rel_ratio30, width, color='orange', bottom = rel_bot10 )
-	rel_p3 = axis_rel.bar(ind, rel_ratio80, width, color='y', bottom = rel_bot30 )
-	rel_p4 = axis_rel.bar(ind, rel_ratio100, width, color='g', bottom = rel_bot80 )
-	
-	axis_rel.set_position([0.10,0.2,0.85,0.75])
-	axis_rel.set_ylabel('fraction in %')
-	axis_rel.set_title('Job Efficiency (relative view)')
-	axis_rel.set_xticks(ind+width/2.)
-	axis_rel.set_xticklabels(user_names, rotation='vertical')
-	axis_rel.set_yticks(np.arange(0,101,10))
+        rel_p0 = axis_rel.bar(ind, rel_queue,   width, color='violet')
+        rel_p1 = axis_rel.bar(ind, rel_ratio10,   width, color='r', bottom = rel_bot_queue)
+        rel_p2 = axis_rel.bar(ind, rel_ratio30, width, color='orange', bottom = rel_bot10 )
+        rel_p3 = axis_rel.bar(ind, rel_ratio80, width, color='y', bottom = rel_bot30 )
+        rel_p4 = axis_rel.bar(ind, rel_ratio100, width, color='g', bottom = rel_bot80 )
+        
+        axis_rel.set_position([0.10,0.2,0.85,0.75])
+        axis_rel.set_ylabel('fraction in %')
+        axis_rel.set_title('Job Efficiency (relative view)')
+        axis_rel.set_xticks(ind+width/2.)
+        axis_rel.set_xticklabels(user_names, rotation='vertical')
+        axis_rel.set_yticks(np.arange(0,101,10))
 
-	axis_rel.legend( (rel_p0[0], rel_p1[0], rel_p2[0], rel_p3[0], rel_p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
+        axis_rel.legend( (rel_p0[0], rel_p1[0], rel_p2[0], rel_p3[0], rel_p4[0]), ('queue', 'ratio < 10%', '10% < ratio < 30%', '30% < ratio < 80%', 'ratio > 80%') )
 
-	fig_rel.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_rel_eff.png",dpi=60)
-	self.db_values["filename_rel_eff_plot"] = self.__module__ + "_jobs_rel_eff.png"
-	self.archive_columns.append('filename_rel_eff_plot')
+        fig_rel.savefig(self.archive_dir + "/" + self.__module__ + "_jobs_rel_eff.png",dpi=60)
+        self.db_values["filename_rel_eff_plot"] = self.__module__ + "_jobs_rel_eff.png"
+        self.archive_columns.append('filename_rel_eff_plot')
 
     def output(self):
 
-	old_result_warning_message = []
-	old_result_warning_message.append("<p style=\"font-size: large; color: red;\">Input XML was generated more than ' . $data['old_result_warning_limit'] . ' hours in the past</p>")
-	old_result_critical_message = []
-	old_result_critical_message.append("<p style=\"font-size: large; color: red;\">Input XML was generated more than ' . $data['old_result_critical_limit'] . ' hours in the past</p>")
+        old_result_warning_message = []
+        old_result_warning_message.append("<p style=\"font-size: large; color: red;\">Input XML was generated more than ' . $data['old_result_warning_limit'] . ' hours in the past</p>")
+        old_result_critical_message = []
+        old_result_critical_message.append("<p style=\"font-size: large; color: red;\">Input XML was generated more than ' . $data['old_result_critical_limit'] . ' hours in the past</p>")
 
-	plots = []
-	plots.append(  '<table>')
-	plots.append(  ' <tr>')
-	plots.append(  '  <td>')
-	plots.append("""   <img src="' . $archive_dir . '/' . $data["filename_eff_plot"] . '" alt=""/>""")
-	plots.append(  '  </td>')
-	plots.append(  '  <td>')
-	plots.append("""   <img src="' . $archive_dir . '/' . $data["filename_rel_eff_plot"] . '" alt=""/>""")
-	plots.append(  '  </td>')
-	plots.append(  ' </tr>')
-	plots.append(  '</table>')
+        plots = []
+        plots.append(  '<table>')
+        plots.append(  ' <tr>')
+        plots.append(  '  <td>')
+        plots.append("""   <img src="' . $archive_dir . '/' . $data["filename_eff_plot"] . '" alt=""/>""")
+        plots.append(  '  </td>')
+        plots.append(  '  <td>')
+        plots.append("""   <img src="' . $archive_dir . '/' . $data["filename_rel_eff_plot"] . '" alt=""/>""")
+        plots.append(  '  </td>')
+        plots.append(  ' </tr>')
+        plots.append(  '</table>')
 
-	module_content = """<?php
+        module_content = """<?php
 
-	if(isset($data['old_result_critical_limit']) && isset($data['old_result_warning_limit']))
-	{
-		if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_critical_limit']*3600)
-			print('""" + self.PHPArrayToString(old_result_critical_message) + """');
-		elseif($data['timestamp'] - $data['result_timestamp'] > $data['old_result_warning_limit']*3600)
-			print('""" + self.PHPArrayToString(old_result_warning_message) + """');
-	}
+        if(isset($data['old_result_critical_limit']) && isset($data['old_result_warning_limit']))
+        {
+                if($data['timestamp'] - $data['result_timestamp'] > $data['old_result_critical_limit']*3600)
+                        print('""" + self.PHPArrayToString(old_result_critical_message) + """');
+                elseif($data['timestamp'] - $data['result_timestamp'] > $data['old_result_warning_limit']*3600)
+                        print('""" + self.PHPArrayToString(old_result_warning_message) + """');
+        }
 
-	$tm = localtime($data['timestamp']);
-	$year = $tm[5] + 1900; // PHP gives year since 1900
-	$month = sprintf('%02d', $tm[4] + 1); // PHP uses 0-11, Python uses 1-12
-	$day = sprintf('%02d', $tm[3]);
-	$archive_dir = "archive/$year/$month/$day/" . $data['timestamp'];
+        $tm = localtime($data['timestamp']);
+        $year = $tm[5] + 1900; // PHP gives year since 1900
+        $month = sprintf('%02d', $tm[4] + 1); // PHP uses 0-11, Python uses 1-12
+        $day = sprintf('%02d', $tm[3]);
+        $archive_dir = "archive/$year/$month/$day/" . $data['timestamp'];
 
-	// Assume old format if archive_dir does not exist
-	if(!file_exists($archive_dir))
-		$archive_dir = '.';
+        // Assume old format if archive_dir does not exist
+        if(!file_exists($archive_dir))
+                $archive_dir = '.';
 
-	if($data['filename_eff_plot'] != '' || $data['filename_rel_eff_plot'] != '')
-		print('""" + self.PHPArrayToString(plots) + """');
+        if($data['filename_eff_plot'] != '' || $data['filename_rel_eff_plot'] != '')
+                print('""" + self.PHPArrayToString(plots) + """');
 
-	?>"""
+        ?>"""
 
-	return self.PHPOutput(module_content)
+        return self.PHPOutput(module_content)
