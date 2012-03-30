@@ -1,0 +1,15 @@
+<h3>${config["name"]}</h3>
+<p>${run["time"]}</p>
+% if len(error_string) > 0:
+ <p>${error_string}</p>
+% else:
+<div style="" class="module_info">
+ <ul>
+  <li>Module instance: ${instance_name}</li>
+  <li>Status: ${dataset["status"]}</li>
+  <li>Description: ${dataset["description"]}</li>
+  <li>Instruction: ${dataset["instruction"]}</li>
+ </ul>
+</div>
+${contents}
+% endif
