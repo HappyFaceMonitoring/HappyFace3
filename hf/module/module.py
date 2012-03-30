@@ -64,7 +64,11 @@ class ModuleBase:
             data.update(self.extractData())
             
             result = self.module_table.insert().values(**data).execute()
-            self.fillSubtables(result.inserted_primary_key[0])
+            try:
+                inserted_id = result.inserted_primary_key[0]
+            except AttributeError:
+                inserted_id = result.last_inserted_ids()[0]
+            self.fillSubtables(inserted_id)
         except Exception, e:
             # TODO logging
             traceback.print_exc()

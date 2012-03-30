@@ -17,7 +17,11 @@ if __name__ == '__main__':
     
     time = datetime.datetime.now()
     result = hf.module.database.hf_runs.insert().values(time=time).execute()
-    run = {"id":result.inserted_primary_key[0], "time":time}
+    try:
+        inserted_id = result.inserted_primary_key[0]
+    except AttributeError:
+        inserted_id = result.last_inserted_ids()[0]
+    run = {"id": inserted_id, "time":time}
     
     print "Prepare data acquisition"
     for category in category_list:
