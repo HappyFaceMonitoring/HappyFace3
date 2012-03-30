@@ -14,6 +14,7 @@ class ModuleBase:
     
     def __init__(self, instance_name, config):
         self.module_name = self.__class__.module_name
+        self.module_table = self.__class__.module_table
         instance = hf.module.database.module_instances.select(hf.module.database.module_instances.c.instance==instance_name).execute().fetchone()
         if instance is None:
             hf.module.database.module_instances.insert().values(instance=instance_name, module=self.module_name).execute()
@@ -102,8 +103,8 @@ class ModuleBase:
         return module_html
         
 
-def generateModuleTable(tabname, columns):
-    return Table("module_"+tabname, hf.database.metadata,
+def generateModuleTable(module_class, tabname, columns):
+    table = Table("module_"+tabname, hf.database.metadata,
         *([
             Column('id', Integer, Sequence(tabname+'_id_seq'), primary_key=True),
             Column('instance', Integer, ForeignKey("module_instances.instance")),
@@ -114,6 +115,8 @@ def generateModuleTable(tabname, columns):
             Column('error_string', Text),
             Column('source_url', Text),
         ] + columns))
+    module_class.module_table = table
+    return table
         
 def generateModuleSubtable(tabname, module_table, columns):
     return Table("module_sub_"+tabname, hf.database.metadata,
