@@ -16,7 +16,7 @@ class DownloadSlave(threading.Thread):
                 path = self.file.url[len("file://"):]
                 shutil.copy(path, self.file.file_path)
             else:
-                command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.file_path, "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
+                command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.getTmpPath(), "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
                 process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
                 stderr = process.communicate()[1]
                 if process.returncode != 0:
@@ -67,12 +67,12 @@ class DownloadService:
         if not os.path.exists(tmp_dir):
             os.makedirs(tmp_dir)
         
-        file_prefix = os.path.join(tmp_dir, runtime.strftime("%Y%m%d_%H%M%s_"))
+        file_prefix = runtime.strftime("%Y%m%d_%H%M%s_")
         
         timeout = hf.config.getint("downloadService", "timeout")
         
         for number, slave in enumerate(slaves):
-            slave.file.file_path = os.path.abspath(file_prefix + "%03i.download"%number)
+            slave.file.tmp_filename = os.path.abspath(file_prefix + "%03i.download"%number)
             slave.start()
         
         for slave in slaves:
@@ -90,6 +90,11 @@ class DownloadService:
                 self.logger.info("Download timeout for %s" % slave.file.download_command)
             elif not slave.file.errorOccured():
                 slave.file.is_downloaded = True
+    
+    def getArchivePath(self, run, filename):
+        return os.path.join(hf.config.get('paths', 'archive_dir'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
+    def getArchiveUrl(self, run, filename):
+        return os.path.join(hf.config.get('paths', 'archive_url'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
     
     def cleanup(self):
         for file in self.file_list:
@@ -113,33 +118,63 @@ class DownloadService:
             self.file_path = ""
             self.file_url = ""
             self.keep = False
+            self.is_archived = False
         
         def isDownloaded(self):
             return self.is_downloaded
+        
+        def isArchived(self):
+            return self.is_archived
         
         def errorOccured(self):
             return len(self.error) > 0
             
         def getFile(self):
-            return open(self.getFilePath(), "r")
+            return open(self.getTmpPath(), "r")
             
-        def getFilePath(self):
-            return self.file_url
+        def getTmpPath(self):
+            return os.path.join(hf.config.get('paths', 'tmp_dir'), self.tmp_filename)
         
-        def getFileUrl(self):
-            return self.file_path
+        def getArchivePath(self):
+            return os.path.join(hf.downloadService.archive_dir, self.filename)
+        
+        def getArchiveUrl(self):
+            return os.path.join(hf.downloadService.archive_url, self.filename)
+        
+        def getArchiveFilename(self):
+            return self.filename
         
         def getSourceUrl(self):
             return self.url
         
         def copyToArchive(self, name):
-            if self.isDownloaded() and not self.errorOccured():
+            if self.isDownloaded() and not self.errorOccured() and not self.isArchived():
                 self.keep = True
-                dest = os.path.join(hf.downloadService.archive_dir, name)
-                shutil.move(self.file_path, dest)
-                self.file_path = dest
-                self.file_url = os.path.join(hf.downloadService.archive_url, name)
+                self.is_archived = True
+                self.filename = name
+                shutil.move(self.getTmpPath(), self.getArchivePath())
+
+class File:
+    def __init__(self, run, name):
+        self.name = name
+        self.run = run
     
+    def getArchivePath(self):
+        return hf.downloadService.getArchivePath(self.run, self.name)
     
+    def getArchiveUrl(self):
+        return hf.downloadService.getArchiveUrl(self.run, self.name)
+    
+    def getArchiveFilename(self):
+        return self.name
+    
+    def __repr__(self):
+        return '%s(%s, %s)' % (self.__module__, repr(self.run), repr(self.name))
+    
+    def __str__(self):
+        return self.getArchiveUrl()
+            
+    def __unicode__(self):
+        return self.getArchiveUrl()
     
 downloadService = DownloadService()

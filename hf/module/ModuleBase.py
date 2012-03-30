@@ -71,7 +71,7 @@ class ModuleBase:
     
     def url(self):
         # something along ?date=2012-03-24&amp;time=17:20&amp;t=batchsys&amp;m=${module.instance_name}
-        return ""
+        return "#%s" % self.instance_name
         
     def getStatusIcon(self):
         return os.path.join(hf.config.get('paths', 'template_icons_url'), 'mod_'+self.getStatusString()+'.png')

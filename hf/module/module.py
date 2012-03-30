@@ -36,7 +36,7 @@ def addColumnFileReference(table, column):
 
 def getColumnFileReference(table):
     name = table.name if isinstance(table, Table) else table
-    return __column_file_list[table]
+    return __column_file_list[name]
 
 def addModuleClass(mod_class):
     mod_name = mod_class.__module__.split(".")[-1]
