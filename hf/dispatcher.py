@@ -18,10 +18,11 @@ class CategoryDispatcher(object):
     @cp.expose
     def default(self, category=None, **kwargs):
         try:
-            time_obj = datetime.datetime.now()
+            time_obj = datetime.datetime.fromtimestamp(int(time.time()))
             timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
             timestamp += '_' + (kwargs['time'] if 'time' in kwargs else time_obj.strftime('%H:%M'))
-            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")))
+            # notice the extra seconds to avoid microsecond and minute issues
+            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")) + 60)
             
             run = hf_runs.select(hf_runs.c.time <= time_obj).order_by(hf_runs.c.time.desc()).execute().fetchone()
             run = {"id":run["id"], "time":run["time"]}

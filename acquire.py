@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import hf,sys
-import os, datetime, traceback
+import os, datetime, time, traceback
 import ConfigParser
 import logging
 logger = logging.getLogger(__name__)
@@ -24,13 +24,13 @@ if __name__ == '__main__':
             logger.error("Setting up HappyFace failed: %s", str(e))
             logger.debug(traceback.format_exc())
         
-        time = datetime.datetime.now()
-        result = hf.module.database.hf_runs.insert().values(time=time).execute()
+        runtime = datetime.datetime.fromtimestamp(int(time.time()))
+        result = hf.module.database.hf_runs.insert().values(time=runtime).execute()
         try:
             inserted_id = result.inserted_primary_key[0]
         except AttributeError:
             inserted_id = result.last_inserted_ids()[0]
-        run = {"id": inserted_id, "time":time}
+        run = {"id": inserted_id, "time":runtime}
         
         logger.info("Prepare data acquisition")
         for category in category_list:
@@ -39,7 +39,7 @@ if __name__ == '__main__':
         
         logger.info("Download files...")
         try:
-            hf.downloadService.performDownloads(time)
+            hf.downloadService.performDownloads(runtime)
             logger.info("Download done")
         except Exception, e:
             logger.warn("Downloading of all files failed")
