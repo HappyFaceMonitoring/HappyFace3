@@ -61,9 +61,13 @@ class DownloadService:
             raise Exception("Cannot create archive directory")
         slaves = [DownloadSlave(file, self.global_options, self.archive_dir) for file in self.file_list]
         
-        timeout = hf.config.getint("downloadService", "timeout")
+        tmp_dir = hf.config.get("paths", "tmp_dir")
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
         
-        file_prefix = os.path.join(hf.config.get("paths", "tmp_dir"), runtime.strftime("%Y%m%d_%H%M%s_"))
+        file_prefix = os.path.join(tmp_dir, runtime.strftime("%Y%m%d_%H%M%s_"))
+        
+        timeout = hf.config.getint("downloadService", "timeout")
         
         for number, slave in enumerate(slaves):
             slave.file.file_path = os.path.abspath(file_prefix + "%03i.download"%number)
@@ -127,6 +131,7 @@ class DownloadService:
             return self.url
         
         def copyToArchive(self, name):
+            logging.debug('%s %s %s %s' % (name, self.isDownloaded(), self.errorOccured(), self.file_path))
             if self.isDownloaded() and not self.errorOccured():
                 self.keep = True
                 dest = os.path.join(hf.downloadService.archive_dir, name)
