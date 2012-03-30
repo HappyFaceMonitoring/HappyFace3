@@ -26,7 +26,7 @@ def generateModuleTable(module_class, tabname, columns):
 def generateModuleSubtable(tabname, module_table, columns):
     return Table("module_sub_"+tabname, hf.database.metadata,
         *([
-            Column('id', Integer, Sequence("module_sub_"+tabname+'_id_seq'), primary_key=True),
+            Column('id', Integer, Sequence("module_"+module_table.name+"_sub_"+tabname+'_id_seq'), primary_key=True),
             Column('parent_id', Integer, ForeignKey(module_table.c.id)),
         ] + columns))
 
@@ -36,7 +36,7 @@ def addColumnFileReference(table, column):
 
 def getColumnFileReference(table):
     name = table.name if isinstance(table, Table) else table
-    return __column_file_list[name]
+    return __column_file_list[name] if name in __column_file_list else []
 
 def addModuleClass(mod_class):
     mod_name = mod_class.__module__.split(".")[-1]
