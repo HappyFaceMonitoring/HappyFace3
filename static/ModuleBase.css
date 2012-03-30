@@ -1,0 +1,79 @@
+/* CSS file available to all HappyFace modules */
+
+/* Global status colors */
+
+/* Success, service is up and running */
+.ok {
+	background-color:  #AAFFAA;
+}
+
+/* Warning */
+.warning {
+	background-color: #FFFF96;
+}
+
+/* Service reports failure */
+.critical {
+	background-color: #FF6464;
+}
+
+/* Operation in question has a report to make; not important enough for a
+   warning though, or operation is still in progress */
+.report {
+    background-color: #96C8FF;
+}
+
+/* not applicable or no status value available */
+.undefined {
+    background-color: #C0C0C0;
+}
+
+/* Service is not active */
+.deactivated {
+    background-color:  #C896DC;
+}
+
+/* Table containing service data */
+
+table.TableData {
+    border: solid 1px #999;
+    width: 800px;
+}
+
+table.TableDataSmall {
+    border: solid 1px #999;
+    width: 400px;
+}
+
+table.TableData td, table.TableDataSmall td {
+    padding: 5px;
+    border: solid 1px #999;
+}
+
+table.TableData th, table.TableDataSmall th {
+    padding: 5px;
+    border: solid 1px #999;
+    font-weight: bold;
+}
+
+/* Service details */
+div.DetailedInfo {
+    font-family: monospace;
+    line-height: 14px;
+}
+
+table.TableDetails {
+    border: solid 1px #999;
+    width: 800px;
+}
+
+table.TableDetails td {
+    padding: 5px;
+    border: solid 1px #999;
+}
+
+/* Common to all tables */
+tr.TableHeader {
+    font-weight: bold;
+    background-color: #CCCCCC;
+}
