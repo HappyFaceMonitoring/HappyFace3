@@ -1,5 +1,79 @@
-<h2>${category["name"]}</h2>
-<p>${category["description"]}</p>
-% for module,contents in module_contents.iteritems():
-${contents}
+<%inherit file="/base.html" />
+
+<%def name="content()">
+<%include file="/atom_timemachine.html" /> 
+<div id="HappyFNnav_${category_name}" class="HappyFNnav">
+ <ul>
+  <li>
+   <table class="HappyFNnaventry" style="border-top: solid 1px #999;">
+    <tr>
+     <td style="width:200px;" align="left">
+      <div class="HappyFNtopdiv">Fast Navigation Bar</div>
+     </td>
+     <td style="width:40px;" align="center">
+      <div class="HappyFNtopdiv">
+       <a href="javascript:movenav('HappyFNnav_${category_name}')" onfocus="this.blur()">
+        <img id="HappyFNnav_${category_name}arrow" alt="" style="width:32px;border:0px;" src="/static/images/rightarrow.png" />
+       </a>
+      </div>
+     </td>
+    </tr>
+   </table>
+  </li>
+% for module in category_module_list:
+  <li>
+   <table class="HappyFNnaventry">
+    <tr style="border-bottom:1px solid #FFF;">
+     <td style="width:200px;" align="left">
+      <a href="javascript:goto('${module.instance_name}')" onfocus="this.blur()" ondblclick="HappyReloadPage('${category_name}', '${module.instance_name}')">${module.config["name"]}</a>
+     </td>
+     <td style="width:40px;" align="left">
+      <div class="HappyFNnavimg">
+       <a href="javascript:goto('${module.instance_name}')" onfocus="this.blur()" ondblclick="HappyReloadPage('${category_name}', '${module.instance_name}')">
+% if module.dataset is not None:
+ % if module.config["type"] == "plots":
+  % if module.dataset["status"] < 0.9:
+        <img src='/static/themes/armin_box_arrows/nav_unavail_plot.png'/>
+  % else:
+        <img src='/static/themes/armin_box_arrows/nav_avail_plot.png'/>
+  % endif
+ % else:
+  % if module.dataset["status"] > 0.9:
+        <img src='/static/themes/armin_box_arrows/nav_happy.png'/>
+  % elif module.dataset["status"] < 0.3:
+        <img src='/static/themes/armin_box_arrows/nav_unhappy.png'/>
+  % else:
+        <img src='/static/themes/armin_box_arrows/nav_neutral.png'/>
+  % endif
+ % endif
+% else:
+ % if module.config["type"] == "plots":
+        <img src='/static/themes/armin_box_arrows/nav_unavail_plot.png'/>
+ % else:
+        <img src='/static/themes/armin_box_arrows/nav_unhappy.png'/>
+ % endif
+% endif
+       </a>
+      </div>
+     </td>
+    </tr>
+   </table>
+  </li>
 % endfor
+ </ul>
+</div>
+<script type="text/javascript">getFNSize("HappyFNnav_${category_name}");</script>
+<div id="HappyPanels1" class="HappyPanels">
+
+<%include file="/atom_navbar.html" />
+ <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">' + "\n"
+  <div class="HappyPanelsContent" id="${category_name}_panel">
+   <h2>${category_config["name"]}</h2>
+    <p>${category_config["description"]}</p>
+% for module,contents in module_contents.iteritems():
+     ${contents}
+% endfor
+  </div>
+ </div>
+</div>
+</%def>

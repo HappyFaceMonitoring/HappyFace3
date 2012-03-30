@@ -1,0 +1,24 @@
+<ul class="HappyPanelsTabGroup" id="HappyPanelsTabs">
+% for category in category_list:
+ <li class="HappyPanelsTab" id="' + category + '_tab">
+  <table width="100%">
+   <tr>
+    <td>
+     <div style="text-align:center;">
+     output.append("     ' . getCatStatusSymbolForCategory('" + category + "','" + cat_type + "','" + cat_algo + "', $ModuleResultsArray) . '")
+     output.append("     ' . getCatIndexSymbolForCategory('" + category + "', $ModuleResultsArray) . '")
+     output.append("     ' . getCatLockSymbolForCategory('" + category + "', $ModuleResultsArray) . '")
+     </div>
+    </td>
+   </tr>
+   <tr>
+    <td>
+     <div style="text-align:center;">
+      ' + cat_title)
+     </div>
+    </td>
+   </tr>
+  </table>
+ </li>
+% endfor
+</ul>

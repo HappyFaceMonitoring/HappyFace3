@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+/* CSS configuration for table sorting. */
+span.SortIndicator {
+	color: #666666;
+/*	font-size: large;*/
+}
+
+tr.SortHeader td:hover {
+	background-color: #DDDDDD;
+}

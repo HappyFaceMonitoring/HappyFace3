@@ -10,3 +10,6 @@ class ModuleError(Exception):
 
 class ModuleRuntimeError(Exception):
     pass
+
+class ModuleProgrammingError(Exception):
+    pass

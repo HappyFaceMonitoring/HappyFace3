@@ -8,3 +8,4 @@ from downloadservice import downloadService
 from exceptions import *
 
 config = None
+template_lookup = None

@@ -1,0 +1,117 @@
+<div class="HappyTitleBar">
+ <div class="HappyTitleBarElement">
+  <table border="0" class="HappyTitleBarElementTable">
+   <tr>
+    <td>
+     <img style="border:solid 1px #000;height:35px;" alt="" src="${hf.config.get('template', 'logo_img')}" />
+    </td>
+   </tr>
+  </table>
+ </div>
+ <div class="HappyTitleBarElement">
+  <table border="0" class="HappyTitleBarElementTable">
+   <tr>
+    <td colspan="2" style="color:#FF9900;vertical-align:top;text-align:left;">The Happy Face</td>
+   </tr>
+   <tr>
+    <td style="color:#FF9900;vertical-align:middle;text-align:left;">Project</td>
+    <td style="font-size:0.7em;color:#FFFFFF;vertical-align:middle;text-align:right;">Rev.""" + rev + """</td>
+   </tr>
+  </table>
+ </div>
+ <div class="HappyTitleBarElement">
+  <table border="0" class="HappyTitleBarElementTable">
+   <tr>
+    <td colspan="2"><a href="?action=getxml&amp;date=' . $date_string . '&amp;time=' . $time_string . '" onfocus="this.blur()"><img src="${static_url}/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: middle;"/></a></td>
+   </tr>
+       <tr>
+###    <td><img src="' . $lock_icon . '" onmouseover="javascript:HappyCertInfo(\\\'over\\\;" onmouseout="javascript:HappyCertInfo(\\\'out\\\;" width="15" height="13" alt="Lock icon" style="border: none; vertical-align: middle;"/></td>
+        <td><a href="${hf.config.get("template", "documentation_url")}" onfocus="this.blur()"><img src="${static_url}/images/help_icon.gif" width="15" height="13" alt="Help icon" style="border: none; vertical-align: middle;"/></a></td>
+       </tr>
+  </table>
+ </div>
+ <div class="HappyTitleBarElement">
+  <table border="0" class="HappyTitleBarElementTable">
+   <tr>
+    <td><div style="text-align: left;">' . $date_message_short . '</div></td>
+   </tr>
+   <tr>
+    <td><div style="text-align: center;">' . $time_message . '</div></td>
+   </tr>
+  </table>
+ </div>
+ <div class="HappyTitleBarElement">
+  <form id="HistoForm1" class="HappyTitleBarForm" action="' . $_SERVER['SCRIPT_NAME'] . '" method="get">
+   <table border="0" class="HappyTitleBarElementTable">
+    <tr>
+     <td>
+      <div>
+       <img src="${static_url}/images/left_icon.gif" width="22" height="22" alt="backwards" style="border: none; padding-top: 2px; margin: 0px 2px;" onclick="javascript:HappyHistoNav(\\\'back\\\',\\\'' . $timestamp . '\\\" onfocus="this.blur()">
+      </div>
+     </td>
+     <td>
+      <div>
+       <input type="text" id="HistoStep" name="s" size="4" style="text-align:center;" value="' . $histo_step . '" />
+       <input type="hidden" id="HistoNavDate" name="date" value="' . $date_string . '" />
+       <input type="hidden" id="HistoNavTime" name="time" value="' . $time_string . '" />
+       <input type="hidden" id="HistoReloadTab1" name="t" value="' . $selectedTab . '" />
+       <input type="hidden" id="HistoReloadMod1" name="m" value="' . $selectedMod . '" />
+       <input type="hidden" id="HistoReloadExpand1" name="expand" value="" />
+      </div>
+     </td>
+     <td>
+      <div>
+       <img src="${static_url}/images/right_icon.gif" width="22" height="22" alt="forwards" style="border: none; padding-top: 2px; margin: 0px 2px;" onclick="javascript:HappyHistoNav(\\\'fwd\\\',\\\'' .$timestamp . '\\\" onfocus="this.blur()">
+      </div>
+     </td>
+    </tr>
+   </table>
+  </form>
+ </div>
+
+ <div class="HappyTitleBarElement">
+  <form id="HistoForm2" class="HappyTitleBarForm" action="' . $_SERVER['SCRIPT_NAME'] . '" method="get">
+   <table border="0" class="HappyTitleBarElementTable">
+    <tr>
+     <td>
+      <div>
+       <input name="date" type="text" size="10" style="text-align:center;" value="' . $date_string . '" />
+       -
+       <input name="time" type="text" size="5" style="text-align:center;" value="' . $time_string . '" />
+       <input type="hidden" id="HistoReloadTab2" name="t" value="' . $selectedTab . '" />
+       <input type="hidden" id="HistoReloadMod2" name="m" value="' . $selectedMod . '" />
+       <input type="hidden" id="HistoReloadExpand2" name="expand" value="" />
+       <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
+      </div>
+     </td>
+    </tr>
+   </table>
+  </form>
+ </div>
+ <div class="HappyTitleBarElement">
+  <form class="HappyTitleBarForm" action="' . $_SERVER['SCRIPT_NAME'] . '" method="get">
+   <table border="0" class="HappyTitleBarElementTable">
+    <tr>
+     <td>
+      <div>
+       <button onclick="javascript:document.getElementById(\\\'ReloadForm\\\.submit()" onfocus="this.blur()">Reset</button>
+      </div>
+     </td>
+    </tr>
+   </table>
+  </form>
+ </div>
+
+<div class="HappyTitleBarElement">
+ <table border="0" class="HappyTitleBarElementTable">
+  <tr>
+   <td>
+    <div>
+    error_msg.append("      ' . $time_error_message . '
+    </div>
+   </td>
+  </tr>
+ </table>
+</div>
+
+</div>

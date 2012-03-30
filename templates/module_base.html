@@ -1,16 +1,20 @@
-<h3>${config["name"]}</h3>
-<p>${run["time"]}</p>
-% if len(error_string) > 0:
- <p>${error_string}</p>
+<h3>${module.config["name"]}</h3>
+<p>${module.run["time"]}</p>
+% if no_data:
+ <p>No data at this time.</p>
 % else:
+ % if len(module.dataset["error_string"]) > 0:
+ <p>${module.dataset["error_string"]}</p>
+ % else:
 <div style="" class="module_info">
  <ul>
-  <li>Module instance: ${instance_name}</li>
-  <li>Status: ${dataset["status"]}</li>
-  <li>Description: ${dataset["description"]}</li>
-  <li>Instruction: ${dataset["instruction"]}</li>
-  <li>Data source: <a href="${dataset["source_url"]}">${dataset["source_url"]}</a></li>
+  <li>Module instance: ${module.instance_name}</li>
+  <li>Status: ${module.dataset["status"]}</li>
+  <li>Description: ${module.dataset["description"]}</li>
+  <li>Instruction: ${module.dataset["instruction"]}</li>
+  <li>Data source: <a href="${dataset["source_url"]}">${module.dataset["source_url"]}</a></li>
  </ul>
 </div>
-${contents}
+ ${self.content()}
+ % endif
 % endif

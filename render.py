@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import hf, cherrypy
-import os
+import os, logging
 import ConfigParser
 
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
     hf.configtools.readConfiguration()
     cp_config = {}
@@ -23,8 +25,7 @@ if __name__ == '__main__':
     hf.configtools.importModules()
     
     hf.database.connect(implicit_execution = True)
-    category_list = hf.configtools.createCategoryObjects()
     
-    cherrypy.quickstart(root=hf.dispatcher.CategoryDispatcher(category_list), script_name="/", config=cp_config)
+    cherrypy.quickstart(root=hf.dispatcher.CategoryDispatcher(), script_name="/", config=cp_config)
     hf.database.disconnect()
     
