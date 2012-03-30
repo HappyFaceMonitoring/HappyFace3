@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import hf
+import hf,sys
 import os, datetime, traceback
 import ConfigParser
 
@@ -29,8 +29,10 @@ if __name__ == '__main__':
         category.prepareAcquisition(run)
         print "done"
     
+    print "Download files...",
+    sys.stdout.flush()
     hf.downloadService.performDownloads(time)
-    
+    print "done"
     print "Acquire data and fill database"
     for category in category_list:
         print "  %s..." % category.config["name"],
