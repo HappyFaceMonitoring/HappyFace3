@@ -43,7 +43,7 @@ class ModuleProxy:
             module.prepareAcquisition()
         except Exception, e:
             module.logger.error("prepareAcquisition() failed: %s" % str(e))
-            module.debug(traceback.format_exc())
+            module.logger.debug(traceback.format_exc())
     
     def acquire(self, run):
         module = self.acquisitionModules[run['id']]
