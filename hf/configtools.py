@@ -29,17 +29,24 @@ def readConfigurationAndEnv():
         except Exception, e:
             logger.exception("Cannot import default config '%s'" % file)
             raise
-        
-    for file in _getCfgInDirectory(os.path.join(hf.hf_dir, hf.config.get("paths", "local_happyface_cfg_dir"))):
-        try:
-            hf.config.read(file)
-        except Exception, e:
-            logger.exception("Cannot import config '%s'" % file)
-            raise
+    if os.path.exists(hf.config.get("paths", "local_happyface_cfg_dir")):
+        for file in _getCfgInDirectory(os.path.join(hf.hf_dir, hf.config.get("paths", "local_happyface_cfg_dir"))):
+            try:
+                hf.config.read(file)
+            except Exception, e:
+                logger.exception("Cannot import config '%s'" % file)
+                raise
+    else:
+        logger.info('Configuration directory does not exist, use only defaults')
     
     directories = [hf.config.get("paths", "hf_template_dir"), hf.config.get("paths", "module_template_dir")]
     directories = map(lambda x: os.path.join(hf.hf_dir, x), directories)
     hf.template_lookup = TemplateLookup(directories=directories, module_directory=hf.config.get("paths", "template_cache_dir"))
+    
+    if not os.path.exists(hf.config.get("paths", "category_cfg_dir")):
+        raise hf.exceptions.ConfigError("Category config directory not found")
+    if not os.path.exists(hf.config.get("paths", "module_cfg_dir")):
+        raise hf.exceptions.ConfigError("Module config directory not found")
     
     hf.category.config = ConfigParser.ConfigParser()
     for dirpath, dirnames, filenames in os.walk(hf.config.get("paths", "category_cfg_dir")):
