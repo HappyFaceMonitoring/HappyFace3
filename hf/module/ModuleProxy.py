@@ -116,9 +116,10 @@ class ModuleProxy:
                 .where(self.module_table.c.instance==self.instance_name)\
                 .execute()\
                 .fetchone()
-        file_columns = hf.module.getColumnFileReference(self.module_table)
-        # create access objects for files if name is not empty, in this case None
-        dataset = dict((col, (hf.downloadservice.File(run, val) if len(val)>0 else None) if col in file_columns else val) for col,val in dataset.items())
+        if dataset is not None:
+            file_columns = hf.module.getColumnFileReference(self.module_table)
+            # create access objects for files if name is not empty, in this case None
+            dataset = dict((col, (hf.downloadservice.File(run, val) if len(val)>0 else None) if col in file_columns else val) for col,val in dataset.items())
         template = self.template
         module = self.ModuleClass(self.instance_name, self.config, run, dataset, template)
         return module

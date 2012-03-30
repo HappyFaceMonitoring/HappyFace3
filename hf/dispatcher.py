@@ -18,16 +18,30 @@ class CategoryDispatcher(object):
     @cp.expose
     def default(self, category=None, **kwargs):
         try:
-            time_obj = datetime.datetime.fromtimestamp(int(time.time()))
-            timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
-            timestamp += '_' + (kwargs['time'] if 'time' in kwargs else time_obj.strftime('%H:%M'))
-            # notice the extra seconds to avoid microsecond and minute issues
-            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")) + 60)
+            self.logger.debug(kwargs['date'] if 'date' in kwargs is not None else '')
+            self.logger.debug(kwargs['time'] if 'time' in kwargs is not None else '')
             
+            time_error_message = ''
+            
+            time_obj = datetime.datetime.fromtimestamp(int(time.time()))
+            try:
+                timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
+                timestamp += '_' + (kwargs['time'] if 'time' in kwargs else time_obj.strftime('%H:%M'))
+                # notice the extra seconds to avoid microsecond and minute issues
+                time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")) + 60)
+            except Exception:
+                time_error_message = "The passed time was invalid"
+            
+            if time_obj > datetime.datetime.fromtimestamp(int(time.time())+60):
+                time_error_message = "HappyFace is not an oracle"
+ 
             run = hf_runs.select(hf_runs.c.time <= time_obj).order_by(hf_runs.c.time.desc()).execute().fetchone()
+            if run is None:
+                time_error_message = "No data so far in past"
+                run = hf_runs.select(hf_runs.c.time >= time_obj).order_by(hf_runs.c.time.asc()).execute().fetchone()
             run = {"id":run["id"], "time":run["time"]}
             self.logger.info(run)
-            category_dict = dict((cat.name, cat.getModule(run)) for cat in hf.category.createCategoryObjects())
+            category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
             
             selected_category = None
             for c in category_dict.itervalues():
@@ -40,12 +54,14 @@ class CategoryDispatcher(object):
                 "category_list": category_dict.values(),
                 "module_list": [],
                 "hf": hf,
+                "time_specified": ('date' in kwargs or 'time' in kwargs),
                 "date_string": run["time"].strftime('%Y-%m-%d'),
                 "time_string": run["time"].strftime('%H:%M'),
                 "histo_step": kwargs['s'] if 's' in kwargs else "00:15",
                 "run": run,
                 'selected_module': None,
                 'selected_category': selected_category,
+                'time_error_message': time_error_message
             }
 
             for cat in category_dict.itervalues():

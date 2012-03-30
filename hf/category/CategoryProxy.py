@@ -57,7 +57,7 @@ class CategoryProxy:
                 self.logger.error("acquire() failed on %s: %s" % (module.instance_name, str(e)))
                 self.logger.debug(traceback.format_exc())
     
-    def getModule(self, run):
+    def getCategory(self, run):
         specific_modules = [m.getModule(run) for m in self.module_list]
         return hf.category.Category(self.name, self.config, specific_modules, run)
         

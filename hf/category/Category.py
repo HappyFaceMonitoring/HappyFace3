@@ -33,7 +33,7 @@ class Category:
         for module in self.module_list:
             if module.dataset is None:
                 self.data_missing = True
-            if module.dataset['status'] < 0.0:
+            elif module.dataset['status'] < 0.0:
                 self.data_missing = True
         
         if not "type" in self.config:
@@ -64,8 +64,11 @@ class Category:
     def __str__(self):
         return self.name
     
-    def url(self):
-        return "/"+self.name
+    def url(self, time=None):
+        url = "/"+self.name
+        if time is not None:
+            url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'), time.strftime('%H:%M'))
+        return url
                 
     def render(self, template_context):
         module_contents = {}

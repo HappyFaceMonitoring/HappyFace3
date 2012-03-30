@@ -41,12 +41,16 @@
   </table>
  </div>
  <div class="HappyTitleBarElement">
-  <form id="HistoForm1" class="HappyTitleBarForm" action="' . $_SERVER['SCRIPT_NAME'] . '" method="get">
+% if selected_category is None:
+  <form id="HistoForm1" class="HappyTitleBarForm" action="/" method="get">
+% else:
+  <form id="HistoForm1" class="HappyTitleBarForm" action="${selected_category.url()}" method="get">
+% endif
    <table border="0" class="HappyTitleBarElementTable">
     <tr>
      <td>
       <div>
-       <img src="${static_url}/images/left_icon.gif" width="22" height="22" alt="backwards" style="border: none; padding-top: 2px; margin: 0px 2px;" onclick="javascript:HappyHistoNav(\\\'back\\\',\\\'' . $timestamp . '\\\" onfocus="this.blur()">
+       <img id="HistoBack" src="${static_url}/images/left_icon.gif" width="22" height="22" alt="backwards" style="border: none; padding-top: 2px; margin: 0px 2px;" />
       </div>
      </td>
      <td>
@@ -54,14 +58,11 @@
        <input type="text" id="HistoStep" name="s" size="4" style="text-align:center;" value="${histo_step}" />
        <input type="hidden" id="HistoNavDate" name="date" value="${date_string}" />
        <input type="hidden" id="HistoNavTime" name="time" value="${time_string}" />
-       <input type="hidden" id="HistoReloadTab1" name="t" value="' . $selectedTab . '" />
-       <input type="hidden" id="HistoReloadMod1" name="m" value="' . $selectedMod . '" />
-       <input type="hidden" id="HistoReloadExpand1" name="expand" value="" />
       </div>
      </td>
      <td>
       <div>
-       <img src="${static_url}/images/right_icon.gif" width="22" height="22" alt="forwards" style="border: none; padding-top: 2px; margin: 0px 2px;" onclick="javascript:HappyHistoNav(\\\'fwd\\\',\\\'' .$timestamp . '\\\" onfocus="this.blur()">
+       <img id="HistoFwd" src="${static_url}/images/right_icon.gif" width="22" height="22" alt="forwards" style="border: none; padding-top: 2px; margin: 0px 2px;" />
       </div>
      </td>
     </tr>
@@ -70,7 +71,11 @@
  </div>
 
  <div class="HappyTitleBarElement">
-  <form id="HistoForm2" class="HappyTitleBarForm" action="' . $_SERVER['SCRIPT_NAME'] . '" method="get">
+% if selected_category is None:
+  <form id="HistoForm2" class="HappyTitleBarForm" action="/" method="get">
+% else:
+  <form id="HistoForm2" class="HappyTitleBarForm" action="${selected_category.url()}" method="get">
+% endif
    <table border="0" class="HappyTitleBarElementTable">
     <tr>
      <td>
@@ -78,9 +83,6 @@
        <input name="date" type="text" size="10" style="text-align:center;" value="${date_string}" />
        -
        <input name="time" type="text" size="5" style="text-align:center;" value="${time_string}" />
-       <input type="hidden" id="HistoReloadTab2" name="t" value="' . $selectedTab . '" />
-       <input type="hidden" id="HistoReloadMod2" name="m" value="' . $selectedMod . '" />
-       <input type="hidden" id="HistoReloadExpand2" name="expand" value="" />
        <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
       </div>
      </td>
@@ -89,29 +91,28 @@
   </form>
  </div>
  <div class="HappyTitleBarElement">
-  <form class="HappyTitleBarForm" action="' . $_SERVER['SCRIPT_NAME'] . '" method="get">
-   <table border="0" class="HappyTitleBarElementTable">
-    <tr>
-     <td>
-      <div>
-       <button onclick="javascript:document.getElementById(\\\'ReloadForm\\\.submit()" onfocus="this.blur()">Reset</button>
-      </div>
-     </td>
-    </tr>
-   </table>
-  </form>
+  <table border="0" class="HappyTitleBarElementTable">
+   <tr>
+    <td>
+% if selected_category is None:
+     <a class="button" href="/" title="Reset to default settings and current time">Reset</a>
+% else:
+     <a class="button" href="${selected_category.url()}" title="Reset to default settings and current time">Reset</a>
+% endif
+    </td>
+   </tr>
+  </table>
  </div>
-
+% if len(time_error_message) > 0:
 <div class="HappyTitleBarElement">
  <table border="0" class="HappyTitleBarElementTable">
   <tr>
    <td>
-    <div>
-    error_msg.append("      ' . $time_error_message . '
-    </div>
+    ${time_error_message}
    </td>
   </tr>
  </table>
 </div>
+% endif
 
 </div>

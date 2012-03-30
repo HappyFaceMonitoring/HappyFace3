@@ -135,10 +135,16 @@
 	padding: 0px;
 }
 
-.HappyTitleBarElement input[type="submit"], .HappyTitleBarElement button {
+.HappyTitleBarElement input[type="submit"], .HappyTitleBarElement button, .HappyTitleBarElement a.button {
  background-color: #8c8c8c;
  border: 1px solid #adadad;
- padding: 2px 4px;;
+ padding: 2px 4px;
+}
+
+.HappyTitleBarElement a.button {
+ font: 0.9em sans-serif;
+ text-decoration: none;
+ color: black;
 }
 
 .HappyTitleBarElement input[type="text"] {

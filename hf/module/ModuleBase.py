@@ -84,7 +84,7 @@ class ModuleBase:
         if self.template is None:
             return '<p class="error">Rendering module %s failed because template was not loaded</p>' % self.instance_name
         try:
-            template_data = { 'module': self }
+            template_data = { 'module': self, 'run': self.run }
             if self.dataset is None:
                 template_data['no_data'] = True
                 module_html = self.template.render(**template_data)
@@ -93,7 +93,7 @@ class ModuleBase:
                 template_data['no_data'] = False
                 module_html = self.template.render(**template_data)
         except Exception, e:
-            module_html = "<p class='error'>Final rendering of a '%s' module failed completely!</p>" % self.module_name
+            module_html = "<p class='error'>Final rendering of '%s' failed completely!</p>" % self.instance_name
             self.logger.error("Rendering of module %s failed: %s" %(self.module_name, str(e)))
             self.logger.debug(traceback.format_exc())
         return module_html
