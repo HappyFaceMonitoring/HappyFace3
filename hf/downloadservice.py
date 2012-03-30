@@ -24,7 +24,9 @@ class DownloadSlave(threading.Thread):
                     http_errorcode = 0
                     if match:
                         http_errorcode = int(match.group(1))
-                    self.file.error = "Downloading failed" + " with error code %i"%http_errorcode if http_errorcode>0 else ""
+                    self.file.error = "Downloading failed"
+                    if http_errorcode != 0:
+                         self.file.error += " with error code %i" % http_errorcode
                     try:
                         os.unlink(self.file.file_path)
                     except Exception:
@@ -131,7 +133,6 @@ class DownloadService:
             return self.url
         
         def copyToArchive(self, name):
-            logging.debug('%s %s %s %s' % (name, self.isDownloaded(), self.errorOccured(), self.file_path))
             if self.isDownloaded() and not self.errorOccured():
                 self.keep = True
                 dest = os.path.join(hf.downloadService.archive_dir, name)
