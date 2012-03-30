@@ -37,7 +37,7 @@ class ModuleProxy:
         
     def prepareAcquisition(self, run):
         # create module instance solely for that purpose
-        module = self.getModule(run)
+        module = self.ModuleClass(self.instance_name, self.config, run, None, None)
         self.acquisitionModules[run['id']] = module
         try:
             module.prepareAcquisition()
@@ -80,12 +80,12 @@ class ModuleProxy:
         Generate a module instance object for a specific
         HappyFace run.
         """
-        module = self.ModuleClass(self.instance_name, self.config, run)
-        module.template = self.template
-        module.dataset = self.module_table.select(self.module_table.c.run_id==run["id"])\
+        dataset = self.module_table.select(self.module_table.c.run_id==run["id"])\
                 .where(self.module_table.c.instance==self.instance_name)\
                 .execute()\
                 .fetchone()
+        template = self.template
+        module = self.ModuleClass(self.instance_name, self.config, run, dataset, template)
         return module
         
     

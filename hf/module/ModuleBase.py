@@ -1,6 +1,6 @@
 import hf
 from mako.template import Template
-import logging, traceback
+import logging, traceback, os
 
 class ModuleBase:
     """
@@ -24,13 +24,15 @@ class ModuleBase:
         'type': 'rated'
     }
     
-    def __init__(self, instance_name, config, run):
+    def __init__(self, instance_name, config, run, dataset, template):
         self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
         self.module_name = self.__class__.module_name
         self.module_table = self.__class__.module_table
         self.instance_name = instance_name
         self.config = config
         self.run = run
+        self.dataset = dataset
+        self.template = template
     
     def prepareAcquisition(self, run):
         pass
@@ -44,6 +46,34 @@ class ModuleBase:
         preprocessing of data or you have data in subtables.
         """
         return {"dataset": self.dataset, "run": self.run}
+        
+    def __unicode__(self):
+        return self.instance_name
+    
+    def __str__(self):
+        return self.instance_name
+    
+    def getStatusString(self):
+        icon = 'unhappy'
+        if self.dataset is None:
+            icon = 'unhappy' if type == 'rated' else 'unavail_plot'
+        else:
+            if type == 'rated':
+                if self.dataset['status'] > 0.66:
+                    icon = 'happy'
+                elif self.dataset['status'] > 0.33:
+                    icon = 'neutral'
+                else:
+                    icon = 'unhappy'
+            else:
+                icon = 'avail_plot' if self.dataset['status'] > 0.9 else 'unavail_plot'
+        return icon
+        
+    def getStatusIcon(self):
+        return os.path.join(hf.config.get('paths', 'template_icons_url'), 'mod_'+self.getStatusString()+'.png')
+    
+    def getNavStatusIcon(self):
+        return os.path.join(hf.config.get('paths', 'template_icons_url'), 'nav_'+self.getStatusString()+'.png')
     
     def render(self):
         module_html = ''

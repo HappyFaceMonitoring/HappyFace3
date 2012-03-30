@@ -1,6 +1,6 @@
 from Category import Category
 from CategoryProxy import CategoryProxy
-
+import algorithms
 import hf
 
 config = None

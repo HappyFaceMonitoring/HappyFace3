@@ -16,11 +16,12 @@ class CategoryDispatcher(object):
         self.category_list = hf.category.createCategoryObjects()
     
     @cp.expose
-    def default(self, category=None, timestamp=None):
+    def default(self, category=None, **kwargs):
         try:
             time_obj = datetime.datetime.now()
-            if timestamp is not None:
-                time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M:%S")))
+            timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
+            timestamp += '_' + (kwargs['time'] if 'time' in kwargs else time_obj.strftime('%H:%M'))
+            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")))
             
             run = hf_runs.select(hf_runs.c.time <= time_obj).order_by(hf_runs.c.time.desc()).execute().fetchone()
             run = {"id":run["id"], "time":run["time"]}
@@ -32,6 +33,9 @@ class CategoryDispatcher(object):
                 "category_list": category_dict.values(),
                 "module_list": [],
                 "hf": hf,
+                "date_string": run["time"].strftime('%Y-%m-%d'),
+                "time_string": run["time"].strftime('%H:%M'),
+                "histo_step": kwargs['s'] if 's' in kwargs else "00:15"
             }
 
             for cat in category_dict.itervalues():

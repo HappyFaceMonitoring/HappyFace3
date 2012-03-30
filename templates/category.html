@@ -30,29 +30,7 @@
      <td style="width:40px;" align="left">
       <div class="HappyFNnavimg">
        <a href="javascript:goto('${module.instance_name}')" onfocus="this.blur()" ondblclick="HappyReloadPage('${category_name}', '${module.instance_name}')">
-% if module.dataset is not None:
- % if module.config["type"] == "plots":
-  % if module.dataset["status"] < 0.9:
-        <img src='/static/themes/armin_box_arrows/nav_unavail_plot.png'/>
-  % else:
-        <img src='/static/themes/armin_box_arrows/nav_avail_plot.png'/>
-  % endif
- % else:
-  % if module.dataset["status"] > 0.9:
-        <img src='/static/themes/armin_box_arrows/nav_happy.png'/>
-  % elif module.dataset["status"] < 0.3:
-        <img src='/static/themes/armin_box_arrows/nav_unhappy.png'/>
-  % else:
-        <img src='/static/themes/armin_box_arrows/nav_neutral.png'/>
-  % endif
- % endif
-% else:
- % if module.config["type"] == "plots":
-        <img src='/static/themes/armin_box_arrows/nav_unavail_plot.png'/>
- % else:
-        <img src='/static/themes/armin_box_arrows/nav_unhappy.png'/>
- % endif
-% endif
+        <img id="FNImage_${module.instance_name}" class="HappyFNnavpic" src='${module.getNavStatusIcon()}' title="${module.config['name']}" />
        </a>
       </div>
      </td>
