@@ -55,6 +55,9 @@ class Category:
     
     def __str__(self):
         return self.name
+    
+    def url(self):
+        return "/"+self.name
                 
     def render(self, template_context):
         module_contents = {}
@@ -70,10 +73,7 @@ class Category:
         template_context['category_name'] = self.name
         template_context['category_config'] = self.config
         template_context['category_module_list'] = self.module_list
-        template_context['run'] = self.run
         template_context['module_contents'] = module_contents
-        template_context['selected_module'] = None
-        template_context['selected_category'] = None
         try:
             return self.template.render(**template_context)
         except Exception, e:

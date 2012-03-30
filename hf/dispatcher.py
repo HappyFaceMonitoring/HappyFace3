@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import cherrypy as cp
-import hf, datetime, time, logging, traceback
+import hf, datetime, time, logging, traceback, os
 from hf.module.database import hf_runs
 from sqlalchemy import *
 from mako.template import Template
@@ -29,6 +29,12 @@ class CategoryDispatcher(object):
             self.logger.info(run)
             category_dict = dict((cat.name, cat.getModule(run)) for cat in hf.category.createCategoryObjects())
             
+            selected_category = None
+            for c in category_dict.itervalues():
+                if c.name == category:
+                    selected_category = c
+                    break
+            
             template_context = {
                 "static_url": hf.config.get('paths', 'static_url'),
                 "category_list": category_dict.values(),
@@ -36,7 +42,10 @@ class CategoryDispatcher(object):
                 "hf": hf,
                 "date_string": run["time"].strftime('%Y-%m-%d'),
                 "time_string": run["time"].strftime('%H:%M'),
-                "histo_step": kwargs['s'] if 's' in kwargs else "00:15"
+                "histo_step": kwargs['s'] if 's' in kwargs else "00:15",
+                "run": run,
+                'selected_module': None,
+                'selected_category': selected_category,
             }
 
             for cat in category_dict.itervalues():
@@ -44,17 +53,14 @@ class CategoryDispatcher(object):
             
             doc = u""
 
-            doc += u"<ul>"
-            for cat in category_dict.iterkeys():
-                doc += u"<li><a href=\"/%s\">%s</a></li>" % (cat,cat)
-            doc += u"</ul>"
-            
-            
-            if category is not None and not category in category_dict:
-                doc += u"<h2>404 – File Not Found</h2>"
+            if category is None:
+                filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "index.html")
+                index_template = Template(filename=filename, lookup=hf.template_lookup)
+                doc = index_template.render(**template_context)
+            elif category is not None and not category in category_dict:
+                raise cp.HTTPError(404, u"<h2>404 – File Not Found</h2>")
             elif category is not None:
                 if run is not None:
-                    
                     doc = category_dict[category].render(template_context)
                 else:
                     doc = "<h2>No data found at this time</h2>"
@@ -62,4 +68,4 @@ class CategoryDispatcher(object):
         except Exception, e:
             self.logger.error("Page request threw exception: %s" % str(e))
             self.logger.debug(traceback.format_exc())
-            raise
+            raise cp.HTTPError(500, "HappyFace threw an exception, see logfile for detailed info")

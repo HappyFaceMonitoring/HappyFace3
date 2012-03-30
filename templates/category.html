@@ -1,7 +1,6 @@
 <%inherit file="/base.html" />
 
 <%def name="content()">
-<%include file="/atom_timemachine.html" /> 
 <div id="HappyFNnav_${category_name}" class="HappyFNnav">
  <ul>
   <li>
@@ -42,12 +41,8 @@
 </div>
 <script type="text/javascript">getFNSize("HappyFNnav_${category_name}");</script>
 <div id="HappyPanels1" class="HappyPanels">
-
-<%include file="/atom_navbar.html" />
- <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">' + "\n"
+ <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">
   <div class="HappyPanelsContent" id="${category_name}_panel">
-   <h2>${category_config["name"]}</h2>
-    <p>${category_config["description"]}</p>
 % for module,contents in module_contents.iteritems():
      ${contents}
 % endfor

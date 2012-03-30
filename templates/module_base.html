@@ -1,20 +1,50 @@
-<h3>${module.config["name"]}</h3>
-<p>${module.run["time"]}</p>
+<a id=""></a>
+<table class="main" style="width:1000px;">
+ <tbody>
+  <tr>
+   <td>
+    <button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide_info('${module.instance_name}_info', '${module.instance_name}_info_link');">
+     <img alt="" src="${module.getStatusIcon()}" />
+    </button>
+   </td>
+   <td>
+    <strong>
+     <a href="${module.url()}" style="text-decoration:none;color:#000000;" onfocus="this.blur()">${module.config["name"]}</a>
+     <br />
+     <span style="color:#999; font: bold 0.7em sans-serif;">${run["time"].strftime("%d. %b %Y, %H:%M")}</span>
+     <span style="color:gray;">-</span>
+     <small>
+      <a href="javascript:show_hide_info('${module.instance_name}_info', '${module.instance_name}_info_link');" class="HappyLink" onfocus="this.blur()" id="${module.instance_name}_info_link">Show module information</a>
+     </small>
+    </strong>
+   </td>   
+  </tr>
+  <tr>
+   <td> </td>
+   <td>
+    <div style="display:none;" id="${module.instance_name}_info">
+     <ul>
+      <li>Module instance: ${module.instance_name}</li>
+% if not no_data:
+      <li>Status: ${module.dataset["status"]}</li>
+      <li>Description: ${module.dataset["description"]}</li>
+      <li>Instruction: ${module.dataset["instruction"]}</li>
+%endif
+% if not no_data:
+      <li>Data source: <a href="${dataset["source_url"]}">${module.dataset["source_url"]}</a></li>
+% endif
+     </ul>
+    </div>
 % if no_data:
- <p>No data at this time.</p>
+    <p>No data at this time.</p>
 % else:
  % if len(module.dataset["error_string"]) > 0:
- <p>${module.dataset["error_string"]}</p>
+    <p>${module.dataset["error_string"]}</p>
  % else:
-<div style="" class="module_info">
- <ul>
-  <li>Module instance: ${module.instance_name}</li>
-  <li>Status: ${module.dataset["status"]}</li>
-  <li>Description: ${module.dataset["description"]}</li>
-  <li>Instruction: ${module.dataset["instruction"]}</li>
-  <li>Data source: <a href="${dataset["source_url"]}">${module.dataset["source_url"]}</a></li>
- </ul>
-</div>
- ${self.content()}
+${self.content()}
  % endif
 % endif
+   </td>
+  </tr>
+ </tbody>
+</table>

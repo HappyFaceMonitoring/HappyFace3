@@ -81,7 +81,6 @@
 	border-bottom: solid 1px #999;
 	border-top: solid 0px #999;
 	border-right: solid 0px #999;
-	visibility: hidden;
 }
 
 /* Definition of a single content layer */
@@ -93,7 +92,6 @@
 	font-family: sans-serif;
 	border-left: solid 0px #999;
 	border-bottom: solid 0px #999;
-	visibility: hidden;
 }
 
 /* Configuration of the title bar/history bar */
