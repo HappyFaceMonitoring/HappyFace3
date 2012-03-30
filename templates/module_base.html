@@ -2,18 +2,19 @@
  <tbody>
   <tr>
    <td>
-    <button class="HappyButton" type="button" onfocus="this.blur()" onclick="show_hide_info('${module.instance_name}_info', '${module.instance_name}_info_link');">
+    ###<button class="HappyButton" type="button">
      <img alt="" src="${module.getStatusIcon()}" />
-    </button>
+    ###</button>
    </td>
    <td>
     <strong>
-     <a id="${module.instance_name}" href="${module.url()}" style="text-decoration:none;color:#000000;" onfocus="this.blur()">${module.config["name"]}</a>
+     <a id="${module.instance_name}" style='position:relative; top:-162px'></a>
+     <a href="${module.url()}" style="text-decoration:none;color:#000000;" onfocus="this.blur()">${module.config["name"]}</a>
      <br />
      <span style="color:#999; font: bold 0.7em sans-serif;">${run["time"].strftime("%d. %b %Y, %H:%M")}</span>
      <span style="color:gray;">-</span>
      <small>
-      <a href="javascript:show_hide_info('${module.instance_name}_info', '${module.instance_name}_info_link');" class="HappyLink" onfocus="this.blur()" id="${module.instance_name}_info_link">Show module information</a>
+      <a href="" class="HappyLink" id="${module.instance_name}_info_link">Show module information</a>
      </small>
     </strong>
    </td>   
@@ -21,7 +22,7 @@
   <tr>
    <td> </td>
    <td>
-    <div style="display:none;" id="${module.instance_name}_info">
+    <div style="display:none;" class='HappyDesc' id="${module.instance_name}_info_box">
      <ul>
       <li>Module instance: ${module.instance_name}</li>
 % if not no_data:
