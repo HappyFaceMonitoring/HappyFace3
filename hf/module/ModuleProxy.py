@@ -58,17 +58,38 @@ class ModuleProxy:
                     "description": self.config["description"],
                     "instruction": self.config["instruction"]
                     }
-            d = module.extractData()
-            data.update(d)
-            
-            result = module.module_table.insert().values(**data).execute()
+            dataExctractionSuccessfull = False
+            try:
+                d = module.extractData()
+                data.update(d)
+                dataExctractionSuccessfull = True
+            except Exception, e:
+                self.logger.error("Data extraction failed: "+str(e))
+                self.logger.debug(traceback.format_exc())
+                data.update({
+                    "status": -1,
+                    "error_string": str(e)
+                })
+            finally:
+                result = module.module_table.insert().values(**data).execute()
             
             # compatibility between different sqlalchemy versions
             try:
                 inserted_id = result.inserted_primary_key[0]
             except AttributeError:
                 inserted_id = result.last_inserted_ids()[0]
-            module.fillSubtables(inserted_id)
+            
+            if dataExctractionSuccessfull:
+                try:
+                    module.fillSubtables(inserted_id)
+                except Exception, e:
+                    self.logger.error("Filling subtables failed: "+str(e))
+                    self.logger.debug(traceback.format_exc())
+                    if len(data["error_string"]) > 0:
+                        data["error_string"] += "; "
+                    data["error_string"] += str(e)
+                    module.module_table.update().where(module.module_table.c.id == inserted_id).values(error_string=data["error_string"]).execute()
+        
         except Exception, e:
             module.logger.error("data acquisition failed: %s" % str(e))
             module.logger.debug(traceback.format_exc())
