@@ -1,6 +1,16 @@
 <%inherit file="/base.html" />
 
 <%def name="content()">
+###<script type="text/javascript">getFNSize("HappyFNnav_${category_name}");</script>
+<div id="HappyPanels1" class="HappyPanels">
+ <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">
+  <div class="HappyPanelsContent" id="${category_name}_panel">
+% for module,contents in module_contents.iteritems():
+     ${contents}
+% endfor
+  </div>
+ </div>
+</div>
 <div id="HappyFNnav_${category_name}" class="HappyFNnav">
  <ul>
   <li>
@@ -28,7 +38,7 @@
      </td>
      <td style="width:40px;" align="left">
       <div class="HappyFNnavimg">
-       <a href="javascript:goto('${module.instance_name}')" onfocus="this.blur()" ondblclick="HappyReloadPage('${category_name}', '${module.instance_name}')">
+       <a href="#${module.instance_name}" title="${module.config["name"]}">
         <img id="FNImage_${module.instance_name}" class="HappyFNnavpic" src='${module.getNavStatusIcon()}' title="${module.config['name']}" />
        </a>
       </div>
@@ -38,15 +48,5 @@
   </li>
 % endfor
  </ul>
-</div>
-<script type="text/javascript">getFNSize("HappyFNnav_${category_name}");</script>
-<div id="HappyPanels1" class="HappyPanels">
- <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">
-  <div class="HappyPanelsContent" id="${category_name}_panel">
-% for module,contents in module_contents.iteritems():
-     ${contents}
-% endfor
-  </div>
- </div>
 </div>
 </%def>
