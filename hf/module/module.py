@@ -57,10 +57,10 @@ class ModuleBase:
                     "run_id": run["id"],
                     "status": self.status,
                     "error_string": self.error_string,
+                    "source_url": "",
                     "description": self.config["description"],
                     "instruction": self.config["instruction"]
                     }
-            
             data.update(self.extractData())
             
             result = self.module_table.insert().values(**data).execute()
@@ -111,7 +111,8 @@ def generateModuleTable(tabname, columns):
             Column('status', Float),
             Column('description', Text),
             Column('instruction', Text),
-            Column('error_string', Text)
+            Column('error_string', Text),
+            Column('source_url', Text),
         ] + columns))
         
 def generateModuleSubtable(tabname, module_table, columns):
