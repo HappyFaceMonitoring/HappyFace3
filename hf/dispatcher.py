@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import cherrypy as cp
-import hf, datetime
+import hf, datetime, time
 from hf.module.database import hf_runs
 from sqlalchemy import *
 
@@ -14,7 +14,7 @@ class CategoryDispatcher(object):
         self.category_dict = dict((cat.config["name"], cat) for cat in category_list)
     
     @cp.expose
-    def default(self, category=None, date=None, time=None):
+    def default(self, category=None, timestamp=None):
         doc = u"<html><body>"
         
         doc += u"<ul>"
@@ -22,8 +22,13 @@ class CategoryDispatcher(object):
             doc += u"<li><a href=\"/%s\">%s</a></li>" % (cat,cat)
         doc += u"</ul>"
         
-        run = hf_runs.select(hf_runs.c.time <= datetime.datetime.now()).order_by(hf_runs.c.time.desc()).execute().fetchone()
-        print run, repr(run), type(run)
+        time_obj = datetime.datetime.now()
+        if timestamp is not None:
+            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M:%S")))
+        
+        run = hf_runs.select(hf_runs.c.time <= time_obj).order_by(hf_runs.c.time.desc()).execute().fetchone()
+        run = {"id":run["id"], "time":run["time"]}
+        print run
         
         if category is not None and not category in self.category_dict:
             doc += u"<h2>404 – File Not Found</h2>"
