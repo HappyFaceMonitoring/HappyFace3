@@ -8,7 +8,7 @@ def _getCfgInDirectory(dir):
 def readConfiguration():
     defaults = {}
     
-    hf.config = ConfigParser.ConfigParser(defaults=defaults, allow_no_value=True)
+    hf.config = ConfigParser.ConfigParser(defaults=defaults)
     for file in _getCfgInDirectory(os.path.join(hf.hf_dir, "defaultconfig")):
         print file
         try:
@@ -23,14 +23,14 @@ def readConfiguration():
             # TODO logging
             traceback.print_exc()
     
-    hf.category.config = ConfigParser.ConfigParser(allow_no_value=True)
+    hf.category.config = ConfigParser.ConfigParser()
     for dirpath, dirnames, filenames in os.walk(hf.config.get("paths", "category_cfg_dir")):
         for filename in filenames:
             if filename.endswith(".cfg"):
                 hf.category.config.read(os.path.join(dirpath, filename))
                 cherrypy.engine.autoreload.files.add(os.path.join(dirpath, filename))
     
-    hf.module.config = ConfigParser.ConfigParser(allow_no_value=True)
+    hf.module.config = ConfigParser.ConfigParser()
     for dirpath, dirnames, filenames in os.walk(hf.config.get("paths", "module_cfg_dir")):
         for filename in filenames:
             if filename.endswith(".cfg"):
