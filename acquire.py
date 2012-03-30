@@ -4,16 +4,21 @@ import hf,sys
 import os, datetime, time, traceback
 import ConfigParser
 import logging
+
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
+    try:
+        hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
+        hf.configtools.readConfigurationAndEnv()
+        hf.configtools.setupLogging('acquire_logging_cfg')
+    except Exception,e:
+        print "Setting up HappyFace failed"
+        traceback.print_exc()
+        sys.exit(-1)
     try:
         cfg_dir = None
         try:
-            hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
-            hf.configtools.readConfiguration()
             hf.configtools.importModules()
             
             hf.database.connect(implicit_execution = True)

@@ -7,9 +7,9 @@ import ConfigParser
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
     hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
-    hf.configtools.readConfiguration()
+    hf.configtools.readConfigurationAndEnv()
+    hf.configtools.setupLogging('render_logging_cfg')
     cp_config = {}
     for section in hf.config.sections():
         if section == "global" or section.startswith("/"):
