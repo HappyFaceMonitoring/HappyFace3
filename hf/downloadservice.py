@@ -101,6 +101,9 @@ class DownloadService:
         def getFilename(self):
             return self.filename
         
+        def getSourceUrl(self):
+            return self.url
+        
         def copyToArchive(self, name):
             self.keep = True
             dest = os.path.join(hf.downloadService.archive_dir, name)
