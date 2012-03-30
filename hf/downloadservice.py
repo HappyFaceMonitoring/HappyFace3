@@ -1,5 +1,5 @@
 
-import hf, threading, time, os, subprocess, shutil, traceback
+import hf, threading, time, os, subprocess, shutil, traceback, shlex
 
 class DownloadSlave(threading.Thread):
     def __init__(self, file, global_options, archive_dir):
@@ -15,7 +15,14 @@ class DownloadSlave(threading.Thread):
                 shutil.copy(path, self.file.filename)
             else:
                 command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.filename, "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
-                subprocess.call(command, shell=True)
+                process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
+                stderr = process.communicate()[1]
+                if process.returncode != 0:
+                    match = re.search("ERROR ([0-9][0-9][0-9])", stderr)
+                    http_errorcode = 0
+                    if match:
+                        http_errorcode = int(match.group(1))
+                    self.file.error = "Downloading failed" + " with error code %i"%http_errorcode if http_errorcode>0 else ""
         except Exception, e:
             self.file.error += "Failed to download file: %s" % e
             traceback.print_exc()
@@ -66,7 +73,8 @@ class DownloadService:
             if slave.isAlive():
                 slave.file.error += "Download didn't finish in time"
                 slave._Thread__stop()
-            else:
+                print "DOWNLOAD TIMEOUT!"
+            elif not slave.file.errorOccured():
                 slave.file.is_downloaded = True
     
     def cleanup(self):
