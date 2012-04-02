@@ -1,8 +1,10 @@
 *~
 *.pyc
 *.db
-tmp/*
+mako_cache/*
 static/archive/*
+static/tmp/*
 .svn/*
 modules/*
 config/*
+log/*
