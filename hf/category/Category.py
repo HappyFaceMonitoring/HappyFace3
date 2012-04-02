@@ -63,7 +63,8 @@ class Category:
     
     def __str__(self):
         return self.name
-    
+
+    @hf.url.absoluteUrl
     def url(self, time=None):
         url = "/"+self.name
         if time is not None:

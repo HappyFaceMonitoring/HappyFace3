@@ -17,6 +17,7 @@ class CategoryDispatcher(object):
     
     @cp.expose
     def default(self, category=None, **kwargs):
+	self.logger.warning(category)
         try:
             self.logger.debug(kwargs['date'] if 'date' in kwargs is not None else '')
             self.logger.debug(kwargs['time'] if 'time' in kwargs is not None else '')
