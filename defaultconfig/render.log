@@ -36,5 +36,5 @@ formatter=detailedFormatter
 [handler_fileHandler]
 class=FileHandler
 level=INFO
-args=("render.log", "a")
+args=("log/render.log", "a")
 formatter=detailedFormatter

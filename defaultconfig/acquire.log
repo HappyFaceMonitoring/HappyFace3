@@ -30,11 +30,11 @@ formatter=basicFormatter
 [handler_persistentFileHandler]
 class=FileHandler
 level=WARNING
-args=("happyface.log", "a")
+args=("log/happyface.log", "a")
 formatter=detailedFormatter
 
 [handler_fileHandler]
 class=FileHandler
 level=DEBUG
-args=("happyface_lastrun.log", "w")
+args=("log/happyface_lastrun.log", "w")
 formatter=basicFormatter
