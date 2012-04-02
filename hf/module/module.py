@@ -12,7 +12,7 @@ def generateModuleTable(module_class, tabname, columns):
     table = Table("module_"+tabname, hf.database.metadata,
         *([
             Column('id', Integer, Sequence(tabname+'_id_seq'), primary_key=True),
-            Column('instance', Integer, ForeignKey("module_instances.instance")),
+            Column('instance', Text, ForeignKey("module_instances.instance")),
             Column('run_id', Integer, ForeignKey("hf_runs.id")),
             Column('status', Float),
             Column('description', Text),
