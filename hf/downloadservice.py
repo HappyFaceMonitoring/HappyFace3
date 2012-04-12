@@ -70,7 +70,7 @@ class DownloadService:
         if not os.path.exists(tmp_dir):
             os.makedirs(tmp_dir)
         
-        file_prefix = runtime.strftime("%Y%m%d_%H%M%s_")
+        file_prefix = os.path.join(tmp_dir, runtime.strftime("%Y%m%d_%H%M%s_"))
         
         timeout = hf.config.getint("downloadService", "timeout")
         
