@@ -34,7 +34,7 @@ class ModuleBase:
         self.dataset = dataset
         self.template = template
     
-    def prepareAcquisition(self, run):
+    def prepareAcquisition(self):
         pass
     
     def fillSubtables(self, module_entry_id):
