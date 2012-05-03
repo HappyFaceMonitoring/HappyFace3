@@ -84,7 +84,7 @@ class ModuleBase:
         if self.template is None:
             return '<p class="error">Rendering module %s failed because template was not loaded</p>' % self.instance_name
         try:
-            template_data = { 'module': self, 'run': self.run }
+            template_data = { 'module': self, 'run': self.run, 'hf': hf }
             if self.dataset is None:
                 template_data['no_data'] = True
                 module_html = self.template.render(**template_data)
