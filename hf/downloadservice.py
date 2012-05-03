@@ -14,7 +14,7 @@ class DownloadSlave(threading.Thread):
         try:
             if self.file.url.startswith("file://"):
                 path = self.file.url[len("file://"):]
-                shutil.copy(path, self.file.file_path)
+                shutil.copy(path, self.file.getTmpPath())
             else:
                 command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.getTmpPath(), "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
                 process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
@@ -28,7 +28,7 @@ class DownloadSlave(threading.Thread):
                     if http_errorcode != 0:
                          self.file.error += " with error code %i" % http_errorcode
                     try:
-                        os.unlink(self.file.file_path)
+                        os.unlink(self.file.getTmpPath())
                     except Exception:
                         pass
         except Exception, e:
