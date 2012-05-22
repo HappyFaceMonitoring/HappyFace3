@@ -1,3 +1,25 @@
+<?php
+$debug_msg_prefix = "plot_generator ".$_SERVER["REMOTE_ADDR"]." ".$_SERVER["REQUEST_TIME"].":";
+$config = array();
+$debug_call_counter = 0;
+if(file_exists("plot_config.php"))
+	include("plot_config.php");
+
+function debug($msg)
+{
+	global $config, $debug_msg_prefix, $debug_call_counter;
+	if(isset($config["debug_logging"]) and $config["debug_logging"] === True)
+	{
+		$debug_call_counter++;
+		$msg = "($debug_call_counter)$msg";
+		if(isset($config["debug_logpath"]) and strlen($config["debug_logpath"]) > 0)
+			file_put_contents($config["debug_logpath"], $debug_msg_prefix." ".$msg."\n", FILE_APPEND);
+		if(isset($config["debug_weblog"]) and $config["debug_weblog"] === True)
+			echo $msg."<br />\n";
+	}
+}
+debug("start plot generator");
+?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
@@ -7,7 +29,6 @@
 		<h2><strong>Module: <?php echo $_GET["module"]?></strong></h2>
 
 <?php
-
 include('plot_common.php');
 include('plot_timerange_select.php');
 
@@ -33,7 +54,7 @@ $renormalize = '';
 $legend = '';
 $variables = '';
 $extra_title = '';
-
+debug("\"verify\" input data");
 // now insert actuall,verified get-data if available
 if(isset($_GET['timestamp_var']) && $_GET['timestamp_var'] != '')
 	$timestamp_var = verify_column_name($_GET['timestamp_var']);

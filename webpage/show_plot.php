@@ -1,5 +1,25 @@
 <?php
 
+$debug_msg_prefix = "show_plot ".$_SERVER["REMOTE_ADDR"]." ".$_SERVER["REQUEST_TIME"].":";
+$config = array();
+$debug_call_counter = 0;
+if(file_exists("plot_config.php"))
+	include("plot_config.php");
+
+function debug($msg)
+{
+	global $config, $debug_msg_prefix, $debug_call_counter;
+	if(isset($config["debug_logging"]) and $config["debug_logging"] === True)
+	{
+		$debug_call_counter++;
+		$msg = "($debug_call_counter)$msg";
+		if(isset($config["debug_logpath"]) and strlen($config["debug_logpath"]) > 0)
+			file_put_contents($config["debug_logpath"], $debug_msg_prefix." ".$msg."\n", FILE_APPEND);
+		//if(isset($config["debug_weblog"]) and $config["debug_weblog"] === True)
+		//	echo $msg."<br />\n";
+	}
+}
+
  # This parses $_GET parameters to obtain timerange to plot
 include('plot_common.php');
 include('evalmath.class.php');

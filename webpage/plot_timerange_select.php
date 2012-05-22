@@ -48,6 +48,7 @@ function get_options_string($unit)
 // then $variables should be a single variable only.
 function print_plot_timerange_selection($module, $subtable, $timestamp_var, $constraint, $squash, $renormalize, $legend, $variable_list, $variables, $timestamp_begin, $timestamp_end, $timestamp_now, $timestamp_timerange, $new_window, $extra_title='')
 {
+	debug("print_plot_timerange_selection()");
 	// Construct unit and variable selection widgets
 	$variables_arr = explode(',', $variables);
 	$variable_str = $variables_arr[0];
@@ -172,6 +173,7 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	echo '  </tr>';
 	echo ' </table>';
 	echo '</form>';
+	debug("end: print_plot_timerange_selection()");
 }
 
 ?>
