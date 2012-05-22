@@ -69,6 +69,7 @@ class WebCreator(object):
 	output += '<?php ini_set("arg_separator.output","&amp;"); ?>'
 
 	output += '<?php' + "\n"
+	output += 'function debug($msg) {} // dummy to make plot_generator debug feature happy\n'
 	output += '    include("plot_timerange_select.php");' + "\n"
 	output += '?>'
 

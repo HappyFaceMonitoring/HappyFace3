@@ -87,7 +87,7 @@ if(isset($_GET['squash']) && intval($_GET['squash']) != 0)
 }
 
 print_plot_timerange_selection($module, $module_table, $timestamp_var, $constraint, $squash, $renormalize, $legend, null, $variables, $timestamp0, $timestamp1, $timestamp_now, $timestamp_timerange, false, $extra_title);
-
+debug("Expect script not to fail from here on");
 # create the variables array just now, the previous function call expects the raw string
 if($squash != 0)
     $variables = array($variables);
@@ -172,3 +172,4 @@ if($variable == "status")
 
 	</body>
 </html>
+<?php debug("plot_generator.php finished!"); ?>

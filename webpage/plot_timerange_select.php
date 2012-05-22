@@ -52,29 +52,34 @@ function print_plot_timerange_selection($module, $subtable, $timestamp_var, $con
 	// Construct unit and variable selection widgets
 	$variables_arr = explode(',', $variables);
 	$variable_str = $variables_arr[0];
+	debug("if-statement");
 	if($variable_list)
 	{
 		$variable_out = '<select id="' . htmlentities($module) . '_variable_list">';
 		$variable_out .= '<option value="all">all variables (trend plot)</option>';
+		debug("if-1");
 		foreach($variable_list as $variable)
 			$variable_out .= '<option value="' . htmlentities($variable) . '"' . ($variable == $variable_str ? ' selected="selected"' : '') . '>' . htmlentities($variable) . '</option>';
+		debug("if-2");
 		$variable_out .= '</select>';
 	}
 	else
 	{
+		debug("else-1");
 		$variable_out = '<strong>' . htmlentities($variable_str) . '</strong>';
 		if(count($variables_arr) > 1)
 			$variable_out .= " +" . (count($variables_arr)-1) . " more";
 	}
-
+	debug("conversion 1");
 	// Construct unit selection
 	$seconds = $timestamp_end - $timestamp_begin;
 	$timerange_now_unit = convert_seconds(time() - $timestamp_begin);
+	debug("conversion 2");
 	$timerange_fix_unit = convert_seconds($seconds);
 
 	// Default
 	if($legend == '') $legend = 'bottom';
-
+	debug("output-block");
 	echo '<script type="text/javascript">' . "\n";
 	echo 'function ' . $module . '_plot_submit(module)' . "\n";
 	echo '{' . "\n";
