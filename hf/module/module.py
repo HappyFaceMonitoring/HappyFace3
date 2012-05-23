@@ -21,14 +21,18 @@ def generateModuleTable(module_class, tabname, columns):
             Column('source_url', Text),
         ] + columns))
     module_class.module_table = table
+    table.module_class = module_class
     return table
         
 def generateModuleSubtable(tabname, module_table, columns):
-    return Table("module_sub_"+tabname, hf.database.metadata,
+    table = Table("module_sub_"+tabname, hf.database.metadata,
         *([
             Column('id', Integer, Sequence("module_"+module_table.name+"_sub_"+tabname+'_id_seq'), primary_key=True),
             Column('parent_id', Integer, ForeignKey(module_table.c.id)),
         ] + columns))
+    module_table.module_class.subtables["module_sub_"+tabname] = table
+    table.module_class = module_table.module_class
+    return table
 
 def addColumnFileReference(table, column):
     name = table.name if isinstance(table, Table) else table

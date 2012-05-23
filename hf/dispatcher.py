@@ -3,6 +3,7 @@
 import cherrypy as cp
 import hf, datetime, time, logging, traceback, os
 from hf.module.database import hf_runs
+import hf.plotgenerator
 from sqlalchemy import *
 from mako.template import Template
 
@@ -14,7 +15,18 @@ class CategoryDispatcher(object):
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = hf.category.createCategoryObjects()
+        hf.plotgenerator.init()
     
+    @cp.expose
+    def plot(self, plt_type=None, img=None, **kwargs):
+        if plt_type == "time":
+            if img == "img":
+                return hf.plotgenerator.timeseriesPlot(**kwargs)
+            else:
+                return "navigat0r frame" # show navigator frame
+        else:
+            return "404" # TODO 404!
+        
     @cp.expose
     def default(self, category=None, **kwargs):
 	self.logger.warning(category)

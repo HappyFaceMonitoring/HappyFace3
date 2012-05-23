@@ -24,6 +24,9 @@ class ModuleBase:
         'type': 'rated'
     }
     
+    table = None
+    subtables = {}
+    
     def __init__(self, instance_name, config, run, dataset, template):
         self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
         self.module_name = self.__class__.module_name
