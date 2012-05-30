@@ -210,7 +210,7 @@ class CMSPhedexBlockTestFiles(ModuleBase):
         mc_overview.append('<table class="TableData">')
         mc_overview.append('<tbody>')
         mc_overview.append(' <tr class="TableHeader">')
-        mc_overview.append('  <th>Type</th>')
+        mc_overview.append('  <th>Failed Tests</th>')
         mc_overview.append('  <th>Request Time</th>')
         mc_overview.append('  <th>Num. Failed Blocks </th>')
         mc_overview.append('  <th>Num. Failed Files </th>')

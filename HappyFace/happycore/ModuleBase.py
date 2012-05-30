@@ -181,6 +181,7 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	return config
 
     def run(self):
+        print '#START', self.__module__
         try:
 	    self.process()
 	except GetData.DownloadError, ex:
@@ -207,6 +208,8 @@ class ModuleBase(Thread,DataBaseLock,HTMLOutput):
 	    sys.stderr.write(self.__module__ + ': ' + self.error_message + '\n')
 	    traceback.print_exc()
 	    return -1
+        finally:
+            print '-STOP', self.__module__
 
     def process(self):
         raise Exception("process() not implemented for module " + self.__module__)
