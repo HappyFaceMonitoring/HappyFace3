@@ -91,6 +91,9 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
         if fileLine.count('resources_used.cput'):
             theJobInfo[theJobId]['cputime'] = getSeconds(fileLine.split(" = ")[1])
 
+        if fileLine.count('resources_used.ncpus'):
+            theJobInfo[theJobId]['ncpus'] = fileLine.split(" = ")[1]
+
         if fileLine.count('resources_used.walltime'):
             theJobInfo[theJobId]['walltime'] = getSeconds(fileLine.split(" = ")[1])
 
@@ -157,6 +160,7 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
         jobSummary[expr] = {}
         jobSummary[expr]['jobs'] = 0
         jobSummary[expr]['running'] = 0
+        jobSummary[expr]['ncpus'] = 0
         jobSummary[expr]['pending'] = 0
         jobSummary[expr]['held'] = 0
         jobSummary[expr]['walltime'] = 0
@@ -168,6 +172,10 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
                 if 'state' in theJobInfo[job].keys():
                     if theJobInfo[job]['state'] == "running":
                         jobSummary[expr]['running'] += 1
+                        if 'ncpus' in theJobInfo[job].keys() and int(theJobInfo[job]['ncpus']) > 0:
+                          jobSummary[expr]['ncpus'] += int(theJobInfo[job]['ncpus'])
+                        else:
+                          jobSummary[expr]['ncpus'] += 1
                     elif theJobInfo[job]['state'] == "pending":
                         jobSummary[expr]['pending'] += 1
                     elif theJobInfo[job]['state'] == "held":
@@ -176,6 +184,8 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
                 if 'cpueff' in theJobInfo[job].keys():
                     if float(theJobInfo[job]['cpueff']) <=theMinRatio:
                         jobSummary[expr]['ratio'+str(theMinRatio)] += 1
+                if jobSummary[expr]['ncpus'] < jobSummary[expr]['running']:
+                    print "WARNING: cores < running jobs:", jobSummary[expr]['ncpus'], "<", jobSummary[expr]['running']
 
 		if 'walltime' in theJobInfo[job].keys():
 		    jobSummary[expr]['walltime'] += theJobInfo[job]['walltime']
