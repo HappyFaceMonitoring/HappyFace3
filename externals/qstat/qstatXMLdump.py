@@ -29,10 +29,10 @@ from xml.dom.minidom import Document
 
 pwfile = ConfigParser.ConfigParser()
 try:
-	pwfile.readfp(open('/home/cmssgm/vobox-tools/monitoring/qstatXMLdump.pwd'))
+    pwfile.readfp(open('/home/cmssgm/vobox-tools/monitoring/qstatXMLdump.pwd'))
 except IOError:
-	sys.stdout.write('Could not find password file!\n')
-	sys.exit(1)
+    sys.stdout.write('Could not find password file!\n')
+    sys.exit(1)
 
 theUploadPw = pwfile.get('upload','pw')
 
@@ -41,7 +41,7 @@ def getSeconds(inString):
     if len(fields) != 3:
         print "Wrong time format in def getSeconds"
         sys.exit(1)
-    return (int(fields[0])*24+int(fields[1]))*60+int(fields[2])                       
+    return (int(fields[0])*24+int(fields[1]))*60+int(fields[2])
 
 def uploadFile(theFile):
     theServer = 'http://'+theUploadPw+'@www-ekp.physik.uni-karlsruhe.de/~happyface/upload/in/uploadFile.php'
@@ -56,14 +56,14 @@ def uploadFile(theFile):
 def checkGroup(chk_group, group, group_table):
     while chk_group != group:
         if chk_group == None or chk_group not in group_table:
-	    return False
+            return False
         chk_group = group_table[chk_group]
     return True
 
 def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
 
     print "qstatXMLdump.py: start processing."
-    
+
     theQstatInfo = {}
     theQstatInfo["start"] = startTime
     theQstatInfo["end"] = stopTime
@@ -103,15 +103,15 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
                 theJobInfo[theJobId]['state'] = 'running'
             elif state == 'Q':
                 theJobInfo[theJobId]['state'] = 'pending'
-	    elif state == 'H':
+            elif state == 'H':
                 theJobInfo[theJobId]['state'] = 'held'
-	    elif state == 'E':
+            elif state == 'E':
                 theJobInfo[theJobId]['state'] = 'exited'
-	    elif state == 'W':
+            elif state == 'W':
                 theJobInfo[theJobId]['state'] = 'waiting'
-	    elif state == 'S':
+            elif state == 'S':
                 theJobInfo[theJobId]['state'] = 'suspended'
-	    else:
+            else:
                 theJobInfo[theJobId]['state'] = state # fallback
 
         if fileLine.count('queue'):
@@ -121,7 +121,7 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
             theJobInfo[theJobId]['created'] = int(time.mktime(time.strptime(fileLine.split(" = ")[1], '%a %b %d %H:%M:%S %Y')))
         if fileLine.count('start_time') or fileLine.count('stime'):
             theJobInfo[theJobId]['start'] = int(time.mktime(time.strptime(fileLine.split(" = ")[1], '%a %b %d %H:%M:%S %Y')))
-	    theJobInfo[theJobId]['end'] = 'n/a' # We do not record finished jobs (yet)
+            theJobInfo[theJobId]['end'] = 'n/a' # We do not record finished jobs (yet)
 
         if fileLine.count('exec_host'):
             theJobInfo[theJobId]['exec_host'] = fileLine.split(" = ")[1]
@@ -138,20 +138,19 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
                 if 'cpupercent' in theJobInfo[job].keys():
                     cpuwallratio = theJobInfo[job]['cpupercent']
 
-        
             theJobInfo[job]['cpueff'] = str(cpuwallratio)
 
-	# Set group by prefix of user
-	if theJobInfo[job]['user'].startswith('cmsmcp'):
-	    theJobInfo[job]['group'] = 'cmsmcp'
-	elif theJobInfo[job]['user'].startswith('cmst1p'):
-	    theJobInfo[job]['group'] = 'cmst1p'
-	elif theJobInfo[job]['user'].startswith('dcms'):
-	    theJobInfo[job]['group'] = 'dcms'
-	elif 'cms' in theJobInfo[job]['user']:
-	    theJobInfo[job]['group'] = 'cmsother'
-	else:
-	    theJobInfo[job]['group'] = 'all'
+        # Set group by prefix of user
+        if theJobInfo[job]['user'].startswith('cmsmcp'):
+            theJobInfo[job]['group'] = 'cmsmcp'
+        elif theJobInfo[job]['user'].startswith('cmst1p'):
+            theJobInfo[job]['group'] = 'cmst1p'
+        elif theJobInfo[job]['user'].startswith('dcms'):
+            theJobInfo[job]['group'] = 'dcms'
+        elif 'cms' in theJobInfo[job]['user']:
+            theJobInfo[job]['group'] = 'cmsother'
+        else:
+            theJobInfo[job]['group'] = 'all'
 
     jobSummary = {}
     theMinRatio = 10
@@ -180,17 +179,17 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
                         jobSummary[expr]['pending'] += 1
                     elif theJobInfo[job]['state'] == "held":
                         jobSummary[expr]['held'] += 1
-                        
+
                 if 'cpueff' in theJobInfo[job].keys():
                     if float(theJobInfo[job]['cpueff']) <=theMinRatio:
                         jobSummary[expr]['ratio'+str(theMinRatio)] += 1
                 if jobSummary[expr]['ncpus'] < jobSummary[expr]['running']:
                     print "WARNING: cores < running jobs:", jobSummary[expr]['ncpus'], "<", jobSummary[expr]['running']
 
-		if 'walltime' in theJobInfo[job].keys():
-		    jobSummary[expr]['walltime'] += theJobInfo[job]['walltime']
-		if 'cputime' in theJobInfo[job].keys():
-		    jobSummary[expr]['cputime'] += theJobInfo[job]['cputime']
+                if 'walltime' in theJobInfo[job].keys():
+                    jobSummary[expr]['walltime'] += theJobInfo[job]['walltime']
+                if 'cputime' in theJobInfo[job].keys():
+                    jobSummary[expr]['cputime'] += theJobInfo[job]['cputime']
 
         if jobSummary[expr]['walltime'] > 0:
             jobSummary[expr]['cpueff'] = round(float(jobSummary[expr]['cputime'])/jobSummary[expr]['walltime']*100, 2);
@@ -235,37 +234,37 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
 
         if userin:
             jobNode = doc.createElement("job")
-	    group = None
-	    state = None
+            group = None
+            state = None
             for tag in theJobInfo[job]:
-	        element = doc.createElement(tag)
-	        node = doc.createTextNode(str(theJobInfo[job][tag]))
-	        element.appendChild(node)
+                element = doc.createElement(tag)
+                node = doc.createTextNode(str(theJobInfo[job][tag]))
+                element.appendChild(node)
                 jobNode.appendChild(element)
-		if tag == 'state': state = str(theJobInfo[job][tag])
-		if tag == 'group': group = str(theJobInfo[job][tag])
-	    if group is not None: jobNode.setAttribute('group', group)
-	    if state is not None: jobNode.setAttribute('status', state)
+                if tag == 'state': state = str(theJobInfo[job][tag])
+                if tag == 'group': group = str(theJobInfo[job][tag])
+            if group is not None: jobNode.setAttribute('group', group)
+            if state is not None: jobNode.setAttribute('status', state)
 
             jobDetails.appendChild(jobNode)
-   
+
     jobSum = doc.createElement("summaries")
     jobInfo.appendChild(jobSum)
 
     for vo in jobSummary:
         summary = doc.createElement('summary')
-	summary.setAttribute('group', vo)
-	if vo in exprJobSummary:
-	    if exprJobSummary[vo] is not None:
-	        summary.setAttribute('parent', exprJobSummary[vo])
+        summary.setAttribute('group', vo)
+        if vo in exprJobSummary:
+            if exprJobSummary[vo] is not None:
+                summary.setAttribute('parent', exprJobSummary[vo])
         for entry in jobSummary[vo]:
-	    element = doc.createElement(entry)
-	    node = doc.createTextNode(str(jobSummary[vo][entry]))
-	    element.appendChild(node)
+            element = doc.createElement(entry)
+            node = doc.createTextNode(str(jobSummary[vo][entry]))
+            element.appendChild(node)
             summary.appendChild(element)
- 
+
         jobSum.appendChild(summary)
-             
+
     # Print our newly created XML
     # print doc.toprettyxml(indent="  ")
 
@@ -276,7 +275,7 @@ def createXMLFile(theLogFile, theXMLFile, startTime, stopTime):
     print "qstatXMLdump.py: xml output finished."
 
     uploadFile(theXMLFile)
-    
+
 
 if __name__ == '__main__':
 
@@ -286,11 +285,11 @@ if __name__ == '__main__':
     # Map of group to parent group
     exprJobSummary  = {'all': None,
                        'cms': 'all',
-		       'cmsproduction': 'cms',
-		       'cmsother': 'cms',
-		       'dcms': 'cms',
-		       'cmsmcp': 'cmsproduction',
-		       'cmst1p': 'cmsproduction'}
+                       'cmsproduction': 'cms',
+                       'cmsother': 'cms',
+                       'dcms': 'cms',
+                       'cmsmcp': 'cmsproduction',
+                       'cmst1p': 'cmsproduction'}
 
     exprJobDetails  = ['cms']
 
@@ -298,14 +297,13 @@ if __name__ == '__main__':
     print "qstatXMLdump.py: Servers to query: "+theBatchServers
 
 #    print "qstatXMLdump.py: Checking lockfile... "
-    # Check if process is already running
+#    # Check if process is already running
 #    if os.path.exists(theLockFile):
 #        print "qstatXMLdump.py: process locked by "+theLockFile
 #        print "                 Exit with code 1"
 #        sys.exit(1)
-        
 #    print "qstatXMLdump.py: Creating lockfile: "+theLockFile
-    # Create lock file for this job
+#    # Create lock file for this job
 #    open(theLockFile,'w').close()
 
     # Execute qstat commands
@@ -314,16 +312,16 @@ if __name__ == '__main__':
     combinedStartTime = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
 
     for server in servers:
-	print "qstatXMLdump.py: Create output for server: "+server
-	theQstatCommand = '/usr/pbs/bin/qstat -f @'+server
-	theLogFile      = '/tmp/qstat_'+server+'.log'
-	theXMLFile      = '/tmp/qstat_'+server+'.xml'
+        print "qstatXMLdump.py: Create output for server: "+server
+        theQstatCommand = '/usr/pbs/bin/qstat -f @'+server
+        theLogFile      = '/tmp/qstat_'+server+'.log'
+        theXMLFile      = '/tmp/qstat_'+server+'.xml'
 
         startTime = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
-	os.system(theQstatCommand+' > '+theLogFile)
+        os.system(theQstatCommand+' > '+theLogFile)
         stopTime  = time.time() #strftime("%a, %d %b %Y, %H:%M:%S")
 
-	createXMLFile(theLogFile, theXMLFile, startTime, stopTime)
+        createXMLFile(theLogFile, theXMLFile, startTime, stopTime)
     
     combinedStopTime = time.time() #time.strftime("%a, %d %b %Y, %H:%M:%S")
 
@@ -334,12 +332,12 @@ if __name__ == '__main__':
 
     os.system('rm -f '+theCombinedLogFile)
     for server in servers:
-	os.system('cat /tmp/qstat_'+server+'.log >> '+theCombinedLogFile)
+        os.system('cat /tmp/qstat_'+server+'.log >> '+theCombinedLogFile)
 
     createXMLFile(theCombinedLogFile, theCombinedXMLFile, combinedStartTime, combinedStopTime)
 
 #    print "qstatXMLdump.py: Removing lockfile: "+theLockFile
-    # Remove lock file    
+#    # Remove lock file
 #    os.remove(theLockFile)
 
     print "qstatXMLdump.py: Done."
