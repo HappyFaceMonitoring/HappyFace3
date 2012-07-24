@@ -21,7 +21,8 @@ class ModuleBase:
     config_defaults = {
         'description': '',
         'instruction': '',
-        'type': 'rated'
+        'type': 'rated',
+        'weight': '1.0',
     }
     
     table = None
@@ -36,6 +37,24 @@ class ModuleBase:
         self.run = run
         self.dataset = dataset
         self.template = template
+        
+        if not "type" in self.config:
+            self.type = "rated"
+            self.logger.warn("Module type not specified, using 'rated'")
+        else:
+            self.type = self.config['type']
+        if self.type not in ('rated', 'plots'):
+            self.logger.warn("Unknown module type '%s', using 'rated'" % self.type)
+            self.type = "rated"
+            
+        if not "weight" in self.config:
+            self.weight = 0.0
+            self.logger.warn("Module weight not specified, ignore in calculations")
+        else:
+            try:
+                self.weight = float(self.config['weight'])
+            except Exception:
+                self.logger.warn("Module weight not numeric, using 0.0")
     
     def prepareAcquisition(self):
         pass
@@ -59,9 +78,9 @@ class ModuleBase:
     def getStatusString(self):
         icon = 'unhappy'
         if self.dataset is None:
-            icon = 'unhappy' if type == 'rated' else 'unavail_plot'
+            icon = 'unhappy' if self.type == 'rated' else 'unavail_plot'
         else:
-            if type == 'rated':
+            if self.type == 'rated':
                 if self.dataset['status'] > 0.66:
                     icon = 'happy'
                 elif self.dataset['status'] > 0.33:

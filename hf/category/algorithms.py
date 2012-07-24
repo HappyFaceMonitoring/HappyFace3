@@ -6,6 +6,6 @@ def worst(category):
             continue
         if status == -1 and int(mod.dataset['status']) != -2:
             status = mod.dataset['status']
-        elif(mod.dataset['status'] < status and mod.dataset['status'] >= 0 and mod.config['type'] == 'rated'):
+        elif(mod.dataset['status'] < status and mod.dataset['status'] >= 0 and mod.type == 'rated'):
             status = mod.dataset['status']
     return status

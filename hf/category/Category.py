@@ -37,12 +37,17 @@ class Category:
                 self.data_missing = True
         
         if not "type" in self.config:
-            self.logger.warn("Category type not specified, use 'rated'")
-            self.config['type'] = 'rated'
+            self.type = "rated"
+            self.logger.warn("Category type not specified, using 'rated'")
+        else:
+            self.type = self.config['type']
+        if self.type not in ('rated', 'plots'):
+            self.logger.warn("Unknown type '%s', using 'rated'" % self.type)
+            self.type = "rated"
     
     def getStatusIcon(self):
         icon = 'cat_noinfo.png'
-        if self.config['type'] == 'plots':
+        if self.type == 'plots':
             icon = 'cat_avail_plot.png' if self.status > 0.9 else 'cat_unavail_plot.png'
         else:
             if self.status > 0.66:
@@ -56,7 +61,8 @@ class Category:
         return os.path.join(hf.config.get('paths', 'template_icons_url'), icon)
     
     def getIndexIcon(self):
-        return os.path.join(hf.config.get('paths', 'template_icons_url'), "index_warn.png" if self.data_missing else "index_ok.png")
+        return os.path.join(hf.config.get('paths', 'template_icons_url'),
+            "index_warn.png" if self.data_missing else "index_ok.png")
         
     def __unicode__(self):
         return self.name
