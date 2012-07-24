@@ -5,5 +5,5 @@
 import code, traceback, sys
 import hf
 
-def execute(args):
+def execute():
     code.interact("Interactive HappyFace Shell", local={'hf':hf})

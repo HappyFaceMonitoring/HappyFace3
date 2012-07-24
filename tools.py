@@ -33,15 +33,18 @@ if __name__ == '__main__':
             logger.error("Setting up HappyFace failed: %s", str(e))
             logger.debug(traceback.format_exc())
         
+        tool_name = sys.argv[1]
+        del sys.argv[1]
+        
         import hf.tools
         try:
-            tool = __import__("hf.tools."+sys.argv[1], fromlist=[hf.tools], globals=globals())
-        except ImportError:
-            logger.error("No tool called %s" % sys.argv[1])
+            tool = __import__("hf.tools."+tool_name, fromlist=[hf.tools], globals=globals())
+        except ImportError,e:
+            logger.error("No tool called %s: %s" % (tool_name, str(e)))
             sys.exit(-1)
         
         try:
-            tool.execute(sys.argv)
+            tool.execute()
         except Exception, e:
             logger.error("HappyFace Tool execution failed: %s", str(e))
         
