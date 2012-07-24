@@ -1,0 +1,19 @@
+ HappyFace3 Tools Directory
+============================
+
+Place tool-scripts in this directory, their name will
+be used to call it using the tools.py script. So a
+file DUMMY.py will imply a call like
+ python tools.py DUMMY
+
+The file will be imported as a module, then the existance
+of the module variable 'load_hf_environment' will be
+checked. If it is set to True, HappyFace will be loaded
+prior to calling the execute(...) function.
+
+After eventually loading HappyFace, execute() is called.
+Write everything you want the tool to do in that file.
+
+You can access sys.args if you need the command line arguments,
+but be aware that the element with index 0 is the name 
+of the calling command *plus* the first argument (name of the tool)!
