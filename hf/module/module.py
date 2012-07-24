@@ -66,3 +66,6 @@ def tryModuleClassImport(mod_class):
     
 def getModuleClass(mod_name):
     return __module_class_list[mod_name] if mod_name in __module_class_list else None
+
+def getModuleClassDict():
+    return __module_class_list

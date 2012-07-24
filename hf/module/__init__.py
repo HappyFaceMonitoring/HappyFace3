@@ -5,4 +5,3 @@ from ModuleProxy import ModuleProxy
 import database
 
 config = None
-module_registry = {}

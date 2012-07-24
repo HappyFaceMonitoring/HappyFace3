@@ -64,7 +64,7 @@ def readConfigurationAndEnv():
                 
 def importModules():
     '''
-    
+    Interpete the category configuration and import the used modules
     '''
     used_modules = []
     for category in hf.category.config.sections():
