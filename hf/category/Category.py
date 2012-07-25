@@ -4,7 +4,9 @@ from mako.template import Template
 import logging
       
 class Category:
-    
+    """
+    For the meaning of status values, see ModuleBase docstring.
+    """
     def __init__(self, category_name, conf, module_list, run):
         self.logger = logging.getLogger(self.__module__+'('+category_name+')')
         self.name = category_name
@@ -26,15 +28,6 @@ class Category:
             self.logger.warn("Status algorithm '%s' not supported, use 'worst'", self.config['algorithm'])
         except KeyError, e:
             self.logger.warn("Status algorithm not specified, use 'worst'")
-        self.status = self.algorithm(self)
-        
-        self.data_missing = False
-        min_status = 1.0
-        for module in self.module_list:
-            if module.dataset is None:
-                self.data_missing = True
-            elif module.dataset['status'] < 0.0:
-                self.data_missing = True
         
         if not "type" in self.config:
             self.type = "rated"
@@ -44,6 +37,16 @@ class Category:
         if self.type not in ('rated', 'plots'):
             self.logger.warn("Unknown type '%s', using 'rated'" % self.type)
             self.type = "rated"
+            
+        self.status = self.algorithm(self)
+        
+        self.data_missing = False
+        min_status = 1.0
+        for module in self.module_list:
+            if module.dataset is None:
+                self.data_missing = True
+            elif module.dataset['status'] < 0.0:
+                self.data_missing = True
     
     def getStatusIcon(self):
         icon = 'cat_noinfo.png'

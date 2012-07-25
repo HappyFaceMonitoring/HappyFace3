@@ -16,6 +16,21 @@ class ModuleBase:
     Because thread-safety is required for concurrent rendering, the module itself
     MUST NOT save its state during rendering. The modules functions are internally
     accessed by the ModuleProxy class.
+    
+    The status of the module represents a quick overview over the current module
+    status and fitness.
+    * 0.66 <= status <= 1.0  The module is happy/normal operation
+    * 0.33 <= status < 0.66  Neutral, there are things going wrong slightly.
+    * 0.0  <= status < 0.33  Unhappy, something is very wrong with the monitored modules
+    * status = -1            An error occured during module execution
+    * status = -2            Data could not be retrieved (download failed etc.)
+    
+    The category status is calculated with a user specified algorithm from the statuses
+    of the modules in the category. If there is missing data or an error, the category
+    index icon is changed, too.
+    
+    In practice, there is no "visual" difference between status -1 and -2, but there might
+    be in future.
     """
     
     config_defaults = {

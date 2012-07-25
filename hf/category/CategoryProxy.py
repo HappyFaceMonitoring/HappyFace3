@@ -8,6 +8,8 @@ class CategoryProxy:
     """
     A run independant Category object.
     Can create run dependant category objects efficently.
+    
+    For the meaning of status values, see ModuleBase docstring.
     """
     template = None
     
