@@ -8,3 +8,5 @@ static/tmp/*
 modules/*
 config/*
 log/*
+modules
+config
