@@ -26,9 +26,6 @@ def ask(args, message):
         
     return True
 
-def compare(args, hf_table, db_table):
-    if args.verbose: print "Compare '%s' tables" % (hf_table.name)
-
 def execute():
     parser = argparse.ArgumentParser(description='Update the database schema as neccessary')
     parser.add_argument('--verbose', '-v', action='store_true', help="Provide more detailed output")
@@ -37,6 +34,13 @@ def execute():
     parser.add_argument('--dry', action='store_true', help="Just provide a summary of what will be done. Superseds any other options.")
     parser.add_argument('--new-only', action='store_true', help="Creates only new tables and does not check for changes in existing ones.")
     args = parser.parse_args()
+    
+    try:
+        from migrate.versioning.util import load_model
+        from migrate.versioning import genmodel, schemadiff
+    except ImportError, e:
+        print 'The sqlalchemy-migrate Python module was not found.\nThis is required for the dbupdate functionallity'
+        return
     
     # Setup minimalistic, offline HF environment
     hf.configtools.readConfigurationAndEnv()
@@ -52,21 +56,38 @@ def execute():
     if args.new_only:
         # We're already done!
         return
+
+    # calculate diff using sqlalchemy-migrate magic
+    diff = schemadiff.getDiffOfModelAgainstDatabase(hf.database.metadata, hf.database.engine)
     
-    modules = hf.module.getModuleClassDict()
-    
-    # Use all database tables via reflection in another,
-    # separate metadata object
-    server_metadata = MetaData(bind=hf.database.engine, reflect=True)
-    
-    # Now compare each of the tables
-    for name, hf_table in hf.database.metadata.tables.iteritems():
-        if name not in server_metadata.tables:
-            print """FATAL: '%s' was not found on database server!
-            If you are in a dry run or skipped the creation of non-existant tables, this should not be a big problem. Just run this tool with the --new-only option, it is quite safe, anyway.
-            
-            In case the problem persists, there is something strange going on."""
-            return
-        compare(args, hf_table, server_metadata.tables[name])
+    # display the diffs
+    if len(diff.tablesMissingInDatabase) > 0 and (args.verbose or args.interactive):
+        print 'Add tables'
+        for t in diff.tablesMissingInDatabase:
+            print ' *', t.name
+    if len(diff.tablesMissingInModel) > 0 and (args.verbose or args.interactive):
+        print 'Remove tables'
+        for t in diff.tablesMissingInModel:
+            print ' *', t.name
+    if len(diff.colDiffs) > 0 and (args.verbose or args.interactive):
+        print 'Alter tables'
+        for t,changes in diff.colDiffs.iteritems():
+            print ' *', t
+            if len(changes[0]) > 0:
+                print '   add', ', '.join(c.name for c in changes[0])
+            if len(changes[1]) > 0:
+                print '   delete', ', '.join(c.name for c in changes[1])
+            if len(changes[2]) > 0:
+                print '   change', ', '.join(c[0].name for c in changes[2])
         
+    if not args.dry and ask(args, 'Do you want to apply these changes? Deleting tables and columns is not reversible!'):
+        import pdb; pdb.set_trace()
+        # sqlite specific!
+        # SQlite does not support dropping columns, so migrate creates a new one
+        # copies over the data to tmp, drops the old one and recreates the table.
+        # This fails if the table is referenced as a ForeignKey table, so we
+        # have to disable ForeignKey checks (for SQLite) for this to work...
+        if hf.database.engine.url.drivername.startswith('sqlite'):
+            hf.database.engine.execute('pragma foreign_keys = off;')
+        genmodel.ModelGenerator(diff).applyModel()
     
