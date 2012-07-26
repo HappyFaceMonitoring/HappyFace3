@@ -39,6 +39,7 @@ def execute():
     try:
         from migrate.versioning.util import load_model
         from migrate.versioning import genmodel, schemadiff
+        from migrate.changeset import schema
     except ImportError, e:
         print 'The sqlalchemy-migrate Python module was not found.\nThis is required for the dbupdate functionallity'
         return
@@ -48,7 +49,7 @@ def execute():
     hf.configtools.readConfigurationAndEnv()
     hf.configtools.setupLogging('acquire_logging_cfg')
     hf.configtools.importModules()
-    hf.database.connect(implicit_execution=False)
+    hf.database.connect(implicit_execution=True)
 
     # calculate diff using sqlalchemy-migrate magic
     diff = schemadiff.getDiffOfModelAgainstDatabase(hf.database.metadata, hf.database.engine)
@@ -57,21 +58,21 @@ def execute():
         print "Dry run! Database will be unchanged"
     
     # create missing tables
-    for table in diff.tablesMissingInDatabase:
-        table = table.tometadata(meta)
-        if not args.interactive: print "\033[1m\033[32mCreate\033[0m table \033[1m%s\033[0m" % table.name
-        if ask(args, "\033[1m\033[32mCreate\033[0m table \033[1m%s\033[0m?" % table.name):
-            if not args.dry: table.create()
+    if len(diff.tablesMissingInDatabase) > 0:
+        tables = "\033[1m" + '\033[0m, \033[1m'.join(t.name for t in diff.tablesMissingInDatabase) + '\033[0m'
+        if not args.interactive:
+            print "\033[1m\033[32mAdd\033[0m table(s) " + tables
+        if ask(args, "\033[1m\033[32mAdd\033[0m table(s) " + tables + "?"):
+            hf.database.metadata.create_all(bind=hf.database.engine, tables=diff.tablesMissingInDatabase)
     
     # delete residual tables
     deleted_tables = []
-    if not args.new_only:
-        for table in diff.tablesMissingInModel:
-            #table = table.tometadata(meta)
-            if not args.interactive: print "\033[1m\033[31mDelete\033[0m table \033[1m%s\033[0m" % table.name
-            if ask(args, "\033[1m\033[31mDelete\033[0m table \033[1m%s\033[0m? \033[1m\033[31mWARNING\033[0m Not reversible!" % table.name):
-                if not args.dry: table.drop()
-                deleted_tables.append(table.name)
+    if not args.new_only and len(diff.tablesMissingInModel) > 0:
+        tables = "\033[1m" + '\033[0m, \033[1m'.join(t.name for t in diff.tablesMissingInModel) + '\033[0m'
+        if not args.interactive:
+            print "\033[1m\033[31mDrop\033[0m table(s) " + tables
+        if ask(args, "\033[1m\033[31mDrop\033[0m table(s) " + tables + "?\n\033[1m\033[31mWARNING\033[0m Not reversible! Procede?"):
+            hf.database.metadata.drop_all(bind=hf.database.engine, tables=diff.tablesMissingInModel)
             
     # apply changes in a table
     # This code was heavily influenced by the original
@@ -161,18 +162,18 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
             # "just do everything"
             for col in add:
                 if not args.interactive: print " \033[1m\033[32madd\033[0m column '%s'" % col.name
-                if not ask(args, " \033[1m\033[32madd\033[0m column '%s'?" % col.name):
+                if ask(args, " \033[1m\033[32madd\033[0m column '%s'?" % col.name):
                     if not args.dry: model_table.columns[col.name].create()
-            if args.new_only:
+            if not args.new_only:
                 for col in drop:
                     if not args.interactive: print " \033[1m\033[31mdrop\033[0m column '%s'" % col.name
-                    if not ask(args, " \033[1m\033[31mdrop\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % col.name):
+                    if ask(args, " \033[1m\033[31mdrop\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % col.name):
                         if not args.dry: db_table.columns[col.name].drop()
-                for model_col, database_col, model_cecl, database_cecl in alter:
+                for model_col, database_col, model_decl, database_decl in alter:
                     if not args.interactive: print " \033[1m\033[33malter\033[0m column '%s'" % model_col.name
-                    if not ask(args, " \033[1m\033[33malter\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % col.name):
-                        if not args.dry: db_table.columns[col.name].drop()
-                    database_col.alter(modelCol)
+                    if ask(args, " \033[1m\033[33malter\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % col.name):
+                        if not args.dry: database_col.alter(modelCol)
+                    
     if args.dry:
         print "Dry run completed"
     else:
