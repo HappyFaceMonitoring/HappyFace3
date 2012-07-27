@@ -15,7 +15,7 @@ class CategoryDispatcher(object):
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = hf.category.createCategoryObjects()
-        hf.plotgenerator.init()
+        # hf.plotgenerator.init()
     
     @cp.expose
     def plot(self, plt_type=None, img=None, **kwargs):
