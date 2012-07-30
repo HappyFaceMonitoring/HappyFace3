@@ -29,8 +29,16 @@ class CategoryDispatcher(object):
         
     @cp.expose
     def default(self, category=None, **kwargs):
-	self.logger.warning(category)
+        self.logger.warning(category)
         try:
+            '''
+            Select a hf run based on the passed 'date' and 'time' parameters. If not
+            specified, use most recent run. If they are specified, make sure they do
+            not mark a point in the future.
+            Because (usually) microseconds are stored in the database, too, we have
+            to pad with extra 59 seconds (note: 59 because it will be the same minute
+            but there will only be a single "dead" second, we can live with that).
+            '''
             self.logger.debug(kwargs['date'] if 'date' in kwargs is not None else '')
             self.logger.debug(kwargs['time'] if 'time' in kwargs is not None else '')
             
@@ -41,13 +49,15 @@ class CategoryDispatcher(object):
                 timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
                 timestamp += '_' + (kwargs['time'] if 'time' in kwargs else time_obj.strftime('%H:%M'))
                 # notice the extra seconds to avoid microsecond and minute issues
-                time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")) + 60)
+                time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M"))+59)
+
             except Exception:
                 time_error_message = "The passed time was invalid"
             
-            if time_obj > datetime.datetime.fromtimestamp(int(time.time())+60):
+            if time_obj > datetime.datetime.fromtimestamp(int(time.time())+59):
                 time_error_message = "HappyFace is not an oracle"
- 
+                time_obj = datetime.datetime.fromtimestamp(int(time.time())+59)
+                
             run = hf_runs.select(hf_runs.c.time <= time_obj).order_by(hf_runs.c.time.desc()).execute().fetchone()
             if run is None:
                 time_error_message = "No data so far in past"
@@ -68,8 +78,8 @@ class CategoryDispatcher(object):
                 "module_list": [],
                 "hf": hf,
                 "time_specified": ('date' in kwargs or 'time' in kwargs),
-                "date_string": run["time"].strftime('%Y-%m-%d'),
-                "time_string": run["time"].strftime('%H:%M'),
+                "date_string": time_obj.strftime('%Y-%m-%d'),
+                "time_string": time_obj.strftime('%H:%M'),
                 "histo_step": kwargs['s'] if 's' in kwargs else "00:15",
                 "run": run,
                 'selected_module': None,
@@ -81,7 +91,11 @@ class CategoryDispatcher(object):
                 template_context["module_list"].extend(cat.module_list)
             
             doc = u""
-
+            
+            '''
+            Show the requested category or a 'blank' overview if
+            no category is specified.
+            '''
             if category is None:
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "index.html")
                 index_template = Template(filename=filename, lookup=hf.template_lookup)
@@ -92,7 +106,7 @@ class CategoryDispatcher(object):
                 if run is not None:
                     doc = category_dict[category].render(template_context)
                 else:
-                    doc = "<h2>No data found at this time</h2>"
+                    doc = u"<h2>No data found at this time</h2>"
             return doc
         except Exception, e:
             self.logger.error("Page request threw exception: %s" % str(e))
