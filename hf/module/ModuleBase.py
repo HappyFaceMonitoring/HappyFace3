@@ -52,6 +52,7 @@ class ModuleBase:
         self.run = run
         self.dataset = dataset
         self.template = template
+        self.category = None # set by CategoryProxy.getCategroy() after creating specific module instances
         
         if not "type" in self.config:
             self.type = "rated"
@@ -106,9 +107,9 @@ class ModuleBase:
                 icon = 'avail_plot' if self.dataset['status'] > 0.9 else 'unavail_plot'
         return icon
     
-    def url(self):
+    def url(self, only_anchor=True, time=None):
         # something along ?date=2012-03-24&amp;time=17:20&amp;t=batchsys&amp;m=${module.instance_name}
-        return "#%s" % self.instance_name
+        return ('' if only_anchor else self.category.url(time=time)) + u"#" + self.instance_name
         
     def getStatusIcon(self):
         return os.path.join(hf.config.get('paths', 'template_icons_url'), 'mod_'+self.getStatusString()+'.png')

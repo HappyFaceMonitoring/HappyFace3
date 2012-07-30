@@ -61,5 +61,8 @@ class CategoryProxy:
     
     def getCategory(self, run):
         specific_modules = [m.getModule(run) for m in self.module_list]
-        return hf.category.Category(self.name, self.config, specific_modules, run)
+        category = hf.category.Category(self.name, self.config, specific_modules, run)
+        for s in specific_modules:
+            s.category = category
+        return category
         
