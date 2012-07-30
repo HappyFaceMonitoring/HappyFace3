@@ -89,7 +89,7 @@ def setupLogging(logging_cfg):
     http://docs.python.org/library/logging.config.html#configuration-file-format
     
     If None is specified, console logging only is setup. This is particularily
-    usefull for tools e.g. for migration or cleanup.
+    useful for tools e.g. for migration or cleanup.
     
     The environment variable HF_LOGLEVEL can contain a level from DEFAULT, INFO,
     WARNING, ERROR or CRITICAL. If HF_DEBUG is set, HF_LOGLEVEL=DEBUG is implied.

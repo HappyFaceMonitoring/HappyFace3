@@ -9,7 +9,7 @@ def renderXmlOverview(run, template_context):
     Create a summary of the status of all categories
     and their modules in an XML format.
     
-    Usefull for the HappyFace Firefox Icon or the
+    Useful for the HappyFace Firefox Icon or the
     HappyFace AndroidApp.
     '''
     try:
