@@ -92,21 +92,28 @@ class CategoryDispatcher(object):
             
             doc = u""
             
-            '''
-            Show the requested category or a 'blank' overview if
-            no category is specified.
-            '''
-            if category is None:
-                filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "index.html")
-                index_template = Template(filename=filename, lookup=hf.template_lookup)
-                doc = index_template.render(**template_context)
-            elif category is not None and not category in category_dict:
-                raise cp.HTTPError(404, u"<h2>404 – File Not Found</h2>")
-            elif category is not None:
-                if run is not None:
-                    doc = category_dict[category].render(template_context)
+            if 'action' in kwargs:
+                if kwargs['action'].lower() == 'getxml':
+                    doc = hf.category.renderXmlOverview(run, template_context)
                 else:
-                    doc = u"<h2>No data found at this time</h2>"
+                    doc = u'''<h2>Unkown action</h2>
+                    <p>The specified action <em>%s</em> is not known.<p>''' % kwargs['action']
+            else:
+                '''
+                Show the requested category or a 'blank' overview if
+                no category is specified.
+                '''
+                if category is None:
+                    filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "index.html")
+                    index_template = Template(filename=filename, lookup=hf.template_lookup)
+                    doc = index_template.render(**template_context)
+                elif category is not None and not category in category_dict:
+                    raise cp.HTTPError(404, u"<h2>404 – File Not Found</h2>")
+                elif category is not None:
+                    if run is not None:
+                        doc = category_dict[category].render(template_context)
+                    else:
+                        doc = u"<h2>No data found at this time</h2>"
             return doc
         except Exception, e:
             self.logger.error("Page request threw exception: %s" % str(e))

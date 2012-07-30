@@ -1,5 +1,6 @@
 from Category import Category
 from CategoryProxy import CategoryProxy
+from xml import renderXmlOverview
 import algorithms
 import hf
 
