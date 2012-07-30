@@ -42,7 +42,7 @@
  </div>
  <div class="HappyTitleBarElement">
 % if selected_category is None:
-  <form id="HistoForm1" class="HappyTitleBarForm" action="/" method="get">
+  <form id="HistoForm1" class="HappyTitleBarForm" action="${hf.config.get('paths', 'happyface_url')}" method="get">
 % else:
   <form id="HistoForm1" class="HappyTitleBarForm" action="${selected_category.url()}" method="get">
 % endif
