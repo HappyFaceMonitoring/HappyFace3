@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <happyface>
- <title>${hf.config.get('template', 'web_title')}</title>
+ <title>${hf.config.get('template', 'web_title')| x}</title>
 % for category in category_list:
  <category>
   <name>${category.name}</name>
-  <title>${category.config['name']}</title>
+  <title>${category.config['name']| x}</title>
   <status>${category.status}</status>
   <type>${category.type}</type>
   <link>${hf.url.join(protocol_host, category.url(time=run['time']))}</link>
  % for module in category.module_list:
   <module>
    <name>${module.instance_name}</name>
-   <title>${module.module_name}</title>
+   <title>${module.config["name"]| x}</title>
    <type>${module.type}</type>
    <status>${module.dataset['status']}</status>
    <time>${run['time'].strftime('%Y-%m-%d %H:%M')}</time>
