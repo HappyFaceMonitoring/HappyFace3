@@ -171,8 +171,8 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
                         if not args.dry: db_table.columns[col.name].drop()
                 for model_col, database_col, model_decl, database_decl in alter:
                     if not args.interactive: print " \033[1m\033[33malter\033[0m column '%s'" % model_col.name
-                    if ask(args, " \033[1m\033[33malter\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % col.name):
-                        if not args.dry: database_col.alter(modelCol)
+                    if ask(args, " \033[1m\033[33malter\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % model_col.name):
+                        if not args.dry: database_col.alter(model_col)
                     
     if args.dry:
         print "Dry run completed"
