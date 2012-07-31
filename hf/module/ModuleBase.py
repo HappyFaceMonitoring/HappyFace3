@@ -55,13 +55,13 @@ class ModuleBase:
         self.category = None # set by CategoryProxy.getCategroy() after creating specific module instances
         
         if not "type" in self.config:
-            self.type = "rated"
-            self.logger.warn("Module type not specified, using 'rated'")
+            self.type = "unrated"
+            self.logger.warn("Module type not specified, using 'unrated'")
         else:
             self.type = self.config['type']
-        if self.type not in ('rated', 'plots'):
-            self.logger.warn("Unknown module type '%s', using 'rated'" % self.type)
-            self.type = "rated"
+        if self.type not in ('rated', 'plots', 'unrated'):
+            self.logger.warn("Unknown module type '%s', using 'unrated'" % self.type)
+            self.type = "unrated"
             
         if not "weight" in self.config:
             self.weight = 0.0
