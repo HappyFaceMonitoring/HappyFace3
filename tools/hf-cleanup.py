@@ -12,7 +12,7 @@ from sqlobject import *
 import ConfigParser
 
 def help():
-	print(
+    print(
 '''hf-cleanup [options] <HappyFace directory>
 
 This script performs three steps to clean up the HappyFace database:
@@ -22,9 +22,9 @@ This script performs three steps to clean up the HappyFace database:
 
 Possible options are:
 
---start=TIMESTAMP	if given only erase database entries recorded after TIMESTAMP
---end=TIMESTAMP		if given only erase database entries recorded before TIMESTAMP
---modules=MODULES	specifies a comma-separated list of modules to clean up
+--start=TIMESTAMP    if given only erase database entries recorded after TIMESTAMP
+--end=TIMESTAMP        if given only erase database entries recorded before TIMESTAMP
+--modules=MODULES    specifies a comma-separated list of modules to clean up
 --force                 cleanup tables that are not correctly referenced
 
 All three options only affect the first of the three steps explained above.
@@ -58,84 +58,84 @@ Tue Jul 20 13:45 CEST 2010.
 Skips the first of the three steps (this could also be achieved by answering q
 at the first prompt).''')
 
-	sys.exit(0)
+    sys.exit(0)
 
 def cleanup_table(conn, hfdir, table_name, start, end, drop, recurse_subtables):
-	"""Remove all entries between start and end in table_name. Also cleanup
-	   plots in archive directory"""
+    """Remove all entries between start and end in table_name. Also cleanup
+       plots in archive directory"""
 
-	print 'Cleaning ' + table_name + '...'
-	
-        # remeber that we cleaned this table globally
-        #global cleaned_table_list
-        visited_table_list.append(table_name)
+    print 'Cleaning ' + table_name + '...'
 
-        # Construct WHERE clause to query the data in the specified range
-        table = sqlbuilder.table.__getattr__(table_name)
-        where_clause = sqlbuilder.SQLTrueClauseClass()
-        if start >= 0:
-            where_clause = where_clause & (table.timestamp >= start)
-        if end >= 0:
-            where_clause = where_clause & (table.timestamp <= end)
+    # remeber that we cleaned this table globally
+    #global cleaned_table_list
+    visited_table_list.append(table_name)
+
+    # Construct WHERE clause to query the data in the specified range
+    table = sqlbuilder.table.__getattr__(table_name)
+    where_clause = sqlbuilder.SQLTrueClauseClass()
+    if start >= 0:
+        where_clause = where_clause & (table.timestamp >= start)
+    if end >= 0:
+        where_clause = where_clause & (table.timestamp <= end)
         
-	cursor = conn.cursor()
-	
-	class sqlmeta:
-		table = table_name
-		fromDatabase = True
+    cursor = conn.cursor()
+    
+    class sqlmeta:
+        table = table_name
+        fromDatabase = True
 
-	DBProxy = type(table_name + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
-	columns = [k.dbName for k in DBProxy.sqlmeta.columnList if k!='index']
+    DBProxy = type(table_name + "_DBProxy",(SQLObject,),dict(sqlmeta = sqlmeta))
+    columns = [k.dbName for k in DBProxy.sqlmeta.columnList if k!='index']
 
-        select_query = sqlbuilder.Select([table.__getattr__(col) for col in columns], where=where_clause)
-        rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
-	
-	for row in rows:
-		row = dict( itertools.izip(columns, row) )
-		for column in columns:
-			if column.startswith('filename') or column == 'eff_plot' or column == 'rel_eff_plot':
-				timestamp = row['timestamp']
-				tm = time.localtime(timestamp)
+    select_query = sqlbuilder.Select([table.__getattr__(col) for col in columns], where=where_clause)
+    rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
+    
+    for row in rows:
+        row = dict( itertools.izip(columns, row) )
+        for column in columns:
+            if column.startswith('filename') or column == 'eff_plot' or column == 'rel_eff_plot':
+                timestamp = row['timestamp']
+                tm = time.localtime(timestamp)
 
-				year = str(tm.tm_year)
-				month = '%02d' % tm.tm_mon
-				day = '%02d' % tm.tm_mday
+                year = str(tm.tm_year)
+                month = '%02d' % tm.tm_mon
+                day = '%02d' % tm.tm_mday
 
-				if row[column] is not None:
-					output_dir = hfdir + '/archive'
-					archive_dir = output_dir + '/' + str(year) + '/' + str(month) + '/' + str(day) + '/' + str(timestamp)
-					source_file = archive_dir + '/' + row[column]
-					try:
-						os.unlink(source_file)
-						dir = archive_dir
-						while dir != output_dir:
-							os.rmdir(dir)
-							dir = os.path.dirname(dir)
-					except Exception as ex:
-						# Ignore if file does not exist in archive directory...
-						# maybe a previous run of the script removed it
-						# but it was interrupted before it could clear up
-						# the DB entries
-						pass
+                if row[column] is not None:
+                    output_dir = hfdir + '/archive'
+                    archive_dir = output_dir + '/' + str(year) + '/' + str(month) + '/' + str(day) + '/' + str(timestamp)
+                    source_file = archive_dir + '/' + row[column]
+                    try:
+                        os.unlink(source_file)
+                        dir = archive_dir
+                        while dir != output_dir:
+                            os.rmdir(dir)
+                            dir = os.path.dirname(dir)
+                    except Exception as ex:
+                        # Ignore if file does not exist in archive directory...
+                        # maybe a previous run of the script removed it
+                        # but it was interrupted before it could clear up
+                        # the DB entries
+                        pass
 
-	if not drop:
-		result = cursor.execute("DELETE FROM %s WHERE %s" % (table_name, where_clause))
-	else:
-		result = cursor.execute("DROP TABLE %s" % (table_name))
-	conn.commit()
+    if not drop:
+        result = cursor.execute("DELETE FROM %s WHERE %s" % (table_name, where_clause))
+    else:
+        result = cursor.execute("DROP TABLE %s" % (table_name))
+    conn.commit()
 
-	if recurse_subtables:
-            # try to find all subtables, throughout all time
-            # This is the imporvement to the old mechanism of finding subtables.
-            subtables = []
-            for col in columns:
-                if 'database' not in col:
-                    continue
-                select_query = sqlbuilder.Select([table.__getattr__(col)], distinct=True)
-                rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
-                subtables += (row[0] for row in rows if row[0] != '' and row[0] is not None)
-            for subtable in subtables:
-                cleanup_table(conn, hfdir, subtable, start, end, drop, recurse_subtables)
+    if recurse_subtables:
+        # try to find all subtables, throughout all time
+        # This is the imporvement to the old mechanism of finding subtables.
+        subtables = []
+        for col in columns:
+            if 'database' not in col:
+                continue
+            select_query = sqlbuilder.Select([table.__getattr__(col)], distinct=True)
+            rows = sqlhub.processConnection.queryAll(sqlhub.processConnection.sqlrepr(select_query))
+            subtables += (row[0] for row in rows if row[0] != '' and row[0] is not None)
+        for subtable in subtables:
+            cleanup_table(conn, hfdir, subtable, start, end, drop, recurse_subtables)
 
 start = -1
 end = -1
@@ -146,34 +146,34 @@ force_cleanup = False
 optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'modules=', 'help', 'force'])
 options = dict(optlist)
 if '-h' in options or '--help' in options:
-	help()
+    help()
 if '--start' in options:
-	start = int(options['--start'])
+    start = int(options['--start'])
 
-	# If start or end are very low we interpret them as number of days
-	# from today, not as a timestamp
-	if start < 1000000:
-		start = time.time() - start*60*60*24
+    # If start or end are very low we interpret them as number of days
+    # from today, not as a timestamp
+    if start < 1000000:
+        start = time.time() - start*60*60*24
 if '--end' in options:
-	end = int(options['--end'])
+    end = int(options['--end'])
 
-	# If start or end are very low we interpret them as number of days
-	# from today, not as a timestamp
-	if end < 1000000:
-		end = time.time() - end*60*60*24
+    # If start or end are very low we interpret them as number of days
+    # from today, not as a timestamp
+    if end < 1000000:
+        end = time.time() - end*60*60*24
 if '--modules' in options:
-	modules = options['--modules']
+    modules = options['--modules']
 
 if '--force' in options:
     force_cleanup = True
 
 if len(args) != 1:
-	sys.stderr.write('%s [--start=timestamp or number of days from today] [--end=timestamp or number of days from today] [--modules=module1,module2,...] <HappyFace Database>\n' % sys.argv[0])
-	sys.exit(-1)
+    sys.stderr.write('%s [--start=timestamp or number of days from today] [--end=timestamp or number of days from today] [--modules=module1,module2,...] <HappyFace Database>\n' % sys.argv[0])
+    sys.exit(-1)
 
 allowed_modules = []
 if modules != '':
-	allowed_modules = modules.split(',')
+    allowed_modules = modules.split(',')
 
 source = args[0]
 dirname = source
@@ -187,11 +187,11 @@ cfg_files = [os.path.join(dirname, 'run.cfg'),
 
 config = ConfigParser.ConfigParser()
 for file in cfg_files:
-	try: config.readfp(open(file))
-	except IOError:
-		print "Cannot read cfg file %s" % file
-		traceback.print_exc()
-		sys.exit(1)
+    try: config.readfp(open(file))
+    except IOError:
+        print "Cannot read cfg file %s" % file
+        traceback.print_exc()
+        sys.exit(1)
 
 # try to initiate / create the database
 connection_string = config.get('setup', 'db_connection')
@@ -211,14 +211,14 @@ categories = config.get('setup', 'categories').split(',')
 modules = {}
 module_list = []
 for section in config.sections():
-        if section == 'setup':
-                continue
-        mod = config.get(section, 'modules').split(',')
-        # Restrict module map to allowed modules
-        if len(allowed_modules) > 0:
-                mod = filter(lambda x: x in allowed_modules, mod)
-        module_list.extend(mod)
-        modules[section] = mod
+    if section == 'setup':
+        continue
+    mod = config.get(section, 'modules').split(',')
+    # Restrict module map to allowed modules
+    if len(allowed_modules) > 0:
+        mod = filter(lambda x: x in allowed_modules, mod)
+    module_list.extend(mod)
+    modules[section] = mod
 
 # we will remember all tables that were cleared here
 visited_table_list = []
@@ -228,48 +228,48 @@ answers = ['a','q','c','s','y','n', '?']
 all = False
 none = False
 for category in categories:
-	print 'Category "' + category + '":'
-	all_cat = False
-	for module in modules[category]:
-		answer = None
-		while (not all and not all_cat) and not answer in answers:
-			sys.stdout.write('\tClean up module "' + module + '"? [' + ''.join(answers) + '] ')
-			answer = sys.stdin.readline()
-			if answer == '': answer = '?'
-			if answer[-1] == '\n': answer = answer[:-1]
+    print 'Category "' + category + '":'
+    all_cat = False
+    for module in modules[category]:
+        answer = None
+        while (not all and not all_cat) and not answer in answers:
+            sys.stdout.write('\tClean up module "' + module + '"? [' + ''.join(answers) + '] ')
+            answer = sys.stdin.readline()
+            if answer == '': answer = '?'
+            if answer[-1] == '\n': answer = answer[:-1]
 
-			if answer == '?':
-			    print 'a: Clean up all modules'
-			    print 'q: Do not clean up any module'
-			    print 'c: Clean up all modules in this category'
-			    print 's: Skip all modules in this category'
-			    print 'y: Clean up this module'
-			    print 'n: Do not clean up this module'
-			    answer = None
+            if answer == '?':
+                print 'a: Clean up all modules'
+                print 'q: Do not clean up any module'
+                print 'c: Clean up all modules in this category'
+                print 's: Skip all modules in this category'
+                print 'y: Clean up this module'
+                print 'n: Do not clean up this module'
+                answer = None
                 
                 if none:
                     visited_table_list.append(module + '_table')
                     break
                 
-		if all or all_cat:
-			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
-		elif answer == 'q':
-			none = True
-			visited_table_list.append(module + '_table')
-			break
-		elif answer == 'a':
-			all = True
-			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
-		elif answer == 'c':
-			all_cat = True
-			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
-		elif answer == 's':
-			break
-		elif answer == 'y':
-			cleanup_table(conn, dirname, module + '_table', start, end, False, True)
-                else:
-                    visited_table_list.append(module + '_table')
-	if(none): break
+        if all or all_cat:
+            cleanup_table(conn, dirname, module + '_table', start, end, False, True)
+        elif answer == 'q':
+            none = True
+            visited_table_list.append(module + '_table')
+            break
+        elif answer == 'a':
+            all = True
+            cleanup_table(conn, dirname, module + '_table', start, end, False, True)
+        elif answer == 'c':
+            all_cat = True
+            cleanup_table(conn, dirname, module + '_table', start, end, False, True)
+        elif answer == 's':
+            break
+        elif answer == 'y':
+            cleanup_table(conn, dirname, module + '_table', start, end, False, True)
+        else:
+            visited_table_list.append(module + '_table')
+    if(none): break
 
 # Check for tables not associated with a module
 table_list = dbWrapper.listOfTables()
@@ -280,40 +280,40 @@ n_rows = 0
 print 'Tables no longer referenced in configuration:'
 for table in table_list:
 
-	has_module = True
-	for module in module_list:
-		if table.startswith(module + '_'):
-			has_module = False
-			break
+    has_module = True
+    for module in module_list:
+        if table.startswith(module + '_'):
+            has_module = False
+            break
 
-	if has_module:
-		n_rows += 1
-		answer = None
-		while not all and not answer in answers:
-			sys.stdout.write('\tDrop table "' + table + '"? [' + ''.join(answers) + '] ')
-			answer = sys.stdin.readline()
-			if answer == '': answer = '?'
-			if answer[-1] == '\n': answer = answer[:-1]
+    if has_module:
+        n_rows += 1
+        answer = None
+        while not all and not answer in answers:
+            sys.stdout.write('\tDrop table "' + table + '"? [' + ''.join(answers) + '] ')
+            answer = sys.stdin.readline()
+            if answer == '': answer = '?'
+            if answer[-1] == '\n': answer = answer[:-1]
 
-			if answer == '?':
-			    print 'a: Drop all unreferenced tables'
-			    print 'q: Do not drop any unreferenced table'
-			    print 'y: Drop this table'
-			    print 'n: Do not drop this table'
-			    answer = None
+            if answer == '?':
+                print 'a: Drop all unreferenced tables'
+                print 'q: Do not drop any unreferenced table'
+                print 'y: Drop this table'
+                print 'n: Do not drop this table'
+                answer = None
 
-		if all:
-			cleanup_table(conn, dirname, table, -1, -1, True, False)
-		elif answer == 'q':
-			break
-		elif answer == 'a':
-			all = True
-			cleanup_table(conn, dirname, table, -1, -1, True, False)
-		elif answer == 'y':
-			cleanup_table(conn, dirname, table, -1, -1, True, False)
+        if all:
+            cleanup_table(conn, dirname, table, -1, -1, True, False)
+        elif answer == 'q':
+            break
+        elif answer == 'a':
+            all = True
+            cleanup_table(conn, dirname, table, -1, -1, True, False)
+        elif answer == 'y':
+            cleanup_table(conn, dirname, table, -1, -1, True, False)
 
 if n_rows == 0:
-	print '\tNone'
+    print '\tNone'
 
 
 # are there still unvisited tables left in the database?
