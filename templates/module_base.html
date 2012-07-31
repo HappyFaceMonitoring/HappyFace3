@@ -39,7 +39,7 @@
     <p>No data at this time.</p>
 % else:
  % if len(module.dataset["error_string"]) > 0:
-    <p>${module.dataset["error_string"]}</p>
+    <p style="color:red;">${module.dataset["error_string"]}</p>
  % else:
 ${self.content()}
  % endif
