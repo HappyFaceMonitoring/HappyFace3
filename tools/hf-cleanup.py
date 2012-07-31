@@ -7,6 +7,7 @@ import getopt
 import shutil
 import re
 import itertools
+import traceback
 from sqlobject import *
 import ConfigParser
 
@@ -189,6 +190,8 @@ for file in cfg_files:
 	try: config.readfp(open(file))
 	except IOError:
 		print "Cannot read cfg file %s" % file
+		traceback.print_exc()
+		sys.exit(1)
 
 # try to initiate / create the database
 connection_string = config.get('setup', 'db_connection')
@@ -204,36 +207,18 @@ cursor = conn.cursor()
 dbWrapperModule = __import__(config.get('setup', 'db_wrapper_module'))
 dbWrapper = dbWrapperModule.__dict__[config.get('setup', 'db_wrapper_class')]()
 
-categories = []
+categories = config.get('setup', 'categories').split(',')
 modules = {}
 module_list = []
-for file in cfg_files:
-	try:
-		section = None
-		for line in open(file):
-			# For some reason the trailing newline character is
-			# not stripped away with strip()
-			if line[-1] == "\n":
-				line = line[:-1]
-			line.strip()
-
-			if line == '' or line.startswith('#'):
-				continue
-			elif line.startswith('['):
-				section = line[1:-1].strip()
-			elif section is not None:
-				key,value = map(lambda x: x.strip(), line.split('=', 1))
-				if section == 'setup' and key == 'categories':
-					categories = map(lambda x: x.strip(), value.split(','))
-				elif key == 'modules':
-					modules[section] = map(lambda x: x.strip(), value.split(','))
-					module_list.extend(modules[section])
-
-					# Restrict module map to allowed modules
-					if len(allowed_modules) > 0:
-						modules[section] = filter(lambda x: x in allowed_modules, modules[section])
-	except:
-		pass
+for section in config.sections():
+        if section == 'setup':
+                continue
+        mod = config.get(section, 'modules').split(',')
+        # Restrict module map to allowed modules
+        if len(allowed_modules) > 0:
+                mod = filter(lambda x: x in allowed_modules, mod)
+        module_list.extend(mod)
+        modules[section] = mod
 
 # we will remember all tables that were cleared here
 visited_table_list = []
