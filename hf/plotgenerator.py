@@ -15,6 +15,10 @@ def timeseriesPlot(**kwargs):
     """
     Supported arguments:
      curve_XXX: colon-separated curve info: (module_instance,[subtable],column,title)
+     filter: include only rows where specified column in result set matches value, can be specified more than once: col,value
+     filter_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
+     exclude: include only rows where specified column in result set matches value, can be specified more than once: col,value
+     exclude_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
      legend: (true, false / 1, 0) Show legend in image
      title: (string) Display a title above plot
      ylabel: self-explanatory
@@ -28,8 +32,25 @@ def timeseriesPlot(**kwargs):
     
     # generate plot
     fig = plt.figure()
-    ax = Axes(fig, [.08, .15, .88, 0.78])
+    ax = Axes(fig, [.12, .15, .84, 0.78])
     fig.add_axes(ax)
+    
+    # extract constraints from kwargs dictionary
+    constraint = {'filter': {None: []}, 'exclude':{None: []}}
+    for t in constraint.iterkeys():
+        for key, value in kwargs.iteritems():
+            if key.startswith(t):
+                if len(key) <= len(t)+1:
+                    curve = None
+                else:
+                    curve = key[len(t)+1:]
+                if type(value) is not list:
+                    value = [value,]
+                print value
+                for constr in value:
+                    if curve not in constraint[t]:
+                        constraint[t][curve] = []
+                    constraint[t][curve].append(constr.split(','))
 
     errors = []
     try:
@@ -50,6 +71,7 @@ def timeseriesPlot(**kwargs):
         for key, value in kwargs.iteritems():
             if key.lower().startswith(u"curve_"):
                 try:
+                    curve_name = key[6:]
                     curve_info = value.split(",")
                     if len(curve_info) < 4:
                         raise Exception("Insufficient number of arguments for plot curve")
@@ -67,20 +89,40 @@ def timeseriesPlot(**kwargs):
                     col = getattr(table.c, col_name)
                     
                     hf_runs = hf.module.database.hf_runs
+                    
+                    # Create database query
                     if len(table_name) == 0:
                         # query from module table
-                        query = select([hf_runs.c.time, col], table.c.run_id==hf_runs.c.id)
-                        if timerange is not None:
-                            query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
-                        data = [(date2num(p[0]),p[1]) for p in query.execute().fetchall()]
+                        query = select([hf_runs.c.time, 0, col], \
+                            table.c.instance == module) \
+                            .where(table.c.run_id == hf_runs.c.id)
                     else:
                         # query from subtable
                         mod_table = module_class.module_table
                         query = select([hf_runs.c.time, mod_table.c.id, col], \
-                            table.c.parent_id==mod_table.c.id and mod_table.c.run_id==hf_runs.c.id)
-                        if timerange is not None:
-                            query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
-                        data = [(date2num(p[0]),p[2]) for p in query.execute().fetchall()]
+                            mod_table.c.instance == module) \
+                            .where(table.c.parent_id == mod_table.c.id) \
+                            .where(mod_table.c.run_id == hf_runs.c.id)
+                    
+                    # apply constraints
+                    for include in constraint['filter'][None]:
+                        query = query.where(getattr(table.c, include[0]) == include[1])
+                    for exclude in constraint['exclude'][None]:
+                        query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                    # apply named constraints
+                    if curve_name in constraint['filter']:
+                        for include in constraint['filter'][curve_name]:
+                            query = query.where(getattr(table.c, include[0]) == include[1])
+                    if curve_name in constraint['exclude']:
+                        for exclude in constraint['exclude'][curve_name]:
+                            query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                    
+                    # apply timerange selection
+                    if timerange is not None:
+                        query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
+                        
+                    # query data from database and convert datetime object to ordinal
+                    data = [(date2num(p[0]),p[2]) for p in query.execute().fetchall()]
                     
                     curve_list.append((title, data))
                 except Exception, e:
@@ -94,7 +136,6 @@ def timeseriesPlot(**kwargs):
                 title = value
                 
         # generate plot
-        
         try:
             ax.set_ymargin(0.01)
             ax.set_autoscalex_on(True)
@@ -121,6 +162,7 @@ def timeseriesPlot(**kwargs):
                 'label': curve[0],
             }
             ax.plot_date(*zip(*curve[1]), **options)
+        # custom date formats
         ax.xaxis.get_major_formatter().scaled = {
             365.0  : '%Y',
             30.    : '%Y-%m',
