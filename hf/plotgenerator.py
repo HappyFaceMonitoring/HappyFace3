@@ -95,9 +95,13 @@ def timeseriesPlot(**kwargs):
                 
         # generate plot
         
-        ax.set_ymargin(0.01)
-        ax.set_autoscalex_on(True)
-        
+        try:
+            ax.set_ymargin(0.01)
+            ax.set_autoscalex_on(True)
+        except Exception:
+            # these might not be supported by
+            # old matplotlib versions
+            pass
         plot_format_list = [
             'bo-', 'go-', 'ro-', 'co-', 'mo-', 'yo-', 'ko-', 'wo-', 
             'bo--', 'go--', 'ro--', 'co--', 'mo--', 'yo--', 'ko--', 'wo--', 
