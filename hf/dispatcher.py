@@ -62,8 +62,9 @@ class CategoryDispatcher(object):
             if run is None:
                 time_error_message = "No data so far in past"
                 run = hf_runs.select(hf_runs.c.time >= time_obj).order_by(hf_runs.c.time.asc()).execute().fetchone()
+                time_obj = run["time"]
             run = {"id":run["id"], "time":run["time"]}
-            self.logger.info(run)
+            
             category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
             
             selected_category = None
