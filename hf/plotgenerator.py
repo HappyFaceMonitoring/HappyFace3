@@ -57,7 +57,6 @@ def timeseriesPlot(**kwargs):
                     title = ",".join(curve_info[3:])
                     if len(title) == 0:
                         title = module + " " + col_name
-                    print repr(module), repr(table_name), repr(col_name), repr(title)
                     if not hf.module.config.has_section(module):
                         raise Exception("No such module")
                     module_class = hf.module.getModuleClass(hf.module.config.get(module, "module"))
@@ -113,7 +112,6 @@ def timeseriesPlot(**kwargs):
         fig.autofmt_xdate()
         
         for num,curve in enumerate(curve_list):
-            print curve[0], zip(*curve[1])
             options = {
                 'fmt': plot_format_list[num%len(plot_format_list)],
                 'label': curve[0],
