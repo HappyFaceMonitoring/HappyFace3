@@ -7,8 +7,8 @@ $(function() {
         
         // build date object
         match = pattDate.exec(dateString);
-        // f*** JavaScript, day and month starts at 0
-        date = new Date(match[1], match[2]-1, match[3]-1, match[4], match[5], 0, 0);
+        // f*** JavaScript, month starts at 0
+        date = new Date(match[1], match[2]-1, match[3], match[4], match[5], 0, 0);
         match = pattHistoStep.exec($('#HistoStep').val());
         var timeDiff = (match[1]*3600e3 + match[2]*60e3);
         
@@ -16,7 +16,7 @@ $(function() {
         var newDate = new Date(date.getTime() + timeDiff*direction);
         
         // update form, get Date() is form 1-31 unlike getMonth...
-        $('#HistoNavDate').val(newDate.getFullYear()+'-'+(newDate.getMonth()+1)+'-'+(newDate.getDate()+1));
+        $('#HistoNavDate').val(newDate.getFullYear()+'-'+(newDate.getMonth()+1)+'-'+(newDate.getDate()));
         $('#HistoNavTime').val(newDate.getHours()+':'+newDate.getMinutes());
         $('#HistoForm1').submit()
     }

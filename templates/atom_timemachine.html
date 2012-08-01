@@ -72,7 +72,7 @@
 
  <div class="HappyTitleBarElement">
 % if selected_category is None:
-  <form id="HistoForm2" class="HappyTitleBarForm" action="/" method="get">
+  <form id="HistoForm2" class="HappyTitleBarForm" action="${hf.config.get('paths', 'happyface_url')}" method="get">
 % else:
   <form id="HistoForm2" class="HappyTitleBarForm" action="${selected_category.url()}" method="get">
 % endif
@@ -95,7 +95,7 @@
    <tr>
     <td>
 % if selected_category is None:
-     <a class="button" href="/" title="Reset to default settings and current time">Reset</a>
+     <a class="button" href="${hf.config.get('paths', 'happyface_url')}" title="Reset to default settings and current time">Reset</a>
 % else:
      <a class="button" href="${selected_category.url()}" title="Reset to default settings and current time">Reset</a>
 % endif
