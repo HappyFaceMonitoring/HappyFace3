@@ -160,6 +160,7 @@ def timeseriesPlot(**kwargs):
             options = {
                 'fmt': plot_format_list[num%len(plot_format_list)],
                 'label': curve[0],
+                'markersize': 4.0,
             }
             ax.plot_date(*zip(*curve[1]), **options)
         # custom date formats
