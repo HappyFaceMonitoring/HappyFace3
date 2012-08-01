@@ -15,10 +15,13 @@ class CategoryDispatcher(object):
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = hf.category.createCategoryObjects()
-        # hf.plotgenerator.init()
+        if hf.config.get('plotgenerator', 'enabled').lower() == 'true':
+            hf.plotgenerator.init()
     
     @cp.expose
     def plot(self, plt_type=None, img=None, **kwargs):
+        if hf.config.get('plotgenerator', 'enabled').lower() != 'true':
+            return "Plot Generator disabled by HappyFace configuration"
         if plt_type == "time":
             if img == "img":
                 return hf.plotgenerator.timeseriesPlot(**kwargs)
