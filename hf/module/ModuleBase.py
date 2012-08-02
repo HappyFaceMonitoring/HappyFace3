@@ -1,6 +1,7 @@
 import hf
 from mako.template import Template
 import logging, traceback, os
+from sqlalchemy import Integer, Float, Numeric
 
 class ModuleBase:
     """
@@ -116,6 +117,17 @@ class ModuleBase:
     
     def getNavStatusIcon(self):
         return os.path.join(hf.config.get('paths', 'template_icons_url'), 'nav_'+self.getStatusString()+'.png')
+        
+    def getPlotableColumns(self):
+        blacklist = ['id', 'run_id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
+        types = [Integer, Float, Numeric]
+        def isnumeric(cls):
+            for t in types:
+                if isinstance(cls,t):
+                    return True
+            return False
+        numerical_cols = filter(lambda x: isnumeric(x.type), self.module_table.columns)
+        return [col.name for col in numerical_cols if col.name not in blacklist]
     
     def render(self):
         module_html = ''

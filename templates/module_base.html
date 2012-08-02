@@ -1,3 +1,7 @@
+<%!
+from datetime import timedelta
+%>
+
 <table class="main" style="width:1000px;">
  <tbody>
   <tr>
@@ -24,16 +28,33 @@
    <td>
     <div style="display:none;" class='HappyDesc' id="${module.instance_name}_info_box">
      <ul>
-      <li>Module instance: ${module.instance_name}</li>
+      <li><span class="key">Module</span><span class="value">${module.module_name}</span></li>
+      <li><span class="key">Instance</span><span class="value">${module.instance_name}</span></li>
+      <li><span class="key">Type</span><span class="value">${module.type}</span></li>
+      <li><span class="key">Weight</span><span class="value">${module.weight}</span></li>
 % if not no_data:
-      <li>Status: ${module.dataset["status"]}</li>
-      <li>Description: ${module.dataset["description"]}</li>
-      <li>Instruction: ${module.dataset["instruction"]}</li>
+      <li><span class="key">Status</span><span class="value">${module.dataset["status"]}</span></li>
+      <li><span class="key">Description</span><span class="value">${module.dataset["description"]}</span></li>
+      <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
 %endif
 % if not no_data:
-      <li>Data source: <a href="${dataset["source_url"]}">${module.dataset["source_url"]}</a></li>
+      <li><span class="key">Data source</span><span class="value"><a href="${dataset["source_url"]}">${module.dataset["source_url"]}</a></span></li>
 % endif
      </ul>
+     <form class="PlotMask" action="${hf.plotgenerator.getTimeseriesUrl()}" method="get" target="_blank">
+      <label><span>Start</span><input type="text" name="start_date" value="${(run["time"]-timedelta(2)).strftime("%Y-%m-%d")}" class="DateField" />
+      <input type="text" name="start_time" value="${(run["time"]-timedelta(2)).strftime("%H:%M")}" class="TimeField" /></label>
+      <label><span>End</span><input type="text" name="end_date" value="${run["time"].strftime("%Y-%m-%d")}" class="DateField" />
+      <input type="text" name="end_time" value="${run["time"].strftime("%H:%M")}" class="TimeField" /></label>
+      <input type="hidden" name="title" value="${module.instance_name}" />
+      <input type="hidden" name="legend" value="1" />
+      <label><span>Variable</span><select name="curve_1">
+% for var in module.getPlotableColumns():
+       <option value="${module.instance_name},,${var},${var}">${var}</option>
+% endfor
+      </select></label>
+      <input name="submit" type="submit" value="Plot" />
+     </form>
     </div>
 % if no_data:
     <p>No data at this time.</p>
