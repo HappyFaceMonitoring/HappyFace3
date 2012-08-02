@@ -4,7 +4,7 @@ import cherrypy as cp
 import json, StringIO, traceback, logging, datetime, time
 import numpy as np
 import timeit
-from sqlalchemy.sql import select
+from sqlalchemy.sql import select, func
 
 def init():
     """ Configure matplotlib backends by hf-configuration. Call before any plot-commands """
@@ -23,13 +23,14 @@ def timeseriesPlot(**kwargs):
      filter_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
      exclude: include only rows where specified column in result set matches value, can be specified more than once: col,value
      exclude_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
-     legend: (true, false / 1, 0) Show legend in image
+     legend: Show legend in image
      title: (string) Display a title above plot
      ylabel: self-explanatory
      start_date: Start date (Y-m-d)
      end_date: End date (Y-m-d)
      start_time: Start time (H:M)
      end_date: End time (H:M)
+     renormalize: (true, false / 1, 0) Scales all curves to a [0,1] interval
     """
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
@@ -66,6 +67,7 @@ def timeseriesPlot(**kwargs):
         legend = False
         ylabel = ""
         timerange = None
+        renormalize = False
         
         # extract timeranges
         now = datetime.datetime.now()
@@ -76,6 +78,10 @@ def timeseriesPlot(**kwargs):
         start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
         end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
         timerange = [start, end]
+        
+        if 'renormalize' in kwargs:
+            if kwargs['renormalize'].lower() in ['true', '1']:
+                renormalize = True
         
         # download data for curves        
         for key, value in kwargs.iteritems():
@@ -100,39 +106,50 @@ def timeseriesPlot(**kwargs):
                     
                     hf_runs = hf.module.database.hf_runs
                     
-                    # Create database query
-                    if len(table_name) == 0:
-                        # query from module table
-                        query = select([hf_runs.c.time, 0, col], \
-                            table.c.instance == module) \
-                            .where(table.c.run_id == hf_runs.c.id)
-                    else:
-                        # query from subtable
-                        mod_table = module_class.module_table
-                        query = select([hf_runs.c.time, mod_table.c.id, col], \
-                            mod_table.c.instance == module) \
-                            .where(table.c.parent_id == mod_table.c.id) \
-                            .where(mod_table.c.run_id == hf_runs.c.id)
-                    
-                    # apply constraints
-                    for include in constraint['filter'][None]:
-                        query = query.where(getattr(table.c, include[0]) == include[1])
-                    for exclude in constraint['exclude'][None]:
-                        query = query.where(getattr(table.c, exclude[0]) != exclude[1])
-                    # apply named constraints
-                    if curve_name in constraint['filter']:
-                        for include in constraint['filter'][curve_name]:
-                            query = query.where(getattr(table.c, include[0]) == include[1])
-                    if curve_name in constraint['exclude']:
-                        for exclude in constraint['exclude'][curve_name]:
-                            query = query.where(getattr(table.c, exclude[0]) != exclude[1])
-                    
-                    # apply timerange selection
-                    if timerange is not None:
-                        query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
+                    # A helper method to create queries with all
+                    # neccessary constraints applied.
+                    def queryDatabase(query_columns):
+                        if len(table_name) == 0:
+                            # query from module table
+                            query = select(query_columns, \
+                                table.c.instance == module) \
+                                .where(table.c.run_id == hf_runs.c.id)
+                        else:
+                            # query from subtable
+                            mod_table = module_class.module_table
+                            query_columns[1] = mod_table.c.id
+                            query = select(query_columns, \
+                                mod_table.c.instance == module) \
+                                .where(table.c.parent_id == mod_table.c.id) \
+                                .where(mod_table.c.run_id == hf_runs.c.id)
                         
+                        # apply constraints
+                        for include in constraint['filter'][None]:
+                            query = query.where(getattr(table.c, include[0]) == include[1])
+                        for exclude in constraint['exclude'][None]:
+                            query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                        # apply named constraints
+                        if curve_name in constraint['filter']:
+                            for include in constraint['filter'][curve_name]:
+                                query = query.where(getattr(table.c, include[0]) == include[1])
+                        if curve_name in constraint['exclude']:
+                            for exclude in constraint['exclude'][curve_name]:
+                                query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                        
+                        # apply timerange selection
+                        if timerange is not None:
+                            query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
+                        return query
+                    
+                    query = queryDatabase([hf_runs.c.time, 0, col])
                     # query data from database and convert datetime object to ordinal
-                    data = [(date2num(p[0]),p[2]) for p in query.execute().fetchall()]
+                    if renormalize:
+                        limits = queryDatabase([func.min(col), 0, func.max(col)]).execute().fetchone()
+                        print limits
+                        fac = limits[2]-limits[0]
+                        data = [(date2num(p[0]), float(p[2] - limits[0])/fac) for p in query.execute().fetchall()]
+                    else:
+                        data = [((p[0]), p[2]) for p in query.execute().fetchall()]
                     
                     curve_list.append((title, data))
                 except Exception, e:
@@ -147,7 +164,10 @@ def timeseriesPlot(**kwargs):
                 
         # generate plot
         try:
-            ax.set_ymargin(0.01)
+            if renormalize:
+                ax.set_ylim(0.0, 1.0)
+            else:
+                ax.set_ymargin(0.01)
             ax.set_autoscalex_on(True)
         except Exception:
             # these might not be supported by
