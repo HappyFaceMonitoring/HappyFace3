@@ -10,6 +10,10 @@ def init():
     """ Configure matplotlib backends by hf-configuration. Call before any plot-commands """
     import matplotlib
     matplotlib.use(hf.config.get('plotgenerator', 'backend'))
+    
+@hf.url.absoluteUrl
+def getTimeseriesUrl():
+    return "/plot/time/img"
 
 def timeseriesPlot(**kwargs):
     """
@@ -22,7 +26,10 @@ def timeseriesPlot(**kwargs):
      legend: (true, false / 1, 0) Show legend in image
      title: (string) Display a title above plot
      ylabel: self-explanatory
-     timerange: Start date and end date: (Y-m-d_H:M,Y-m-d_H:M)
+     start_date: Start date (Y-m-d)
+     end_date: End date (Y-m-d)
+     start_time: Start time (H:M)
+     end_date: End time (H:M)
     """
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
@@ -60,12 +67,15 @@ def timeseriesPlot(**kwargs):
         ylabel = ""
         timerange = None
         
-        # extract timerange
-        if 'timerange' in kwargs:
-            timestamps = kwargs['timerange'].split(',')
-            start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamps[0], "%Y-%m-%d_%H:%M")))
-            end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamps[1], "%Y-%m-%d_%H:%M"))+60)
-            timerange = [start, end]
+        # extract timeranges
+        now = datetime.datetime.now()
+        end_date = kwargs['end_date'] if 'end_date' in kwargs else now.strftime('%Y-%m-%d')
+        start_date = kwargs['start_date'] if 'start_date' in kwargs else end_date
+        start_time = kwargs['start_time'] if 'start_time' in kwargs else "00:00"
+        end_time = kwargs['end_time'] if 'end_time' in kwargs else now.strftime('%H:%M')
+        start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
+        end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
+        timerange = [start, end]
         
         # download data for curves        
         for key, value in kwargs.iteritems():
