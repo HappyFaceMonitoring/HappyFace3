@@ -35,7 +35,7 @@ class CategoryDispatcher(object):
                 return hf.plotgenerator.timeseriesPlot(**kwargs)
         else:
             # just get the lastest run, we don't really need it
-            run = hf_runs.select(hf_runs.c.time).order_by(hf_runs.c.time.asc()).execute().fetchone()
+            run = hf_runs.select().order_by(hf_runs.c.time.asc()).execute().fetchone()
             category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
             template_context = {
                     "static_url": hf.config.get('paths', 'static_url'),
