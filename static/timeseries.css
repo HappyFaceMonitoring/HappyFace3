@@ -22,7 +22,7 @@ body {
 }
 
 #content {
-    width: 900px;
+    width: 960px;
     background: #fefefe;
     border-left: 1px solid #fff;
     border-left: 1px solid #fff;
@@ -46,9 +46,9 @@ p { display: block; margin-bottom: 15px}
 
 .hidden { display: none }
 
-input,select { border: 1px solid #888; background-color: #eee; text-align: left;}
+input,select { height: 20px; border: 1px solid #888; background-color: #eee; text-align: left; margin-bottom: 5px}
 select { background-color: #aaa; text-align: right }
-select option { padding-top: 2px; padding-right: 5px; padding-left: 5px}
+select option { padding-top: 2px; padding-right: 5px; padding-left: 5px; margin-left: 0px !important;}
 
 fieldset.floating {
     border: 1px solid #bbb;
@@ -58,9 +58,8 @@ fieldset.floating {
     padding: 5px;
     margin: 0px 0px 5px 5px;
 }
-fieldset.floating label { display: block; }
-fieldset.floating label * { position:static; margin-left: 80px; }
-fieldset.floating label select option { margin-left: 0px; }
+fieldset.floating p { margin-bottom: 0px }
+fieldset.floating label *:nth-child(2) { position:static; margin-left: 80px; }
 fieldset.floating label span { position:absolute; left: 10px; margin-left:0px }
 fieldset.floating + p {
     clear: both;
@@ -71,6 +70,9 @@ fieldset.floating + p {
 
 .button_box {
     display: block;
+    text-align: right;
+    margin-right: 20px;
+    padding-right: 5px
 }
 .button_box a {
     padding: 5px;

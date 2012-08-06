@@ -27,3 +27,10 @@ def absoluteUrl(arg):
     if isinstance(arg, str):
         return join(hf.config.get("paths", "happyface_url"), arg)
     return joinCfg
+
+
+def get(**kwargs):
+    """
+    Generate a GET line from a dictionary
+    """
+    return u"?"+"&".join(str(key)+"="+str(val) for key,val in kwargs.iteritems())

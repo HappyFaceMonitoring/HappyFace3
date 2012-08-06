@@ -41,18 +41,18 @@ function add_curve() {
             first_mod = mod;
         html += " <option>" + mod + "</option>";
     }
-    html += " </select></label>";
-    html += " <label><span>Subtable</span><select id=\"curve_"+curve_num+"_subtable\" name=\"curve_"+curve_num+"_subtable\">";
+    html += " </select></label></p>";
+    html += " <p><label><span>Subtable</span><select id=\"curve_"+curve_num+"_subtable\" name=\"curve_"+curve_num+"_subtable\">";
     for(var subtable in modules[first_mod]) {
         html += " <option>" + subtable + "</option>";
     }
-    html += " </select></label>";
-    html += " <label><span>Variable</span><select  id=\"curve_"+curve_num+"_variable\" name=\"curve_"+curve_num+"_variable\">";
+    html += " </select></label></p>";
+    html += " <p><label><span>Variable</span><select  id=\"curve_"+curve_num+"_variable\" name=\"curve_"+curve_num+"_variable\">";
     for(var idx in modules[first_mod]['']) {
         html += " <option>" + modules[first_mod][''][idx] + "</option>";
     }
-    html += " </select></label>";
-    html += " <label><span>Title</span><input type=\"edit\" name=\"curve_"+curve_num+"_title\"></label></p>";
+    html += " </select></label></p>";
+    html += " <p><label><span>Title</span><input type=\"edit\" name=\"curve_"+curve_num+"_title\"></label></p>";
     html += "</fieldset>";
     $("#curve_controls").before(html);
     $("#curve_"+curve_num+"_module_instance").change({'curve': "curve_"+curve_num}, changed_module);
@@ -80,6 +80,22 @@ $("#hide_curve_form").click(function() {
     $("#curve").slideUp();
     $("#show_curve_form").show();
     $("#hide_curve_form").hide();
+    return false;
+});
+
+$("#update_plot").click(function() {
+    var html = "";
+    for(var i=1; i <= curve_num; i++)
+    {
+        var id_particle = "#curve_"+i;
+        var mod = $(id_particle+"_module_instance option:selected").val();
+        var table = $(id_particle+"_subtable option:selected").val();
+        var variable = $(id_particle+"_variable option:selected").val();
+        var title = $(id_particle+"_title").val();
+        html = "<input type=\"hidden\" name=\"curve_"+i+"\" value=\""+mod+","+table+","+variable+","+title+"\" />\n";
+    }
+    $("#plot_inputs").empty().append(html);
+    $("#plot_form").submit();
     return false;
 });
 
