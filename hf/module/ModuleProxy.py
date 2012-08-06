@@ -16,6 +16,7 @@ class ModuleProxy:
         self.ModuleClass = ModuleClass
         self.module_name = ModuleClass.module_name
         self.module_table = ModuleClass.module_table
+        self.subtables = ModuleClass.subtables
         self.instance_name = instance_name
         self.config = config
         self.acquisitionModules = {}

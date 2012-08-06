@@ -42,12 +42,13 @@ class ModuleBase:
     }
     
     table = None
-    subtables = {}
+    subtables = None
     
     def __init__(self, instance_name, config, run, dataset, template):
         self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
         self.module_name = self.__class__.module_name
         self.module_table = self.__class__.module_table
+        self.subtables = self.__class__.subtables
         self.instance_name = instance_name
         self.config = config
         self.run = run
@@ -129,6 +130,22 @@ class ModuleBase:
         numerical_cols = filter(lambda x: isnumeric(x.type), self.module_table.columns)
         return [col.name for col in numerical_cols if col.name not in blacklist]
     
+    def getPlotableColumnsWithSubtables(self):
+        cols = {'': self.getPlotableColumns()}
+        
+        blacklist = ['id', 'parent_id']
+        types = [Integer, Float, Numeric]
+        def isnumeric(cls):
+            for t in types:
+                if isinstance(cls,t):
+                    return True
+            return False
+        
+        for name, table in self.subtables.iteritems():
+            numerical_cols = filter(lambda x: isnumeric(x.type), table.columns)
+            cols[name] = [col.name for col in numerical_cols if col.name not in blacklist]
+        
+        return cols
     def render(self):
         module_html = ''
         if self.template is None:

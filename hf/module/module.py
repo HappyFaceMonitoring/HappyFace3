@@ -21,6 +21,7 @@ def generateModuleTable(module_class, tabname, columns):
             Column('source_url', Text),
         ] + columns))
     module_class.module_table = table
+    module_class.subtables = {}
     table.module_class = module_class
     return table
         

@@ -17,18 +17,40 @@ class CategoryDispatcher(object):
         self.category_list = hf.category.createCategoryObjects()
         if hf.config.get('plotgenerator', 'enabled').lower() == 'true':
             hf.plotgenerator.init()
+            try:
+                filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "plot_timeseries.html")
+                cp.engine.autoreload.files.add(filename)
+                self.timeseries_template = Template(filename=filename, lookup=hf.template_lookup)
+            except Exception:
+                self.logger.error("Cannot initialize timeseries template")
+                self.logger.debug(traceback.format_exc())
     
     @cp.expose
     def plot(self, plt_type=None, img=None, **kwargs):
         if hf.config.get('plotgenerator', 'enabled').lower() != 'true':
             return "Plot Generator disabled by HappyFace configuration"
-        if plt_type == "time":
-            if img == "img":
+        
+        if img == "img":
+            if plt_type == "time":
                 return hf.plotgenerator.timeseriesPlot(**kwargs)
-            else:
-                return "navigat0r frame" # show navigator frame
         else:
-            return "404" # TODO 404!
+            # just get the lastest run, we don't really need it
+            run = hf_runs.select(hf_runs.c.time).order_by(hf_runs.c.time.asc()).execute().fetchone()
+            category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
+            template_context = {
+                    "static_url": hf.config.get('paths', 'static_url'),
+                    "happyface_url": hf.config.get('paths', 'happyface_url'),
+                    "category_list": category_dict.values(),
+                    "module_list": [],
+                    "hf": hf,
+                }
+            for cat in category_dict.itervalues():
+                template_context["module_list"].extend(cat.module_list)
+            if plt_type == "time":
+                return self.timeseries_template.render(**template_context)
+        
+        # if we get here, 404!
+        return "404" # TODO 404!
         
     @cp.expose
     def default(self, category=None, **kwargs):
@@ -78,6 +100,7 @@ class CategoryDispatcher(object):
             
             template_context = {
                 "static_url": hf.config.get('paths', 'static_url'),
+                "happyface_url": hf.config.get('paths', 'happyface_url'),
                 "category_list": category_dict.values(),
                 "module_list": [],
                 "hf": hf,

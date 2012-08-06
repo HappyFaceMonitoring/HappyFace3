@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <title>${hf.config.get('template', "web_title")} - Timeseries Plot</title>
+  <link href="${static_url}/timeseries.css" rel="stylesheet" type="text/css" />
+  <script src="${static_url}/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script src="${static_url}/js/hf.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var modules = {
+% for mod in module_list:
+   "${mod.instance_name}": {
+ % for name,cols in mod.getPlotableColumnsWithSubtables().iteritems():
+  % if len(cols) > 0:
+        "${name}": ["${'", "'.join(cols)}"],
+  % endif
+ % endfor
+        },
+% endfor
+    };
+  </script>
+  <script src="${static_url}/js/timeseries.js" type="text/javascript"></script>
+  <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="${static_url}/favicon.ico" />
+ </head>
+ <body>
+<div id="content">
+ <h1>Timeseries Plot Generator</h1>
+ <p class="button_box">
+  <a id="show_curve_form" href="#" class="add">Show curve forms</a>
+  <a id="hide_curve_form" href="#" class="remove hidden">Hide curve forms</a>
+ </p>
+ <div id="curve" class="hidden">
+  <h2>Curves</h2>
+  <form action="" method="get">
+## Fieldsets will be added here by JS
+   <p id="curve_controls" class="button_box">
+    <a id="add_curve" href="#" class="add">Add curve</a>
+    <a id="remove_curve" href="#" class="remove">Remove curve</a>
+   </p> 
+  </form>
+
+  <h2>Common Constraints</h2>
+  <form action="" method="get">
+## Fieldsets will be added here by JS
+   <p id="curve_controls" class="button_box">
+    <a id="add_com_constraint" href="#" class="add">Add constraint</a>
+    <a id="remove_com_constraint" href="#" class="remove">Remove contraint</a>
+   </p> 
+  </form>
+ </div>
+
+
+ <div id="settings">
+  <h2>Settings</h2>
+  <form action="" method="get">
+   <fieldset class="floating">
+    <legend>Timerange</legend>
+    
+   </fieldset>
+   <p class="button_box">
+    <a href="#">Test</a>
+   </p>
+   <span id="plot_inputs">
+   </span>
+  </form>
+ </div>
+ <img src="${hf.url.join(happyface_url, 'plot/time/img')}" alt="HF Timeseries Plot" />
+</div>
+ </body>
+</html>
