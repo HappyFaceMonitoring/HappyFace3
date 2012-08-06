@@ -1,7 +1,7 @@
-<%!
+<%
 from datetime import timedelta
+past = run['time'] - timedelta(days = 2)
 %>
-
 <table class="main" style="width:1000px;">
  <tbody>
   <tr>
@@ -42,8 +42,8 @@ from datetime import timedelta
 % endif
      </ul>
      <form class="PlotMask" action="${hf.plotgenerator.getTimeseriesUrl()}" method="get" target="_blank">
-      <label><span>Start</span><input type="text" name="start_date" value="${(run["time"]-timedelta(2)).strftime("%Y-%m-%d")}" class="DateField" />
-      <input type="text" name="start_time" value="${(run["time"]-timedelta(2)).strftime("%H:%M")}" class="TimeField" /></label>
+      <label><span>Start</span><input type="text" name="start_date" value="${past.strftime("%Y-%m-%d")}" class="DateField" />
+      <input type="text" name="start_time" value="${past.strftime("%H:%M")}" class="TimeField" /></label>
       <label><span>End</span><input type="text" name="end_date" value="${run["time"].strftime("%Y-%m-%d")}" class="DateField" />
       <input type="text" name="end_time" value="${run["time"].strftime("%H:%M")}" class="TimeField" /></label>
       <input type="hidden" name="title" value="${module.instance_name}" />
