@@ -54,7 +54,6 @@ class CategoryDispatcher(object):
         
     @cp.expose
     def default(self, category=None, **kwargs):
-        self.logger.warning(category)
         try:
             '''
             Select a hf run based on the passed 'date' and 'time' parameters. If not
