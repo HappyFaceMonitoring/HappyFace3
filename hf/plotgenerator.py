@@ -187,6 +187,8 @@ def timeseriesPlot(**kwargs):
         fig.autofmt_xdate()
         
         for num,curve in enumerate(curve_list):
+            if len(curve[1]) == 0:
+                continue
             options = {
                 'fmt': plot_format_list[num%len(plot_format_list)],
                 'label': curve[0],
