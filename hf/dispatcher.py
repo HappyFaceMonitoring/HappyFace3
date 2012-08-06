@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import cherrypy as cp
-import hf, datetime, time, logging, traceback, os
+import hf, datetime, time, logging, traceback, os, subprocess
 from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
@@ -98,6 +98,11 @@ class CategoryDispatcher(object):
                     selected_category = c
                     break
             
+            try:
+                svn_rev = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE).stdout.read().strip()
+            except Exception:
+                svn_rev = 'exported'
+            
             template_context = {
                 "static_url": hf.config.get('paths', 'static_url'),
                 "happyface_url": hf.config.get('paths', 'happyface_url'),
@@ -111,7 +116,8 @@ class CategoryDispatcher(object):
                 "run": run,
                 'selected_module': None,
                 'selected_category': selected_category,
-                'time_error_message': time_error_message
+                'time_error_message': time_error_message,
+                'svn_rev': svn_rev,
             }
 
             for cat in category_dict.itervalues():
