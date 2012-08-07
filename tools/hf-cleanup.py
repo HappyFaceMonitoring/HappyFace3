@@ -26,6 +26,7 @@ Possible options are:
 --end=TIMESTAMP        if given only erase database entries recorded before TIMESTAMP
 --modules=MODULES    specifies a comma-separated list of modules to clean up
 --force                 cleanup tables that are not correctly referenced
+--auto              automatically answer with 'all' to input prompts and VACUUMM SQLite DB (does not imply --force)
 
 All three options only affect the first of the three steps explained above.
 If TIMESTAMP for --start or --end is lower then it is interpreted as the
@@ -143,7 +144,7 @@ modules = ''
 source = ''
 force_cleanup = False
 
-optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'modules=', 'help', 'force'])
+optlist,args = getopt.getopt(sys.argv[1:], 'h', ['start=', 'end=', 'modules=', 'help', 'force', 'auto'])
 options = dict(optlist)
 if '-h' in options or '--help' in options:
     help()
@@ -168,7 +169,7 @@ if '--force' in options:
     force_cleanup = True
 
 if len(args) != 1:
-    sys.stderr.write('%s [--start=timestamp or number of days from today] [--end=timestamp or number of days from today] [--modules=module1,module2,...] <HappyFace Database>\n' % sys.argv[0])
+    sys.stderr.write('%s [--force] [--auto] [--start=timestamp or number of days from today] [--end=timestamp or number of days from today] [--modules=module1,module2,...] <HappyFace Directory>\n' % sys.argv[0])
     sys.exit(-1)
 
 allowed_modules = []
@@ -178,8 +179,9 @@ if modules != '':
 source = args[0]
 dirname = source
 
-sys.path.insert(0, os.path.join(os.getcwd(), dirname))
-sys.path.insert(0, os.path.join(os.getcwd(), dirname, "happycore"))
+sys.path.append(os.path.join(os.getcwd(), dirname))
+sys.path.append(os.path.join(os.getcwd(), dirname, "happycore"))
+import DBWrapper
 
 # cfg files to examine if module is not explicitely given, in increasing order of priority
 cfg_files = [os.path.join(dirname, 'run.cfg'),
@@ -188,24 +190,24 @@ cfg_files = [os.path.join(dirname, 'run.cfg'),
 config = ConfigParser.ConfigParser()
 for file in cfg_files:
     try: config.readfp(open(file))
-    except IOError:
-        print "Cannot read cfg file %s" % file
+    except ConfigParser.Error:
+        print "Cannot parse cfg file %s" % file
         traceback.print_exc()
         sys.exit(1)
+    except IOError:
+        pass # file not found, thats okay
+        
+# get database wrapper
+dbWrapperModule = __import__(config.get('setup', 'db_wrapper_module'))
+DBWrapper.SelectedDBWrapper = dbWrapperModule.__dict__[config.get('setup', 'db_wrapper_class')]
 
 # try to initiate / create the database
 connection_string = config.get('setup', 'db_connection')
-# fetch special directory path
-result = re.match(r'(\w+://)\./(.+)', connection_string)
-if result is not None:
-    connection_string = result.group(1) + os.path.join(os.getcwd(), config.get("setup", "output_dir"), result.group(2))
-sqlhub.processConnection = connectionForURI(connection_string)
+sqlhub.processConnection = DBWrapper.SelectedDBWrapper.connectionForURI(connection_string, os.path.join(os.getcwd(), config.get('setup','output_dir')))
 conn = sqlhub.processConnection.getConnection()
 cursor = conn.cursor()
 
-# get database wrapper
-dbWrapperModule = __import__(config.get('setup', 'db_wrapper_module'))
-dbWrapper = dbWrapperModule.__dict__[config.get('setup', 'db_wrapper_class')]()
+dbWrapper = DBWrapper.SelectedDBWrapper()
 
 categories = config.get('setup', 'categories').split(',')
 modules = {}
@@ -225,7 +227,7 @@ visited_table_list = []
 
 # TODO: Avoid code duplication below
 answers = ['a','q','c','s','y','n', '?']
-all = False
+all = '--auto' in options
 none = False
 for category in categories:
     print 'Category "' + category + '":'
@@ -275,7 +277,7 @@ for category in categories:
 table_list = dbWrapper.listOfTables()
 answers = ['a','q','y','n', '?']
 
-all = False
+all = '--auto' in options
 n_rows = 0
 print 'Tables no longer referenced in configuration:'
 for table in table_list:
@@ -327,7 +329,7 @@ Please contact the responsible module developer.""" % len(unvisited_table_list)
     print "Hint: Use the --force argument to cleanup these tables, too"
 elif len(unvisited_table_list) > 0 and force_cleanup:
     print "There are %i not correctly referenced tables, cleaning up now" % len(unvisited_table_list)
-    all = False
+    all = '--auto' in options
     for table in unvisited_table_list:
         answer = None
         while (not all) and not answer in answers:
@@ -356,7 +358,7 @@ elif len(unvisited_table_list) > 0 and force_cleanup:
 # Only ask for VACUUM with SQLite
 if config.get("setup", "db_connection").find("sqlite") != -1:
     answers = ['y','n', '?']
-    answer = None
+    answer = 'y' if '--auto' in options else None
     while answer not in answers:
             sys.stdout.write('''
 SQLite VACUUM rebuilds the database-file to reduce its

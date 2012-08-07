@@ -268,7 +268,7 @@ class SQLiteWrapper(DBWrapper):
         cursor.execute('SELECT name FROM sqlite_master WHERE type="table"')
         rows = cursor.fetchall() # Fetch all to avoid a lock on the table
         cursor.close()
-        return [row[0] for row in rows]
+        return [row[0] for row in rows if row[0] != "sqlite_sequence"]
 
 class PostgresWrapper(DBWrapper):
     so_type_to_postgres = {
