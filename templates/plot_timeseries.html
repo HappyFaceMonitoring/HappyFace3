@@ -1,9 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <%
-import datetime
 import cherrypy as cp
-current = datetime.datetime.now()
-past = current - datetime.timedelta(days=2)
 %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 
@@ -23,6 +20,16 @@ past = current - datetime.timedelta(days=2)
   % endif
  % endfor
         },
+% endfor
+    };
+    var module_types = {
+% for mod in module_list:
+        "${mod.instance_name}": "${mod.module_name}",
+% endfor
+    };
+    var curves = {
+% for key,val in curve_dict.iteritems():
+        ${key}: ["${'", "'.join(val)}"],
 % endfor
     };
   </script>
@@ -47,11 +54,12 @@ past = current - datetime.timedelta(days=2)
   </form>
 
   <h2>Common Constraints</h2>
-  <form action="" method="get">
+  <p id="common_constraints_info" class="hidden">Common Constraints only work with curves plottet from the same module type and subtable!</p>
+  <form id="common_constraints_form" action="" method="get">
 ## Fieldsets will be added here by JS
    <p id="curve_controls" class="button_box">
-    <a id="add_com_constraint" href="#" class="add">Add constraint</a>
-    <a id="remove_com_constraint" href="#" class="remove">Remove contraint</a>
+    <a id="add_com_constraint" href="#" class="add disabled">Add constraint</a>
+    <a id="remove_com_constraint" href="#" class="remove disabled">Remove constraint</a>
    </p> 
   </form>
  </div>
@@ -62,19 +70,23 @@ past = current - datetime.timedelta(days=2)
   <form id="plot_form" action="" method="get">
    <fieldset class="floating">
     <legend>Timerange</legend>
-    <p><label><span>Start</span><input type="text" name="start_date" value="${past.strftime("%Y-%m-%d")}" class="DateField" /></label>
-    <input type="text" name="start_time" value="${past.strftime("%H:%M")}" class="TimeField" /></p>
-    <label><span>End</span><input type="text" name="end_date" value="${current.strftime("%Y-%m-%d")}" class="DateField" /></label>
-    <input type="text" name="end_time" value="${current.strftime("%H:%M")}" class="TimeField" /></p>
+    <p><label><span>Start</span><input type="text" name="start_date" value="${start.strftime("%Y-%m-%d")}" class="DateField" /></label>
+    <input type="text" name="start_time" value="${start.strftime("%H:%M")}" class="TimeField" /></p>
+    <label><span>End</span><input type="text" name="end_date" value="${end.strftime("%Y-%m-%d")}" class="DateField" /></label>
+    <input type="text" name="end_time" value="${end.strftime("%H:%M")}" class="TimeField" /></p>
    </fieldset>
    <fieldset class="floating">
     <legend>Misc.</legend>
-    <p><label><span>Title</span><input type="text" name="title" value="" /></label></p>
+    <p><label><span>Title</span><input type="text" name="title" value="${title}" /></label></p>
     <p><label><span>Legend</span><select name="legend">
      <option value="0">None</option>
      <option value="1">Inside top right</option>
     </select></label></p>
+% if trendplot:
+    <p><label><span>Trendplot</span><input type="checkbox" name="renormalize" value="1" checked="checked" /></label></p>
+% else:
     <p><label><span>Trendplot</span><input type="checkbox" name="renormalize" value="1" /></label></p>
+% endif
    </fieldset>
    <p class="button_box">
     <a id="update_plot" href="#">Update Plot</a>

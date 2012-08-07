@@ -31,28 +31,44 @@ function changed_module(e)
 }
 
 var curve_num = 0;
-function add_curve() {
+function add_curve(initial_mod, initial_table, initial_variable, initial_title) {
     curve_num += 1;
     html  = "<fieldset class=\"floating\"><legend>Curve "+curve_num+"</legend>";
     html += " <p><label><span>Module</span><select id=\"curve_"+curve_num+"_module_instance\" name=\"curve_"+curve_num+"_module_instance\">";
-    var first_mod = "";
+    var first_mod = initial_mod;
     for(var mod in modules) {
-        if(first_mod == "")
-            first_mod = mod;
-        html += " <option>" + mod + "</option>";
+        if(first_mod == "") first_mod = mod;
+        if(first_mod == mod) html += " <option selected=\"selected\"";
+        else html += " <option";
+        html += " value=\"" + mod + "\">" + mod + " (" + module_types[mod] + ")</option>";
     }
     html += " </select></label></p>";
     html += " <p><label><span>Subtable</span><select id=\"curve_"+curve_num+"_subtable\" name=\"curve_"+curve_num+"_subtable\">";
+    var found_subtable = false;
     for(var subtable in modules[first_mod]) {
-        html += " <option>" + subtable + "</option>";
+        if(subtable == initial_table) {
+            html += " <option selected=\"selected\">";
+            found_subtable = true;
+        }
+        else
+            html += " <option>";
+        html += subtable + "</option>";
     }
+    if(!found_subtable)
+        initial_table = '';
+    
     html += " </select></label></p>";
     html += " <p><label><span>Variable</span><select  id=\"curve_"+curve_num+"_variable\" name=\"curve_"+curve_num+"_variable\">";
-    for(var idx in modules[first_mod]['']) {
-        html += " <option>" + modules[first_mod][''][idx] + "</option>";
+    for(var idx in modules[first_mod][initial_table]) {
+        if(modules[first_mod][initial_table][idx] == initial_variable)
+            html += " <option selected=\"selected\">";
+        else
+            html += " <option>";
+        html += modules[first_mod][initial_table][idx] + "</option>";
     }
     html += " </select></label></p>";
-    html += " <p><label><span>Title</span><input type=\"edit\" name=\"curve_"+curve_num+"_title\"></label></p>";
+    html += " <p><label><span>Title</span><input id=\"curve_"+curve_num+"_title\" type=\"edit\" name=\"curve_"+curve_num+"_title\" value=\"";
+    html += initial_title+"\"></label></p>";
     html += "</fieldset>";
     $("#curve_controls").before(html);
     $("#curve_"+curve_num+"_module_instance").change({'curve': "curve_"+curve_num}, changed_module);
@@ -61,7 +77,7 @@ function add_curve() {
     return false;
 }
 
-$("#add_curve").click(add_curve);
+$("#add_curve").click(function() {add_curve('', '', '', '') });
 $("#remove_curve").click(function() {
     if(curve_num > 1) {
         $("#curve_controls").prev().remove();
@@ -92,13 +108,19 @@ $("#update_plot").click(function() {
         var table = $(id_particle+"_subtable option:selected").val();
         var variable = $(id_particle+"_variable option:selected").val();
         var title = $(id_particle+"_title").val();
-        html = "<input type=\"hidden\" name=\"curve_"+i+"\" value=\""+mod+","+table+","+variable+","+title+"\" />\n";
+        html += "<input type=\"hidden\" name=\"curve_"+i+"\" value=\""+mod+","+table+","+variable+","+title+"\" />\n";
     }
     $("#plot_inputs").empty().append(html);
     $("#plot_form").submit();
     return false;
 });
 
-add_curve();
+
+for(var idx in curves) {
+    add_curve(curves[idx][0], curves[idx][1], curves[idx][2], curves[idx][3]);
+}
+
+if(curve_num == 0)
+    add_curve('', '', '', '');
 
 });

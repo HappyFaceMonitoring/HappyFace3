@@ -37,11 +37,44 @@ class CategoryDispatcher(object):
             # just get the lastest run, we don't really need it
             run = hf_runs.select().order_by(hf_runs.c.time.asc()).execute().fetchone()
             category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
+            
+            start_date = kwargs['start_date'] if 'start_date' in kwargs else run["time"].strftime('%Y-%m-%d')
+            start_time = kwargs['start_time'] if 'start_time' in kwargs else run["time"].strftime('%H:%M')
+            
+            start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
+            past = start - datetime.timedelta(days=2)
+            
+            end_date = kwargs['end_date'] if 'end_date' in kwargs else past.strftime('%Y-%m-%d')
+            end_time = kwargs['end_time'] if 'end_time' in kwargs else past.strftime('%H:%M')
+            
+            end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M")))
+            
+            def extractCurve(d):
+                try:
+                    d = d.split(',')
+                    data = d[0:3]
+                    data.append(','.join(d[3:]))
+                    return data
+                except Exception:
+                    return None
+            
+            curve_dict = dict((int(name[6:]), extractCurve(val)) \
+                for name,val in kwargs.iteritems() \
+                if name.startswith("curve_"))
+            curve_dict = dict(filter(lambda x: x is not None, curve_dict.iteritems()))
+            
+            trendplot = (kwargs['renormalize'].lower() if 'renormalize' in kwargs else 'false') in ['1', 'true']
+            
             template_context = {
                     "static_url": hf.config.get('paths', 'static_url'),
                     "happyface_url": hf.config.get('paths', 'happyface_url'),
                     "category_list": category_dict.values(),
                     "module_list": [],
+                    "start": start,
+                    "end": end,
+                    "curve_dict": curve_dict,
+                    "trendplot": trendplot,
+                    "title": kwargs["title"] if 'title' in kwargs else '',
                     "hf": hf,
                 }
             for cat in category_dict.itervalues():
