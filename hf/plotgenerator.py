@@ -117,7 +117,7 @@ def timeseriesPlot(**kwargs):
                         else:
                             # query from subtable
                             mod_table = module_class.module_table
-                            query_columns[1] = mod_table.c.id
+                            #query_columns[1] = mod_table.c.id
                             query = select(query_columns, \
                                 mod_table.c.instance == module) \
                                 .where(table.c.parent_id == mod_table.c.id) \
@@ -147,6 +147,8 @@ def timeseriesPlot(**kwargs):
                         limits = queryDatabase([func.min(col), 0, func.max(col)]).execute().fetchone()
                         print limits
                         fac = limits[2]-limits[0]
+                        if fac == 0:
+                            fac = 1.0
                         data = [(date2num(p[0]), float(p[2] - limits[0])/fac) for p in query.execute().fetchall()]
                     else:
                         data = [((p[0]), p[2]) for p in query.execute().fetchall()]
@@ -202,7 +204,7 @@ def timeseriesPlot(**kwargs):
             1.0    : '%Y-%m-%d',
             1./24. : '%H:%M %y-%m-%d',
         }
-        if title in kwargs:
+        if 'title' in kwargs:
             ax.set_title(kwargs['title'])
         if 'legend' in kwargs:
             if kwargs['legend'].lower() in ('true', '1'):
