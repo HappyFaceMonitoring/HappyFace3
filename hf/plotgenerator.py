@@ -54,12 +54,10 @@ def timeseriesPlot(**kwargs):
                     curve = key[len(t)+1:]
                 if type(value) is not list:
                     value = [value,]
-                print value
                 for constr in value:
                     if curve not in constraint[t]:
                         constraint[t][curve] = []
                     constraint[t][curve].append(constr.split(','))
-
     errors = []
     try:
         curve_list = []
