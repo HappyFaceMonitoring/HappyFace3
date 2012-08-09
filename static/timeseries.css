@@ -91,6 +91,13 @@ fieldset.floating h3 {
     background-color: #eee;
     text-decoration: none; 
 }
+legend a {
+    padding: 2px;
+    color: #000;
+    border: 1px solid #888;
+    background-color: #eee;
+    text-decoration: none; 
+}
 
 .button_box .small {
     font-size: 10px;
@@ -102,14 +109,14 @@ fieldset.floating h3 {
 
 .button_box:last-child .button_box.floating:last-child { margin-right: 15px; }
 
-.button_box a:hover  { background-color: #f9f9f9 }
-.button_box a:active { background-color: #dedede }
+.button_box a:hover , legend a:hover  { background-color: #f9f9f9 }
+.button_box a:active, legend a:active { background-color: #dedede }
 
-.button_box a.add              { background-color: #2f2 }
-.button_box a:hover.add        { background-color: #5f5 }
-.button_box a:active.add       { background-color: #1a1 }
-.button_box a.add.disabled     { background-color: #8c8 !important }
-.button_box a.remove           { background-color: #f22 }
-.button_box a:hover.remove     { background-color: #f55 }
-.button_box a:active.remove    { background-color: #a11 }
-.button_box a.remove.disabled  { background-color: #c88 !important }
+.button_box a.add            , legend a.add              { background-color: #2f2 }
+.button_box a:hover.add      , legend a:hover.add        { background-color: #5f5 }
+.button_box a:active.add     , legend a:active.add       { background-color: #1a1 }
+.button_box a.add.disabled   , legend a.add.disabled     { background-color: #8c8 !important }
+.button_box a.remove         , legend a.remove           { background-color: #f22 }
+.button_box a:hover.remove   , legend a:hover.remove     { background-color: #f55 }
+.button_box a:active.remove  , legend a:active.remove    { background-color: #a11 }
+.button_box a.remove.disabled, legend a.remove.disabled  { background-color: #c88 !important }

@@ -63,6 +63,26 @@ class CategoryDispatcher(object):
                 if name.startswith("curve_"))
             curve_dict = dict(filter(lambda x: x is not None, curve_dict.iteritems()))
             
+            # Parse the constraints
+            constraint_dict = {}
+            for name, cond_list in kwargs.iteritems():
+                if name.startswith('filter'):
+                    include = True
+                    name = name[6:] if len(name) > 6 else ''
+                elif name.startswith('exclude'):
+                    include = False
+                    name = name[7:] if len(name) > 7 else ''
+                else:
+                    continue
+                if not isinstance(cond_list, list):
+                    cond_list = [cond_list,]
+                for cond in cond_list:
+                    var = cond.split(',')[0]
+                    value = ','.join(cond.split(',')[1:])
+                    if name in constraint_dict:
+                        constraint_dict[name].append([include, var, value])
+                    else:
+                        constraint_dict[name] = [[include, var, value],]
             trendplot = (kwargs['renormalize'].lower() if 'renormalize' in kwargs else 'false') in ['1', 'true']
             
             template_context = {
@@ -73,6 +93,7 @@ class CategoryDispatcher(object):
                     "start": start,
                     "end": end,
                     "curve_dict": curve_dict,
+                    "constraint_dict": constraint_dict,
                     "trendplot": trendplot,
                     "title": kwargs["title"] if 'title' in kwargs else '',
                     "hf": hf,

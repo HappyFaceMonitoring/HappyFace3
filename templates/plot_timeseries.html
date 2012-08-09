@@ -11,10 +11,21 @@ import cherrypy as cp
   <script src="${static_url}/js/jquery-1.7.2.min.js" type="text/javascript"></script>
   <script src="${static_url}/js/hf.js" type="text/javascript"></script>
   <script type="text/javascript">
-    var modules = {
+    var module_plotable_vars = {
 % for mod in module_list:
    "${mod.instance_name}": {
  % for name,cols in mod.getPlotableColumnsWithSubtables().iteritems():
+  % if len(cols) > 0:
+        "${name}": ["${'", "'.join(cols)}"],
+  % endif
+ % endfor
+        },
+% endfor
+    };
+    var module_all_vars = {
+% for mod in module_list:
+   "${mod.instance_name}": {
+ % for name,cols in mod.getAllColumnsWithSubtables().iteritems():
   % if len(cols) > 0:
         "${name}": ["${'", "'.join(cols)}"],
   % endif
@@ -30,6 +41,15 @@ import cherrypy as cp
     var curves = {
 % for key,val in curve_dict.iteritems():
         ${key}: ["${'", "'.join(val)}"],
+% endfor
+    };
+    var constraints = {
+% for key,cond_list in constraint_dict.iteritems():
+        '${key}': [
+% for val in cond_list:
+            [${str(val[0]).lower()}, "${'", "'.join(val[1:])}"], 
+% endfor
+        ],
 % endfor
     };
   </script>
@@ -53,13 +73,12 @@ import cherrypy as cp
    </p> 
   </form>
 
-  <h2>Common Constraints</h2>
+  <h2>Constraints</h2>
   <p id="common_constraints_info" class="hidden">Common Constraints only work with curves plottet from the same module type and subtable!</p>
   <form id="common_constraints_form" action="" method="get">
 ## Fieldsets will be added here by JS
-   <p id="curve_controls" class="button_box">
-    <a id="add_com_constraint" href="#" class="add">Add constraint</a>
-    <a id="remove_com_constraint" href="#" class="remove">Remove constraint</a>
+   <p id="constraint_controls" class="button_box">
+    <a id="add_constraint" href="#" class="add">Add constraint</a>
    </p> 
   </form>
  </div>

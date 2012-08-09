@@ -146,6 +146,15 @@ class ModuleBase:
             cols[name] = [col.name for col in numerical_cols if col.name not in blacklist]
         
         return cols
+        
+    def getAllColumnsWithSubtables(self):
+        blacklist = ['id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
+        blacklist_sub = ['id', 'parent_id']
+        cols = {'': [col.name for col in self.module_table.columns if col.name not in blacklist]}
+        for name, table in self.subtables.iteritems():
+            cols[name] = [col.name for col in table.columns if col.name not in blacklist_sub]
+        
+        return cols
     def render(self):
         module_html = ''
         if self.template is None:
