@@ -36,8 +36,10 @@ a:focus   { color:#1369bf; border:none; }
 a:hover   { color:#1369bf; text-decoration:underline; }
 a:active  { color:#333   ; }
 
+h1,h2,h3     { text-align: left }
 h1           { color:#333   ; font-size:28px; line-height:36px; padding-top:15px; margin-bottom:15px; }
 h2           { color:#333   ; border-bottom:2px solid #eee; font-size:20px; line-height:26px; padding-top:10px; margin-bottom:10px; }
+h3           { color:#333   ; border-bottom:2px solid #eee; font-size:15px; line-height:20px; padding-top:10px; margin-bottom:5px; }
 h2 a         { color:#33a; }
 
 form { display: block; }
@@ -64,6 +66,9 @@ fieldset.floating label span { position:absolute; left: 10px; margin-left:0px }
 fieldset.floating + p {
     clear: both;
 }
+fieldset.floating h3 {
+    padding-top: 0px
+}
 
 #curve {
 }
@@ -71,16 +76,32 @@ fieldset.floating + p {
 .button_box {
     display: block;
     text-align: right;
-    margin-right: 20px;
-    padding-right: 5px
+    width: 100%;
 }
+.button_box.floating {
+    text-align: right;
+    position: absolute;
+}
+
 .button_box a {
+    margin-right: 15px;
     padding: 5px;
     color: #000;
     border: 1px solid #888;
     background-color: #eee;
     text-decoration: none; 
 }
+
+.button_box .small {
+    font-size: 10px;
+    padding: 2px;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+}
+
+.button_box:last-child .button_box.floating:last-child { margin-right: 15px; }
+
 .button_box a:hover  { background-color: #f9f9f9 }
 .button_box a:active { background-color: #dedede }
 
