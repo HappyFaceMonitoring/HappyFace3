@@ -81,7 +81,7 @@ class Category:
         return url
                 
     def render(self, template_context):
-        module_contents = {}
+        module_contents = []
         for module in self.module_list:
             module_name = module.instance_name
             try:
@@ -90,7 +90,7 @@ class Category:
                 contents = "Rendering module %s failed" % module_name
                 self.logger.error("Rendering module %s failed: %s" % (module_name, str(e)))
                 self.logger.debug(traceback.format_exc())
-            module_contents[module_name] = contents
+            module_contents.append(contents)
         template_context['category_name'] = self.name
         template_context['category_config'] = self.config
         template_context['category_module_list'] = self.module_list

@@ -36,7 +36,7 @@ class CategoryDispatcher(object):
         else:
             # just get the lastest run, we don't really need it
             run = hf_runs.select().order_by(hf_runs.c.time.asc()).execute().fetchone()
-            category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
+            category_list = [cat.getCategory(run) for cat in self.category_list]
             
             start_date = kwargs['start_date'] if 'start_date' in kwargs else run["time"].strftime('%Y-%m-%d')
             start_time = kwargs['start_time'] if 'start_time' in kwargs else run["time"].strftime('%H:%M')
@@ -88,7 +88,7 @@ class CategoryDispatcher(object):
             template_context = {
                     "static_url": hf.config.get('paths', 'static_url'),
                     "happyface_url": hf.config.get('paths', 'happyface_url'),
-                    "category_list": category_dict.values(),
+                    "category_list": category_list,
                     "module_list": [],
                     "start": start,
                     "end": end,
@@ -98,7 +98,7 @@ class CategoryDispatcher(object):
                     "title": kwargs["title"] if 'title' in kwargs else '',
                     "hf": hf,
                 }
-            for cat in category_dict.itervalues():
+            for cat in category_list:
                 template_context["module_list"].extend(cat.module_list)
             if plt_type == "time":
                 return self.timeseries_template.render(**template_context)
@@ -143,10 +143,11 @@ class CategoryDispatcher(object):
                 time_obj = run["time"]
             run = {"id":run["id"], "time":run["time"]}
             
-            category_dict = dict((cat.name, cat.getCategory(run)) for cat in self.category_list)
+            category_list = [cat.getCategory(run) for cat in self.category_list]
+            category_dict = dict((cat.name, cat) for cat in category_list)
             
             selected_category = None
-            for c in category_dict.itervalues():
+            for c in category_list:
                 if c.name == category:
                     selected_category = c
                     break
@@ -159,7 +160,7 @@ class CategoryDispatcher(object):
             template_context = {
                 "static_url": hf.config.get('paths', 'static_url'),
                 "happyface_url": hf.config.get('paths', 'happyface_url'),
-                "category_list": category_dict.values(),
+                "category_list": category_list,
                 "module_list": [],
                 "hf": hf,
                 "time_specified": ('date' in kwargs or 'time' in kwargs),
@@ -173,7 +174,7 @@ class CategoryDispatcher(object):
                 'svn_rev': svn_rev,
             }
 
-            for cat in category_dict.itervalues():
+            for cat in category_list:
                 template_context["module_list"].extend(cat.module_list)
             
             doc = u""

@@ -26,6 +26,7 @@ def readConfigurationAndEnv():
     for file in _getCfgInDirectory(os.path.join(hf.hf_dir, "defaultconfig")):
         try:
             hf.config.read(file)
+            cherrypy.engine.autoreload.files.add(os.path.join(file))
         except Exception, e:
             logger.exception("Cannot import default config '%s'" % file)
             raise
@@ -33,6 +34,7 @@ def readConfigurationAndEnv():
         for file in _getCfgInDirectory(os.path.join(hf.hf_dir, hf.config.get("paths", "local_happyface_cfg_dir"))):
             try:
                 hf.config.read(file)
+                cherrypy.engine.autoreload.files.add(os.path.join(file))
             except Exception, e:
                 logger.exception("Cannot import config '%s'" % file)
                 raise
@@ -49,25 +51,34 @@ def readConfigurationAndEnv():
         raise hf.exceptions.ConfigError("Module config directory not found")
     
     hf.category.config = ConfigParser.ConfigParser()
-    for dirpath, dirnames, filenames in os.walk(hf.config.get("paths", "category_cfg_dir")):
-        for filename in filenames:
-            if filename.endswith(".cfg"):
-                hf.category.config.read(os.path.join(dirpath, filename))
-                cherrypy.engine.autoreload.files.add(os.path.join(dirpath, filename))
+    category_config_files = os.path.join(hf.hf_dir, hf.config.get("paths", "category_cfg_dir"))
+    for file in _getCfgInDirectory(category_config_files):
+        try:
+            hf.category.config.read(file)
+            cherrypy.engine.autoreload.files.add(file)
+        except Exception, e:
+            logger.error("Cannot parse category config '%s'" % file)
+            logger.debug(traceback.format_exc())
     
     hf.module.config = ConfigParser.ConfigParser(defaults=hf.module.ModuleBase.config_defaults)
-    for dirpath, dirnames, filenames in os.walk(hf.config.get("paths", "module_cfg_dir")):
-        for filename in filenames:
-            if filename.endswith(".cfg"):
-                hf.module.config.read(os.path.join(dirpath, filename))
-                cherrypy.engine.autoreload.files.add(os.path.join(dirpath, filename))
+    module_config_files = os.path.join(hf.hf_dir, hf.config.get("paths", "module_cfg_dir"))
+    for file in _getCfgInDirectory(module_config_files):
+        try:
+            hf.module.config.read(file)
+            cherrypy.engine.autoreload.files.add(file)
+        except Exception, e:
+            logger.error("Cannot parse category config '%s'" % file)
+            logger.debug(traceback.format_exc())
                 
 def importModules():
     '''
     Interpete the category configuration and import the used modules
     '''
     used_modules = []
-    for category in hf.category.config.sections():
+    category_names = hf.category.config.sections()
+    if len(hf.config.get('happyface', 'categories')) > 0:
+        category_names = hf.config.get('happyface', 'categories').split(',')
+    for category in category_names:
         conf = dict(hf.category.config.items(category))
         for module in conf["modules"].split(","):
             if len(module) == 0: continue

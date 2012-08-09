@@ -11,7 +11,10 @@ def createCategoryObjects():
     '''
     category_list = []
     used_modules = []
-    for category in hf.category.config.sections():
+    category_names = hf.category.config.sections()
+    if len(hf.config.get('happyface', 'categories')) > 0:
+        category_names = hf.config.get('happyface', 'categories').split(',')
+    for category in category_names:
         conf = dict(hf.category.config.items(category))
         module_conf = {}
         for module in conf["modules"].split(","):
