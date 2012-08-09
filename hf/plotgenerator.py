@@ -4,7 +4,7 @@ import cherrypy as cp
 import json, StringIO, traceback, logging, datetime, time
 import numpy as np
 import timeit
-from sqlalchemy.sql import select, func
+from sqlalchemy.sql import select, func, or_
 
 def init():
     """ Configure matplotlib backends by hf-configuration. Call before any plot-commands """
@@ -122,8 +122,10 @@ def timeseriesPlot(**kwargs):
                                 .where(mod_table.c.run_id == hf_runs.c.id)
                         
                         # apply constraints
-                        for include in constraint['filter'][None]:
-                            query = query.where(getattr(table.c, include[0]) == include[1])
+                        if len(constraint['filter'][None]) > 0:
+                            constraint_list = [getattr(table.c, include[0]) == include[1] \
+                                for include in constraint['filter'][None]]
+                            query = query.where(or_(*constraint_list))
                         for exclude in constraint['exclude'][None]:
                             query = query.where(getattr(table.c, exclude[0]) != exclude[1])
                         # apply named constraints
@@ -143,7 +145,6 @@ def timeseriesPlot(**kwargs):
                     # query data from database and convert datetime object to ordinal
                     if renormalize:
                         limits = queryDatabase([func.min(col), 0, func.max(col)]).execute().fetchone()
-                        print limits
                         fac = limits[2]-limits[0]
                         if fac == 0:
                             fac = 1.0
