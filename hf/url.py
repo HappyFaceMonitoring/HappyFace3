@@ -33,4 +33,10 @@ def get(**kwargs):
     """
     Generate a GET line from a dictionary
     """
-    return u"?"+"&".join(str(key)+"="+str(val) for key,val in kwargs.iteritems())
+    opt_list = [(key,val) for key,val in kwargs.iteritems() if type(val) is not list and type(val) is not tuple]
+    for key,val in kwargs.iteritems():
+        if type(val) is not list and type(val) is not tuple:
+            continue
+        opt_list.extend((key,v) for v in val)
+    print opt_list
+    return u"?" + u"&".join(unicode(key)+"="+unicode(val) for key,val in opt_list)
