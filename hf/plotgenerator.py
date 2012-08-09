@@ -13,7 +13,7 @@ def init():
     
 @hf.url.absoluteUrl
 def getTimeseriesUrl():
-    return "/plot/time/img"
+    return "/plot/time/"
 
 def timeseriesPlot(**kwargs):
     """
