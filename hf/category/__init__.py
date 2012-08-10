@@ -1,4 +1,5 @@
 from Category import Category
+from dispatcher import Dispatcher
 from CategoryProxy import CategoryProxy
 from xml import renderXmlOverview
 import algorithms

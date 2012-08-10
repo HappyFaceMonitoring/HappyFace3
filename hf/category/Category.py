@@ -75,7 +75,7 @@ class Category:
 
     @hf.url.absoluteUrl
     def url(self, time=None):
-        url = "/"+self.name
+        url = "/category/"+self.name
         if time is not None:
             url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'), time.strftime('%H:%M'))
         return url

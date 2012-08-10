@@ -37,11 +37,11 @@ hf.configtools.importModules()
 hf.database.connect(implicit_execution = True)
 
 if __name__ == '__main__':
-    cherrypy.quickstart(root=hf.dispatcher.CategoryDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
+    cherrypy.quickstart(root=hf.RootDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
     hf.database.disconnect()
 else:
     cherrypy.config.update({'environment': 'embedded'})
     if cherrypy.__version__.startswith('3.0') and cherrypy.engine.state == 0:
         cherrypy.engine.start(blocking=False)
         atexit.register(cherrypy.engine.stop)
-    application = cherrypy.Application(root=hf.dispatcher.CategoryDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
+    application = cherrypy.Application(root=hf.RootDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)

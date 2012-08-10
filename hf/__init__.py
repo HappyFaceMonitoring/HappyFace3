@@ -1,7 +1,7 @@
 
 import url
 import module
-import dispatcher
+from dispatcher import RootDispatcher
 import database
 import configtools
 import category
