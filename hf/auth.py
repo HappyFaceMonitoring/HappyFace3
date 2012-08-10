@@ -1,0 +1,40 @@
+
+import hf, os, logging, subprocess, traceback
+import cherrypy as cp
+
+authorized_dn_list = []
+
+logger = logging.getLogger()
+
+def init():
+    try:
+        dn_file_path = os.path.join(hf.hf_dir, hf.config.get('auth', 'dn_file'))
+        with open(dn_file_path) as f:
+            hf.auth.authorized_dn_list = [line.strip() for line in f]
+        cp.engine.autoreload.files.add(dn_file_path)
+    except IOError:
+        logger.warning("No DN file found for authorization.")
+
+def cert_auth():
+    cp.request.cert_authorized = False
+    try:
+        s_dn = cp.request.wsgi_environ['SSL_CLIENT_S_DN'].strip()
+        logging.debug("Subject DN: " + s_dn)
+    except KeyError:
+        logging.debug("No certificate information found in WSGI environment")
+        return
+    
+    if s_dn in hf.auth.authorized_dn_list:
+        cp.request.cert_authorized = True
+    try:            
+        script_file = hf.config.get('auth', 'auth_script')
+        if not cp.request.cert_authorized and len(script_file) > 0:
+            script_file = os.path.join(hf.hf_dir, script_file)
+            if subprocess.call([script_file, s_dn]) == 1:
+                cp.request.cert_authorized = True
+    except Exception:
+        logging.error("Script authorization failed")
+        logging.debug(traceback.format_exc())
+
+    
+cp.tools.cert_auth = cp.Tool('before_handler', cert_auth)

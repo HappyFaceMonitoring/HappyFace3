@@ -34,6 +34,8 @@ cherrypy.config.update(cp_config)
 
 hf.configtools.importModules()
 
+hf.auth.init()
+
 hf.database.connect(implicit_execution = True)
 
 if __name__ == '__main__':

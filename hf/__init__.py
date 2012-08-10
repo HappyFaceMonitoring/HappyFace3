@@ -6,6 +6,7 @@ import database
 import configtools
 import category
 import utility
+import auth
 from downloadservice import downloadService
 from exceptions import *
 
