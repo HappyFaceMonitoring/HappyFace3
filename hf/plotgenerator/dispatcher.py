@@ -38,7 +38,10 @@ class Dispatcher(object):
         else:
             try:
                 # just get the lastest run, we don't really need it
-                run = hf_runs.select().order_by(hf_runs.c.time.asc()).execute().fetchone()
+                run = hf_runs.select().\
+                    where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
+                    order_by(hf_runs.c.time.desc()).\
+                    execute().fetchone()
                 category_list = [cat.getCategory(run) for cat in self.category_list]
                 
                 start_date = kwargs['start_date'] if 'start_date' in kwargs else run["time"].strftime('%Y-%m-%d')

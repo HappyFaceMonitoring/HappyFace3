@@ -5,6 +5,7 @@ import os, datetime, time, traceback
 import ConfigParser
 import logging
 import time
+from hf.module.database import hf_runs
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
             logger.debug(traceback.format_exc())
         
         runtime = datetime.datetime.fromtimestamp(int(time.time()))
-        result = hf.module.database.hf_runs.insert().values(time=runtime).execute()
+        result = hf_runs.insert().values(time=runtime, completed=False).execute()
         try:
             inserted_id = result.inserted_primary_key[0]
         except AttributeError:
@@ -68,6 +69,8 @@ if __name__ == '__main__':
         for category in category_list:
             logger.info("Acquire in category %s..." % category.config["name"])
             category.acquire(run)
+        
+        hf_runs.update(hf_runs.c.id == inserted_id).values(completed=True).execute()
         
         # cleanup temporary directory
 	hf.downloadService.cleanup()

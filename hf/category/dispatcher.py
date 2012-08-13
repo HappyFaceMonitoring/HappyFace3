@@ -46,10 +46,16 @@ class Dispatcher(object):
                 time_error_message = "HappyFace is not an oracle"
                 time_obj = datetime.datetime.fromtimestamp(int(time.time())+59)
                 
-            run = hf_runs.select(hf_runs.c.time <= time_obj).order_by(hf_runs.c.time.desc()).execute().fetchone()
+            run = hf_runs.select(hf_runs.c.time <= time_obj).\
+                where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
+                order_by(hf_runs.c.time.desc()).\
+                execute().fetchone()
             if run is None:
                 time_error_message = "No data so far in past"
-                run = hf_runs.select(hf_runs.c.time >= time_obj).order_by(hf_runs.c.time.asc()).execute().fetchone()
+                run = hf_runs.select(hf_runs.c.time >= time_obj).\
+                where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
+                order_by(hf_runs.c.time.asc()).\
+                execute().fetchone()
                 time_obj = run["time"]
             run = {"id":run["id"], "time":run["time"]}
             

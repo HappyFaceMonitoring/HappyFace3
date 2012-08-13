@@ -139,7 +139,7 @@ def timeseriesPlot(category_list, **kwargs):
                                 mod_table.c.instance == module_instance) \
                                 .where(table.c.parent_id == mod_table.c.id) \
                                 .where(mod_table.c.run_id == hf_runs.c.id)
-                        
+                        query = query.where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None))
                         # apply constraints
                         if len(constraint['filter'][None]) > 0:
                             constraint_list = [getattr(table.c, include[0]) == include[1] \
