@@ -15,8 +15,10 @@ class RootDispatcher(object):
     _cp_config = { 'tools.cert_auth.on': True }
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
-        self.category = hf.category.Dispatcher()
-        self.plot = hf.plotgenerator.Dispatcher()
+        self.category_list = hf.category.createCategoryObjects()
+        self.category = hf.category.Dispatcher(self.category_list)
+        self.plot = hf.plotgenerator.Dispatcher(self.category_list)
+        
     
     @cp.expose
     def index(self):

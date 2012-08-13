@@ -12,9 +12,9 @@ class Dispatcher(object):
     Show a page for displaying the contents of a category.
     """
     
-    def __init__(self):
+    def __init__(self, category_list):
         self.logger = logging.getLogger(self.__module__)
-        self.category_list = hf.category.createCategoryObjects()
+        self.category_list = category_list
 
     @cp.expose
     def default(self, category=None, **kwargs):
@@ -67,6 +67,9 @@ class Dispatcher(object):
             except Exception:
                 svn_rev = 'exported'
             
+            lock_icon = 'lock_icon_on.png' if cp.request.cert_authorized else 'lock_icon_off.png'
+            lock_icon = os.path.join(hf.config.get('paths', 'template_icons_url'), lock_icon)
+            
             template_context = {
                 "static_url": hf.config.get('paths', 'static_url'),
                 "happyface_url": hf.config.get('paths', 'happyface_url'),
@@ -82,6 +85,7 @@ class Dispatcher(object):
                 'selected_category': selected_category,
                 'time_error_message': time_error_message,
                 'svn_rev': svn_rev,
+                'lock_icon': lock_icon,
             }
 
             for cat in category_list:
@@ -91,6 +95,8 @@ class Dispatcher(object):
             
             if 'action' in kwargs:
                 if kwargs['action'].lower() == 'getxml':
+                    template_context['category_list'] = filter(lambda x: not x.isUnauthorized(),
+                        template_context['category_list'])
                     doc = hf.category.renderXmlOverview(run, template_context)
                 else:
                     doc = u'''<h2>Unkown action</h2>

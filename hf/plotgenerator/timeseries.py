@@ -10,7 +10,7 @@ from sqlalchemy.sql import select, func, or_
 def getTimeseriesUrl():
     return "/plot/time/"
 
-def timeseriesPlot(**kwargs):
+def timeseriesPlot(category_list, **kwargs):
     """
     Supported arguments:
      curve_XXX: colon-separated curve info: (module_instance,[subtable],column,title)
@@ -62,6 +62,9 @@ def timeseriesPlot(**kwargs):
         timerange = None
         renormalize = False
         
+        # Set to true if special auth is required for a curve.
+        auth_required = False
+        
         # extract timeranges
         now = datetime.datetime.now()
         end_date = kwargs['end_date'] if 'end_date' in kwargs else now.strftime('%Y-%m-%d')
@@ -84,18 +87,39 @@ def timeseriesPlot(**kwargs):
                     curve_info = value.split(",")
                     if len(curve_info) < 4:
                         raise Exception("Insufficient number of arguments for plot curve")
-                    module,table_name,col_name = curve_info[:3]
+                    module_instance,table_name,col_name = curve_info[:3]
                     title = ",".join(curve_info[3:])
                     if len(title) == 0:
-                        title = module + " " + col_name
-                    if not hf.module.config.has_section(module):
+                        title = module_instance + " " + col_name
+                    if not hf.module.config.has_section(module_instance):
                         raise Exception("No such module")
-                    module_class = hf.module.getModuleClass(hf.module.config.get(module, "module"))
+                    module_class = hf.module.getModuleClass(hf.module.config.get(module_instance, "module"))
                     try:
                         table = module_class.module_table if len(table_name) == 0 else module_class.subtables[table_name]
                     except IndexError, e:
                         raise Exception("No such subtable")
                     col = getattr(table.c, col_name)
+                    
+                    # see if user is authorized to view data
+                    try:
+                        target_category = None
+                        target_module = None
+                        for category in category_list:
+                            for mod in category.module_list:
+                                if module_instance == mod.instance_name:
+                                    target_module = mod
+                                    target_category = category
+                        if target_category is None or target_module is None:
+                            auth_required = True
+                            continue
+                        elif target_module.isUnauthorized() or target_category.isUnauthorized():
+                            auth_required = True
+                            continue
+                    except Exception, e:
+                        logger.error("Getting module privileges failed")
+                        logger.error(traceback.format_exc())
+                        auth_required = True
+                        continue
                     
                     hf_runs = hf.module.database.hf_runs
                     
@@ -105,14 +129,14 @@ def timeseriesPlot(**kwargs):
                         if len(table_name) == 0:
                             # query from module table
                             query = select(query_columns, \
-                                table.c.instance == module) \
+                                table.c.instance == module_instance) \
                                 .where(table.c.run_id == hf_runs.c.id)
                         else:
                             # query from subtable
                             mod_table = module_class.module_table
                             #query_columns[1] = mod_table.c.id
                             query = select(query_columns, \
-                                mod_table.c.instance == module) \
+                                mod_table.c.instance == module_instance) \
                                 .where(table.c.parent_id == mod_table.c.id) \
                                 .where(mod_table.c.run_id == hf_runs.c.id)
                         
@@ -137,6 +161,7 @@ def timeseriesPlot(**kwargs):
                         return query
                     
                     query = queryDatabase([hf_runs.c.time, 0, col])
+                    
                     # query data from database and convert datetime object to ordinal
                     if renormalize:
                         limits = queryDatabase([func.min(col), 0, func.max(col)]).execute().fetchone()
@@ -149,7 +174,7 @@ def timeseriesPlot(**kwargs):
                     
                     curve_list.append((title, data))
                 except Exception, e:
-                    logger.warning("Generating plot image:\n"+traceback.format_exc())
+                    logger.warning("Retrieving plot data:\n"+traceback.format_exc())
                     errors.append("Data '%s': %s" % (key, str(e)))
             elif key.lower() == u"legend":
                 legend = (value.lower() == "true" or value == "1")
@@ -204,6 +229,8 @@ def timeseriesPlot(**kwargs):
             if kwargs['legend'].lower() in ('true', '1'):
                 ax.legend(numpoints=1)
         ax.set_ylabel(ylabel)
+        if auth_required:
+            ax.text(0.02, 0.5, "One or more curves require certificate authentification", color="#ff0000", fontsize=14)
     except Exception, e:
         logger.error("Plotting Failed: %s" % str(e))
         logger.debug(traceback.format_exc())

@@ -12,6 +12,9 @@
       <a href="${category.url(run['time'])}" title="${category.config["name"]}">
        <img alt="" class="HappyNavTab" src="${category.getStatusIcon()}" />
        <img alt="" class="HappyNavTabIndex" src="${category.getIndexIcon()}" />
+% if category.isUnauthorized():
+       <img alt="" class="HappyNavLockTabIndex" src="${category.getLockIcon()}" />
+% endif
       </a>
      </div>
     </td>

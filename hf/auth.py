@@ -10,15 +10,18 @@ def init():
     try:
         dn_file_path = os.path.join(hf.hf_dir, hf.config.get('auth', 'dn_file'))
         with open(dn_file_path) as f:
-            hf.auth.authorized_dn_list = [line.strip() for line in f]
+            hf.auth.authorized_dn_list = [line.strip() for line in f if len(line.strip()) > 0]
         cp.engine.autoreload.files.add(dn_file_path)
     except IOError:
-        logger.warning("No DN file found for authorization.")
+        logger.debug("No DN file found for authorization.")
 
 def cert_auth():
     cp.request.cert_authorized = False
+    cp.request.cert_info = []
     try:
         s_dn = cp.request.wsgi_environ['SSL_CLIENT_S_DN'].strip()
+        i_dn = cp.request.wsgi_environ['SSL_CLIENT_I_DN'].strip()
+        cp.request.cert_info = [s_dn, i_dn]
         logging.debug("Subject DN: " + s_dn)
     except KeyError:
         logging.debug("No certificate information found in WSGI environment")

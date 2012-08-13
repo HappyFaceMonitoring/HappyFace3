@@ -1,6 +1,7 @@
 import hf
 import logging, traceback, os
 from mako.template import Template
+import cherrypy as cp
 
 class ModuleProxy:
     """
@@ -20,6 +21,13 @@ class ModuleProxy:
         self.instance_name = instance_name
         self.config = config
         self.acquisitionModules = {}
+        
+        if 'access' not in self.config:
+            self.config['access'] = 'open'
+        if self.config['access'] not in ['open', 'restricted']:
+            self.logger.warning("Unknown access option '%s', assume 'open'" % self.config['access'])
+            self.config['access'] = 'open'
+        
         # check if instance is in database and of correct type
         instance = hf.module.database.module_instances.select(hf.module.database.module_instances.c.instance==instance_name).execute().fetchone()
         if instance is None:
@@ -35,6 +43,12 @@ class ModuleProxy:
             self.logger.error("Cannot create template, " + str(e))
             self.logger.debug(traceback.format_exc())
             self.template = None
+            
+    def isAccessRestricted(self):
+        return self.config['access'] != 'open'
+    
+    def isUnauthorized(self):
+        return self.config['access'] == 'restricted' and not cp.request.cert_authorized
         
     def prepareAcquisition(self, run):
         # create module instance solely for that purpose

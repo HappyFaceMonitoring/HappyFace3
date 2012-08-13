@@ -1,5 +1,6 @@
 import hf
 from mako.template import Template
+import cherrypy as cp
 import logging, traceback, os
 from sqlalchemy import Integer, Float, Numeric
 
@@ -94,6 +95,8 @@ class ModuleBase:
         return self.instance_name
     
     def getStatusString(self):
+        if self.isUnauthorized():
+            return 'noinfo' if self.type == 'rated' else 'unavail_plot'
         icon = 'unhappy'
         if self.dataset is None:
             icon = 'unhappy' if self.type == 'rated' else 'unavail_plot'
@@ -130,6 +133,12 @@ class ModuleBase:
         numerical_cols = filter(lambda x: isnumeric(x.type), self.module_table.columns)
         return [col.name for col in numerical_cols if col.name not in blacklist]
     
+    def isAccessRestricted(self):
+        return self.config['access'] != 'open'
+    
+    def isUnauthorized(self):
+        return self.config['access'] == 'restricted' and not cp.request.cert_authorized
+        
     def getPlotableColumnsWithSubtables(self):
         cols = {'': self.getPlotableColumns()}
         
@@ -159,6 +168,8 @@ class ModuleBase:
         module_html = ''
         if self.template is None:
             return '<p class="error">Rendering module %s failed because template was not loaded</p>' % self.instance_name
+        if self.isUnauthorized():
+            return '<p class="error">Access to Module %s is restricted, please log in with your certificate.</p>' % self.instance_name
         try:
             template_data = { 'module': self, 'run': self.run, 'hf': hf }
             if self.dataset is None:

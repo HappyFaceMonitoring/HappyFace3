@@ -1,5 +1,6 @@
 
 import hf, os, traceback
+import cherrypy as cp
 from mako.template import Template
 import logging
       
@@ -12,6 +13,7 @@ class Category:
         self.name = category_name
         self.config = conf
         self.module_list = module_list
+        self.accessible_module_list = filter(lambda x: not x.isUnauthorized(), module_list)
         self.run = run
         self.status = -1
         try:
@@ -61,11 +63,19 @@ class Category:
                 icon = 'cat_unhappy.png'
             else:
                 icon = 'cat_noinfo.png'
+        if self.isUnauthorized():
+            icon = 'cat_noinfo.png'
         return os.path.join(hf.config.get('paths', 'template_icons_url'), icon)
     
     def getIndexIcon(self):
+        if self.isUnauthorized():
+            return os.path.join(hf.config.get('paths', 'template_icons_url'),
+                "index_warn.png")
         return os.path.join(hf.config.get('paths', 'template_icons_url'),
             "index_warn.png" if self.data_missing else "index_ok.png")
+            
+    def getLockIcon(self):
+        return os.path.join(hf.config.get('paths', 'template_icons_url'), "index_lock.png")
         
     def __unicode__(self):
         return self.name
@@ -79,6 +89,12 @@ class Category:
         if time is not None:
             url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'), time.strftime('%H:%M'))
         return url
+        
+    def isAccessRestricted(self):
+        return self.config['access'] != 'open'
+    
+    def isUnauthorized(self):
+        return self.config['access'] == 'restricted' and not cp.request.cert_authorized
                 
     def render(self, template_context):
         module_contents = []
@@ -91,6 +107,7 @@ class Category:
                 self.logger.error("Rendering module %s failed: %s" % (module_name, str(e)))
                 self.logger.debug(traceback.format_exc())
             module_contents.append(contents)
+        template_context['category'] = self
         template_context['category_name'] = self.name
         template_context['category_config'] = self.config
         template_context['category_module_list'] = self.module_list

@@ -8,7 +8,7 @@
   <status>${category.status}</status>
   <type>${category.type}</type>
   <link>${hf.url.join(protocol_host, category.url(time=run['time']))}</link>
- % for module in category.module_list:
+ % for module in category.accessible_module_list:
   <module>
    <name>${module.instance_name}</name>
    <title>${module.config["name"]| x}</title>

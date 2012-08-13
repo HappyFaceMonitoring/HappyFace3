@@ -2,6 +2,7 @@
 import hf, os, traceback
 from mako.template import Template
 import logging
+import cherrypy as cp
 config = None
 
 class CategoryProxy:
@@ -20,16 +21,32 @@ class CategoryProxy:
         self.module_config = module_conf
         self.module_list = []
         
+        if 'access' not in self.config:
+            self.config['access'] = 'permod'
+        if self.config['access'] not in ['open', 'permod', 'restricted']:
+            self.logger.warning("Unknown access option '%s', assume 'permod'" % self.config['access'])
+            self.config['access'] = 'permod'
+        
         for instance_name in self.config["modules"].split(","):
             if len(instance_name) == 0: continue
             try:
                 cfg = self.module_config[instance_name]
+                if self.config['access'] == 'open':
+                    cfg['access'] = 'open'
+                elif self.config['access'] == 'restricted':
+                    cfg['access'] = 'restricted'
                 hf.module.tryModuleClassImport(cfg["module"])
                 ModuleClass = hf.module.getModuleClass(cfg["module"])
                 self.module_list.append(hf.module.ModuleProxy(ModuleClass, instance_name, cfg))
             except Exception, e:
                 self.logger.error("Cannot add module instance %s: %s" %(instance_name, str(e)))
                 self.logger.debug(traceback.format_exc())
+    
+    def isAccessRestricted(self):
+        return self.config['access'] != 'open'
+    
+    def isUnauthorized(self):
+        return self.config['access'] == 'restricted' and not cp.request.cert_authorized
     
     def prepareAcquisition(self, run):
         '''
