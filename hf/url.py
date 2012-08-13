@@ -38,5 +38,4 @@ def get(**kwargs):
         if type(val) is not list and type(val) is not tuple:
             continue
         opt_list.extend((key,v) for v in val)
-    print opt_list
     return u"?" + u"&".join(unicode(key)+"="+unicode(val) for key,val in opt_list)
