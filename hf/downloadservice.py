@@ -39,6 +39,11 @@ class DownloadSlave(threading.Thread):
             traceback.print_exc()
             
 class DownloadService:
+    '''
+    Note when copying files to the archive directory:
+    The name must start with the name of the module instance,
+    otherwise certificate auth will always disable the file!
+    '''
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.file_list = {}
@@ -149,10 +154,14 @@ class DownloadFile:
     def getSourceUrl(self):
         return self.url
     
-    def copyToArchive(self, name):
+    def copyToArchive(self, module, name):
+        ''' Copy the file to the archive directory. The name is prefixed
+        with the instance name of the module, thus the name should be always
+        unique and the file can be associated with the module.
+        '''
         if self.isDownloaded() and not self.errorOccured() and not self.isArchived():
             self.is_archived = True
-            self.filename = name
+            self.filename = module.instance_name + name
             shutil.copy(self.getTmpPath(), self.getArchivePath())
 
 class File:
