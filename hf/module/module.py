@@ -9,7 +9,7 @@ __column_file_list = {}
 __module_class_list = {}
 
 def generateModuleTable(module_class, tabname, columns):
-    table = Table("module_"+tabname, hf.database.metadata,
+    table = Table("mod_"+tabname, hf.database.metadata,
         *([
             Column('id', Integer, Sequence(tabname+'_id_seq'), primary_key=True),
             Column('instance', Text, ForeignKey("module_instances.instance")),
@@ -26,7 +26,8 @@ def generateModuleTable(module_class, tabname, columns):
     return table
         
 def generateModuleSubtable(tabname, module_table, columns):
-    table = Table("module_sub_"+tabname, hf.database.metadata,
+    table = Table("sub_"+module_table.name[4:] + '_' + tabname,
+        hf.database.metadata,
         *([
             Column('id', Integer, Sequence("module_"+module_table.name+"_sub_"+tabname+'_id_seq'), primary_key=True),
             Column('parent_id', Integer, ForeignKey(module_table.c.id)),
