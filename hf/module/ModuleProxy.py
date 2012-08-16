@@ -37,7 +37,7 @@ class ModuleProxy:
         
         # get the common module template
         try:
-            filename = os.path.join(hf.hf_dir, hf.config.get("paths", "module_template_dir"), self.module_name+".html")
+            filename = os.path.join(os.path.dirname(self.ModuleClass.filepath), self.module_name+".html")
             self.template = Template(filename=filename, lookup=hf.template_lookup)
         except Exception, e:
             self.logger.error("Cannot create template, " + str(e))

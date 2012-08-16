@@ -32,8 +32,7 @@ for section in hf.config.sections():
         cp_config[section] = config
 cherrypy.config.update(cp_config)
 
-hf.configtools.importModules()
-
+hf.module.importModuleClasses()
 hf.auth.init()
 
 hf.database.connect(implicit_execution = True)

@@ -35,7 +35,7 @@ class CategoryProxy:
                     cfg['access'] = 'open'
                 elif self.config['access'] == 'restricted':
                     cfg['access'] = 'restricted'
-                hf.module.tryModuleClassImport(cfg["module"])
+                hf.module.getModuleClass(cfg["module"])
                 ModuleClass = hf.module.getModuleClass(cfg["module"])
                 self.module_list.append(hf.module.ModuleProxy(ModuleClass, instance_name, cfg))
             except Exception, e:

@@ -42,8 +42,11 @@ class ModuleBase:
         'weight': '1.0',
     }
     
+    # set by hf.module.importModuleClasses and
+    # hf.module.addModuleClass when the module is imported
     table = None
     subtables = None
+    filepath = None
     
     def __init__(self, instance_name, config, run, dataset, template):
         self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
