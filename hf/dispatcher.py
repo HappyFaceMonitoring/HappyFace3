@@ -19,6 +19,10 @@ class RootDispatcher(object):
         self.category_list = hf.category.createCategoryObjects()
         self.category = hf.category.Dispatcher(self.category_list)
         self.plot = hf.plotgenerator.Dispatcher(self.category_list)
+        self.module_map = {}
+        for category in self.category_list:
+            for module in category.module_list:
+                self.module_map[module.instance_name] = module
     
     @cp.expose
     def index(self):
@@ -30,8 +34,20 @@ class RootDispatcher(object):
         cp.lib.caching.expires(secs=timedelta(365), force=True)
         
         path = os.path.join(hf.hf_dir, hf.config.get('paths', 'static_dir'), *args)
-        if len(args) > 0 and args[0] == 'archive':
-            return serve_file(path)
-            #raise cp.HTTPError(status=403, message="You are not allowed to access this resource.")
+        # archive/Y/M/D/H/M/file -> 7
+        if len(args) == 7 and args[0] == 'archive':
+            authorized = self.archiveFileAuthorized(args[6])
+            if authorized:
+                return serve_file(path)
+            else:
+                raise cp.HTTPError(status=403, message="You are not allowed to access this resource.")
         else:
             return serve_file(path)
+    
+    def archiveFileAuthorized(self, filename):
+        for instance, module in self.module_map.iteritems():
+            if filename.startswith(instance):
+                return not module.isUnauthorized()
+        self.logger.warning("""Unable to map file '%s' to module!
+Perhaps the corresponding module was removed from the HF config or the file does not start with the module instance name (this is an error in the module).""")
+        return False
