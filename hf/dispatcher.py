@@ -7,6 +7,7 @@ from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
 from mako.template import Template
+from datetime import timedelta
 
 class RootDispatcher(object):
     """
@@ -18,14 +19,16 @@ class RootDispatcher(object):
         self.category_list = hf.category.createCategoryObjects()
         self.category = hf.category.Dispatcher(self.category_list)
         self.plot = hf.plotgenerator.Dispatcher(self.category_list)
-        
     
     @cp.expose
     def index(self):
         raise cp.HTTPRedirect(hf.url.join(hf.config.get('paths', 'happyface_url'), 'category'))
     
     @cp.expose
+    @cp.tools.caching()
     def static(self, *args):
+        cp.lib.caching.expires(secs=timedelta(365), force=True)
+        
         path = os.path.join(hf.hf_dir, hf.config.get('paths', 'static_dir'), *args)
         if len(args) > 0 and args[0] == 'archive':
             return serve_file(path)

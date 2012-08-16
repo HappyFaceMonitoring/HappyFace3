@@ -18,6 +18,7 @@ class Dispatcher(object):
 
     @cp.expose
     def default(self, category=None, **kwargs):
+        cp.lib.caching.expires(secs=60, force=True)
         try:
             '''
             Select a hf run based on the passed 'date' and 'time' parameters. If not
