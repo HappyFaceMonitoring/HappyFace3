@@ -47,6 +47,8 @@ def getColumnFileReference(table):
 
 def addModuleClass(mod_class):
     mod_name = mod_class.__module__.split(".")[-1]
+    if mod_name in __module_class_list:
+        raise hf.exception.ConfigError('A module with the name %s was already imported!' % mod_name)
     mod_class.module_name = mod_name
     __module_class_list[mod_name] = mod_class
     
