@@ -21,7 +21,7 @@
  <div class="HappyTitleBarElement">
   <table border="0" class="HappyTitleBarElementTable">
    <tr>
-    <td colspan="2"><a href="${hf.config.get('paths', 'happyface_url')}?action=getxml&amp;date=${date_string}&amp;time=${time_string}" onfocus="this.blur()"><img src="${static_url}/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: middle;"/></a></td>
+    <td colspan="2"><a href="${hf.url.absoluteUrl('category')}?action=getxml&amp;date=${date_string}&amp;time=${time_string}" onfocus="this.blur()"><img src="${static_url}/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: middle;"/></a></td>
    </tr>
        <tr>
         <td><img src="${lock_icon}" width="15" height="13" alt="Lock icon" style="border: none; vertical-align: middle;"/></td>
@@ -94,7 +94,7 @@
    <tr>
     <td>
 % if selected_category is None:
-     <a class="button" href="${hf.config.get('paths', 'happyface_url')}" title="Reset to default settings and current time">Reset</a>
+     <a class="button" href="${hf.url.absoluteUrl('category')}" title="Reset to default settings and current time">Reset</a>
 % else:
      <a class="button" href="${selected_category.url()}" title="Reset to default settings and current time">Reset</a>
 % endif
