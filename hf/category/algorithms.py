@@ -9,12 +9,10 @@ def worst(category):
     If there is no correct module with positive status, the
     category status is set to -1 (no information).
     """
-    status = -1
+    status = 1.0
     for mod in category.module_list:
         if mod.dataset is None:
             continue
-        if status == -1 and mod.dataset['status'] > 0 and mod.type == category.type:
-            status = mod.dataset['status']
-        elif mod.dataset['status'] < status and mod.dataset['status'] >= 0 and mod.type == category.type:
+        if status > mod.dataset['status'] >= 0 and mod.type == category.type:
             status = mod.dataset['status']
     return status
