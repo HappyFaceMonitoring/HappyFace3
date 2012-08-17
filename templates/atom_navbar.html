@@ -1,32 +1,23 @@
-<ul class="HappyPanelsTabGroup" id="HappyPanelsTabs">
+<ul id="category_bar">
 % for category in category_list:
 % if category == selected_category:
- <li class="HappyPanelsTab HappyPanelsTabSelected" id="${category.name}_tab">
+ <li class="selected" id="${category.name}_tab" >
+  <span style="background-image:url('${category.getStatusIcon()}')">
 % else:
- <li class="HappyPanelsTab" id="${category.name}_tab">
+ <li id="${category.name}_tab">
+  <a href="${category.url(run['time'])}" title="${category.config["name"]}" style="background-image:url('${category.getStatusIcon()}')">
 %endif
-  <table width="100%">
-   <tr>
-    <td>
-     <div style="text-align:center;">
-      <a href="${category.url(run['time'])}" title="${category.config["name"]}">
-       <img alt="" class="HappyNavTab" src="${category.getStatusIcon()}" />
-       <img alt="" class="HappyNavTabIndex" src="${category.getIndexIcon()}" />
+    <img alt="" class="index" src="${category.getIndexIcon()}" />
 % if category.isUnauthorized():
-       <img alt="" class="HappyNavLockTabIndex" src="${category.getLockIcon()}" />
+    <img alt="" class="lock" src="${category.getLockIcon()}" />
+%endif
+   ${category.config["name"]}
+% if category == selected_category:
+  </span>
+% else:
+  </a>
 % endif
-      </a>
-     </div>
-    </td>
-   </tr>
-   <tr>
-    <td>
-     <div style="text-align:center;">
-      <a href="${category.url()}" title="${category.config["name"]}">${category.config["name"]}</a>
-     </div>
-    </td>
-   </tr>
-  </table>
  </li>
+## r
 % endfor
 </ul>

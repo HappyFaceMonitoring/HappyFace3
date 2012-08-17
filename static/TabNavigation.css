@@ -13,6 +13,16 @@
  * All class/id definitions should start with Happy...
  */
 
+.HappyHeader {
+        position: fixed;
+        z-index: 10000;
+        background-color: #fff;
+        left: 0px;
+        top: 0px;
+        padding: 8px 8px 0 8px;
+        width: 100%;
+}
+
 /* Main container for the complete site tabs */
 .HappyPanels {
 	margin: 0px;
@@ -24,14 +34,10 @@
 }
 
 /* Main container for the navigation tabs */
-.HappyPanelsTabGroup {
-	z-index: 3;
-	position: fixed;
-	left: 8px;
-	top: 51px;
+#category_bar {
 	width: 100%;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 	border-left: solid 1px #999;
 	border-right: solid 0px #999;
 	border-bottom: solid 1px #999;
@@ -39,43 +45,58 @@
 }
 
 /* Container for the each tab button */
-.HappyPanelsTab {
-	position: relative;
-	float: left;
-	padding: 4px 10px;
-	margin: 0px 0px -1px 0px;
+#category_bar li {
+        position: relative;
+        float: left;
 	font: bold 0.7em sans-serif;
-	background-color: #DDD;
 	list-style: none;
 	border-left: solid 0px #CCC;
 	border-bottom: solid 1px #999;
 	border-top: solid 1px #999;
 	border-right: solid 1px #999;
-	cursor: pointer;
-	min-width: 90px;
+	min-width: 110px;
 }
 
-/* What happens on mouse-over on the tab button? */
-.HappyPanelsTabHover {
-	background-color: #CCC;
+#category_bar span, #category_bar a {
+        display: block;
+        position: relative;
+        padding: 80px 5px 5px 10px;
+        background-repeat: no-repeat;
+        background-position: 18px 5px;
 }
 
-/* Look & feel of the selected tab button */
-.HappyPanelsTabSelected {
-	background-color: #FFFFFF;
-	border-bottom: 1px solid #FFF;
+#category_bar li.selected {
+        background-color: #FFFFFF;
+        border-bottom: 1px solid #FFF;
 }
 
-/* Look & feel of links within the tab button */
-.HappyPanelsTab a {
-	color: black;
-	text-decoration: none;
+#category_bar a {
+        background-color: #DDD;
+        color: black;
+        text-decoration: none;
+}
+#category_bar a:hover { background-color: #CCC; }
+
+
+/* Style for the index symbol for each category */
+#category_bar .index {
+        position: absolute;
+        left:  67px;
+        top:   55px;
+        width: 25px;
+}
+
+/* Style for the lock icon, if displayed */
+#category_bar .lock {
+        position: absolute;
+        left:  67px;
+        top:   25px;
+        width: 25px;
 }
 
 /* Definition of all content layers */
 .HappyPanelsContentGroup {
 	z-index: 0;
-	position: relative;
 	clear: both;
 	border-left: solid 1px #999;
 	border-bottom: solid 1px #999;
@@ -96,9 +117,7 @@
 
 /* Configuration of the title bar/history bar */
 .HappyTitleBar{
-	z-index: 2;
-	position: fixed;
-	margin: 0px 0px 10px 0px;
+	margin: 0px 0px 1px 0px;
 	padding: 0px 0px;
 	background-color: #464646;
 	height: 42px;
@@ -232,10 +251,6 @@
  	text-decoration: none;
 }
 
-/* Buttons/Status pictures in the navigation tab at the top of the page */
-.HappyNavTab {
-	width: 64px;
-}
 
 /* Layer below the navigation part to hide the content layer */
 .HappySolidLayer {
@@ -258,19 +273,6 @@
 	width: 100%;
 }
 
-/* Style for the index symbol for each category */
-.HappyNavTabIndex {
-	margin-left:-17px;
-	margin-bottom:-6px;
-	width:25px;
-}
-
-/* Style for the lock icon, if displayed */
-.HappyNavLockTabIndex {
-        margin-left:-28px;
-        margin-bottom:20px;
-        width:25px;
-}
 
 /* The infor box displaying the certificate information */
 #HappyCertInfoDiv {
