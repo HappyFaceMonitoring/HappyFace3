@@ -64,7 +64,6 @@ class ModuleProxy:
         module = self.acquisitionModules[run['id']]
         try:
             self.acquisitionModules[run['id']] = module
-            self.conn = hf.database.engine.connect()
             data = {"instance": self.instance_name,
                     "run_id": run["id"],
                     "status": 1.0,
