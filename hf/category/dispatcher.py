@@ -60,6 +60,13 @@ class Dispatcher(object):
                 time_obj = run["time"]
             run = {"id":run["id"], "time":run["time"]}
             
+            # if the run is older than a certain time threshold,
+            # then mark it as stale
+            stale_threshold = datetime.timedelta(0, 0, 0, 0,\
+                int(hf.config.get('happyface', 'stale_data_threshold_minutes')))
+            data_stale = (run['time'] + stale_threshold) < datetime.datetime.now()
+            run['stale'] = data_stale
+            
             category_list = [cat.getCategory(run) for cat in self.category_list]
             category_dict = dict((cat.name, cat) for cat in category_list)
             
@@ -91,6 +98,7 @@ class Dispatcher(object):
                 'selected_module': None,
                 'selected_category': selected_category,
                 'time_error_message': time_error_message,
+                'data_stale': data_stale,
                 'svn_rev': svn_rev,
                 'lock_icon': lock_icon,
             }

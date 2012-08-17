@@ -174,7 +174,12 @@ class ModuleBase:
         if self.isUnauthorized():
             return '<p class="error">Access to Module %s is restricted, please log in with your certificate.</p>' % self.instance_name
         try:
-            template_data = { 'module': self, 'run': self.run, 'hf': hf }
+            template_data = {
+                'module': self,
+                'data_stale': self.run['stale'],
+                'run': self.run,
+                'hf': hf
+            }
             if self.dataset is None:
                 template_data['no_data'] = True
                 module_html = self.template.render(**template_data)

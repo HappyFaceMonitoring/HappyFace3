@@ -32,10 +32,10 @@
  <div class="HappyTitleBarElement">
   <table border="0" class="HappyTitleBarElementTable">
    <tr>
-    <td><div style="text-align: left;">${run['time'].strftime('%d. %b %Y')}</div></td>
+    <td><div style="text-align: left; ${'color: red' if data_stale else ''}">${run['time'].strftime('%d. %b %Y')}</div></td>
    </tr>
    <tr>
-    <td><div style="text-align: center;">${run['time'].strftime('%H:%M')}</div></td>
+    <td><div style="text-align: center; ${'color: red' if data_stale else ''}">${run['time'].strftime('%H:%M')}</div></td>
    </tr>
   </table>
  </div>

@@ -15,7 +15,7 @@ past = run['time'] - timedelta(days = 2)
      <a id="${module.instance_name}" style='position:relative; top:-162px'></a>
      <a href="${module.url()}" style="text-decoration:none;color:#000000;" onfocus="this.blur()">${module.config["name"]}</a>
      <br />
-     <span style="color:#999; font: bold 0.7em sans-serif;">${run["time"].strftime("%d. %b %Y, %H:%M")}</span>
+     <span style="color:${'#f66' if data_stale else '#999'}; font: bold 0.7em sans-serif;" >${run["time"].strftime("%d. %b %Y, %H:%M")}</span>
      <span style="color:gray;">-</span>
      <small>
       <a href="" class="HappyLink" id="${module.instance_name}_info_link">Show module information</a>
