@@ -1,7 +1,7 @@
 <ul id="category_bar">
 % for category in category_list:
 % if category == selected_category:
- <li class="selected" id="${category.name}_tab" >
+ <li id="${category.name}_tab" >
   <span style="background-image:url('${category.getStatusIcon()}')">
 % else:
  <li id="${category.name}_tab">
