@@ -176,6 +176,7 @@ dl.module_list dt{
     margin-bottom: 10px;
     background-repeat: no-repeat;
 }
+dl.module_list dt:first-child { border-top-width: 0 }
 
 dl.module_list dt .details{
     font: bold 11px sans-serif;
@@ -195,19 +196,49 @@ dl.module_list dt .details a:hover {
     color: #fc0;
 }
 
-
-dl.module_list:first-child {
-    border-bottom:2px solid #eee;
-}
-
 dl.module_list dd{
     margin-left: 60px;
+    margin-bottom: 20px;
     width: 1000px;
 }
 
 dl.module_list .panel {
     background-color: #ddd;
     border: 1px solid #999;
+}
+
+/* Information panel for each module which shows up after clicking
+ * on the status button.
+ */
+dl.module_list .panel {
+    position: relative;
+    text-align: left;
+    width:800px;
+    background-color: #ddd;
+    border: 1px #999 solid;
+    font: bold 11px sans-serif;
+}
+dl.module_list .panel td {
+    color: #000;
+    padding: 2px;
+    text-align: left;
+}
+dl.module_list .panel > ul {
+    list-style: none outside none;
+    /*font-size: 0.7em; */
+}
+dl.module_list .panel .key {
+    position: absolute;
+    left: 10px;
+    display: block;
+    padding-top: 0.5em;
+}
+dl.module_list .panel .value {
+    position: relative;
+    padding-left: 150px;
+    display: block;
+    padding-top: 0.5em;
+    min-height: 1.1em;
 }
 
 #timemachine {
@@ -258,138 +289,30 @@ dl.module_list .panel {
 #timemachine .form { padding-top: 10px; }
 
 
-
-.HappyTitleBarElementTable {
-	text-align: center;
-	border-collapse: collapse;
-	margin: 1px 0px 0px 0px;
-	height:90%;
-}
-.HappyTitleBarElementTable td {
-	vertical-align: middle;
-	padding: 0px;
-}
-
-.HappyTitleBarElement input[type="submit"], .HappyTitleBarElement button, .HappyTitleBarElement a.button {
- background-color: #8c8c8c;
- border: 1px solid #adadad;
- padding: 2px 4px;
-}
-
-.HappyTitleBarElement a.button {
- font: 0.9em sans-serif;
- text-decoration: none;
- color: black;
-}
-
-.HappyTitleBarElement input[type="text"] {
- background-color: white;
- border: 1px solid #adadad;
- padding: 2px;
-}
-
-.HappyTitleBarForm {
-	margin: 6px 0px 0px 0px;
-	padding: 0px;
-}
-
-/* Information table for each module which shows up after clicking
- * on the status button.
- */
-dl.module_list .panel {
-        position: relative;
-	text-align: left;
-	width:800px;
-	background-color: #ddd;
-	border: 1px #999 solid;
-        font: bold 11px sans-serif;
-}
-dl.module_list .panel td {
-	color: #000;
-	padding: 2px;
-	text-align: left;
-}
-dl.module_list .panel > ul {
-        list-style: none outside none;
-        /*font-size: 0.7em; */
-}
-dl.module_list .panel .key {
-        position: absolute;
-        left: 10px;
-        display: block;
-        padding-top: 0.5em;
-}
-dl.module_list .panel .value {
-        position: relative;
-        padding-left: 150px;
-        display: block;
-        padding-top: 0.5em;
-        min-height: 1.1em;
-}
-
 .PlotMask label {
-        display: block;
+    display: block;
 }
 .PlotMask label span {
-        position: absolute;
-        left: 80px;
+    position: absolute;
+    left: 80px;
 }
 .PlotMask input {
-        position: relative;
-        left: 69px;
+    position: relative;
+    left: 69px;
 }
 .PlotMask label input, .PlotMask label select {
-        position: relative;
-        left: 70px;
+    position: relative;
+    left: 70px;
 }
 
 .DateField {
-        width: 6em;
-        text-align: right;
+    width: 6em;
+    text-align: right;
 }
 .TimeField {
-        width: 4em;
-        text-align: right;
+    width: 4em;
+    text-align: right;
 }
-
-/* Buttons/Status pictures in the content layer besides each module */ 
-.HappyButton {
-	background-color: #FFFFFF;
-	border: 0px;
-	padding: 0px;
-	width: 64px;
-        cursor: pointer;
-}
-
-/* Show module information link for each module */
-.HappyLink {
-        font: bold 0.9em sans-serif;
-	color: orange;
- 	text-decoration: none;
-}
-
-
-/* Layer below the navigation part to hide the content layer */
-.HappySolidLayer {
-	z-index: 1;
-	position: fixed;
-	left: 0px;
-	top: 0px;
-	background-color:#FFFFFF;
-	width: 100%;
-	height: 151px;
-	border-left: solid 0px #999;
-	border-bottom: solid 0px #999;
-}
-
-/* Separator between the modules */
-.HappyHr {
-	border: 0px;
-	border-top: solid 1px #999;
-	border-bottom: transparent;
-	width: 100%;
-}
-
 
 /* The infor box displaying the certificate information */
 #HappyCertInfoDiv {
