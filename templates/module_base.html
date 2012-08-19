@@ -2,31 +2,15 @@
 from datetime import timedelta
 past = run['time'] - timedelta(days = 2)
 %>
-<table class="main" style="width:1000px;">
- <tbody>
-  <tr>
-   <td>
-    ###<button class="HappyButton" type="button">
-     <img alt="" src="${module.getStatusIcon()}" />
-    ###</button>
-   </td>
-   <td>
-    <strong>
-     <a id="${module.instance_name}" style='position:relative; top:-162px'></a>
-     <a href="${module.url()}" style="text-decoration:none;color:#000000;" onfocus="this.blur()">${module.config["name"]}</a>
-     <br />
-     <span style="color:${'#f66' if data_stale else '#999'}; font: bold 0.7em sans-serif;" >${run["time"].strftime("%d. %b %Y, %H:%M")}</span>
-     <span style="color:gray;">-</span>
-     <small>
-      <a href="" class="HappyLink" id="${module.instance_name}_info_link">Show module information</a>
-     </small>
-    </strong>
-   </td>   
-  </tr>
-  <tr>
-   <td> </td>
-   <td>
-    <div style="display:none;" class='HappyDesc' id="${module.instance_name}_info_box">
+<dt style="background-image:url('${module.getStatusIcon()}')" class="module">
+ ${module.config["name"]}
+ <span class="details ${'stale' if data_stale else ''};" >${run["time"].strftime("%d. %b %Y, %H:%M")}
+  --
+  <a href="#"  id="${module.instance_name}_info_link">Show module information</a>
+ </span>
+</dt>
+<dd>
+    <div style="display:none;" class='panel' id="${module.instance_name}_info_box">
      <ul>
       <li><span class="key">Module</span><span class="value">${module.module_name}</span></li>
       <li><span class="key">Instance</span><span class="value">${module.instance_name}</span></li>
@@ -56,16 +40,5 @@ past = run['time'] - timedelta(days = 2)
       <input name="submit" type="submit" value="Plot" />
      </form>
     </div>
-% if no_data:
-    <p>No data at this time.</p>
-% else:
- % if len(module.dataset["error_string"]) > 0:
-    <p style="color:red;">${module.dataset["error_string"]}</p>
- % else:
-${self.content()}
- % endif
-% endif
-   </td>
-  </tr>
- </tbody>
-</table>
+    ${self.content()}
+</dd>

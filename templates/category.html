@@ -2,15 +2,11 @@
 
 <%def name="content()">
 ###<script type="text/javascript">getFNSize("HappyFNnav_${category_name}");</script>
-<div id="HappyPanels1" class="HappyPanels">
- <div class="HappyPanelsContentGroup" id="HappyPanelsContentGroup">
-  <div class="HappyPanelsContent" id="${category_name}_panel">
+<dl id="content" class="module_list">
 % for contents in module_contents:
      ${contents}
 % endfor
-  </div>
- </div>
-</div>
+</dl>
 <div id="HappyFNnav_${category_name}" class="HappyFNnav">
  <ul>
   <li>
