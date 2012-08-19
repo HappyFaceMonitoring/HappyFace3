@@ -50,15 +50,28 @@ h2 a         { color:#33a; }
 
 form { display: block; }
 
-input, button {
+input, button, .button {
         background-color: #d6d2d0;
         color: #000;
         border-top:1px solid #fff;
         border-left:1px solid #fff;
         border-bottom:1px solid #000;
         border-right:1px solid #000;
-        padding: 3px;
-        font: none 12px sans-serif;
+        padding: 3px !important;
+        font-size: 12px;
+        font-family: sans-serif;
+        font-weight: normal !important;
+}
+
+a.button { padding: 4px }
+a.button:hover, a.button:active, a.button:focus, a.button:visited, a.button:link { color: #000; text-decoration: none }
+
+input:active, button:active, a.button:active {
+        background-color: #a6a2a0;
+        border-right:1px solid #fff;
+        border-bottom:1px solid #fff;
+        border-top:1px solid #000;
+        border-left:1px solid #000;
 }
 
 input[type=text] {
@@ -197,34 +210,55 @@ dl.module_list .panel {
     border: 1px solid #999;
 }
 
-/* Configuration of the title bar/history bar */
-.HappyTitleBar{
-	margin: 0px 0px 1px 0px;
-	padding: 0px 0px;
-	background-color: #464646;
-	height: 42px;
-	left: 8px;
-	float: left;
-	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
-	border-left: solid 0px #999;
-	border-right: solid 0px #999;
-	border-bottom: solid 0px #999;
-	border-top: solid 0px #999;
-	overflow: hidden;
+#timemachine {
+    list-style: none;
+    margin: 0px 0px 1px 0px;
+    padding: 0px 0px;
+    background-color: #464646;
+    height: 42px;
+    left: 8px;
+    float: left;
+    width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
+    overflow: hidden;
 }
-.HappyTitleBarElement {
-	float: left;
-	padding: 0px 10px;
-	margin: 0px 0px 0px 0px;
-	font: bold 0.90em sans-serif;
-	color: white;
-	list-style: none;
-	border-left: solid 0px #999;
-	border-bottom: solid 0px #999;
-	border-top: solid 0px #999;
-	border-right: solid 1px #999;
-	height: 100%;
+#timemachine li {
+    float: left;
+    padding: 2px 10px 0;
+    margin: 0px 0px 0px 0px;
+    font: bold 0.90em sans-serif;
+    color: white;
+    list-style: none;
+    border-right: solid 1px #999;
+    height: 100%;
+    font: bold 15px sans-serif;
 }
+
+#timemachine li div {
+    display: block;
+    /*vertical-align: top;*/
+    text-align: center;
+}
+
+#timemachine .title {
+    font-size: 15px;
+    color: #f90;
+    text-align: left;
+}
+
+#timemachine .version {
+    font-size: 10px;
+    text-align: right;
+}
+
+#timemachine .stale {
+    color: #f00;
+}
+
+#timemachine form { padding-top: 7px; }
+#timemachine .form { padding-top: 10px; }
+
+
+
 .HappyTitleBarElementTable {
 	text-align: center;
 	border-collapse: collapse;

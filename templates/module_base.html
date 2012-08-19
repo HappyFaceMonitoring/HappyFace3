@@ -4,7 +4,7 @@ past = run['time'] - timedelta(days = 2)
 %>
 <dt style="background-image:url('${module.getStatusIcon()}')" class="module">
  ${module.config["name"]}
- <span class="details ${'stale' if data_stale else ''};" >${run["time"].strftime("%d. %b %Y, %H:%M")}
+ <span class="details ${'stale' if data_stale else ''}" >${run["time"].strftime("%d. %b %Y, %H:%M")}
   --
   <a href="#"  id="${module.instance_name}_info_link">Show module information</a>
  </span>
