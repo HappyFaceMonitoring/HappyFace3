@@ -15,6 +15,10 @@ class Dispatcher(object):
     def __init__(self, category_list):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = category_list
+        try:
+            self.svn_rev = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE).stdout.read().strip()
+        except Exception:
+            self.svn_rev = 'exported'
 
     @cp.expose
     def default(self, category=None, **kwargs):
@@ -76,11 +80,6 @@ class Dispatcher(object):
                     selected_category = c
                     break
             
-            try:
-                svn_rev = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE).stdout.read().strip()
-            except Exception:
-                svn_rev = 'exported'
-            
             lock_icon = 'lock_icon_on.png' if cp.request.cert_authorized else 'lock_icon_off.png'
             lock_icon = os.path.join(hf.config.get('paths', 'template_icons_url'), lock_icon)
             
@@ -99,7 +98,7 @@ class Dispatcher(object):
                 'selected_category': selected_category,
                 'time_error_message': time_error_message,
                 'data_stale': data_stale,
-                'svn_rev': svn_rev,
+                'svn_rev': self.svn_rev,
                 'lock_icon': lock_icon,
             }
 
