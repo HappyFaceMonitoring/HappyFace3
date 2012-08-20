@@ -2,7 +2,7 @@
  Execute database schema updates
 """
 
-import hf, sys
+import hf, sys, traceback
 try:
     import argparse
 except ImportError:
@@ -37,12 +37,14 @@ def execute():
     args.interactive = not (args.force or args.dry)
     
     try:
-        from migrate.versioning.util import load_model
-        from migrate.versioning import genmodel, schemadiff
-        from migrate.changeset import schema
+        import migrate
     except ImportError, e:
         print 'The sqlalchemy-migrate Python module was not found.\nThis is required for the dbupdate functionallity'
+        traceback.print_exc()
         return
+    from migrate.versioning.util import load_model
+    from migrate.versioning import genmodel, schemadiff
+    from migrate.changeset import schema
     
     
     # Setup minimalistic, offline HF environment
@@ -56,6 +58,15 @@ def execute():
     
     if args.dry:
         print "Dry run! Database will be unchanged"
+        
+    # compatibility with newer versions of sqlalchemy-migrate
+    if not hasattr(diff, "tablesMissingInDatabase"):
+        diff.tablesMissingInDatabase = diff.tables_missing_from_B
+    if not hasattr(diff, "tablesMissingInModel"):
+        diff.tablesMissingInModel = diff.tables_missing_from_A
+    if not hasattr(diff, "tablesWithDiff"):
+        diff.tablesWithDiff = diff.tables_different.values()
+    #import pdb; pdb.set_trace()
     
     # create missing tables
     if len(diff.tablesMissingInDatabase) > 0:
