@@ -171,12 +171,17 @@ dl.module_list dt{
     border-top: 2px solid #eee;
     font-size: 20px;
     line-height: 26px;
-    padding-top: 10px;
+    padding-top: 15px;
     padding-left: 60px;
     margin-bottom: 10px;
+    background-position: 8px 5px;
     background-repeat: no-repeat;
 }
-dl.module_list dt:first-child { border-top-width: 0 }
+dl.module_list dt:first-child {
+    border-top-width: 0;
+    background-position: 8px 0;
+    padding-top: 10px;
+}
 
 dl.module_list dt .details{
     font: bold 11px sans-serif;
