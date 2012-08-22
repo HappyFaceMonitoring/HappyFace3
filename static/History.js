@@ -18,7 +18,7 @@ $(function() {
         // update form, get Date() is form 1-31 unlike getMonth...
         $('#HistoNavDate').val(newDate.getFullYear()+'-'+(newDate.getMonth()+1)+'-'+(newDate.getDate()));
         $('#HistoNavTime').val(newDate.getHours()+':'+newDate.getMinutes());
-        $('#HistoForm1').submit()
+        $('#HistoForm1').attr('action', $('#HistoForm1').attr('action')+window.location.hash).submit()
     }
     $('#HistoBack').click(function() {
         moveInHist(-1);
@@ -26,5 +26,9 @@ $(function() {
     
     $('#HistoFwd').click(function() {
         moveInHist(1);
+    });
+    $('#HistoForm2').submit(function() {
+        $(this).attr('action', $(this).attr('action')+window.location.hash);
+        return true;
     });
 });
