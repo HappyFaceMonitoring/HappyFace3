@@ -69,25 +69,6 @@ def readConfigurationAndEnv():
         except Exception, e:
             logger.error("Cannot parse category config '%s'" % file)
             logger.debug(traceback.format_exc())
-                
-def importModules():
-    '''
-    Interpete the category configuration and import the used modules
-    '''
-    used_modules = []
-    category_names = hf.category.config.sections()
-    if len(hf.config.get('happyface', 'categories')) > 0:
-        category_names = hf.config.get('happyface', 'categories').split(',')
-    for category in category_names:
-        conf = dict(hf.category.config.items(category))
-        for module in conf["modules"].split(","):
-            if len(module) == 0: continue
-            if module in used_modules:
-                raise hf.ConfigError("Module '%s' used second time in category '%s'" % (module, category))
-            try:
-                hf.module.tryModuleClassImport(hf.module.config.get(module, "module"))
-            except ConfigParser.NoSectionError, e:
-                raise hf.ConfigError("Referenced module %s from category %s was never configured" % (module, category))
 
 def setupLogging(logging_cfg):
     """

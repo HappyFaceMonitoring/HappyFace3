@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
             cfg_dir = None
             try:
-                hf.configtools.importModules()
+                hf.module.importModuleClasses()
                 
                 hf.database.connect(implicit_execution = True)
                 hf.database.metadata.create_all()

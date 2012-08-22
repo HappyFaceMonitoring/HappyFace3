@@ -50,7 +50,7 @@ def execute():
     # Setup minimalistic, offline HF environment
     hf.configtools.readConfigurationAndEnv()
     hf.configtools.setupLogging('acquire_logging_cfg')
-    hf.configtools.importModules()
+    hf.module.importModuleClasses()
     hf.database.connect(implicit_execution=True)
 
     # calculate diff using sqlalchemy-migrate magic
