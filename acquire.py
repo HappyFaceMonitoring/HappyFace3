@@ -41,9 +41,14 @@ if __name__ == '__main__':
             hf.database.metadata.create_all()
             
             category_list = hf.category.createCategoryObjects()
+        except hf.exceptions.ModuleProgrammingError, e:
+            logger.error("Module Programming Error: %s", str(e))
+            logger.debug(traceback.format_exc())
+            sys.exit(-1)
         except Exception, e:
             logger.error("Setting up HappyFace failed: %s", str(e))
             logger.debug(traceback.format_exc())
+            sys.exit(-1)
         
         runtime = datetime.datetime.fromtimestamp(int(time.time()))
         result = hf_runs.insert().values(time=runtime, completed=False).execute()

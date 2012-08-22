@@ -4,6 +4,15 @@ import cherrypy as cp
 import logging, traceback, os
 from sqlalchemy import Integer, Float, Numeric
 
+class CheckModuleMeta(type):
+    def __init__(self, name, bases, dct):
+        super(CheckModuleMeta, self).__init__(name, bases, dct)
+        if name != "ModuleBase":
+            if "config_keys" not in dct:
+                raise hf.exceptions.ModuleProgrammingError(name, "No config_keys dictionary specified")
+            if "config_hint" not in dct:
+                raise hf.exceptions.ModuleProgrammingError(name, "No configuration hint config_hint specified (empty string possible)")
+
 class ModuleBase:
     """
     Base class for HappyFace modules.
@@ -34,6 +43,8 @@ class ModuleBase:
     In practice, there is no "visual" difference between status -1 and -2, but there might
     be in future.
     """
+    
+    __metaclass__ = CheckModuleMeta
     
     config_defaults = {
         'description': '',
