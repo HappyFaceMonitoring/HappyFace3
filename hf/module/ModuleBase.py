@@ -1,17 +1,92 @@
 import hf
+from hf.module.module import __module_class_list as _module_class_list
+from hf.module.module import __column_file_list as _column_file_list
 from mako.template import Template
 import cherrypy as cp
-import logging, traceback, os
-from sqlalchemy import Integer, Float, Numeric
+import logging, traceback, os, re
+from sqlalchemy import Integer, Float, Numeric, Table, Column, Sequence, Text, Integer, Float, ForeignKey
 
-class CheckModuleMeta(type):
+class ModuleMeta(type):
     def __init__(self, name, bases, dct):
-        super(CheckModuleMeta, self).__init__(name, bases, dct)
-        if name != "ModuleBase":
-            if "config_keys" not in dct:
-                raise hf.exceptions.ModuleProgrammingError(name, "No config_keys dictionary specified")
-            if "config_hint" not in dct:
-                raise hf.exceptions.ModuleProgrammingError(name, "No configuration hint config_hint specified (empty string possible)")
+        if name == "ModuleBase":
+            super(ModuleMeta, self).__init__(name, bases, dct)
+            return
+            
+        if "config_keys" not in dct:
+            raise hf.exceptions.ModuleProgrammingError(name, "No config_keys dictionary specified")
+        if "config_hint" not in dct:
+            #raise hf.exceptions.ModuleProgrammingError(name, "No configuration hint config_hint specified (empty string possible)")
+            self.config_hint = ''
+        if "table_columns" not in dct:
+            raise hf.exceptions.ModuleProgrammingError(name, "table_colums not specified")
+        if "subtable_columns" not in dct:
+            self.subtable_columns = {}
+        
+        super(ModuleMeta, self).__init__(name, bases, dct)
+        
+        self.addModuleClass(name)
+        
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        tabname = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+        
+        try:
+            tab = self.generateModuleTable(tabname, self.table_columns[0])
+            for fc in self.table_columns[1]:
+                self.addColumnFileReference(tab, fc)
+        except Exception, e:
+            raise hf.exceptions.ModuleProgrammingError(name, "Generating module table failed: " + str(e))
+        for sub, (columns, fc_list) in self.subtable_columns.iteritems():
+            try:
+                tab = self.generateModuleSubtable(sub, columns)
+                for fc in fc_list:
+                    self.addColumnFileReference(tab, fc)
+            except Exception, e:
+                raise hf.exceptions.ModuleProgrammingError(name, "Generating subtable %s failed: %s" % (sub, str(e)))
+        
+        del self.table_columns
+        try:
+            del self.subtable_columns
+        except Exception:
+            pass
+        
+    def generateModuleTable(self, tabname, columns):
+        table = Table("mod_"+tabname, hf.database.metadata,
+            *([
+                Column('id', Integer, Sequence("mod_"+tabname+'_id_seq'), primary_key=True),
+                Column('instance', Text, ForeignKey("module_instances.instance")),
+                Column('run_id', Integer, ForeignKey("hf_runs.id")),
+                Column('status', Float),
+                Column('description', Text),
+                Column('instruction', Text),
+                Column('error_string', Text),
+                Column('source_url', Text),
+            ] + columns))
+        self.module_table = table
+        self.subtables = {}
+        table.module_class = self
+        return table
+        
+    def generateModuleSubtable(self, name, columns):
+        tabname = "sub_"+self.module_table.name[4:] + '_' + name
+        table = Table(tabname,
+            hf.database.metadata,
+            *([
+                Column('id', Integer, Sequence(tabname+'_id_seq'), primary_key=True),
+                Column('parent_id', Integer, ForeignKey(self.module_table.c.id)),
+            ] + columns))
+        self.subtables[name] = table
+        table.module_class = self
+        return table
+
+    def addModuleClass(self, name):
+        if name in _module_class_list:
+            raise hf.exception.ConfigError('A module with the name %s was already imported!' % name)
+        self.module_name = name
+        _module_class_list[name] = self
+        
+    def addColumnFileReference(self, table, column):
+        name = table.name if isinstance(table, Table) else table
+        _column_file_list[name] = _column_file_list[name]+[column] if name in _column_file_list else [column]
 
 class ModuleBase:
     """
@@ -44,7 +119,7 @@ class ModuleBase:
     be in future.
     """
     
-    __metaclass__ = CheckModuleMeta
+    __metaclass__ = ModuleMeta
     
     config_defaults = {
         'description': '',
