@@ -21,8 +21,13 @@ class ModuleMeta(type):
             raise hf.exceptions.ModuleProgrammingError(name, "table_colums not specified")
         if "subtable_columns" not in dct:
             self.subtable_columns = {}
+       
+        self.subtables = {}
         
         super(ModuleMeta, self).__init__(name, bases, dct)
+        
+        if not hasattr(self, 'extractData'):
+            raise hf.exceptions.ModuleProgrammingError(name, "extractData not implemented")
         
         self.addModuleClass(name)
         
@@ -62,7 +67,6 @@ class ModuleMeta(type):
                 Column('source_url', Text),
             ] + columns))
         self.module_table = table
-        self.subtables = {}
         table.module_class = self
         return table
         
@@ -89,34 +93,38 @@ class ModuleMeta(type):
         _column_file_list[name] = _column_file_list[name]+[column] if name in _column_file_list else [column]
 
 class ModuleBase:
-    """
-    Base class for HappyFace modules.
-    A module provides two core functions:
-    1) Acquisition of data through the methods
-      1] prepareAcquisition: Specify the files to download
-      2] extractData: Return a dictionary with data to fill into the database
-      3] fillSubtables: to write the datasets for the modules subtables
-    2) Rendering the module by returning a template data dictionary
-     in method getTemplateData.
+    """Base class for HappyFace modules.
+       A module provides two core functions:
+       
+       1) Acquisition of data through the methods
+       
+          1) prepareAcquisition: Specify the files to download
+          2) extractData: Return a dictionary with data to fill into the database
+          3) fillSubtables: to write the datasets for the modules subtables
+       
+       2) Rendering the module by returning a template data dictionaryin method getTemplateData.
+       
+       Because thread-safety is required for concurrent rendering, the module itself
+       MUST NOT save its state during rendering. The modules functions are internally
+       accessed by the ModuleProxy class.
     
-    Because thread-safety is required for concurrent rendering, the module itself
-    MUST NOT save its state during rendering. The modules functions are internally
-    accessed by the ModuleProxy class.
+       The status of the module represents a quick overview over the current module
+       status and fitness.
+       
+       * 0.66 <= status <= 1.0  The module is happy/normal operation
+       * 0.33 <= status < 0.66  Neutral, there are things going wrong slightly.
+       * 0.0  <= status < 0.33  Unhappy, something is very wrong with the monitored modules
+       * status = -1            An error occured during module execution
+       * status = -2            Data could not be retrieved (download failed etc.)
     
-    The status of the module represents a quick overview over the current module
-    status and fitness.
-    * 0.66 <= status <= 1.0  The module is happy/normal operation
-    * 0.33 <= status < 0.66  Neutral, there are things going wrong slightly.
-    * 0.0  <= status < 0.33  Unhappy, something is very wrong with the monitored modules
-    * status = -1            An error occured during module execution
-    * status = -2            Data could not be retrieved (download failed etc.)
+       The category status is calculated with a user specified algorithm from the statuses
+       of the modules in the category. If there is missing data or an error, the category
+       index icon is changed, too.
     
-    The category status is calculated with a user specified algorithm from the statuses
-    of the modules in the category. If there is missing data or an error, the category
-    index icon is changed, too.
-    
-    In practice, there is no "visual" difference between status -1 and -2, but there might
-    be in future.
+       In practice, there is no "visual" difference between status -1 and -2, but there might
+       be in future.
+       
+
     """
     
     __metaclass__ = ModuleMeta
@@ -128,10 +136,7 @@ class ModuleBase:
         'weight': '1.0',
     }
     
-    # set by hf.module.importModuleClasses and
-    # hf.module.addModuleClass when the module is imported
-    table = None
-    subtables = None
+    # set by hf.module.importModuleClasses
     filepath = None
     
     def __init__(self, instance_name, config, run, dataset, template):
@@ -165,15 +170,64 @@ class ModuleBase:
                 self.logger.warn("Module weight not numeric, using 0.0")
     
     def prepareAcquisition(self):
+        """
+        Override this method if your module needs to download data,
+        or has to perform some other action prior to the data acquisition run.
+        """
         pass
     
     def fillSubtables(self, module_entry_id):
+        """
+        Override this method if your module uses subtables, to fill
+        them with the data from :meth:`ModuleBase.extractData`.
+        
+        To fill the subtable, you need the sqlalchemy table class and issue
+        one or more insert statements. The Table classes are available in
+        the :attr:`hf.module.ModuleBase.subtables` dictionary, where the
+        key is the name specified in :data:`subtable_columns`.
+        
+        For more information about subtables, see :ref:`database_layout_subtable`
+                
+        :param module_entry_id: The ID of the module table entry that works as parent to
+                                the subtable entries added by this call.
+        :type module_entry_id: integer
+        
+        To fill a list of col->value dictionaries in an object attribute to a subtable
+        called *details*, the following implementation can be used
+        
+        .. code-block:: python
+        
+         def fillSubtables(self, module_entry_id)
+             table = self.subtables['details']
+             for entry in self.extra_data:
+                 table.insert().execute(dict(parent_id=module_entry_id, **entry))
+        
+        Actually, the insert accepts a list of dictionaries, but because we do
+        not have the parent ID in the dicts yet, we cannot add it directly.
+        
+        An inline version using generator expressions would look like this
+        
+        .. code-block:: python
+        
+         def fillSubtables(self, module_entry_id)
+             self.subtables['details'].insert().execute([dict(parent_id=module_entry_id, **row) for row in self.extra_data])
+             
+        Finally, a short, readable variant
+        
+        .. code-block:: python
+        
+         def fillSubtables(self, module_entry_id)
+             self.extra_data = map(lambda x: x['parent_id'] = module_entry_id, self.extra_data)
+             self.subtables['details'].insert().execute(self.extra_data)
+        """
         pass
     
     def getTemplateData(self):
         """
         Override this method if your template requires special
         preprocessing of data or you have data in subtables.
+        
+        :return: A dictionary that extends the Mako template namespace.
         """
         return {"dataset": self.dataset, "run": self.run}
         

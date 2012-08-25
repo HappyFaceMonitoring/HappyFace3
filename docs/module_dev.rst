@@ -1,6 +1,6 @@
-==================
+******************
 Module Development
-==================
+******************
 
 Modules are the building blocks that give HappyFace its functionality. Specifically, they
  1) download and parse data to store it in a database
@@ -16,8 +16,11 @@ In one of these files is the source code of our example module. The module itsel
 
 Additionally, a HTML template file with the same name as the class is expected along with the file the class is in. This template contains the formatting information for the web output.
 
+.. _database_layout:
+
 Database Layout
 ---------------
+
 Associated with each module is a so called module table in the database and an arbitrary number of subtables.
 
 One entry is added to the module table every time :mod:`acquire.py` is called. By default, it contains the only a minimal set of columns, but can be extended with the :data:`table_columns` variable in the module definition. For the module developer, the following columns are of interest
@@ -32,6 +35,15 @@ One entry is added to the module table every time :mod:`acquire.py` is called. B
 
  next term source_url
     An URL to the data source, if applicable. At the moment only a single URL can be specified, this is to be regarded as a current limitation of HappyFace.
+    
+.. todo:: Draw graph with database relations
+
+
+.. _database_layout_subtable:
+
+Subtable System
+^^^^^^^^^^^^^^^
+.. todo:: Describe subtable system
 
 Example
 -------
@@ -68,6 +80,8 @@ Module Class Reference
 ======================
 The module class is derived from :class:`hf.module.ModuleBase` and the naming should be CamelCased. For the database table names, the CamelCase name is converted to camel_case.
 
+Any class defiving from :class:`hf.module.ModuleBase` found in the modules directory somewhere is considered a HappyFace module. It is then checked if 
+
 Special Class Variables
 -----------------------
 HappyFace makes use of class wide variables to define several aspects of the module.
@@ -91,7 +105,19 @@ HappyFace makes use of class wide variables to define several aspects of the mod
     *required*
 
     A tuple with two lists in it.
-     1) A list of sqlalchemy Column objects. They represent extra columns
+    1) A list of sqlalchemy Column objects. These columns are added to the module table and usually suffice for the module operation
+    2) A list of strings, they are the names of columns in the module table that point to files in the archive directory.
+
+.. data:: subtable_columns
+
+    *optional*
+
+    A dictionary where the key is the name of the subtable, e.g. *details*, and the values are tuples like :data:`table_colums`. They are the data columns for the subtable and the corresponding archive links. For more information about subtables, see :ref:`database_layout_subtable`
+    
+    The subtable names are not passed to the database as they are, but are prepended with the module name to ensure uniqueness. Therefore, two modules can use the same subtable name without problems.
 
 Class Methods
 -------------
+
+Step-by-Step Guide
+==================
