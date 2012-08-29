@@ -9,6 +9,7 @@ HappyFace implements many classes and functions for internal use or for external
     the module development guide. It links to this reference where the module developer needs to interact with core classes.
 
 .. toctree::
+
     auth.rst
     category.rst
     configtools.rst
