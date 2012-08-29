@@ -39,7 +39,7 @@ One entry is added to the module table every time :mod:`acquire.py` is called. B
 .. todo:: Draw graph with database relations
 
 
-.. _database_layout_subtable:
+.. _mod-dev-subtable:
 
 Subtable System
 ^^^^^^^^^^^^^^^
@@ -112,12 +112,25 @@ HappyFace makes use of class wide variables to define several aspects of the mod
 
     *optional*
 
-    A dictionary where the key is the name of the subtable, e.g. *details*, and the values are tuples like :data:`table_colums`. They are the data columns for the subtable and the corresponding archive links. For more information about subtables, see :ref:`database_layout_subtable`
+    A dictionary where the key is the name of the subtable, e.g. *details*, and the values are tuples like :data:`table_colums`. They are the data columns for the subtable and the corresponding archive links. For more information about subtables, see :ref:`mod-dev-subtable`
     
     The subtable names are not passed to the database as they are, but are prepended with the module name to ensure uniqueness. Therefore, two modules can use the same subtable name without problems.
 
 Class Methods
 -------------
+:class:`hf.module.ModuleBase` does provide several convenience functions that are used when the HTML weboutput is created, as well as default implementations for some optional actions the module can perform. The functions are called during different steps of the HappyFace acquire and render run and perform specific actions.
+
+In total, the user must implement at least one method, :meth:`hf.module.ModuleBase.extractData`, to populate the database and optionally, a set of the following methods
+* :meth:`hf.module.ModuleBase.prepareAcquisition`
+* :meth:`hf.module.ModuleBase.fillSubtables`
+* :meth:`hf.module.ModuleBase.getTemplateData`
+
+Please refer to the linked documentation of :class:`hf.module.ModuleBase` and the :ref:`mod-dev-step-guide`. for implementation details 
+
+HTML Templates, Generating Output
+=================================
+
+.. _mod-dev-step-guide:
 
 Step-by-Step Guide
 ==================

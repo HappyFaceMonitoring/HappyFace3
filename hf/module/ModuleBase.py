@@ -179,14 +179,14 @@ class ModuleBase:
     def fillSubtables(self, module_entry_id):
         """
         Override this method if your module uses subtables, to fill
-        them with the data from :meth:`ModuleBase.extractData`.
+        them with the data from :meth:`extractData`.
         
         To fill the subtable, you need the sqlalchemy table class and issue
         one or more insert statements. The Table classes are available in
-        the :attr:`hf.module.ModuleBase.subtables` dictionary, where the
+        the :attr:`subtables` dictionary, where the
         key is the name specified in :data:`subtable_columns`.
         
-        For more information about subtables, see :ref:`database_layout_subtable`
+        For more information about subtables, see :ref:`mod-dev-subtable`
                 
         :param module_entry_id: The ID of the module table entry that works as parent to
                                 the subtable entries added by this call.
@@ -238,6 +238,20 @@ class ModuleBase:
         return self.instance_name
     
     def getStatusString(self):
+        """
+        Get a string describing the status of the module.
+        
+        Depending of the module type the string is different, it can
+        be used for example to get the name of an icon.
+        
+        It is one of *noinfo*, *happy*, *neutral*,
+        *unhappy*, *unavail_plot*, *avail_plot*.
+        
+        .. note::
+            This method only works in the render process.
+        
+        :rtype: string
+        """
         if self.isUnauthorized():
             return 'noinfo' if self.type == 'rated' else 'unavail_plot'
         icon = 'unhappy'
@@ -256,16 +270,45 @@ class ModuleBase:
         return icon
     
     def url(self, only_anchor=True, time=None):
+        """
+        Get the URL to this module.
+        
+        :param only_anchor: If true, only the anchor part is returned
+        :param time: If not None, the timestamp is included within the URL
+        :type time: datetime or None
+        """
         # something along ?date=2012-03-24&amp;time=17:20&amp;t=batchsys&amp;m=${module.instance_name}
         return ('' if only_anchor else self.category.url(time=time)) + u"#" + self.instance_name
         
     def getStatusIcon(self):
+        """
+        Get URL to a large status icon for the current module state.
+        
+        This function uses the icons located in *path.template_icons_url*.
+        
+        .. note::
+            This method only works in the render process.
+        """
         return os.path.join(hf.config.get('paths', 'template_icons_url'), 'mod_'+self.getStatusString()+'.png')
     
     def getNavStatusIcon(self):
+        """
+        Get URL to a small status icon for the current module state.
+        
+        This function uses the icons located in *path.template_icons_url*.
+        
+        .. note::
+            This method only works in the render process.
+        """
         return os.path.join(hf.config.get('paths', 'template_icons_url'), 'nav_'+self.getStatusString()+'.png')
         
     def getPlotableColumns(self):
+        """
+        Get the names of all columns than can be plotted, that is they
+        are numerical and probably no IDs.
+        
+        :rtype: list
+        """
         blacklist = ['id', 'run_id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
         types = [Integer, Float, Numeric]
         def isnumeric(cls):
@@ -277,12 +320,39 @@ class ModuleBase:
         return [col.name for col in numerical_cols if col.name not in blacklist]
     
     def isAccessRestricted(self):
+        """
+        Find out if access to the module is restricted.
+        
+        :rtype: boolean
+        :return: * True if a valid certificate is required to access the module
+                 * False if access is open to anyone
+        """
         return self.config['access'] != 'open'
     
     def isUnauthorized(self):
+        """
+        Check if the user from this request is authorized to access the module.
+        This takes into account the module restriction and the user certificate,
+        if available.
+        
+        .. note:: This method only works in the render process.
+        
+        :rtype: boolean
+        :return: * True if the user must not access the module
+                 * False if the user may access the module
+        """
         return self.config['access'] == 'restricted' and not cp.request.cert_authorized
         
     def getPlotableColumnsWithSubtables(self):
+        """
+        Get the names of all columns than can be plotted, that is they
+        are numerical and probably no IDs, for the module table and
+        all subtables.
+        
+        The key of the module table is the empty string.
+        
+        :rtype: dict (subtable => list of columns)
+        """
         cols = {'': self.getPlotableColumns()}
         
         blacklist = ['id', 'parent_id']
@@ -300,6 +370,13 @@ class ModuleBase:
         return cols
         
     def getAllColumnsWithSubtables(self):
+        """
+        Get the names of all columns for the module table and
+        all subtables. The key of the module table is the empty
+        string, the other keys are the names of the subtables.
+        
+        :rtype: dict (subtable => list of columns)
+        """
         blacklist = ['id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
         blacklist_sub = ['id', 'parent_id']
         cols = {'': [col.name for col in self.module_table.columns if col.name not in blacklist]}
@@ -307,7 +384,12 @@ class ModuleBase:
             cols[name] = [col.name for col in table.columns if col.name not in blacklist_sub]
         
         return cols
+    
+    
     def render(self):
+        """
+        Return a string with the rendered HTML module
+        """
         module_html = ''
         if self.template is None:
             return '<p class="error">Rendering module %s failed because template was not loaded</p>' % self.instance_name
