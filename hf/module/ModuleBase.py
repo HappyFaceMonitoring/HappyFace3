@@ -265,6 +265,8 @@ class ModuleBase:
                     icon = 'neutral'
                 else:
                     icon = 'unhappy'
+            elif self.type == 'unrated':
+                icon ='happy'
             else:
                 icon = 'avail_plot' if self.dataset['status'] > 0.9 else 'unavail_plot'
         return icon
