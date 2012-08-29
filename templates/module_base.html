@@ -41,5 +41,9 @@ past = run['time'] - timedelta(days = 2)
       <input name="submit" type="submit" value="Plot" />
      </form>
     </div>
+% if no_data:
+    <p>No data at this point in time!</p>
+% else:
     ${self.content()}
+% endif
 </dd>
