@@ -82,6 +82,8 @@ The module class is derived from :class:`hf.module.ModuleBase` and the naming sh
 
 Any class defiving from :class:`hf.module.ModuleBase` found in the modules directory somewhere is considered a HappyFace module. It is then checked if 
 
+.. _mod-dev-classvars:
+
 Special Class Variables
 -----------------------
 HappyFace makes use of class wide variables to define several aspects of the module.

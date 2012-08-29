@@ -1,11 +1,11 @@
-==============
-Core Reference
-==============
+========================================
+:mod:`hf.module` -- Module Functionality
+========================================
 
-The HappyFace Core reference documents all classes and functions provided by HappyFace.
+.. module:: hf.module.ModuleBase
+    :noindex:
 
-.. note::
-    Hallo
+.. autoclass:: ModuleMeta
 
 .. module:: hf.module
 

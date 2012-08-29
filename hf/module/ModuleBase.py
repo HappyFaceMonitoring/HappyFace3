@@ -7,6 +7,15 @@ import logging, traceback, os, re
 from sqlalchemy import Integer, Float, Numeric, Table, Column, Sequence, Text, Integer, Float, ForeignKey
 
 class ModuleMeta(type):
+    """
+    Meta Class of :class:`ModuleBase`.
+    
+    Its purpose is checking for the declarative module specification as described in :ref:`mod-dev-classvars`,
+    as well as registering module classes in the system and creating additional variables based on the
+    declaration.
+    
+    
+    """
     def __init__(self, name, bases, dct):
         if name == "ModuleBase":
             super(ModuleMeta, self).__init__(name, bases, dct)
