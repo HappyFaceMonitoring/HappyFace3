@@ -19,9 +19,16 @@ def execute():
     
     if not hf.module.moduleClassLoaded(args.module):
         print >> sys.stderr, sys.argv[0]+": The module '%s' was not found" % args.module
+        sys.exit(-1)
     
     ModuleClass = hf.module.getModuleClass(args.module)
     print '[INSTANCE_NAME]'
+    print 'module =', args.module
+    print 'name = '
+    print 'description = '
+    print 'instruction = '
+    print 'type = rated'
+    print 'weight = 1.0'
     if not args.no_comment and len(ModuleClass.config_hint) > 0:
         print '# ' + ModuleClass.config_hint
     print ''
