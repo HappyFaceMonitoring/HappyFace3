@@ -1,3 +1,8 @@
+"""
+
+.. data:: config
+"""
+
 from Category import Category
 from dispatcher import Dispatcher
 from CategoryProxy import CategoryProxy
@@ -26,3 +31,5 @@ def createCategoryObjects():
             used_modules.append(module)
         category_list.append(hf.category.CategoryProxy(category, conf, module_conf))
     return category_list
+
+__all__ = ["Category", "CategoryProxy", "Dispatcher", "renderXmlOverview", "algorithms"]

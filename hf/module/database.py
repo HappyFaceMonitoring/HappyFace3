@@ -1,3 +1,13 @@
+"""
+.. data:: module_instance
+
+    Test
+
+.. data:: hf_runs
+
+    123
+
+"""
 
 import hf.database
 from sqlalchemy import *

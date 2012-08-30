@@ -8,7 +8,7 @@ from sqlalchemy import Integer, Float, Numeric, Table, Column, Sequence, Text, I
 
 class ModuleMeta(type):
     """
-    Meta Class of :class:`ModuleBase`.
+    Meta Class of :class:`ModuleBase <hf.module.ModuleBase>`.
     
     Its purpose is checking for the declarative module specification as described in :ref:`mod-dev-classvars`,
     as well as registering module classes in the system and creating additional variables based on the
@@ -38,7 +38,10 @@ class ModuleMeta(type):
         if not hasattr(self, 'extractData'):
             raise hf.exceptions.ModuleProgrammingError(name, "extractData not implemented")
         
-        self.addModuleClass(name)
+        if name in _module_class_list:
+            raise hf.exception.ConfigError('A module with the name %s was already imported!' % name)
+        self.module_name = name
+        _module_class_list[name] = self
         
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         tabname = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -91,49 +94,81 @@ class ModuleMeta(type):
         table.module_class = self
         return table
 
-    def addModuleClass(self, name):
-        if name in _module_class_list:
-            raise hf.exception.ConfigError('A module with the name %s was already imported!' % name)
-        self.module_name = name
-        _module_class_list[name] = self
-        
     def addColumnFileReference(self, table, column):
         name = table.name if isinstance(table, Table) else table
         _column_file_list[name] = _column_file_list[name]+[column] if name in _column_file_list else [column]
 
 class ModuleBase:
-    """Base class for HappyFace modules.
-       A module provides two core functions:
+    """ Base class for HappyFace modules.
+        A module provides two core functions:
+        
+        1) Acquisition of data through the methods
+        
+            1) prepareAcquisition: Specify the files to download
+            2) extractData: Return a dictionary with data to fill into the database
+            3) fillSubtables: to write the datasets for the modules subtables
+        
+        2) Rendering the module by returning a template data dictionaryin method getTemplateData.
+        
+        Because thread-safety is required for concurrent rendering, the module itself
+        MUST NOT save its state during rendering. The modules functions are internally
+        accessed by the ModuleProxy class.
+        
+        The status of the module represents a quick overview over the current module
+        status and fitness.
+        
+        * 0.66 <= status <= 1.0  The module is happy/normal operation
+        * 0.33 <= status < 0.66  Neutral, there are things going wrong slightly.
+        * 0.0  <= status < 0.33  Unhappy, something is very wrong with the monitored modules
+        * status = -1            An error occured during module execution
+        * status = -2            Data could not be retrieved (download failed etc.)
+        
+        The category status is calculated with a user specified algorithm from the statuses
+        of the modules in the category. If there is missing data or an error, the category
+        index icon is changed, too.
+        
+        In practice, there is no "visual" difference between status -1 and -2, but there might
+        be in future.
+        
+        It makes use of the :class:`ModuleMeta <hf.module.ModuleBase.ModuleMeta>` class internally.
        
-       1) Acquisition of data through the methods
-       
-          1) prepareAcquisition: Specify the files to download
-          2) extractData: Return a dictionary with data to fill into the database
-          3) fillSubtables: to write the datasets for the modules subtables
-       
-       2) Rendering the module by returning a template data dictionaryin method getTemplateData.
-       
-       Because thread-safety is required for concurrent rendering, the module itself
-       MUST NOT save its state during rendering. The modules functions are internally
-       accessed by the ModuleProxy class.
-    
-       The status of the module represents a quick overview over the current module
-       status and fitness.
-       
-       * 0.66 <= status <= 1.0  The module is happy/normal operation
-       * 0.33 <= status < 0.66  Neutral, there are things going wrong slightly.
-       * 0.0  <= status < 0.33  Unhappy, something is very wrong with the monitored modules
-       * status = -1            An error occured during module execution
-       * status = -2            Data could not be retrieved (download failed etc.)
-    
-       The category status is calculated with a user specified algorithm from the statuses
-       of the modules in the category. If there is missing data or an error, the category
-       index icon is changed, too.
-    
-       In practice, there is no "visual" difference between status -1 and -2, but there might
-       be in future.
-       
+        .. attribute:: module_table
 
+        .. attribute:: subtables
+
+        .. attribute:: module_name
+            
+        .. attribute:: instance
+            
+        .. attribute:: config
+            
+        .. attribute:: run
+            
+        .. attribute:: dataset
+        
+        .. attribute:: category
+            
+        .. attribute:: template
+
+        .. attribute:: weigth
+
+        .. attribute:: type
+        
+        .. method:: extractData()
+        
+            Mandatory function to process some data and return it in a format that can be used to
+            populate the module table. Downloaded files, e.g. in XML format, should be parsed here.
+            
+            If a part of the extracted data cannot be stored in the module table, but must be passed to
+            a subtable, save it in a class variable. Then, save it into the databe with your own
+            implementation of :meth:`fillSubtables`.
+            
+            For more information about subtables
+        
+            :return: A dictionary where the names of module table columns and the values are the data
+                    to be inserted into the database. If a column is specified as a file column,
+                    objects with an *getArchiveFilename()* method are accepted. This is the case for
+                    :class:`hf.downloadservice.DownloadFile`, returned by the download service.
     """
     
     __metaclass__ = ModuleMeta

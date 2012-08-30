@@ -11,25 +11,18 @@ __module_class_list = {}
 
 
 def getColumnFileReference(table):
+    """
+    Get a list of columns for a table that point to a file in the
+    archive directory.
+    :param table: Table to get the file columns for
+    :ptype table: string or Table
+    :returns: list of column names
+    """
     name = table.name if isinstance(table, Table) else table
     return __column_file_list[name] if name in __column_file_list else []
     
 def moduleClassLoaded(mod_class):
     return mod_class in __module_class_list
-
-def tryModuleClassImport(mod_class):
-    if moduleClassLoaded(mod_class):
-        return
-    try:
-        pymodule = __import__('modules.'+mod_class, globals(), locals(), [], -1)
-        if not moduleClassLoaded(mod_class):
-            raise hf.ConfigError("Module '%s' not found" % mod_class)
-    except ImportError, e:
-        raise hf.ConfigError("Cannot import module '%s'" % mod_class)
-    except Exception, e:
-        # TODO logging
-        traceback.print_exc()
-        raise hf.ModuleError("Error while importing module '%s'" % mod_class)
     
 def importModuleClasses():
     module_paths = [os.path.join(hf.hf_dir, "modules")]
@@ -53,7 +46,10 @@ def importModuleClasses():
         
 
 def getModuleClass(mod_name):
+    """
+    Get the module class for a given module name.
+    :param mod_name: Name of the module
+    :ptype mod_name: string
+    """
     return __module_class_list[mod_name] if mod_name in __module_class_list else None
 
-def getModuleClassDict():
-    return __module_class_list

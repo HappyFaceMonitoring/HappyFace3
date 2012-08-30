@@ -17,14 +17,17 @@ HappyFace – The Meta Monitoring Framework
 * Simple rating system: -1 = no info / error; status float value = 0.0 .. 1.0 (critical .. fine)
 * The overall status of the categories can be calculated from the individual module statii with different algorithms. 
 
-Contents
-========
+.. Contents
+.. ========
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   installation.rst
-   module_dev.rst
-   core.rst
+    basics.rst
+    installation.rst
+    configuration.rst
+    module_dev.rst
+    core.rst
+    tools.rst
    
 Documentation Todos
 ===================
