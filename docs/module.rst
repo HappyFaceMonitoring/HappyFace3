@@ -11,6 +11,6 @@
 
 .. autoclass:: ModuleMeta
 
-        
-                
-    
+.. automodule:: hf.module.database
+    :members:
+    :undoc-members:

@@ -118,14 +118,17 @@ HappyFace makes use of class wide variables to define several aspects of the mod
     
     The subtable names are not passed to the database as they are, but are prepended with the module name to ensure uniqueness. Therefore, two modules can use the same subtable name without problems.
 
+    The resulting Table objects can be accessed via the :attr:`hf.module.ModuleBase.subtables` dictionary.
+
 Class Methods
 -------------
 :class:`hf.module.ModuleBase` does provide several convenience functions that are used when the HTML weboutput is created, as well as default implementations for some optional actions the module can perform. The functions are called during different steps of the HappyFace acquire and render run and perform specific actions.
 
 In total, the user must implement at least one method, :meth:`hf.module.ModuleBase.extractData`, to populate the database and optionally, a set of the following methods
-* :meth:`hf.module.ModuleBase.prepareAcquisition`
-* :meth:`hf.module.ModuleBase.fillSubtables`
-* :meth:`hf.module.ModuleBase.getTemplateData`
+
+* :meth:`prepareAcquisition() <hf.module.ModuleBase.prepareAcquisition>`
+* :meth:`fillSubtables() <hf.module.ModuleBase.fillSubtables>`
+* :meth:`getTemplateData() <hf.module.ModuleBase.getTemplateData>`
 
 Please refer to the linked documentation of :class:`hf.module.ModuleBase` and the :ref:`mod-dev-step-guide`. for implementation details 
 

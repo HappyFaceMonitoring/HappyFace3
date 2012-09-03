@@ -21,6 +21,7 @@ HappyFace – The Meta Monitoring Framework
 .. ========
 .. toctree::
     :maxdepth: 2
+    :numbered:
 
     basics.rst
     installation.rst

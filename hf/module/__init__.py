@@ -11,9 +11,6 @@ All of them derive from :class:`ModuleBase`, and any other
     Since this module variable is used by most category related methods,
     it is important to initialize it early.
 
-.. automodule:: hf.module.database
-    :members:
-    :undoc-members:
 """
 from module import getColumnFileReference, moduleClassLoaded, \
     importModuleClasses, getModuleClass
