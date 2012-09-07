@@ -33,7 +33,7 @@ Several aspects of HappyFace can be tuned by configuration, but usually you don'
     We found it useful in HappyFace2 to place the site configuration in a local Subversion repository, so any developer can easily get a development configuration that is identical to production and reinstalling a site after a potential crash would be easy. Because sensitive information, like database passwords, should not be checked into the repository, they can be easily placed in a separate, unrevisioned file (HappyFace2 was not able to do that!).
 
 Sections
-^^^^^^^^
+--------
 
 The following is a list of the different sections in the default configuration and their purpose and potential use.
 
@@ -73,13 +73,111 @@ The following is a list of the different sections in the default configuration a
 Logfiles
 ========
 
-The Python `logging <http://docs.python.org/library/logging.html>`_ module is used to generate log files. There are different configuration files possible for acquisition and rendering, by default they are the files ending in *\*.log* in the *defaultconfig/* directory. They are imported by the *logging* module, so please consult the Python documentation 
+The Python `logging <http://docs.python.org/library/logging.html>`_ module is used to generate log files. There are different configuration files possible for acquisition and rendering, by default they are the files ending in *\*.log* in the *defaultconfig/* directory. They are imported by the *logging* module, so please consult the Python documentation about their `format. <http://docs.python.org/library/logging.config.html#configuration-file-format>`_
 
 Modules and Categories
 ======================
 
+No actual work is done by the HappyCore, all input processing and displaying is implemented in the modules. The required configuration consists of a mechanism to create and configure module instances and then group them into categories for displaying.
+
+Directory Layout
+----------------
+You can override the locations by changing the **paths** section of the HappyFace configuration, but basically all category configuration is in *config/categories-enabled* and all module configuration in *config/modules-enabled*.
+
+The reason for the *-enabled* suffix is that we originally thought about a Debian-style configuration, where the configuration is in *-available* directories and symbolic links to them in *-enabled* directories. We do not use this at the moment, but if you like to, feel free to do it that way!
+
+As with other configuration directories, all files ending in *.cfg* are parsed in alphabetical order. Because of this, you can split up the different categories and modules over files as you wish. It is possible to have only one massive file for either modules and categories.
+
+We advice you to use one file per category, with the same name as the category, and a similarily named file for the modules, containing all the configuration for all modules in that one category. This supports the original Debian-style configuration idea, but is also a nice grouping, since it is always clear where the module is located. This also makes the maintenance and setup of similar categories rather simple.
+
+Create and Configure Module Instances
+-------------------------------------
+Each module instance has to be assigned a unique name that, it should only contain alphanumerical characters and underscores. We advice you to use a C-style **underscore_separated_name**, *not* CamelCase or something. The name is used at several places, internally, e.g. as anchor in HTML hyper links.
+
+There are certain config variables common to all modules, as well as a set of variables dependent on the module type.
+
+The easiest way to obtain a skeleton configuration is to use the :ref:`tool-modconfig` tool. Just pass it the module type as a name and you get a skeleton you can easily adapt.
+
+Common module configuration variables are
+
+**module**
+    The name of the module class that is used. If it does not correspond to one of the classes in the *modules/*, the world will be sucked into a cosmic singularity.
+
+**name**
+    A verbose name for the generated output
+
+**description**
+    .. todo:: what is it?
+
+**instruction**
+    What should a shifter do if this module fails? Displayed in the module panel on the weboutput.
+
+**type**
+    How the module will affect category status calculations. Possible values are
+    
+    *rated*
+        Uses status mechanism and is taken into account when calculating the status of a rated category
+
+    *unrated*
+        A status is calculated and displayed for the module, but it is ignored when calculating the category status.
+
+    *plots*
+        The status only encodes "got data" and "got no data", taken into account by plots categories.
+
+**weight**
+    A numerical value that should be between 0.0 and 1.0 that might be taken into account by some algorithms to calculate the category status.
+        
+
+Example
+^^^^^^^
+
+As an example, consider we want to configure an instance of the *Plot* module, downloading an image from *https://example.com/file.png*. To obtain a basic configuration, we type the following command on the command line
+
+.. code-block:: bash
+
+    python ./tools.py modconfig Plot
+
+and are rewarded with the following output
+
+.. code-block:: ini
+
+    [INSTANCE_NAME]
+    module = Plot
+    name = 
+    description = 
+    instruction = 
+    type = rated
+    weight = 1.0
+
+
+    # Enable the mechanism to include two timestamps in the GET part of the URL
+    use_start_end_time = False
+
+    # Name of the GET argument for the end timestamp, which is now
+    endtime_parameter_name = endtime
+
+    # URL of the image to display
+    plot_url = 
+
+    # Name of the GET argument for the starting timestamp
+    starttime_parameter_name = starttime
+
+    # How far in the past is the start timestamp (in seconds)
+    timerange_seconds = 259200
+
+All we have to do now is replace the section name, change the *type* to *plots*, set a verbose name and insert a valid download command for the *plot_url* variable.
+
+Configuring Categories
+----------------------
+
+.. todo:: write something here
+
 Updating the Site
 =================
+
+Update the core, update the modules, restart the server (pkill apache2 as unprivileged HappyFace user with mod_wsgi configured accordingly), run *dbupdate* tool.
+
+.. todo:: Maybe go into some details
 
 .. _config_certs:
 
@@ -91,7 +189,7 @@ In the section :ref:`apache_cert` we covered the neccessary configuration for th
 HappyFace gets a certificate DN from Apache but still has to decide if access is granted to that particular user. And secondly, we need to tell HappyFace which modules and categories need to be secured, after all.
 
 HappyFace Configuration
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 After the client certificate is verified (it matches the given root certificates), HappyFace checks if its DN is authorized to access the secured parts of HappyFace.
 
 Two mechanisms are available for this in HappyFace, which can be configured in the [auth] section of the HappyFace configuration. From the default configuration we have
@@ -147,7 +245,7 @@ An example utilizing a Python script to query sitedb. Anyone with a CMS account 
             con.close()
 
 Module and Category Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 Limiting access to a module or complete category is very simple. In both the module and category configuration files, the *access* option is supported.
 
 For modules, it must be set to *restricted* or *open*. By default, if *access* is not specified, *open* is assumed. These may be overridden by the category access.
