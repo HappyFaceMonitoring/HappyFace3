@@ -29,6 +29,7 @@ HappyFace – The Meta Monitoring Framework
     module_dev.rst
     core.rst
     tools.rst
+    license.rst
    
 Documentation Todos
 ===================
