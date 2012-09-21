@@ -129,4 +129,4 @@ class Dispatcher(object):
                 self.logger.debug(traceback.format_exc())
                 raise
         # if we get here, 404!
-        return "404" # TODO 404!
+        raise cp.HTTPError(404)

@@ -1,5 +1,5 @@
 @charset "UTF-8";
-
+/* With courtesy of Dominik Pschenitschni */
 /* CSS configuration for the main HappyFace setup and the tabbed browsing
  * part.
  *
@@ -13,7 +13,6 @@
  * All class/id definitions should start with Happy...
  */
  
-/* With courtesy of Dominik Pschenitschni */
 /* http://meyerweb.com/eric/thoughts/2007/05/01/reset-reloaded/ mit eigenen Ãnderungen */
 * {
     margin:0;

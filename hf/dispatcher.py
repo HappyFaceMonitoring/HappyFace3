@@ -22,12 +22,17 @@ import hf.plotgenerator
 from sqlalchemy import *
 from mako.template import Template
 from datetime import timedelta
+from cherrypy import _cperror
 
 class RootDispatcher(object):
     """
     The main HF Dispatcher
     """
-    _cp_config = { 'tools.cert_auth.on': True }
+    _cp_config = {
+        'tools.cert_auth.on': True,
+        'tools.encode.on': True,
+        'tools.encode.encoding': 'utf8', 
+    }
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = hf.category.createCategoryObjects()
@@ -37,6 +42,10 @@ class RootDispatcher(object):
         for category in self.category_list:
             for module in category.module_list:
                 self.module_map[module.instance_name] = module
+        cp.config.update({
+            'error_page.default': self.errorPage,
+        })
+
     
     @cp.expose
     def index(self):
@@ -65,3 +74,31 @@ class RootDispatcher(object):
         self.logger.warning("""Unable to map file '%s' to module!
 Perhaps the corresponding module was removed from the HF config or the file does not start with the module instance name (this is an error in the module).""")
         return False
+
+    def errorPage(self, **kwargs):
+        self.logger.debug(_cperror.format_exc())
+        try:
+            args = {
+                "message": kwargs['status'],
+                "details": "",
+            }
+            try:
+                template_context, category_dict, run = self.category.prepareDisplay()
+                template_context.update(args)
+                
+                filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "error.html")
+                template = Template(filename=filename, lookup=hf.template_lookup)
+                return template.render(**template_context)
+                
+            except Exception, e:
+                self.logger.debug("Fancy error page generation failed\n" + traceback.format_exc())
+                filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "plain_error.html")
+                template = Template(filename=filename, lookup=hf.template_lookup)
+                return template.render(**template_context)
+                
+        except Exception, e:
+            self.logger.error(u"error page generation failed: "+unicode(e))
+            self.logger.debug(traceback.format_exc())
+            return u"""<h1>Error Inception</h1>
+            <p>An error occured while displaying an error. Embarrasing.</p>
+            <p>Please consult the log files!</p>"""
