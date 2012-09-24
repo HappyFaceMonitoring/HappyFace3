@@ -149,26 +149,53 @@ class ModuleBase:
         It makes use of the :class:`ModuleMeta <hf.module.ModuleBase.ModuleMeta>` class internally.
        
         .. attribute:: module_table
+        
+            Sqlalchemy *Table* object of the modules main data table
 
         .. attribute:: subtables
+            
+            A dictionary of sqlalchemy *Table* objects, with their given names
+            as key.
 
         .. attribute:: module_name
+        
+            The name of the module class.
             
-        .. attribute:: instance
+            .. note:: This is **not** the name of a specific instance!
+            
+        .. attribute:: instance_name
+        
+            The name of the instance of the module currently processed.
             
         .. attribute:: config
+        
+            A dictionary with the module configuration
             
         .. attribute:: run
+        
+            Only available in :meth:`.getTemplateData`. A dictionary
+            with the *id* and *time* of the current run to be displayed.
             
         .. attribute:: dataset
         
+            Only available in :meth:`.getTemplateData`. The data dictionary from
+            the module table for the currently processed run.
+        
         .. attribute:: category
+        
+            A reference to the :class:`hf.category.Category` object where the module is in.
             
         .. attribute:: template
+        
+            The Mako *Template* object.
 
         .. attribute:: weigth
+        
+            The 0..1 weight used in some category rating algorithms.
 
         .. attribute:: type
+        
+            Either *plots*, *rated* or *unrated*.
         
         .. method:: extractData()
         
@@ -231,14 +258,14 @@ class ModuleBase:
     
     def prepareAcquisition(self):
         """
-        Override this method if your module needs to download data,
+        **Override** this method if your module needs to download data,
         or has to perform some other action prior to the data acquisition run.
         """
         pass
     
     def fillSubtables(self, module_entry_id):
         """
-        Override this method if your module uses subtables, to fill
+        **Override** this method if your module uses subtables, to fill
         them with the data from :meth:`extractData`.
         
         To fill the subtable, you need the sqlalchemy table class and issue
@@ -284,8 +311,11 @@ class ModuleBase:
     
     def getTemplateData(self):
         """
-        Override this method if your template requires special
+        **Override** this method if your template requires special
         preprocessing of data or you have data in subtables.
+        
+        The :attr:`.dataset` and :attr:`.run` attributes are
+        available in this method.
         
         :return: A dictionary that extends the Mako template namespace.
         """
