@@ -55,7 +55,7 @@ class ModuleMeta(type):
             raise hf.exceptions.ModuleProgrammingError(name, "extractData not implemented")
         
         if name in _module_class_list:
-            raise hf.exception.ConfigError('A module with the name %s was already imported!' % name)
+            raise hf.exceptions.ConfigError('A module with the name %s was already imported!' % name)
         self.module_name = name
         _module_class_list[name] = self
         
