@@ -122,7 +122,7 @@ class Dispatcher(object):
                 for cat in category_list:
                     template_context["module_list"].extend(cat.module_list)
                 if plt_type == "time":
-                    test= self.timeseries_template.render(**template_context)
+                    test= self.timeseries_template.render_unicode(**template_context)
                     return test
             except Exception,e:
                 self.logger.error("Plot interface hander failed: "+str(e))

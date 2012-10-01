@@ -496,14 +496,14 @@ class ModuleBase:
             }
             if self.dataset is None:
                 template_data['no_data'] = True
-                module_html = self.template.render(**template_data)
+                module_html = self.template.render_unicode(**template_data)
             else:
                 template_data.update(self.getTemplateData())
                 template_data['no_data'] = False
-                module_html = self.template.render(**template_data)
+                module_html = self.template.render_unicode(**template_data)
         except Exception, e:
             module_html = "<p class='error'>Final rendering of '%s' failed completely!</p>" % self.instance_name
-            self.logger.error("Rendering of module %s failed: %s" %(self.module_name, str(e)))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error("Rendering failed: " + str(e))
+            self.logger.error(traceback.format_exc())
         return module_html
         

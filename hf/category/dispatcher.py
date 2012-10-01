@@ -146,7 +146,7 @@ class Dispatcher(object):
                 if category is None:
                     filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "index.html")
                     index_template = Template(filename=filename, lookup=hf.template_lookup)
-                    doc = index_template.render(**template_context)
+                    doc = index_template.render_unicode(**template_context)
                 elif category is not None and not category in category_dict:
                     raise cp.HTTPError(404)
                 elif category is not None:

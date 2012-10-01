@@ -88,13 +88,13 @@ Perhaps the corresponding module was removed from the HF config or the file does
                 
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
-                return template.render(**template_context)
+                return template.render_unicode(**template_context)
                 
             except Exception, e:
                 self.logger.debug("Fancy error page generation failed\n" + traceback.format_exc())
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "plain_error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
-                return template.render(**template_context)
+                return template.render_unicode(**template_context)
                 
         except Exception, e:
             self.logger.error(u"error page generation failed: "+unicode(e))

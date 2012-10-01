@@ -128,7 +128,7 @@ class Category:
         template_context['category_module_list'] = self.module_list
         template_context['module_contents'] = module_contents
         try:
-            return self.template.render(**template_context)
+            return self.template.render_unicode(**template_context)
         except Exception, e:
             self.logger.error("Rendering failed: %s" % str(e))
             self.logger.debug(traceback.format_exc())

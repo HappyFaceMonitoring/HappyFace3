@@ -38,4 +38,4 @@ def renderXmlOverview(run, template_context):
         return u''
     cp.response.headers['Content-Type'] = "text/xml"
     template_context['protocol_host'] = cp.request.base
-    return template.render(**template_context)
+    return template.render_unicode(**template_context)
