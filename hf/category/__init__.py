@@ -25,6 +25,7 @@ from CategoryProxy import CategoryProxy
 from xml import renderXmlOverview
 import algorithms
 import hf
+from ConfigParser import NoSectionError
 
 config = None
 
@@ -40,11 +41,17 @@ def createCategoryObjects():
         conf = dict(hf.category.config.items(category))
         module_conf = {}
         for module in conf["modules"].split(","):
-            if len(module) == 0: continue
-            if module in used_modules:
-                raise hf.ConfigError("Module '%s' used second time in category '%s'" % (module, category))
-            module_conf[module] = dict(hf.module.config.items(module))
-            used_modules.append(module)
+            try:
+                if len(module) == 0: continue
+                if module in used_modules:
+                    raise hf.ConfigError("Module '%s' used second time in category '%s'" % (module, category))
+                module_conf[module] = dict(hf.module.config.items(module))
+                used_modules.append(module)
+            except NoSectionError, e:
+                msg = "Tried to use module '%s' in category '%s', but it was never mentioned in module configuration"
+                raise hf.exceptions.ConfigError(msg % (module, category))
+                
+                
         category_list.append(hf.category.CategoryProxy(category, conf, module_conf))
     return category_list
 
