@@ -27,13 +27,19 @@
 }
 :focus, :hover, :active { outline:0; }
 body {
-    font:12px/22px "HelveticaNeue-Light", Helvetica, Arial, Verdana, sans-serif;
+    font:14px/22px "HelveticaNeue-Light", Helvetica, Arial, Verdana, sans-serif;
     text-align:left; /*zwingt den IE zur mittigen Positionierung...*/
     font-weight:normal;
     color:#000;
 }
 
-
+p.error {
+    color: #800;
+    /*margin-left: 5px;*/
+    padding: 5px;
+    margin-left: 10px;
+    font: bold 15px "HelveticaNeue-Light", Helvetica, Arial, Verdana, sans-serif;
+}
 
 a         { color:#1369bf; text-decoration:none; outline:0; }
 a:visited { color:#5f9ddb; }
@@ -134,6 +140,7 @@ p { display: block; margin-bottom: 15px}
     padding: 80px 5px 5px 10px;
     background-repeat: no-repeat;
     background-position: 18px 5px;
+    text-align: center;
 }
 
 #category_bar a {
