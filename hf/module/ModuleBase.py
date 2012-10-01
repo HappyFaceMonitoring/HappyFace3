@@ -21,6 +21,7 @@ from mako.template import Template
 import cherrypy as cp
 import logging, traceback, os, re
 from sqlalchemy import Integer, Float, Numeric, Table, Column, Sequence, Text, Integer, Float, ForeignKey
+from sqlalchemy.exc import DatabaseError
 
 class ModuleMeta(type):
     """
@@ -237,6 +238,11 @@ class ModuleBase:
         self.dataset = dataset
         self.template = template
         self.category = None # set by CategoryProxy.getCategroy() after creating specific module instances
+        
+        if self.dataset and "error_string" in self.dataset:
+            self.error_string = self.dataset['error_string']
+        else:
+            self.error_string = ''
         
         if not "type" in self.config:
             self.type = "unrated"
@@ -494,15 +500,22 @@ class ModuleBase:
                 'run': self.run,
                 'hf': hf
             }
-            if self.dataset is None:
+            if self.dataset is None or len(self.error_string) > 0:
                 template_data['no_data'] = True
                 module_html = self.template.render_unicode(**template_data)
             else:
-                template_data.update(self.getTemplateData())
-                template_data['no_data'] = False
-                module_html = self.template.render_unicode(**template_data)
+                try:
+                    template_data.update(self.getTemplateData())
+                    template_data['no_data'] = False
+                    module_html = self.template.render_unicode(**template_data)
+                except DatabaseError, e:
+                    template_data['no_data'] = True
+                    self.error_string = "A database error occured. Probably the database schema needs to be updated!"
+                    module_html = self.template.render_unicode(**template_data)
+                    self.logger.error("Rendering failed: " + str(e))
+                    self.logger.error(traceback.format_exc())
         except Exception, e:
-            module_html = "<p class='error'>Final rendering of '%s' failed completely!</p>" % self.instance_name
+            module_html = "<p class='error'>Final rendering of '%s' failed completely! Please refer to the log files</p>" % self.instance_name
             self.logger.error("Rendering failed: " + str(e))
             self.logger.error(traceback.format_exc())
         return module_html

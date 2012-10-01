@@ -18,6 +18,7 @@ import hf
 import logging, traceback, os
 from mako.template import Template
 import cherrypy as cp
+from sqlalchemy.exc import DatabaseError
 
 class ModuleProxy:
     """
@@ -142,16 +143,29 @@ class ModuleProxy:
         Generate a module instance object for a specific
         HappyFace run.
         """
-        dataset = self.module_table.select(self.module_table.c.run_id==run["id"])\
-                .where(self.module_table.c.instance==self.instance_name)\
-                .execute()\
-                .fetchone()
-        if dataset is not None:
-            file_columns = hf.module.getColumnFileReference(self.module_table)
-            # create access objects for files if name is not empty, in this case None
-            dataset = dict((col, (hf.downloadservice.File(run, val) if len(val)>0 else None) if col in file_columns else val) for col,val in dataset.items())
-        template = self.template
-        module = self.ModuleClass(self.instance_name, self.config, run, dataset, template)
+        try:
+            dataset = self.module_table.select(self.module_table.c.run_id==run["id"])\
+                    .where(self.module_table.c.instance==self.instance_name)\
+                    .execute()\
+                    .fetchone()
+            if dataset is not None:
+                file_columns = hf.module.getColumnFileReference(self.module_table)
+                # create access objects for files if name is not empty, in this case None
+                dataset = dict((col, (hf.downloadservice.File(run, val) if len(val)>0 else None) if col in file_columns else val) for col,val in dataset.items())
+        except DatabaseError, e:
+            dataset = {
+                'error_string': "Unable to acquire data for module. Probably the database schema needs an update!"
+            }
+            self.logging.error("Acquisition of module data failed: " + unicode(e))
+            self.logging.error("Probably database schema needs update!")
+            self.logging.debug(traceback.format_exc())
+        except Exception, e:
+            dataset = {
+                'error_string': "Unable to acquire data for module"
+            }
+            self.logging.error("Creation of time-specific module instance failed: " + unicode(e))
+            self.logging.debug(traceback.format_exc())
+        module = self.ModuleClass(self.instance_name, self.config, run, dataset, self.template)
         return module
 
     

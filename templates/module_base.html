@@ -21,9 +21,7 @@ past = run['time'] - timedelta(days = 2)
       <li><span class="key">Status</span><span class="value">${module.dataset["status"]}</span></li>
       <li><span class="key">Description</span><span class="value">${module.dataset["description"]}</span></li>
       <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
-%endif
-% if not no_data:
-      <li><span class="key">Data source</span><span class="value"><a href="${dataset["source_url"]}">${module.dataset["source_url"]}</a></span></li>
+      <li><span class="key">Data source</span><span class="value"><a href="${module.dataset["source_url"]}">${module.dataset["source_url"]}</a></span></li>
 % endif
      </ul>
      <form class="PlotMask" action="${hf.plotgenerator.getTimeseriesUrl()}" method="get" target="_blank">
@@ -41,8 +39,11 @@ past = run['time'] - timedelta(days = 2)
       <input name="submit" type="submit" value="Plot" />
      </form>
     </div>
-% if no_data:
+% if no_data and len(module.error_string) == 0:
     <p>No data at this point in time!</p>
+% elif len(module.error_string) > 0:
+    <h3>Module Error</h3>
+    <p>${module.error_string}</p>
 % else:
     ${self.content()}
 % endif
