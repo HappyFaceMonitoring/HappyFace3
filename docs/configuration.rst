@@ -175,9 +175,36 @@ Configuring Categories
 Updating the Site
 =================
 
-Update the core, update the modules, restart the server (pkill apache2 as unprivileged HappyFace user with mod_wsgi configured accordingly), run *dbupdate* tool.
+Basically, the update flow is as follows
 
-.. todo:: Maybe go into some details
+1. update the core
+
+2. update the modules
+
+3. restart the server (e.g. *pkill apache2* as unprivileged HappyFace user with *mod_wsgi* configured accordingly)
+
+4. run *python tools.py dbupdate -f*
+
+Updating the source code of HappyFace or its modules might render the database schema incompatible. In this case, HappyFace tries to throw supportive error messages, giving you hints that schema updates might be neccessary.
+
+To update the database schema, the :ref:`tool-dbupdate` tool is used. To check if updates are neccessary, you can do a dry run. This will list all required changes.
+
+.. code-block:: bash
+
+    python tools.py dbupdate --dry
+
+.. note::
+
+    With some database backends, *dbupdate* falsely claims that altering some columns is neccessary. This is unfortunate, but should not cause any problems. Because of this a run through *dbupdate* might take some time, although basically nothing happens.
+
+    We hope to resolve this issue soon in an updated version of the *dbupdate* tool.
+
+If you see that updates are required, you can either run it interactively, without any command line parameters, or trust that all changes are valid and force the update by
+
+.. code-block:: bash
+    
+    python tools.py dbupdate --force
+
 
 .. _config_certs:
 
