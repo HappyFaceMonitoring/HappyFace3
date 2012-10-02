@@ -37,15 +37,24 @@ One entry is added to the module table every time :mod:`acquire.py` is called. B
 
  next term source_url
     An URL to the data source, if applicable. At the moment only a single URL can be specified, this is to be regarded as a current limitation of HappyFace.
-    
-.. todo:: Draw graph with database relations
-
 
 .. _mod-dev-subtable:
 
 Subtable System
 ^^^^^^^^^^^^^^^
-.. todo:: Describe subtable system
+Often you want to store more data than just a single, fixed entry in the database per run. For this the so called subtable mechanism is used. For each module, you can specify an arbitrary number of subtables. Each entry in them is linked to an entry in the module table. By this, the data is in the subtable is uniquely identified to a point in time and a specific module instance.
+
+HappyFace cannot provide you much help for filling the subtables and inserting the data into the template namespace. For that reason you have to use the sqlachemy API to insert and select the data.
+
+The following graph is a schematic overview over the relations between the main HappyFace database registry, the module tables and subtables. Only the columns common for all module and subtables are shown. In reality, there are user defined columns for module and subtables containing the actual data.
+    
+.. image:: gfx/database.png
+    :align: center
+
+Smart Database Filling
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. todo:: Describe saving database space by using the *smart filling* method.
 
 Example
 -------
@@ -126,7 +135,7 @@ Class Methods
 -------------
 :class:`hf.module.ModuleBase` does provide several convenience functions that are used when the HTML weboutput is created, as well as default implementations for some optional actions the module can perform. The functions are called during different steps of the HappyFace acquire and render run and perform specific actions.
 
-In total, the user must implement at least one method, :meth:`hf.module.ModuleBase.extractData`, to populate the database and optionally, a set of the following methods
+In total, you must implement at least one method, :meth:`hf.module.ModuleBase.extractData`, to populate the database and optionally, a set of the following methods
 
 * :meth:`prepareAcquisition() <hf.module.ModuleBase.prepareAcquisition>`
 * :meth:`fillSubtables() <hf.module.ModuleBase.fillSubtables>`
@@ -136,6 +145,49 @@ Please refer to the linked documentation of :class:`hf.module.ModuleBase` and th
 
 HTML Templates, Generating Output
 =================================
+
+By now we acquired data, stored them into the database and maybe wrote a function to retrieve data from the database again. To actually display something on the HappyFace weboutput, you need to create an HTML template first.
+
+Internally, the `Mako Template Engine <http://www.makotemplates.org/>`_ is used interpolate the data into the template.
+
+By default, the following variables are available in the template, although you usually only need few of them.
+
+*hf*
+    The HappyFace namespace, refer to the :ref:`Core documentation <core>` for an overview. Usually, you only need functions from :mod:`hf.utility` or :mod:`hf.url`.
+
+*module*
+    The module object of the current instance.
+
+*data_stale*
+    A flag that indicates if the data is stale, meaning it is older than a certain time threshold.
+
+*run*
+    The run dictionary with the information about the current run.
+
+*dataset*
+    Often the only variable you need. It is the data in the module table from the current run. This is the data you probably want to display.
+
+The template namespace is extended by the dictionary returned by :meth:`getTemplateData() <hf.module.ModuleBase.getTemplateData>`.
+
+.. todo:: Include information about CSS and JavaScript.
+
+Using Matplotlib
+================
+
+Sometimes you don't want to display raw, numerical data but instead generate a nice plot from your data. Matplotlib is the common choise for this in Python and is used by the internal plot generator.
+
+If you want to use Matplotlib in one of your modules, you must not include *pyplot* on the module level, but only in the class methods where you want to use it. If you don't do that, you will get a warning message as the following when running the server.
+
+.. code-block:: none
+
+    /usr/lib/pymodules/python2.6/matplotlib/__init__.py:856: UserWarning:  This call to matplotlib.use() has no effect
+    because the the backend has already been chosen;
+    matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+    or matplotlib.backends is imported for the first time.
+
+    if warn: warnings.warn(_use_error_msg)
+
+The reason for that is that HappyFace tries to set the backend during the configuration phase as it is requested by your configuration files. If you import *pyplot* at the module level, it is imported way before the backend is set, which subsequently fails.
 
 .. _mod-dev-step-guide:
 
