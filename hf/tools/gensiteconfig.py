@@ -25,7 +25,7 @@ so you can always recreate the same base state after manual adjustments.
 Always hitting enter results in a minimal configuration.
 """
 
-import hf, sys, traceback, os
+import hf, sys, traceback, os, stat
 try:
     import argparse
 except ImportError:
@@ -74,10 +74,17 @@ def generateConfigFiles(configuration):
     
     config_dir = configuration['local_happyface_cfg_dir'] if 'local_happyface_cfg_dir' in configuration else 'config/'
     if not os.path.exists(config_dir):
-        os.path.makedirs(config_dir)
+        os.makedirs(config_dir)
     
     for section, contents in config_output.iteritems():
         sectionToFile(config_dir, section, contents)
+        
+        # set database configuration to be not world readable
+    if 'database' in config_output:
+        os.chmod(os.path.join(config_dir, 'database.cfg'), stat.S_IRWXU | stat.S_IRWXG)
+
+def generateApache(configuration):
+    pass
 
 def execute():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -129,11 +136,13 @@ def execute():
             ('backend', 'Which Matplotlib backend for HappyFace?', 'data', 'cairo.png', None),
         ]),
         
-        ('apache', 'Do you want to create an Apache2 configuration?', 'yn', 'n', [
-            ('cert', 'Do you want to use certificate authentication?', 'yn', 'n', [
-                ('ca', 'CA certificate for client certificates', 'data', '', None),
-            ]),
-        ]),
+        #('apache', 'Do you want to create an Apache2 configuration?', 'yn', 'n', [
+        #    ('cert', 'Do you want to use certificate authentication?', 'yn', 'n', [
+        #        ('cacert', 'CA certificate for client certificates', 'data', '', None),
+        #        ('cert', 'Server certificate file', 'data', '', None),
+        #        ('key', 'Server certificate key file', 'data', '', None),
+        #    ]),
+        #]),
     ]
     loaded_presets = {}
     preset_output = {}
@@ -153,7 +162,6 @@ def execute():
                     answer = preset
                 else:
                     answer = 'y' if answer.lower()[:-1] in ('y', 'yes') else 'n'
-                print "ANSWER", answer
             elif qtype == 'data':
                 print question, '['+str(preset)+']: ',
                 answer = sys.stdin.readline()
@@ -185,8 +193,8 @@ def execute():
     
     if not args.no_cfg:
         generateConfigFiles(site_presets)
-    
-    
+        if apache in site_presets and site_presets['apache'] == 'y':
+            generateApache(site_presets)
     
     if args.outfile is None and args.interactive:
         question_structure = [
