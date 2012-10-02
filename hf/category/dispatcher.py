@@ -160,4 +160,4 @@ class Dispatcher(object):
         except Exception, e:
             self.logger.error("Page request threw exception: %s" % str(e))
             self.logger.debug(traceback.format_exc())
-            raise cp.HTTPError(500, "HappyFace threw an exception, see logfile for detailed info")
+            raise

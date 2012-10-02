@@ -20,6 +20,7 @@ import hf, datetime, time, logging, traceback, os, subprocess
 from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
+from sqlalchemy.exc import DatabaseError
 from mako.template import Template
 from datetime import timedelta
 from cherrypy import _cperror
@@ -80,8 +81,14 @@ Perhaps the corresponding module was removed from the HF config or the file does
         try:
             args = {
                 "message": kwargs['status'],
-                "details": "",
+                "details": "Please consult the log files for more information.",
+                "hint": '',
             }
+            exception_class = _cperror._exc_info()[0]
+            if issubclass(exception_class, DatabaseError):
+                args['details'] = "An database error occured, please consult the log files."
+                args['hint'] = "Maybe the database schema needs to be updated after an code update?"
+            
             try:
                 template_context, category_dict, run = self.category.prepareDisplay()
                 template_context.update(args)
@@ -94,7 +101,7 @@ Perhaps the corresponding module was removed from the HF config or the file does
                 self.logger.debug("Fancy error page generation failed\n" + traceback.format_exc())
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "plain_error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
-                return template.render_unicode(**template_context)
+                return template.render_unicode(**args)
                 
         except Exception, e:
             self.logger.error(u"error page generation failed: "+unicode(e))

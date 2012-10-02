@@ -3,11 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>${hf.config.get('template', "web_title")} - The HappyFace Project</title>
-  <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="${static_url}/favicon.ico" />
+  <title>HappyFace - ${message}</title>
  </head>
  <body>
   <h1>${message}</h1>
-  ${details}
+  <p>${details}</p>
+% if len(hint) > 0:
+  <h2>Hint</h2>
+  <p>${hint}</p>
+% endif
  </body>
 </html>
