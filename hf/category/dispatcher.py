@@ -126,7 +126,7 @@ class Dispatcher(object):
     def default(self, category=None, **kwargs):
         cp.lib.caching.expires(secs=60, force=True)
         try:
-            template_context, category_dict, run = self.prepareDisplay(**kwargs)
+            template_context, category_dict, run = self.prepareDisplay(category, **kwargs)
             
             doc = u""
             
