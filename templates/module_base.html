@@ -4,6 +4,7 @@ from datetime import timedelta
 past = run['time'] - timedelta(days = 2)
 %>
 <dt style="background-image:url('${module.getStatusIcon()}')" class="module">
+ <div id="${module.instance_name}" style="position: relative; top: -165px"></div>
  ${module.config["name"]}
  <span class="details ${'stale' if data_stale else ''}" >${run["time"].strftime("%d. %b %Y, %H:%M")}
   -
