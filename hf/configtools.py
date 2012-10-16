@@ -58,7 +58,12 @@ def readConfigurationAndEnv():
     
     directories = [hf.config.get("paths", "hf_template_dir"), hf.config.get("paths", "module_template_dir")]
     directories = map(lambda x: os.path.join(hf.hf_dir, x), directories)
-    hf.template_lookup = TemplateLookup(directories=directories, module_directory=hf.config.get("paths", "template_cache_dir"))
+    hf.template_lookup = TemplateLookup(directories=directories,
+        module_directory=hf.config.get("paths", "template_cache_dir"))
+    hf.template_escape_lookup = TemplateLookup(directories=directories,
+        module_directory=hf.config.get("paths", "template_cache_dir"), 
+        default_filters=["unicode", 'markupsafe.escape'],
+        imports=["import markupsafe"])
     
     if not os.path.exists(hf.config.get("paths", "category_cfg_dir")):
         raise hf.exceptions.ConfigError("Category config directory not found")

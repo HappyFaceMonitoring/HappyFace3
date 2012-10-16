@@ -150,7 +150,9 @@ By now we acquired data, stored them into the database and maybe wrote a functio
 
 Internally, the `Mako Template Engine <http://www.makotemplates.org/>`_ is used interpolate the data into the template.
 
-By default, the following variables are available in the template, although you usually only need few of them.
+In short, all data is filled in the template with a pattern looking like *${* **expression** *}*, where expression is a piece of Python code returning a value. By default, the expression is converted to a unicode string, if it isn't already, and then HTML special character escaping is performed. This results e.g. in the replacement of **&** to **&amp;**. If you do not want these default filters applied, to can disable them with the *n* filter as described in the `documentation. <http://docs.makotemplates.org/en/latest/filtering.html#turning-off-filtering-with-the-n-filter>`_ In that case, you need to take care of applying the filters yourself.
+
+Useful data is stored in template wide variables. By default, the following variables are available, although you usually only need few of them.
 
 *hf*
     The HappyFace namespace, refer to the :ref:`Core documentation <core>` for an overview. Usually, you only need functions from :mod:`hf.utility` or :mod:`hf.url`.
@@ -167,7 +169,7 @@ By default, the following variables are available in the template, although you 
 *dataset*
     Often the only variable you need. It is the data in the module table from the current run. This is the data you probably want to display.
 
-The template namespace is extended by the dictionary returned by :meth:`getTemplateData() <hf.module.ModuleBase.getTemplateData>`.
+The template namespace is extended by the dictionary returned by :meth:`getTemplateData() <hf.module.ModuleBase.getTemplateData>`. So if you return a dictionary with the key *super_special_data*, the variable in the template with the same name has the value of the key in the dictionary.
 
 .. todo:: Include information about CSS and JavaScript.
 

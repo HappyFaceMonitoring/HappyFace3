@@ -55,7 +55,7 @@ class ModuleProxy:
         # get the common module template
         try:
             filename = os.path.join(os.path.dirname(self.ModuleClass.filepath), self.module_name+".html")
-            self.template = Template(filename=filename, lookup=hf.template_lookup)
+            self.template = Template(filename=filename, lookup=hf.template_escape_lookup)
         except Exception, e:
             self.logger.error("Cannot create template, " + str(e))
             self.logger.debug(traceback.format_exc())
@@ -154,17 +154,18 @@ class ModuleProxy:
                 dataset = dict((col, (hf.downloadservice.File(run, val) if len(val)>0 else None) if col in file_columns else val) for col,val in dataset.items())
         except DatabaseError, e:
             dataset = {
-                'error_string': "Unable to acquire data for module. Probably the database schema needs an update!"
+                'error_string': "Unable to acquire data for module. Probably the database schema needs an update!",
+                'status': -1,
             }
-            self.logging.error("Acquisition of module data failed: " + unicode(e))
-            self.logging.error("Probably database schema needs update!")
-            self.logging.debug(traceback.format_exc())
+            self.logger.error("Acquisition of module data failed: " + unicode(e))
+            self.logger.error("Probably database schema needs update!")
+            self.logger.debug(traceback.format_exc())
         except Exception, e:
             dataset = {
                 'error_string': "Unable to acquire data for module"
             }
-            self.logging.error("Creation of time-specific module instance failed: " + unicode(e))
-            self.logging.debug(traceback.format_exc())
+            self.logger.error("Creation of time-specific module instance failed: " + unicode(e))
+            self.logger.debug(traceback.format_exc())
         module = self.ModuleClass(self.instance_name, self.config, run, dataset, self.template)
         return module
 
