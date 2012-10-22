@@ -74,6 +74,11 @@ class ModuleProxy:
         try:
             module.prepareAcquisition()
         except Exception, e:
+            exc_name = "Exception %s occured:" % str(e.__class__)
+            module.logger.error(exc_name)
+            if isinstance(e, hf.exceptions.ConfigError):
+                exc_name = "Configuration Error:"
+            module.error_string = exc_name + " " + str(e)
             module.logger.error("prepareAcquisition() failed: %s" % str(e))
             module.logger.debug(traceback.format_exc())
     
@@ -84,27 +89,30 @@ class ModuleProxy:
             data = {"instance": self.instance_name,
                     "run_id": run["id"],
                     "status": 1.0,
-                    "error_string": "",
+                    "error_string": module.error_string,
                     "source_url": "",
                     "description": self.config["description"],
                     "instruction": self.config["instruction"]
                     }
             dataExctractionSuccessfull = False
             try:
-                d = module.extractData()
-                data.update(d)
-                
-                # we treat file columns specially!
-                # If they are None -> Empty String
-                # If they are a downloaded file obj -> getArchiveFilename
-                file_columns = hf.module.getColumnFileReference(module.module_table)
-                for col in file_columns:
-                    if data[col] is None:
-                        data[col] = ''
-                    elif hasattr(data[col], 'getArchiveFilename'):
-                        data[col] = data[col].getArchiveFilename()
-                
-                dataExctractionSuccessfull = True
+                if module.error_string:
+                    data["status"] = 0.0
+                else:
+                    d = module.extractData()
+                    data.update(d)
+                    
+                    # we treat file columns specially!
+                    # If they are None -> Empty String
+                    # If they are a downloaded file obj -> getArchiveFilename
+                    file_columns = hf.module.getColumnFileReference(module.module_table)
+                    for col in file_columns:
+                        if data[col] is None:
+                            data[col] = ''
+                        elif hasattr(data[col], 'getArchiveFilename'):
+                            data[col] = data[col].getArchiveFilename()
+                    
+                    dataExctractionSuccessfull = True
             except Exception, e:
                 self.logger.error("Data extraction failed: "+str(e))
                 self.logger.debug(traceback.format_exc())

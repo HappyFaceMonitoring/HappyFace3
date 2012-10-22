@@ -500,6 +500,9 @@ class ModuleBase:
                 'run': self.run,
                 'hf': hf
             }
+            # make error string a bit more fancy
+            #if self.error_string and ":" in self.error_string:
+            #    self.error_string = re.sub(r"^([^:]+:)", "<strong>\\1</strong>", self.error_string)
             if self.dataset is None or len(self.error_string) > 0:
                 template_data['no_data'] = True
                 module_html = self.template.render_unicode(**template_data)
