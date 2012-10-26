@@ -25,6 +25,7 @@ from mako.template import Template
 from datetime import timedelta
 from cherrypy import _cperror
 
+
 class RootDispatcher(object):
     """
     The main HF Dispatcher
@@ -109,3 +110,68 @@ Perhaps the corresponding module was removed from the HF config or the file does
             return u"""<h1>Error Inception</h1>
             <p>An error occured while displaying an error. Embarrasing.</p>
             <p>Please consult the log files!</p>"""
+            
+            
+
+class CachegrindHandler(cp.dispatch.LateParamPageHandler):
+    """Callable which profiles the subsequent handlers and writes the results to disk.
+    
+    Based on _`http://tools.cherrypy.org/wiki/Cachegrind`
+    """
+    def __init__(self, next_handler):
+        self.next_handler = next_handler
+ 
+    def __call__(self):
+        """ 
+        Profile this request and output results in a cachegrind compatible format.
+        """ 
+        import cProfile
+        try:
+            import lsprofcalltree
+        except ImportError:
+            import hf.external.lsprofcalltree as lsprofcalltree
+        try:
+            p = cProfile.Profile()
+            p.runctx('self._real_call()', globals(), locals())
+        finally:
+            count = 1 
+            filename = None
+            path = cp.request.path_info.strip("/").replace("/", "_")
+            script = cp.request.app.script_name.strip("/").replace("/", "_")
+            path = path + "_" + script
+            while not filename or os.path.exists(filename):
+                filename = os.path.join(hf.hf_dir, "cachegrind.out.%s_%d" % (path, count))
+                count += 1
+            print "writing profile output to %s" % filename
+            k = lsprofcalltree.KCacheGrind(p)
+            data = open(filename, 'w+')
+            k.output(data)
+            data.close()
+        return self.result
+
+    def _real_call(self):
+        """Call the next handler and store its result."""
+        self.result = self.next_handler()
+
+
+def cachegrind():
+    """A CherryPy 3 Tool for loading Profiling requests.
+    
+    To enable the tool, just put something like this in a
+    HappyFace configuration file:
+    
+    .. code-block:: ini
+        
+        [/category]
+        tools.cachegrind.on = True
+    
+    This will enable profiling of the CherryPy code only for the category pages,
+    not static content or the plot generator. As a result the performance
+    impact is reduced and no files with uninteressting data are created.
+    """
+    cp.request.handler = CachegrindHandler(cp.request.handler)
+
+# Priority of 100 is meant to ensure that this tool runs later than all others, such that 
+# CachegrindHandler wraps all other handlers and therefore can profile them along with
+# the controller.
+cp.tools.cachegrind = cp.Tool('before_handler', cachegrind, priority=100)
