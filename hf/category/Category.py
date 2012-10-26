@@ -23,7 +23,7 @@ class Category:
     """
     For the meaning of status values, see ModuleBase docstring.
     """
-    def __init__(self, category_name, conf, module_list, run):
+    def __init__(self, category_name, conf, module_list, run, template):
         self.logger = logging.getLogger(self.__module__+'('+category_name+')')
         self.name = category_name
         self.config = conf
@@ -31,13 +31,7 @@ class Category:
         self.accessible_module_list = filter(lambda x: not x.isUnauthorized(), module_list)
         self.run = run
         self.status = -1
-        try:
-            filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "category.html")
-            self.template = Template(filename=filename, lookup=hf.template_lookup)
-        except Exception, e:
-            self.logger.error("Cannot load category template: %s" % str(e))
-            self.logger.debug(traceback.format_exc())
-            self.template = None
+        self.template = template
         try:
             self.algorithm = hf.category.algorithms.worst
             self.algorithm = getattr(hf.category.algorithms, self.config['algorithm'])

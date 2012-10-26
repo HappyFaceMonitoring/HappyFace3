@@ -56,6 +56,14 @@ class CategoryProxy:
             except Exception, e:
                 self.logger.error("Cannot add module instance %s: %s" %(instance_name, str(e)))
                 self.logger.debug(traceback.format_exc())
+        
+        try:
+            filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "category.html")
+            self.template = Template(filename=filename, lookup=hf.template_lookup)
+        except Exception, e:
+            self.logger.error("Cannot load category template: %s" % str(e))
+            self.logger.debug(traceback.format_exc())
+            self.template = None
     
     def isAccessRestricted(self):
         return self.config['access'] != 'open'
@@ -93,7 +101,7 @@ class CategoryProxy:
     
     def getCategory(self, run):
         specific_modules = [m.getModule(run) for m in self.module_list]
-        category = hf.category.Category(self.name, self.config, specific_modules, run)
+        category = hf.category.Category(self.name, self.config, specific_modules, run, self.template)
         for s in specific_modules:
             s.category = category
         return category
