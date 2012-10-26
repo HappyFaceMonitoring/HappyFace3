@@ -50,13 +50,15 @@ class RootDispatcher(object):
 
     
     @cp.expose
+    @cp.tools.caching()
     def index(self):
+        cp.lib.caching.expires(secs=300, force=True)
         raise cp.HTTPRedirect(hf.url.join(hf.config.get('paths', 'happyface_url'), 'category'))
     
     @cp.expose
-    #@cp.tools.caching()
+    @cp.tools.caching()
     def static(self, *args):
-        #cp.lib.caching.expires(secs=timedelta(365), force=True)
+        cp.lib.caching.expires(secs=timedelta(1), force=True)
         
         path = os.path.join(hf.hf_dir, hf.config.get('paths', 'static_dir'), *args)
         # archive/Y/M/D/H/M/file -> 7

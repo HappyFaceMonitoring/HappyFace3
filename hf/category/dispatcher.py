@@ -123,8 +123,10 @@ class Dispatcher(object):
         return template_context, category_dict, run
 
     @cp.expose
+    @cp.tools.caching()
     def default(self, category=None, **kwargs):
-        cp.lib.caching.expires(secs=60, force=True)
+        cp.lib.caching.expires(secs=300, force=True)
+        
         try:
             template_context, category_dict, run = self.prepareDisplay(category, **kwargs)
             
