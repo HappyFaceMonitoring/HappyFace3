@@ -17,15 +17,13 @@
 
 import os,sys
 
-
-cur_path = os.path.dirname(os.path.abspath(__file__)) if __file__ else os.getcwd()
-if __name__ != '__main__' and os.path.abspath(cur_path) != os.getcwd():
+if __name__ != '__main__':
     # unfortunately we need this rather hacky path change
     # because mod_wsgi for some reason does not want to
     # set PYTHONPATH as we want it or the interpreted
     # doesn't read it, idk
-    os.chdir(os.path.dirname(cur_path))
-    sys.path.append(os.path.dirname(cur_path))
+    os.chdir(os.path.dirname(__file__))
+    sys.path.append(os.path.dirname(__file__))
 
 import hf, cherrypy, logging
 import ConfigParser
@@ -34,7 +32,7 @@ import atexit
 logger = logging.getLogger(__name__)
 
 
-hf.hf_dir = cur_path
+hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
 hf.configtools.readConfigurationAndEnv()
 hf.configtools.setupLogging('render_logging_cfg')
 cp_config = {}
