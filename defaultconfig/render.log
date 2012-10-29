@@ -1,8 +1,8 @@
 [loggers]
-keys=root,cherrypy.error
+keys=root,cherrypy.access
 
 [handlers]
-keys=consoleHandler,fileHandler
+keys=consoleHandler,fileHandler,accessHandler
 
 [formatters]
 keys=basicFormatter,detailedFormatter
@@ -11,11 +11,11 @@ keys=basicFormatter,detailedFormatter
 level=INFO
 handlers=consoleHandler,fileHandler
 
-[logger_cherrypy.error]
-level=WARNING
-handlers=consoleHandler,fileHandler
-qualname=cherrypy.error
-propagate=1
+[logger_cherrypy.access]
+level=INFO
+handlers=accessHandler
+qualname=cherrypy.access
+propagate=0
 
 [formatter_basicFormatter]
 format=%(levelname)s:%(name)s %(message)s
@@ -26,6 +26,12 @@ class=logging.Formatter
 format=%(asctime)s  %(levelname)s:%(name)s  %(pathname)s:%(lineno)s  %(message)s
 datefmt=
 class=logging.Formatter
+
+[handler_accessHandler]
+class=FileHandler
+level=INFO
+args=("log/access.log", "a")
+formatter=detailedFormatter
 
 [handler_consoleHandler]
 class=StreamHandler
