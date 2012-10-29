@@ -20,14 +20,27 @@ import json, StringIO, traceback, logging, datetime, time
 import numpy as np
 import timeit
 from sqlalchemy.sql import select, func, or_
+from sqlalchemy import Integer, Float, Numeric
+from hf.module.database import hf_runs
 
 @hf.url.absoluteUrl
 def getTimeseriesUrl():
     return "/plot/time/"
 
+def __plotableColumns(table):
+    blacklist = ['id', 'run_id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
+    types = [Integer, Float, Numeric]
+    def isnumeric(cls):
+        for t in types:
+            if isinstance(cls,t):
+                return True
+        return False
+    numerical_cols = filter(lambda x: isnumeric(x.type), table.columns)
+    return [col for col in numerical_cols if col.name not in blacklist]
+
 def timeseriesPlot(category_list, **kwargs):
     """
-    Supported arguments (via **kwargs):
+    Supported arguments (via \**kwargs):
     
     :param curve_XXX: colon-separated curve info: (module_instance,[subtable],expr,title)
     :param filter: include only rows where specified column in result set matches value, can be specified more than once: col,value
@@ -72,6 +85,8 @@ def timeseriesPlot(category_list, **kwargs):
     errors = []
     try:
         curve_list = []
+        data_sources = set()
+        retrieved_data = {}
         title = ""
         legend = False
         ylabel = ""
@@ -95,7 +110,9 @@ def timeseriesPlot(category_list, **kwargs):
             if kwargs['renormalize'].lower() in ['true', '1']:
                 renormalize = True
         
-        # download data for curves        
+        # STAGE 1
+        # Parse curve data and scan for parameters.
+        # This gets a list from all tables that are to be retrieved in the next step.
         for key, value in kwargs.iteritems():
             if key.lower().startswith(u"curve_"):
                 try:
@@ -103,10 +120,10 @@ def timeseriesPlot(category_list, **kwargs):
                     curve_info = value.split(",")
                     if len(curve_info) < 4:
                         raise Exception("Insufficient number of arguments for plot curve")
-                    module_instance,table_name,col_name = curve_info[:3]
+                    module_instance, table_name, col_expr = curve_info[:3]
                     title = ",".join(curve_info[3:])
                     if len(title) == 0:
-                        title = module_instance + " " + col_name
+                        title = module_instance + " " + col_expr
                     if not hf.module.config.has_section(module_instance):
                         raise Exception("No such module")
                     module_class = hf.module.getModuleClass(hf.module.config.get(module_instance, "module"))
@@ -114,90 +131,101 @@ def timeseriesPlot(category_list, **kwargs):
                         table = module_class.module_table if len(table_name) == 0 else module_class.subtables[table_name]
                     except IndexError, e:
                         raise Exception("No such subtable")
-                    col = getattr(table.c, col_name)
-                    
-                    # see if user is authorized to view data
-                    try:
-                        target_category = None
-                        target_module = None
-                        for category in category_list:
-                            for mod in category.module_list:
-                                if module_instance == mod.instance_name:
-                                    target_module = mod
-                                    target_category = category
-                        if target_category is None or target_module is None:
-                            auth_required = True
-                            continue
-                        elif target_module.isUnauthorized() or target_category.isUnauthorized():
-                            auth_required = True
-                            continue
-                    except Exception, e:
-                        logger.error("Getting module privileges failed")
-                        logger.error(traceback.format_exc())
-                        auth_required = True
-                        continue
-                    
-                    hf_runs = hf.module.database.hf_runs
-                    
-                    # A helper method to create queries with all
-                    # neccessary constraints applied.
-                    def queryDatabase(query_columns):
-                        if len(table_name) == 0:
-                            # query from module table
-                            query = select(query_columns, \
-                                table.c.instance == module_instance) \
-                                .where(table.c.run_id == hf_runs.c.id)
-                        else:
-                            # query from subtable
-                            mod_table = module_class.module_table
-                            #query_columns[1] = mod_table.c.id
-                            query = select(query_columns, \
-                                mod_table.c.instance == module_instance) \
-                                .where(table.c.parent_id == mod_table.c.id) \
-                                .where(mod_table.c.run_id == hf_runs.c.id)
-                        query = query.where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None))
-                        # apply constraints
-                        if len(constraint['filter'][None]) > 0:
-                            constraint_list = [getattr(table.c, include[0]) == include[1] \
-                                for include in constraint['filter'][None]]
-                            query = query.where(or_(*constraint_list))
-                        for exclude in constraint['exclude'][None]:
-                            query = query.where(getattr(table.c, exclude[0]) != exclude[1])
-                        # apply named constraints
-                        if curve_name in constraint['filter']:
-                            for include in constraint['filter'][curve_name]:
-                                query = query.where(getattr(table.c, include[0]) == include[1])
-                        if curve_name in constraint['exclude']:
-                            for exclude in constraint['exclude'][curve_name]:
-                                query = query.where(getattr(table.c, exclude[0]) != exclude[1])
-                        
-                        # apply timerange selection
-                        if timerange is not None:
-                            query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
-                        return query
-                    
-                    query = queryDatabase([hf_runs.c.time, 0, col])
-                    
-                    # query data from database and convert datetime object to ordinal
-                    if renormalize:
-                        limits = queryDatabase([func.min(col), 0, func.max(col)]).execute().fetchone()
-                        fac = limits[2]-limits[0]
-                        if fac == 0:
-                            fac = 1.0
-                        data = [(date2num(p[0]), float(p[2] - limits[0])/fac) for p in query.execute().fetchall()]
-                    else:
-                        data = [((p[0]), p[2]) for p in query.execute().fetchall()]
-                    
-                    curve_list.append((title, data))
+                    data_sources.add((table, module_instance))
+                    curve_list.append((title, (table, module_instance, col_expr)))
                 except Exception, e:
-                    logger.warning("Retrieving plot data:\n"+traceback.format_exc())
-                    errors.append("Data '%s': %s" % (key, str(e)))
+                    logger.warning("Parsing curve failed:\n"+traceback.format_exc())
+                    errors.append("Curve '%s': %s" % (key, str(e)))
             elif key.lower() == u"legend":
                 legend = (value.lower() == "true" or value == "1")
             elif key.lower() == u"ylabel":
                 ylabel = value
             elif key.lower() == u"title":
                 title = value
+        
+        
+        # STAGE 2
+        # Download the data from all required tables
+        # in the specified timerange.
+        table_data = {}
+        for table, module_instance in data_sources:
+            try:
+                query_columns = [hf_runs.c.time]
+                query_columns.extend(__plotableColumns(table))
+                if table.name.startswith("mod"):
+                    # query from module table
+                    query = select(query_columns, \
+                        table.c.instance == module_instance) \
+                        .where(table.c.run_id == hf_runs.c.id)
+                else:
+                    # query from subtable
+                    mod_table = table.module_class.module_table
+                    #query_columns[1] = mod_table.c.id
+                    query = select(query_columns, \
+                        mod_table.c.instance == module_instance) \
+                        .where(table.c.parent_id == mod_table.c.id) \
+                        .where(mod_table.c.run_id == hf_runs.c.id)
+                query = query.where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None))
+                # apply constraints
+                if len(constraint['filter'][None]) > 0:
+                    constraint_list = [getattr(table.c, include[0]) == include[1] \
+                        for include in constraint['filter'][None]]
+                    query = query.where(or_(*constraint_list))
+                for exclude in constraint['exclude'][None]:
+                    query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                # apply named constraints
+                if curve_name in constraint['filter']:
+                    for include in constraint['filter'][curve_name]:
+                        query = query.where(getattr(table.c, include[0]) == include[1])
+                if curve_name in constraint['exclude']:
+                    for exclude in constraint['exclude'][curve_name]:
+                        query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                
+                # apply timerange selection
+                if timerange is not None:
+                    query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
+                logger.debug(query)
+                result = query.execute()
+                retrieved_data[(table, module_instance)] = (
+                    dict((col, i) for i,col in enumerate(result.keys())),
+                    result.fetchall()
+                )
+
+            except Exception, e:
+                logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+                errors.append("Data '%s': %s" % (key, str(e)))
+        
+        # STAGE 3
+        # Calculate the data structures for each curve
+        for curve_idx,(title, (table, module_instance, expr)) in enumerate(curve_list):
+            try:
+                column_index, source_data = retrieved_data[(table, module_instance)]
+                
+                num_rows = len(source_data)
+                if num_rows == 0: continue
+                
+                logger.debug("Entries in sources: %i" % num_rows)
+                dates = np.zeros(num_rows)
+                data_points = np.zeros(num_rows)
+                min_val = max_val = None
+                
+                for i,row in enumerate(source_data):
+                    variables = dict((col, row[i]) for col,i in column_index.iteritems())
+                    dates[i] = date2num(row[0])
+                    val = hf.utility.matheval(expr, variables)
+                    data_points[i] = val
+                    if min_val is None: min_val = val
+                    elif min_val > val: min_val = val
+                    if max_val is None: max_val = val
+                    elif max_val < val: max_val = val
+                
+                if renormalize:
+                    data_points = (data_points- min_val)/(max_val - min_val)
+                    
+                curve_list[curve_idx] = (title, dates, data_points)
+            except Exception, e:
+                logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+                errors.append("Data '%s': %s" % (key, str(e)))
                 
         # generate plot
         try:
@@ -231,7 +259,7 @@ def timeseriesPlot(category_list, **kwargs):
                 'label': curve[0],
                 'markersize': 4.0,
             }
-            ax.plot_date(*zip(*curve[1]), **options)
+            ax.plot_date(curve[1], curve[2], **options)
         # custom date formats
         ax.xaxis.get_major_formatter().scaled = {
             365.0  : '%Y',
