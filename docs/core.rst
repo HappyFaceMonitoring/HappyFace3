@@ -19,5 +19,6 @@ HappyFace implements many classes and functions for internal use or for external
     dispatcher.rst
     downloadservice.rst
     module.rst
+    plotgenerator.rst
     url.rst
     utility.rst

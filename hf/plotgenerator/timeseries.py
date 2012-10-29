@@ -27,20 +27,21 @@ def getTimeseriesUrl():
 
 def timeseriesPlot(category_list, **kwargs):
     """
-    Supported arguments:
-     curve_XXX: colon-separated curve info: (module_instance,[subtable],column,title)
-     filter: include only rows where specified column in result set matches value, can be specified more than once: col,value
-     filter_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
-     exclude: include only rows where specified column in result set matches value, can be specified more than once: col,value
-     exclude_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
-     legend: Show legend in image
-     title: (string) Display a title above plot
-     ylabel: self-explanatory
-     start_date: Start date (Y-m-d)
-     end_date: End date (Y-m-d)
-     start_time: Start time (H:M)
-     end_date: End time (H:M)
-     renormalize: (true, false / 1, 0) Scales all curves to a [0,1] interval
+    Supported arguments (via **kwargs):
+    
+    :param curve_XXX: colon-separated curve info: (module_instance,[subtable],expr,title)
+    :param filter: include only rows where specified column in result set matches value, can be specified more than once: col,value
+    :param filter_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
+    :param exclude: include only rows where specified column in result set matches value, can be specified more than once: col,value
+    :param exclude_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
+    :param legend: Show legend in image
+    :param title: (string) Display a title above plot
+    :param ylabel: self-explanatory
+    :param start_date: Start date (Y-m-d)
+    :param end_date: End date (Y-m-d)
+    :param start_time: Start time (H:M)
+    :param end_date: End time (H:M)
+    :param renormalize: (true, false / 1, 0) Scales all curves to a [0,1] interval
     """
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
