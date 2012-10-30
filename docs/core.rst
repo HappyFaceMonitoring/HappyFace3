@@ -12,13 +12,13 @@ HappyFace implements many classes and functions for internal use or for external
 
 .. toctree::
 
-    auth.rst
-    category.rst
-    configtools.rst
-    database.rst
-    dispatcher.rst
-    downloadservice.rst
-    module.rst
-    plotgenerator.rst
-    url.rst
-    utility.rst
+    core_auth.rst
+    core_category.rst
+    core_configtools.rst
+    core_database.rst
+    core_dispatcher.rst
+    core_downloadservice.rst
+    core_module.rst
+    core_plotgenerator.rst
+    core_url.rst
+    core_utility.rst
