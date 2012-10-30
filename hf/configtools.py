@@ -60,10 +60,15 @@ def readConfigurationAndEnv():
     directories = map(lambda x: os.path.join(hf.hf_dir, x), directories)
     hf.template_lookup = TemplateLookup(directories=directories,
         module_directory=hf.config.get("paths", "template_cache_dir"))
-    hf.template_escape_lookup = TemplateLookup(directories=directories,
-        module_directory=hf.config.get("paths", "template_cache_dir"), 
-        default_filters=["unicode", 'markupsafe.escape'],
-        imports=["import markupsafe"])
+    try:
+        import markupsafe
+        hf.template_escape_lookup = TemplateLookup(directories=directories,
+            module_directory=hf.config.get("paths", "template_cache_dir"), 
+            default_filters=["unicode", 'markupsafe.escape'],
+            imports=["import markupsafe"])
+    except ImportError:
+        hf.template_escape_lookup = hf.template_lookup
+        logger.warning("Python module 'markupsafe' not found. Web-output will not be HTML escaped!")
     
     if not os.path.exists(hf.config.get("paths", "category_cfg_dir")):
         raise hf.exceptions.ConfigError("Category config directory not found")
