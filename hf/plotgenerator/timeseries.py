@@ -204,10 +204,15 @@ def timeseriesPlot(category_list, **kwargs):
         # Calculate the data structures for each curve
         for curve_idx,(title, (table, module_instance, expr)) in enumerate(curve_list):
             try:
-                column_index, source_data = retrieved_data[(table, module_instance)]
+                try:
+                    column_index, source_data = retrieved_data[(table, module_instance)]
+                except IndexError:
+                    continue # error in stage 2
                 
                 num_rows = len(source_data)
-                if num_rows == 0: continue
+                if num_rows == 0:
+                    curve_list[curve_idx]= (title, [], [])
+                    continue
                 
                 logger.debug("Entries in sources: %i" % num_rows)
                 dates = np.zeros(num_rows)

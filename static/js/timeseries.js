@@ -101,14 +101,21 @@ function add_curve(initial_mod, initial_table, initial_variable, initial_title) 
     
     html += " </select></label></p>";
     html += " <p><label><span>Variable</span><select  id=\"curve_"+curve_num+"_variable\" name=\"curve_"+curve_num+"_variable\">";
+    var plain_expression = false; // the expression is only a variable name
     for(var idx in module_plotable_vars[first_mod][initial_table]) {
-        if(module_plotable_vars[first_mod][initial_table][idx] == initial_variable)
+        if(module_plotable_vars[first_mod][initial_table][idx] == initial_variable) {
             html += " <option selected=\"selected\">";
+            plain_expression = true;
+        }
         else
             html += " <option>";
         html += module_plotable_vars[first_mod][initial_table][idx] + "</option>";
     }
     html += " </select></label></p>";
+    if(plain_expression)
+        html += "<p><label><span>Math Expression</span><input id=\"curve_"+curve_num+"_expression\" type=\"edit\" name=\"curve_"+curve_num+"_title\" value=\"\"></label></p>";
+    else
+        html += "<p><label><span>Math Expression</span><input id=\"curve_"+curve_num+"_expression\" type=\"edit\" name=\"curve_"+curve_num+"_title\" value=\""+initial_variable+"\"></label></p>";
     html += " <p><label><span>Title</span><input id=\"curve_"+curve_num+"_title\" type=\"edit\" name=\"curve_"+curve_num+"_title\" value=\"";
     html += initial_title+"\"></label></p>";
     html += "<!--<p class='button_box floating'><a class='small add' href='#'>+</a><a class='small remove' href='#'>-</a></p>"
@@ -190,8 +197,11 @@ $("#update_plot").click(function() {
         var id_particle = "#curve_"+i;
         var mod = $(id_particle+"_module_instance option:selected").val();
         var table = $(id_particle+"_subtable option:selected").val();
+        var expression = $(id_particle+"_expression").val();
         var variable = $(id_particle+"_variable option:selected").val();
         var title = $(id_particle+"_title").val();
+        if(expression.length > 0)
+            variable = expression
         html += "<input type=\"hidden\" name=\"curve_"+i+"\" value=\""+mod+","+table+","+variable+","+title+"\" />\n";
     }
     $("#common_constraints_form fieldset").each(function(idx) {
