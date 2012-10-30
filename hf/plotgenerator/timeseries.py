@@ -186,8 +186,13 @@ def timeseriesPlot(category_list, **kwargs):
                     query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
                 logger.debug(query)
                 result = query.execute()
+                try:
+                    column_index = dict((col, i) for i,col in enumerate(result.keys()))
+                except TypeError: # backward compatibility
+                    column_index = dict((col, i) for i,col in enumerate(result.keys))
+
                 retrieved_data[(table, module_instance)] = (
-                    dict((col, i) for i,col in enumerate(result.keys())),
+                    column_index,
                     result.fetchall()
                 )
 
