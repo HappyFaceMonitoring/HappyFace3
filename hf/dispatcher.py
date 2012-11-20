@@ -50,9 +50,7 @@ class RootDispatcher(object):
 
     
     @cp.expose
-    @cp.tools.caching()
     def index(self):
-        cp.lib.caching.expires(secs=300, force=True)
         raise cp.HTTPRedirect(hf.url.join(hf.config.get('paths', 'happyface_url'), 'category'))
     
     @cp.expose
