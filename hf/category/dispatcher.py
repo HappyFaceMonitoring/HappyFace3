@@ -20,6 +20,7 @@ from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
 from mako.template import Template
+import json
 
 class Dispatcher(object):
     """
@@ -163,3 +164,63 @@ class Dispatcher(object):
             self.logger.error("Page request threw exception: %s" % str(e))
             self.logger.debug(traceback.format_exc())
             raise
+
+class AjaxDispatcher:
+    def __init__(self, category_list):
+        self.logger = logging.getLogger(self.__module__)
+        self.category_list = category_list
+        self.modules = {}
+        for category in self.category_list:
+            for module in category.module_list:
+                self.modules[module.instance_name] = module
+        self.logger.debug(self.modules)
+        
+    @cp.expose
+    @cp.tools.caching()
+    def default(self, module, run_id, **kwargs):
+        cp.lib.caching.expires(secs=300, force=True)
+        response = {"status": "unkown", "data": []}
+        try:
+            if module not in self.modules:
+                raise Exception("Module not found")
+            
+            module = self.modules[module]
+            
+            if module.isUnauthorized():
+                raise cp.HTTPError(status=403, message="You are not allowed to access this resource.")
+            
+            run = hf_runs.select(hf_runs.c.id==run_id).execute().fetchone()
+            if run is None:
+                raise Exception("The specified run ID was not found!")
+            
+            specific_module = module.getModule(run)
+            if not hasattr(specific_module, "ajax"):
+                raise Exception("Module does not export data via Ajax")
+            
+            if specific_module.error_string:
+                raise Exception(specific_module.error_string)
+            if specific_module.dataset is None:
+                raise Exception("No data at this time")
+            self.logger.debug(specific_module.error_string, specific_module.dataset)
+            response["data"] = specific_module.ajax(**kwargs)
+            response["status"] = "success"
+            
+        except cp.HTTPError, e:
+            response = {
+                "status": "error",
+                "code": e.code,
+                "reason": "%i: %s" % (e.code, e.reason),
+                "data": []
+            }
+        except Exception, e:
+            self.logger.error("Ajax request threw exception: %s" % str(e))
+            self.logger.debug(traceback.format_exc())
+            response = {
+                "status": "error",
+                "code": 500,
+                "reason": str(e),
+                "data":[]
+            }
+            
+        finally:
+            return json.dumps(response)

@@ -20,7 +20,7 @@
 """
 
 from Category import Category
-from dispatcher import Dispatcher
+from dispatcher import Dispatcher, AjaxDispatcher
 from CategoryProxy import CategoryProxy
 from xml import renderXmlOverview
 import algorithms

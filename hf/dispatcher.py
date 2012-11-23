@@ -39,6 +39,7 @@ class RootDispatcher(object):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = hf.category.createCategoryObjects()
         self.category = hf.category.Dispatcher(self.category_list)
+        self.ajax = hf.category.AjaxDispatcher(self.category_list)
         self.plot = hf.plotgenerator.Dispatcher(self.category_list)
         self.module_map = {}
         for category in self.category_list:

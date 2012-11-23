@@ -377,6 +377,10 @@ class ModuleBase:
         """
         # something along ?date=2012-03-24&amp;time=17:20&amp;t=batchsys&amp;m=${module.instance_name}
         return ('' if only_anchor else self.category.url(time=time)) + u"#" + self.instance_name
+    
+    @hf.url.absoluteUrl
+    def ajaxUrl(self):
+        return "ajax/{0}/{1}".format(self.instance_name, self.run["id"])
         
     def getStatusIcon(self):
         """
