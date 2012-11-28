@@ -183,6 +183,13 @@ dl.module_list dt{
     background-position: 8px 5px;
     background-repeat: no-repeat;
 }
+
+dl.module_list dt a { color: inherit; }
+dl.module_list dt a:hover { color: #555; text-decoration: None}
+dl.module_list dt a:visited { color: inherit; text-decoration: None}
+dl.module_list dt a:focus { color: inherit; text-decoration: None}
+dl.module_list dt a:active { color: inherit; text-decoration: None}
+
 dl.module_list dt:first-child {
     border-top-width: 0;
     background-position: 8px 0;
