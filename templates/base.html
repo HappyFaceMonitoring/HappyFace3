@@ -15,6 +15,9 @@
   <link href="${static_url}/Sort.css" rel="stylesheet" type="text/css" />
   <link href="${static_url}/ModuleBase.css" rel="stylesheet" type="text/css" />
   <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="${static_url}/favicon.ico" />
+% if automatic_reload:
+  <script type="text/javascript">$(function(){setTimeout(location.reload, ${reload_interval*60*1000});});</script>
+% endif
  </head>
  <body>
   <div id='header'>

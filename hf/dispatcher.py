@@ -85,6 +85,7 @@ Perhaps the corresponding module was removed from the HF config or the file does
                 "message": kwargs['status'],
                 "details": "Please consult the log files for more information.",
                 "hint": '',
+                "automatic_reload": False,
             }
             exception_class = _cperror._exc_info()[0]
             if issubclass(exception_class, DatabaseError):

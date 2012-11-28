@@ -117,6 +117,9 @@ class Dispatcher(object):
             'data_stale': data_stale,
             'svn_rev': self.svn_rev,
             'lock_icon': lock_icon,
+            'include_time_in_url': ('date' in kwargs or 'time' in kwargs),
+            'automatic_reload': not ('date' in kwargs or 'time' in kwargs),
+            'reload_interval': int(hf.config.get('happyface', 'reload_interval')),
         }
 
         for cat in category_list:
