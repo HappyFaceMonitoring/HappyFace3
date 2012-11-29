@@ -159,7 +159,7 @@ class ModuleProxy:
             if dataset is not None:
                 file_columns = hf.module.getColumnFileReference(self.module_table)
                 # create access objects for files if name is not empty, in this case None
-                dataset = dict((col, (hf.downloadservice.File(run, val) if len(val)>0 else None) if col in file_columns else val) for col,val in dataset.items())
+                dataset = dict((col, (hf.downloadservice.File(run, val) if val else None) if col in file_columns else val) for col,val in dataset.items())
         except DatabaseError, e:
             dataset = {
                 'error_string': "Unable to acquire data for module. Probably the database schema needs an update!",
