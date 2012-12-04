@@ -64,6 +64,10 @@ if __name__ == '__main__':
             logger.error("Setting up HappyFace failed: %s", str(e))
             logger.debug(traceback.format_exc())
             sys.exit(-1)
+            
+        # initialize plotgenerator, even if "the plot generator" is disabled.
+        # All we actually do is configuring the matplotlib backend.
+        hf.plotgenerator.init()
         
         runtime = datetime.datetime.fromtimestamp(int(time.time()))
         result = hf_runs.insert().values(time=runtime, completed=False).execute()

@@ -14,12 +14,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import hf
+import hf, logging
 from dispatcher import Dispatcher
 from timeseries import timeseriesPlot, getTimeseriesUrl
 
+logger = logging.getLogger(__name__)
+
 def init():
     """ Configure matplotlib backends by hf-configuration. Call before any plot-commands """
-    import matplotlib
-    matplotlib.use(hf.config.get('plotgenerator', 'backend'))
+    try:
+        import matplotlib
+        matplotlib.use(hf.config.get('plotgenerator', 'backend'))
+    except Exception, e:
+        logger.error("Cannot initialize matplotlib %s" % str(e))
     
