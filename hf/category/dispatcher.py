@@ -22,6 +22,37 @@ from sqlalchemy import *
 from mako.template import Template
 import json
 
+class CategoryCachingTool(cp._cptools.CachingTool):
+    """
+    Extends the default caching tool to distinguish between category page
+    requests with and without explicit time parameter set.
+    
+    If no explicit time is given (-> most recent run shall be displayed)
+    it is checked if the cached page is older than the most recent run
+    in the database. If that is the case, all variants of the current
+    URI is removed from cache (it is not possible to remove *this* variant
+    as far as I know).
+    """
+    def _wrapper(self, **kwargs):
+        params = cp.serving.request.params
+        # dirty check if we want "the most current" page
+        # When HappyFace is first started, there is no cp._cache variable.
+        # It is created by the first call to cp.lib.caching.get() !
+        if hasattr(cp, "_cache") and ("time" not in params or "date" not in params):
+            cached_data = cp._cache.get()
+            if cached_data is None:
+                super(CategoryCachingTool, self)._wrapper(**kwargs)
+                return
+            cached_run_date = datetime.datetime.fromtimestamp(cached_data[3])
+            hf_runs = hf.module.database.hf_runs
+            newest_run_date = select([hf_runs.c.time], hf_runs.c.completed==True).order_by(hf_runs.c.time.desc()).execute().fetchone()[0]
+            if cached_run_date < newest_run_date:
+                cp._cache.delete()
+        super(CategoryCachingTool, self)._wrapper(**kwargs)
+    _wrapper.priority = 20
+
+cp.tools.category_caching = CategoryCachingTool('before_handler', cp.lib.caching.get, 'category_caching')
+
 class Dispatcher(object):
     """
     Show a page for displaying the contents of a category.
@@ -127,11 +158,14 @@ class Dispatcher(object):
         return template_context, category_dict, run
 
     @cp.expose
-    @cp.tools.caching()
+    @cp.tools.category_caching()
     def default(self, category=None, **kwargs):
-        cp.lib.caching.expires(secs=300, force=True)
-        
         try:
+            # Don't HTTP cache, when no explicit time is set
+            if "date" in kwargs or "time" in kwargs:
+                cp.lib.caching.expires(secs=3600, force=True)
+            else:
+                cp.lib.caching.expires(secs=1, force=True)
             template_context, category_dict, run = self.prepareDisplay(category, **kwargs)
             
             doc = u""
@@ -181,7 +215,6 @@ class AjaxDispatcher:
     @cp.expose
     @cp.tools.caching()
     def default(self, module, run_id, **kwargs):
-        cp.lib.caching.expires(secs=300, force=True)
         response = {"status": "unkown", "data": []}
         try:
             if module not in self.modules:
@@ -208,7 +241,10 @@ class AjaxDispatcher:
             response["data"] = specific_module.ajax(**kwargs)
             response["status"] = "success"
             
+            cp.lib.caching.expires(secs=9999999, force=True) # ajax data never goes bad, since it is supposed to be static
+            
         except cp.HTTPError, e:
+            cp.lib.caching.expires(secs=0, force=False)
             response = {
                 "status": "error",
                 "code": e.code,
@@ -216,6 +252,7 @@ class AjaxDispatcher:
                 "data": []
             }
         except Exception, e:
+            cp.lib.caching.expires(secs=30, force=True) # ajax data never goes bad, since it is supposed to be static
             self.logger.error("Ajax request threw exception: %s" % str(e))
             self.logger.debug(traceback.format_exc())
             response = {
