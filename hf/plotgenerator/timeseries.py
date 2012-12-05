@@ -229,8 +229,10 @@ def timeseriesPlot(category_list, **kwargs):
                     if max_val is None: max_val = val
                     elif max_val < val: max_val = val
                 
-                if renormalize:
+                if renormalize and max_val - min_val != 0:
                     data_points = (data_points- min_val)/(max_val - min_val)
+                elif renormalize:
+                    data_points = np.zeros(len(data_points)) + 0.5
                     
                 curve_list[curve_idx] = (title, dates, data_points)
             except Exception, e:
