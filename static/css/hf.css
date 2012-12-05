@@ -53,6 +53,8 @@ h2           { color:#333   ; border-bottom:2px solid #eee; font-size:20px; line
 h3           { color:#333   ; border-bottom:2px solid #eee; font-size:15px; line-height:20px; padding-top:10px; margin-bottom:5px; }
 h2 a         { color:#33a; }
 
+dt { padding-top: 5px;  font-size: 17px }
+strong { font-weight: bold; }
 form { display: block; }
 
 input, button, .button {
@@ -172,7 +174,7 @@ p { display: block; margin-bottom: 15px}
 }
 
 
-dl.module_list dt{
+dl.module_list dt.module{
     color:#333;
     border-top: 2px solid #eee;
     font-size: 20px;
@@ -184,37 +186,37 @@ dl.module_list dt{
     background-repeat: no-repeat;
 }
 
-dl.module_list dt a { color: inherit; }
-dl.module_list dt a:hover { color: #555; text-decoration: None}
-dl.module_list dt a:visited { color: inherit; text-decoration: None}
-dl.module_list dt a:focus { color: inherit; text-decoration: None}
-dl.module_list dt a:active { color: inherit; text-decoration: None}
+dl.module_list dt.module a { color: inherit; }
+dl.module_list dt.module a:hover { color: #555; text-decoration: None}
+dl.module_list dt.module a:visited { color: inherit; text-decoration: None}
+dl.module_list dt.module a:focus { color: inherit; text-decoration: None}
+dl.module_list dt.module a:active { color: inherit; text-decoration: None}
 
-dl.module_list dt:first-child {
+dl.module_list dt.module:first-child {
     border-top-width: 0;
     background-position: 8px 0;
     padding-top: 10px;
 }
 
-dl.module_list dt .details{
+dl.module_list dt.module .details{
     font: bold 11px sans-serif;
     color: #999;
     display: block;
 }
 
 
-dl.module_list dt .stale{
+dl.module_list dt.module .stale{
     color: #f66;
 }
 
-dl.module_list dt .details a {
+dl.module_list dt.module .details a {
     color: #f93;
 }
-dl.module_list dt .details a:hover {
+dl.module_list dt.module .details a:hover {
     color: #fc0;
 }
 
-dl.module_list dd{
+dl.module_list dd.module{
     margin-left: 60px;
     margin-bottom: 20px;
     width: 1000px;
