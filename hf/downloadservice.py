@@ -75,46 +75,51 @@ class DownloadService:
         return self.file_list[download_command]
 
     def performDownloads(self, runtime):
-        self.global_options = hf.config.get("downloadService", "global_options")
-        self.runtime = runtime
-        self.archive_dir = os.path.join(hf.config.get("paths", "archive_dir"), runtime.strftime("%Y/%m/%d/%H/%M"))
-        self.archive_url = os.path.join(hf.config.get("paths", "archive_url"), runtime.strftime("%Y/%m/%d/%H/%M"))
-        
         try:
-            os.makedirs(self.archive_dir)
-        except Exception, e:
-            self.logger.error("Cannot create archive directory")
-            self.logger.debug(traceback.format_exc())
-            raise Exception("Cannot create archive directory")
-        slaves = [DownloadSlave(file, self.global_options, self.archive_dir) for file in self.file_list.itervalues()]
-        
-        tmp_dir = hf.config.get("paths", "tmp_dir")
-        if not os.path.exists(tmp_dir):
-            os.makedirs(tmp_dir)
-        
-        file_prefix = os.path.join(tmp_dir, runtime.strftime("%Y%m%d_%H%M%s_"))
-        
-        timeout = hf.config.getint("downloadService", "timeout")
-        
-        for number, slave in enumerate(slaves):
-            slave.file.tmp_filename = os.path.abspath(file_prefix + "%03i.download"%number)
-            slave.start()
-        
-        for slave in slaves:
-            start_time = int(time.time())
-            slave.join(timeout)
-            timeout -= int(time.time()) - start_time
-            if timeout <= 0 or slave.isAlive():
-                self.logger.info("Download timeout!")
-                break
+            self.global_options = hf.config.get("downloadService", "global_options")
+            self.runtime = runtime
+            self.archive_dir = os.path.join(hf.config.get("paths", "archive_dir"), runtime.strftime("%Y/%m/%d/%H/%M"))
+            self.archive_url = os.path.join(hf.config.get("paths", "archive_url"), runtime.strftime("%Y/%m/%d/%H/%M"))
+            
+            try:
+                os.makedirs(self.archive_dir)
+            except Exception, e:
+                self.logger.error("Cannot create archive directory")
+                self.logger.debug(traceback.format_exc())
+                raise Exception("Cannot create archive directory")
+            slaves = [DownloadSlave(file, self.global_options, self.archive_dir) for file in self.file_list.itervalues()]
+            
+            tmp_dir = hf.config.get("paths", "tmp_dir")
+            if not os.path.exists(tmp_dir):
+                os.makedirs(tmp_dir)
+            
+            file_prefix = os.path.join(tmp_dir, runtime.strftime("%Y%m%d_%H%M%s_"))
+            
+            timeout = hf.config.getint("downloadService", "timeout")
+            
+            for number, slave in enumerate(slaves):
+                slave.file.tmp_filename = os.path.abspath(file_prefix + "%03i.download"%number)
+                slave.start()
+            
+            for slave in slaves:
+                start_time = int(time.time())
+                slave.join(timeout)
+                timeout -= int(time.time()) - start_time
+                if timeout <= 0 or slave.isAlive():
+                    self.logger.info("Download timeout!")
+                    break
 
-        for slave in slaves:
-            if slave.isAlive():
-                slave.file.error += "Download didn't finish in time"
-                slave._Thread__stop()
-                self.logger.info("Download timeout for %s" % slave.file.download_command)
-            elif not slave.file.errorOccured():
-                slave.file.is_downloaded = True
+            for slave in slaves:
+                if slave.isAlive():
+                    slave.file.error += "Download didn't finish in time"
+                    slave._Thread__stop()
+                    self.logger.info("Download timeout for %s" % slave.file.download_command)
+                elif not slave.file.errorOccured():
+                    slave.file.is_downloaded = True
+        except Exception, e:
+            for file in self.file_list.itervalues():
+                file.error = str(e)
+            raise
     
     def getArchivePath(self, run, filename):
         return os.path.join(hf.config.get('paths', 'archive_dir'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
