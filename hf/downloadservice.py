@@ -31,9 +31,9 @@ class DownloadSlave(threading.Thread):
         try:
             if self.file.url.startswith("file://"):
                 path = self.file.url[len("file://"):]
-                shutil.copy(path, self.file.getTmpPath())
+                shutil.copy(path, self.file.getTmpPath(True))
             else:
-                command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.getTmpPath(), "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
+                command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.getTmpPath(True), "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
                 process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
                 stderr = process.communicate()[1]
                 if process.returncode != 0:
@@ -45,7 +45,7 @@ class DownloadSlave(threading.Thread):
                     if http_errorcode != 0:
                          self.file.error += " with error code %i" % http_errorcode
                     try:
-                        os.unlink(self.file.getTmpPath())
+                        os.unlink(self.file.getTmpPath(True))
                     except Exception:
                         pass
         except Exception, e:
@@ -140,6 +140,7 @@ class DownloadFile:
             self.config_source = self.config_source.lower()
             if self.config_source == "global":
                 self.options = ""
+            self.tried_download = False
         except ValueError:
             raise hf.ConfigError("Download command string malformed")
         self.is_downloaded = False
@@ -161,16 +162,38 @@ class DownloadFile:
     def getFile(self):
         return open(self.getTmpPath(), "r")
         
-    def getTmpPath(self):
-        return os.path.join(hf.config.get('paths', 'tmp_dir'), self.tmp_filename)
+    def getTmpPath(self, no_exception=False):
+        """
+        :arg no_exception: default False. If set to True, no exception is thrown
+                           when there was a problem while downloading the file.
+        """
+        if (not self.isDownloaded() or self.errorOccured()) and not no_exception:
+            raise hf.DownloadError(self)
+        try:
+            return os.path.join(hf.config.get('paths', 'tmp_dir'), self.tmp_filename)
+        except AttributeError:
+            if not no_exception:
+                raise hf.DownloadError(self)
     
     def getArchivePath(self):
-        return os.path.join(hf.downloadService.archive_dir, self.filename)
+        if not self.isDownloaded() or self.errorOccured():
+            raise hf.DownloadError(self)
+        try:
+            return os.path.join(hf.downloadService.archive_dir, self.filename)
+        except AttributeError:
+            raise hf.DownloadError(self)
     
     def getArchiveUrl(self):
-        return os.path.join(hf.downloadService.archive_url, self.filename)
+        if not self.isDownloaded() or self.errorOccured():
+            raise hf.DownloadError(self)
+        try:
+            return os.path.join(hf.downloadService.archive_url, self.filename)
+        except AttributeError:
+            raise hf.DownloadError(self)
     
     def getArchiveFilename(self):
+        if not self.isDownloaded() or self.errorOccured():
+            raise hf.DownloadError(self)
         return self.filename
     
     def getSourceUrl(self):

@@ -44,7 +44,7 @@ past = run['time'] - timedelta(days = 2)
     <p>No data at this point in time!</p>
 % elif len(module.error_string) > 0:
     <h3>Module Error</h3>
-    <p>${module.error_string}</p>
+    <p>${module.error_string | hf.utility.addAutoLinks}</p>
 % else:
     ${self.content()}
 % endif

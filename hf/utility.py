@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import logging, traceback, math
+import logging, traceback, math, re
 
 def prettyDataSize(size_in_bytes):
     """ Takes a data size in bytes and formats a pretty string. """
@@ -80,3 +80,11 @@ def matheval(input, variables={}):
     except Exception, e:
         logging.error(traceback.format_exc())
         return None
+        
+__regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\.?!&/]+)")
+def addAutoLinks(string):
+    """
+    Searches for URLs in string using a regular expression and
+    adds <a>-Tags around them.
+    """
+    return __regex_url.sub("<a href=\"\\1\">\\1</a>", string)

@@ -113,6 +113,12 @@ class ModuleProxy:
                             data[col] = data[col].getArchiveFilename()
                     
                     dataExctractionSuccessfull = True
+            except hf.DownloadError, e:
+                self.logger.info("Data exctraction failed because of failed download: "+str(e))
+                data.update({
+                    "status": -1,
+                    "error_string": str(e)
+                })
             except Exception, e:
                 self.logger.error("Data extraction failed: "+str(e))
                 self.logger.debug(traceback.format_exc())

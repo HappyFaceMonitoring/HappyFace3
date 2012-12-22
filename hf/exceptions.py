@@ -26,6 +26,14 @@ class ModuleError(Exception):
 class ModuleRuntimeError(Exception):
     pass
 
+class DownloadError(Exception):
+    def __init__(self, file):
+        self.file = file
+    def __str__(self):
+        return "Download of %s failed: %s" % (self.file.url, self.file.error)
+    def __unicode__(self):
+        return u"Download of %s failed: %s" % (self.file.url, self.file.error)
+
 class ModuleProgrammingError(Exception):
     def __init__(self, module, msg):
         self.module = module
