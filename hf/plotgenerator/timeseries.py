@@ -184,6 +184,8 @@ def timeseriesPlot(category_list, **kwargs):
                 # apply timerange selection
                 if timerange is not None:
                     query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
+                # sort ascending by date
+                query = query.order_by(hf_runs.c.time)
                 logger.debug(query)
                 result = query.execute()
                 try:
