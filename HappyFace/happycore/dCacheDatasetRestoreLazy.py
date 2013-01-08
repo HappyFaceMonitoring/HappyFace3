@@ -107,7 +107,7 @@ class dCacheDatasetRestoreLazy(ModuleBase):
 				# ok, we now guessed the wrong year above. should only happen around 
 				# silvester, thus the correct year is 1 year less
 				year_req = str(int(year_req)-1)
-				time_tuple_req = strptime(year_now+"."+request['started'],"%Y.%m.%d %H:%M:%S")
+				time_tuple_req = strptime(year_req+"."+request['started'],"%Y.%m.%d %H:%M:%S")
 				time_diff = self.timestamp - mktime(time_tuple_req)
 
 			
