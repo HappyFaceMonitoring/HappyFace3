@@ -16,7 +16,7 @@ import bz2
 import os
 
 # DBSAPI refuses to work otherwise when it is run by cron
-os.environ['USER'] = 'hilfeomgcmssoftwarefrickel'
+os.environ['USER'] = 'dcachestatuscheck'
 
 # Find dbsapi relative to the main script
 root = os.path.dirname(os.path.abspath(os.path.normpath(sys.argv[0])))
