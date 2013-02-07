@@ -133,7 +133,7 @@ The root certificate(s) is/are the first line of authentification, the client ce
             SSLCACertificateFile  /etc/apache2/gridka-root-cert.crt # alt.: SSLCACertificateDirectory
 
             SSLOptions      StdEnvVars
-            SSLVerifyClient Optional  # Optional or Required
+            SSLVerifyClient Optional  # Optional or Require
 
     #       [...] Place usual HF config here
     </VirtualHost>
