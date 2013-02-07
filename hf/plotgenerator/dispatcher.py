@@ -38,7 +38,7 @@ class Dispatcher(object):
                 self.timeseries_template = Template(filename=filename, lookup=hf.template_lookup)
             except Exception:
                 self.logger.error("Cannot initialize timeseries template")
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
     
 
     @cp.expose
@@ -126,7 +126,7 @@ class Dispatcher(object):
                     return test
             except Exception,e:
                 self.logger.error("Plot interface hander failed: "+str(e))
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
                 raise
         # if we get here, 404!
         raise cp.HTTPError(404)

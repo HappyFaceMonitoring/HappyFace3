@@ -114,7 +114,7 @@ class Category:
             except Exception, e:
                 contents = "Rendering module %s failed" % module_name
                 self.logger.error("Rendering module %s failed: %s" % (module_name, str(e)))
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
             module_contents.append(contents)
         template_context['category'] = self
         template_context['category_name'] = self.name
@@ -125,5 +125,5 @@ class Category:
             return self.template.render_unicode(**template_context)
         except Exception, e:
             self.logger.error("Rendering failed: %s" % str(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             raise

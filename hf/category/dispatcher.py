@@ -199,7 +199,7 @@ class Dispatcher(object):
             raise
         except Exception, e:
             self.logger.error("Page request threw exception: %s" % str(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             raise
 
 class AjaxDispatcher:
@@ -254,7 +254,7 @@ class AjaxDispatcher:
         except Exception, e:
             cp.lib.caching.expires(secs=30, force=True) # ajax data never goes bad, since it is supposed to be static
             self.logger.error("Ajax request threw exception: %s" % str(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             response = {
                 "status": "error",
                 "code": 500,

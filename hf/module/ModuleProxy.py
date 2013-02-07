@@ -58,7 +58,7 @@ class ModuleProxy:
             self.template = Template(filename=filename, lookup=hf.template_escape_lookup)
         except Exception, e:
             self.logger.error("Cannot create template, " + str(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             self.template = None
             
     def isAccessRestricted(self):
@@ -80,7 +80,7 @@ class ModuleProxy:
                 exc_name = "Configuration Error:"
             module.error_string = exc_name + " " + str(e)
             module.logger.error("prepareAcquisition() failed: %s" % str(e))
-            module.logger.debug(traceback.format_exc())
+            module.logger.error(traceback.format_exc())
     
     def acquire(self, run):
         module = self.acquisitionModules[run['id']]
@@ -121,7 +121,7 @@ class ModuleProxy:
                 })
             except Exception, e:
                 self.logger.error("Data extraction failed: "+str(e))
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
                 data.update({
                     "status": -1,
                     "error_string": str(e)
@@ -140,7 +140,7 @@ class ModuleProxy:
                     module.fillSubtables(inserted_id)
                 except Exception, e:
                     self.logger.error("Filling subtables failed: "+str(e))
-                    self.logger.debug(traceback.format_exc())
+                    self.logger.error(traceback.format_exc())
                     if len(data["error_string"]) > 0:
                         data["error_string"] += "; "
                     data["error_string"] += str(e)
@@ -148,7 +148,7 @@ class ModuleProxy:
         
         except Exception, e:
             module.logger.error("data acquisition failed: %s" % str(e))
-            module.logger.debug(traceback.format_exc())
+            module.logger.error(traceback.format_exc())
         finally:
             del self.acquisitionModules[run['id']]
     
@@ -173,13 +173,13 @@ class ModuleProxy:
             }
             self.logger.error("Acquisition of module data failed: " + unicode(e))
             self.logger.error("Probably database schema needs update!")
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
         except Exception, e:
             dataset = {
                 'error_string': "Unable to acquire data for module"
             }
             self.logger.error("Creation of time-specific module instance failed: " + unicode(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
         module = self.ModuleClass(self.instance_name, self.config, run, dataset, self.template)
         return module
 

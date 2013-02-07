@@ -291,7 +291,7 @@ def timeseriesPlot(category_list, **kwargs):
             ax.text(0.02, 0.5, "One or more curves require certificate authentification", color="#ff0000", fontsize=14)
     except Exception, e:
         logger.error("Plotting Failed: %s" % str(e))
-        logger.debug(traceback.format_exc())
+        logger.error(traceback.format_exc())
         errors.append("Plotting Failed: %s" % str(e))
     
     img_data = StringIO.StringIO()

@@ -85,7 +85,7 @@ class DownloadService:
                 os.makedirs(self.archive_dir)
             except Exception, e:
                 self.logger.error("Cannot create archive directory")
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
                 raise Exception("Cannot create archive directory")
             slaves = [DownloadSlave(file, self.global_options, self.archive_dir) for file in self.file_list.itervalues()]
             

@@ -34,7 +34,7 @@ def renderXmlOverview(run, template_context):
         template = Template(filename=filename, lookup=hf.template_lookup)
     except Exception, e:
         logger.error("Cannot load XML overview template: %s" % str(e))
-        logger.debug(traceback.format_exc())
+        logger.error(traceback.format_exc())
         return u''
     cp.response.headers['Content-Type'] = "text/xml"
     template_context['protocol_host'] = cp.request.base

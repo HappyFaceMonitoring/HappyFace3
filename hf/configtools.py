@@ -83,7 +83,7 @@ def readConfigurationAndEnv():
             cherrypy.engine.autoreload.files.add(file)
         except Exception, e:
             logger.error("Cannot parse category config '%s'" % file)
-            logger.debug(traceback.format_exc())
+            logger.error(traceback.format_exc())
     
     hf.module.config = ConfigParser.ConfigParser(defaults=hf.module.ModuleBase.config_defaults)
     module_config_files = os.path.join(hf.hf_dir, hf.config.get("paths", "module_cfg_dir"))
@@ -93,7 +93,7 @@ def readConfigurationAndEnv():
             cherrypy.engine.autoreload.files.add(file)
         except Exception, e:
             logger.error("Cannot parse category config '%s'" % file)
-            logger.debug(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
 def setupLogging(logging_cfg):
     """

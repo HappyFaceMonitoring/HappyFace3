@@ -108,7 +108,7 @@ Perhaps the corresponding module was removed from the HF config or the file does
                 
         except Exception, e:
             self.logger.error(u"error page generation failed: "+unicode(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             return u"""<h1>Error Inception</h1>
             <p>An error occured while displaying an error. Embarrasing.</p>
             <p>Please consult the log files!</p>"""

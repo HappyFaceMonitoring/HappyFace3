@@ -68,7 +68,7 @@ if __name__ == '__main__':
         
     except Exception, e:
         logger.error("Uncaught HappyFace exception: %s", str(e))
-        logger.debug(traceback.format_exc())
+        logger.error(traceback.format_exc())
     finally:
         if tool.load_hf_environment:
             hf.database.disconnect()

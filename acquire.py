@@ -58,11 +58,11 @@ if __name__ == '__main__':
             category_list = hf.category.createCategoryObjects()
         except hf.exceptions.ModuleProgrammingError, e:
             logger.error("Module Programming Error: %s", str(e))
-            logger.debug(traceback.format_exc())
+            logger.error(traceback.format_exc())
             sys.exit(-1)
         except Exception, e:
             logger.error("Setting up HappyFace failed: %s", str(e))
-            logger.debug(traceback.format_exc())
+            logger.error(traceback.format_exc())
             sys.exit(-1)
             
         # initialize plotgenerator, even if "the plot generator" is disabled.
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         hf.database.disconnect()
     except Exception, e:
         logger.error("Uncaught HappyFace exception: %s", str(e))
-        logger.debug(traceback.format_exc())
+        logger.error(traceback.format_exc())
     finally:
         os.remove("acquire.lock")
         

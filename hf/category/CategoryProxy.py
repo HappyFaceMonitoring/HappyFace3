@@ -55,14 +55,14 @@ class CategoryProxy:
                 self.module_list.append(hf.module.ModuleProxy(ModuleClass, instance_name, cfg))
             except Exception, e:
                 self.logger.error("Cannot add module instance %s: %s" %(instance_name, str(e)))
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
         
         try:
             filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "category.html")
             self.template = Template(filename=filename, lookup=hf.template_lookup)
         except Exception, e:
             self.logger.error("Cannot load category template: %s" % str(e))
-            self.logger.debug(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             self.template = None
     
     def isAccessRestricted(self):
@@ -83,7 +83,7 @@ class CategoryProxy:
                 module.prepareAcquisition(run)
             except Exception, e:
                 self.logger.error("prepareAcquisition() failed on %s: %s" % (module.instance_name, str(e)))
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
     
     def acquire(self, run):
         '''
@@ -97,7 +97,7 @@ class CategoryProxy:
                 module.acquire(run)
             except Exception, e:
                 self.logger.error("acquire() failed on %s: %s" % (module.instance_name, str(e)))
-                self.logger.debug(traceback.format_exc())
+                self.logger.error(traceback.format_exc())
     
     def getCategory(self, run):
         specific_modules = [m.getModule(run) for m in self.module_list]
