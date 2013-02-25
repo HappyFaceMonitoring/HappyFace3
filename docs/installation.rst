@@ -103,8 +103,69 @@ An example configuration looks something like this
 
     </VirtualHost>
 
+Using PostgreSQL
+================
+
+By default, HappyFace uses a file-based "SQLite <sqlite.org"_ database to store all its stuff. While this is quite powerful and scales to some degree, a PostgreSQL database is more roboust when it comes to server crashes and backups.
+
+In this chapter, we will setup HappyFace to use a PostgreSQL database we create before. It applies to other database systems as-well. The given code examples should work on Ubuntu, but won't differ very much from any other distro.
+
+Install PostgreSQL
+------------------
+
+Using the package manager of your system, install the PostgreSQL database server and make sure it is startet.
+
+.. code-block:: bash
+
+	$> apt-get install postgresql
+	$> /etc/init.d/postgresql status
+	Running.
+
+If you plan to run your database on a server different to your HappyFace machine, you have to make sure the server listens to your network interfaces
+
+Setting up a database
+---------------------
+
+Most database operations can be performed with commandline commands. To use them, open a shell as your PostgreSQL user. Because he does not  have a password (by default), log in via the root account.
+
+.. code-block:: bash
+
+	$> su
+    Password:
+    #> su postgres
+    $>
+
+Before we create the database, we create the user (here: *happyface*) that we use to access the database and set his password. On the commandline create a user with the *createuser* command.
+
+.. code-block:: bash
+
+	# ask for password when creating user
+	$> createuser -P happyface
+	Enter the password of the new role:
+	Enter it again:
+
+Now we can create a database (here: *my_hf_instance*) and set our HappyFace user as owner
+
+.. code-block:: bash
+
+	$> createdb my_hf_instance -O happyface
+
+Configuring HappyFace
+---------------------
+
+The configuration process of HappyFace is explained in detail in the :ref:`next chapter <config_maintenance>`, so here only minimal steps are given.
+
+Create a file *database.cfg* with the following content
+
+.. code-block:: ini
+
+	[database]
+	url = postgres://happyface:PASSWORD@localhost/my_hf_instance
+
+
 Certificate Authorization with Apache2
 ======================================
+
 HappyFace can be configured to restrict access on certain modules to a small group of users. These users can identify themselves with a client certificate. For this to work, both HappyFace as well as Apache2 need special configuration.
 
 .. note:: Certificate authorization does **not** work with the development server.
@@ -114,7 +175,8 @@ The Apache configuration for HappyFace needs to be duplicated for both the plain
 .. _apache_cert:
 
 Apache Configuration
-^^^^^^^^^^^^^^^^^^^^
+--------------------
+
 We have to tell Apache2 to use SSL and client certificates, first. We assume you already have SSL certificates for your server as-well as the root certificate of the users you want to accept.
 
 The root certificate(s) is/are the first line of authentification, the client certificate must match the given root certificates, otherwise access is automatically forbidden.
@@ -142,7 +204,7 @@ The root certificate(s) is/are the first line of authentification, the client ce
 The *SSLOptions* tells Apache to pass the required SSL informations to HappyFace. The *SSLVerifyClient* directive switches on client verification. Two reasonable settings are *optional*, which allows users without certificate to use SSL to access the site, and *require*, which has broader browsers support.
 
 HappyFace Configuration
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 Apache now asks a client to show a certificate and checks if it is valid. We need to tell HappyFace which distinguished names (DN) are valid and to which categories and modules the access is restricted.
 
 Because we only cover installation, deployment and Apache configuration in this chapter, we ask you to refer to :ref:`config_certs` for detailed information.

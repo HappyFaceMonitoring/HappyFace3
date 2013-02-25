@@ -35,7 +35,7 @@ Several aspects of HappyFace can be tuned by configuration, but usually you don'
 Sections
 --------
 
-The following is a list of the different sections in the default configuration and their purpose and potential use.
+The following is a list of the different sections in the default configuration and their purpose and potential use. For an overview of all config variables, just look at the default configuration files. Everything should be sufficiently commented in-line.
 
 **[auth]**
     Certificate authorization details, described in :ref:`config_certs`
@@ -170,7 +170,36 @@ All we have to do now is replace the section name, change the *type* to *plots*,
 Configuring Categories
 ----------------------
 
-.. todo:: write something here
+Each category corresponds to a page on the HappyFace weboutput and is a logical group of HappyFace modules. Modules are specified by creating a uniquely named section in a *\*.cfg* file in the category config directory.
+
+Configuration Variables
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The *CATEGORY_ID*, the name of the config file section, is a short version of the name that should only constist of alphanumerical characters and underscores, since it is part of the URL pointing to the web page. The available variables inside the sections are
+
+**name**
+	The verbose name of the category
+
+**description**
+	A short description of the category that can be displayed somewhere (not used in default templates, at the moment).
+
+**type**
+	Choose if category is informational only or has a status value. Set to one of the following
+
+	*plots*
+		No status is calculated for this module, since only informational or not parsable data (e.g. images) are contained.
+
+	*rated*
+		Calculate a module status with the specified *algorithm* and display the result on the webpage accordingly.
+
+**algorithm**
+	The algorithm to calculate the category status with. At the moment, *worst* and *average* are available.
+
+Setting the Order of Categories
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Usually, you want to display the categories in a certain order on the webpage. For this reason, there is the **categories** variable in the *[happyface]* section of the core configuration. Just enter a colon-separated list of categories there and they will be included on the weboutput. If you do not specify **categories**, the categories will appear in arbitrary order.
+
 
 Updating the Site
 =================
