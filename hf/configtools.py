@@ -22,15 +22,54 @@ from mako.lookup import TemplateLookup
 def _getCfgInDirectory(dir):
     return sorted(filter(lambda x: x.lower().endswith(".cfg") and os.path.isfile(x), map(lambda x:os.path.join(dir,x), os.listdir(dir))))
 
+def _getSvnRevision():
+    try:
+        try:
+            proc = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE)
+            return proc.stdout.read().strip()
+        finally:
+            proc.poll()
+            if proc.returncode is None:
+                proc.kill()
+    except Exception, e:
+        return 'exported'
+
+def _getGitSvnRevision():
+    """
+    Use git-svn to find out local SVN repository revision. Error-checking is quite bad here, it
+    will produce 'exported' in that case and logs nothing to the logfiles =(
+    """
+    try:
+        revision = 0
+        try:
+            proc = subprocess.Popen(['git', 'svn', 'info'], 0, None, None, subprocess.PIPE)
+            git_svn_info = proc.stdout.read()
+            match = re.search(r"Revision: ([0-9]+)", git_svn_info)
+            if match:
+                revision = int(match.group(1))
+            else:
+                return "exported"
+        finally:
+            proc.poll()
+            if proc.returncode is None:
+                proc.kill()
+        # TODO: possible extensions:
+        #     Check for newer git-commits and modifications for displayal
+        return str(revision)
+    except Exception, e:
+        return 'exported'
+
 def readConfigurationAndEnv():
     logger = logging.getLogger(__name__)
     
     if hf.__version__ is None:
-        try:
-            hf.__version__ = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE).stdout.read().strip()
-        except Exception, e:
-            hf.__version__ = 'exported'
-    
+        hf.__version__ = _getSvnRevision()
+        rev_number_regex = re.compile(r"[0-9]+(:[0-9]+)?(M|S|P)*")
+        if rev_number_regex.search(hf.__version__) is None:
+            hf.__version__ = _getGitSvnRevision()
+        if rev_number_regex.search(hf.__version__) is None:
+            hf.__version__ = "exported"
+            
     '''
     Read configuration files for HappyFace from defaultconf directory and subsequently from
     the local HappyFace config directory. The HappyFace config is then accessible by hf.config
