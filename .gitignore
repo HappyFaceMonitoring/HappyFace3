@@ -12,3 +12,4 @@ modules
 config
 docs/_build/
 cachegrind*
+*.kdev4
