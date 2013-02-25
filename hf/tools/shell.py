@@ -24,4 +24,8 @@ import hf
 load_hf_environment = True
 
 def execute():
-    code.interact("Interactive HappyFace Shell", local={'hf':hf})
+    try:
+        import IPython
+        IPython.embed()
+    except ImportError:
+        code.interact("Interactive HappyFace Shell", local={'hf':hf})
