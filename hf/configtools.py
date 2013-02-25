@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 import ConfigParser
-import os, hf, cherrypy, traceback, logging
+import os, hf, cherrypy, traceback, logging, subprocess, re
 import logging.config
 from mako.lookup import TemplateLookup
 
@@ -24,6 +24,13 @@ def _getCfgInDirectory(dir):
 
 def readConfigurationAndEnv():
     logger = logging.getLogger(__name__)
+    
+    if hf.__version__ is None:
+        try:
+            hf.__version__ = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE).stdout.read().strip()
+        except Exception, e:
+            hf.__version__ = 'exported'
+    
     '''
     Read configuration files for HappyFace from defaultconf directory and subsequently from
     the local HappyFace config directory. The HappyFace config is then accessible by hf.config
@@ -94,6 +101,7 @@ def readConfigurationAndEnv():
         except Exception, e:
             logger.error("Cannot parse category config '%s'" % file)
             logger.error(traceback.format_exc())
+    
 
 def setupLogging(logging_cfg):
     """

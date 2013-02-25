@@ -28,3 +28,6 @@ from exceptions import *
 config = None
 template_lookup = None
 template_escape_lookup = None
+
+
+__version__ = None

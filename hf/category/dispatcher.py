@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 import cherrypy as cp
-import hf, datetime, time, logging, traceback, os, subprocess
+import hf, datetime, time, logging, traceback, os
 from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
@@ -61,10 +61,6 @@ class Dispatcher(object):
     def __init__(self, category_list):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = category_list
-        try:
-            self.svn_rev = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE).stdout.read().strip()
-        except Exception:
-            self.svn_rev = 'exported'
             
     def prepareDisplay(self, category=None, **kwargs):
         """
@@ -98,6 +94,12 @@ class Dispatcher(object):
         if time_obj > datetime.datetime.fromtimestamp(int(time.time())+59):
             time_error_message = "HappyFace is not an oracle"
             time_obj = datetime.datetime.fromtimestamp(int(time.time())+59)
+            
+        try:
+            test = hf_runs.select().execute().fetchone()
+            self.logger.error("Test "+str(test))
+        except Exception, e:
+            self.logger.error(traceback.format_exc())
             
         run = hf_runs.select(hf_runs.c.time <= time_obj).\
             where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
@@ -146,7 +148,7 @@ class Dispatcher(object):
             'selected_category': selected_category,
             'time_error_message': time_error_message,
             'data_stale': data_stale,
-            'svn_rev': self.svn_rev,
+            'svn_rev': hf.__version__,
             'lock_icon': lock_icon,
             'include_time_in_url': ('date' in kwargs or 'time' in kwargs),
             'automatic_reload': not ('date' in kwargs or 'time' in kwargs),
