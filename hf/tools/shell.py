@@ -26,6 +26,11 @@ load_hf_environment = True
 def execute():
     try:
         import IPython
-        IPython.embed()
-    except ImportError:
+        try:
+            IPython.embed()
+        except AttributeError:
+            sh = IPython.Shell.IPythonShellEmbed()
+            print "Interactive HappyFace Shell"
+            sh()
+    except Exception:
         code.interact("Interactive HappyFace Shell", local={'hf':hf})
