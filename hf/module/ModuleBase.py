@@ -87,7 +87,7 @@ class ModuleMeta(type):
         table = Table("mod_"+tabname, hf.database.metadata,
             *([
                 Column('id', Integer, Sequence("mod_"+tabname+'_id_seq'), primary_key=True),
-                Column('instance', Text, ForeignKey("module_instances.instance")),
+                Column('instance', Text, ForeignKey("module_instances.instance"), index = True),
                 Column('run_id', Integer, ForeignKey("hf_runs.id"), index = True,),
                 Column('status', Float),
                 Column('description', Text),
