@@ -88,7 +88,7 @@ class ModuleMeta(type):
             *([
                 Column('id', Integer, Sequence("mod_"+tabname+'_id_seq'), primary_key=True),
                 Column('instance', Text, ForeignKey("module_instances.instance")),
-                Column('run_id', Integer, ForeignKey("hf_runs.id")),
+                Column('run_id', Integer, ForeignKey("hf_runs.id"), index = True,),
                 Column('status', Float),
                 Column('description', Text),
                 Column('instruction', Text),
@@ -105,7 +105,7 @@ class ModuleMeta(type):
             hf.database.metadata,
             *([
                 Column('id', Integer, Sequence(tabname+'_id_seq'), primary_key=True),
-                Column('parent_id', Integer, ForeignKey(self.module_table.c.id)),
+                Column('parent_id', Integer, ForeignKey(self.module_table.c.id), index = True),
             ] + columns))
         self.subtables[name] = table
         table.module_class = self

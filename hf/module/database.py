@@ -35,6 +35,6 @@ module_instances = Table("module_instances", hf.database.metadata,
 
 hf_runs = Table("hf_runs", hf.database.metadata,
     Column("id", Integer, Sequence('module_instances_id_seq'), primary_key=True),
-    Column("time", DateTime, unique=True),
-    Column("completed", Boolean, default=True),
+    Column("time", DateTime, unique=True, index = True),
+    Column("completed", Boolean, default=True, index = True),
 )
