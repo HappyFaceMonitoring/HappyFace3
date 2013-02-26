@@ -71,6 +71,14 @@ class CategoryProxy:
     def isUnauthorized(self):
         return self.config['access'] == 'restricted' and not cp.request.cert_authorized
     
+    def hasUnauthorizedModules(self):
+        if self.isUnauthorized():
+            return True
+        for module in self.module_list:
+            if module.isUnauthorized():
+                return True
+        return False
+    
     def prepareAcquisition(self, run):
         '''
         Prepare data acquisition for a certain run.

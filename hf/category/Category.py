@@ -104,7 +104,15 @@ class Category:
     
     def isUnauthorized(self):
         return self.config['access'] == 'restricted' and not cp.request.cert_authorized
-                
+    
+    def hasUnauthorizedModules(self):
+        if self.isUnauthorized():
+            return True
+        for module in self.module_list:
+            if module.isUnauthorized():
+                return True
+        return False
+    
     def render(self, template_context):
         module_contents = []
         for module in self.module_list:
