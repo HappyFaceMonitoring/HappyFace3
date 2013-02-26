@@ -58,6 +58,15 @@ def _getGitSvnRevision():
         return str(revision)
     except Exception, e:
         return 'exported'
+    
+class ConfigDict(dict):
+    def __getitem__(self, key):
+        try:
+            return dict.__getitem__(self, key)
+        except IndexError:
+            raise hf.ConfigError("Required parameter '{0}' not specified".format(key))
+        except KeyError:
+            raise hf.ConfigError("Required parameter '{0}' not specified".format(key))
 
 def readConfigurationAndEnv():
     logger = logging.getLogger(__name__)

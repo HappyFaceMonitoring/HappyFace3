@@ -38,14 +38,14 @@ def createCategoryObjects():
     if len(hf.config.get('happyface', 'categories')) > 0:
         category_names = hf.config.get('happyface', 'categories').split(',')
     for category in category_names:
-        conf = dict(hf.category.config.items(category))
+        conf = hf.configtools.ConfigDict(hf.category.config.items(category))
         module_conf = {}
         for module in conf["modules"].split(","):
             try:
                 if len(module) == 0: continue
                 if module in used_modules:
                     raise hf.ConfigError("Module '%s' used second time in category '%s'" % (module, category))
-                module_conf[module] = dict(hf.module.config.items(module))
+                module_conf[module] = hf.configtools.ConfigDict(hf.module.config.items(module))
                 used_modules.append(module)
             except NoSectionError, e:
                 msg = "Tried to use module '%s' in category '%s', but it was never mentioned in module configuration"

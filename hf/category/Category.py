@@ -37,7 +37,7 @@ class Category:
             self.algorithm = getattr(hf.category.algorithms, self.config['algorithm'])
         except AttributeError, e:
             self.logger.warn("Status algorithm '%s' not supported, use 'worst'", self.config['algorithm'])
-        except KeyError, e:
+        except hf.ConfigError, e:
             self.logger.warn("Status algorithm not specified, use 'worst'")
         
         if not "type" in self.config:
