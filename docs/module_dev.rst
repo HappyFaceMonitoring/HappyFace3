@@ -195,3 +195,5 @@ The reason for that is that HappyFace tries to set the backend during the config
 
 Step-by-Step Guide
 ==================
+
+.. todo:: write step-by-step module development guide

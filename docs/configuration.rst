@@ -324,3 +324,29 @@ For completeness, an example category configuration is given where the access to
     modules = gridka_jobs_statistics
 
     access = restricted
+    
+Hints on Databases and Optimization
+===================================
+Since HappyFace stores alot of data in standard database systems, delivery time and performance of HappyFace depends on data retrieval. There are things that should be taken into account when choosing and configuring a database for HappyFace.
+
+We are no database experts, so this section is mostly our experiences with HappyFace3 and the database systems we used and tested, this is by far not a complete overview of all possible databases, optimization variables or pitfalls. If you encounter issues that should be added to this guide, feel free to contact our development team.
+
+SQLite
+------
+The database of choice for development environments is SQLite, mainly because no additional configuration is required. Taking backups of SQLite databases, besides copying the database file, is not sanely possible, so this is one reason not to use it in an production environment. To be honest, though, it can handle surprisingly large (~ 20GB) database files.
+
+You might encounter situations where the database is locked, causing all database transactions with a **Database Locked** exception. We do not know where this comes from, probably simultaneous access across processes. So far it only occured on development machines, but with both HappyFace2 and HappyFace3. The common solutions found on the internet to fix the databae do not work for some reason, so your only option would be removing the database.
+
+PostgreSQL
+----------
+*sqlalchemy* uses connection pooling to speed up sequential database access. For some reason, we had occasional performance issues after short, many HappyFace accesses, that were tracked to the database and idleing processes. It was possible to recover the usual page access times by restarting either PostgreSQL or the HappyFace process, so we assume the error had something to do with the database.
+
+A permanent solution to fix this was setting the *recycle* option in *sqlalchemy*, so our database configuration looks like
+
+.. code-block:: ini
+
+    [database]
+    url = postgres://USER@SERVER/DATABASE
+    recycle = 10
+  
+Basically, this closes used connections after 10 seconds of inactivity and opens a fresh connection instead. We did not have these performance issues after wards.
