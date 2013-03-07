@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 import hf
+import re
 import cherrypy as cp
 import json, StringIO, traceback, logging, datetime, time
 import numpy as np
@@ -37,6 +38,159 @@ def __plotableColumns(table):
         return False
     numerical_cols = filter(lambda x: isnumeric(x.type), table.columns)
     return [col for col in numerical_cols if col.name not in blacklist]
+
+def getTimeseriesPlotConfig(**kwargs):
+    """
+    Extract the plot configuration from the URL arguments.
+    
+    Possible arguments are a subset from the ones of :meth:`timeseriesPlot() <hf.plotgenerator.timeseries.timeseriesPlot>`, see there for details.
+    
+    :param curve_XXX: colon-separated curve info: (module_instance,[subtable],expr,title)
+    :param legend: Show legend in image
+    :param title: (string) Display a title above plot
+    :param ylabel: self-explanatory
+    :param start_date: Start date (Y-m-d)
+    :param end_date: End date (Y-m-d)
+    :param start_time: Start time (H:M)
+    :param end_date: End time (H:M)
+    :param renormalize: (true, false / 1, 0) Scales all curves to a [0,1] interval
+    
+    :return: A dictionary with the configuration. The entries are
+    
+        *curve_dict*
+            A dictionary encoding the curves to plot. Only curves are given where the user is authorized. to access.
+            The key is the curve name, the value is a tuple of the following format: *(title, table, module_instance, col_expr, subtable)*
+            
+            *title*
+                Title of the curve. Same as given in the URL.
+            
+            *table*
+                sqlalchemy Table instance.
+                
+            *module_instance*
+                Name of the module instance to plot data from. Same as given in the URL.
+                
+            *col_expr*
+                The expression to plot. See :ref:`column_expressions` for syntax.
+                
+            *subtable*
+                Subtable to plot from, empty string if plot from module table is requested. Same as given in the URL.
+        
+        *title*
+            Title of the plot
+        
+        *legend*
+            True or false, 0 or 1, flag to indicate if legend should be displayed.
+            
+        *ylabel*
+            Label of the y-axis
+        
+        *timerange*
+            Tuple of datetime objects, *(start, end)*
+        
+        *renormalize*
+            If *True*, each curve is scaled into a [0,1] interval.
+        
+        *auth_required*
+            Flag if authorization is required for any curve.
+        
+        *errors*
+            A list of error messages that occured during the function call
+    """
+    logger = logging.getLogger(__name__+".getTimeseriesPlotConfig")
+    
+    logger.debug(kwargs)
+    
+    curve_dict = {}
+    data_sources = set()
+    title = ""
+    legend = False
+    ylabel = ""
+    timerange = None
+    renormalize = False
+    errors = []
+    
+    # Set to true if special auth is required for a curve.
+    auth_required = False
+    
+    # extract timeranges
+    now = datetime.datetime.now()
+    end_date = kwargs['end_date'] if 'end_date' in kwargs else now.strftime('%Y-%m-%d')
+    start_date = kwargs['start_date'] if 'start_date' in kwargs else end_date
+    start_time = kwargs['start_time'] if 'start_time' in kwargs else "00:00"
+    end_time = kwargs['end_time'] if 'end_time' in kwargs else now.strftime('%H:%M')
+    start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
+    end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
+    timerange = [start, end]
+    
+    if 'renormalize' in kwargs:
+        if kwargs['renormalize'].lower() in ['true', '1']:
+            renormalize = True
+    
+    # STAGE 1
+    # Parse curve data and scan for parameters.
+    # This gets a list from all tables that are to be retrieved in the next step.
+    for key, value in kwargs.iteritems():
+        if key.lower().startswith(u"curve_"):
+            try:
+                curve_name = key[6:]
+                curve_info = value.split(",")
+                logger.debug("curve data: %s", value)
+                if len(curve_info) < 4:
+                    raise Exception("Insufficient number of arguments for plot curve")
+                module_instance, table_name, col_expr = curve_info[:3]
+                logger.debug("Preliminary column expression: %s", col_expr)
+                
+                # join expression at \, occurences. Increase the index where the
+                # curve title starts.
+                title_start_idx = 3
+                for fragment in curve_info[title_start_idx:]:
+                    if col_expr.endswith("\\"):
+                        col_expr = col_expr[:-1] + "," + fragment
+                        title_start_idx += 1
+                    else:
+                        break
+                logger.debug("Column expression: %s", col_expr)
+                
+                # Since the title was split at "," before, join them together again.
+                # If it is empty, auto generate title.
+                logger.debug("title_start_idx %i", title_start_idx)
+                logger.debug("Curve info belonging to title: %s", str(curve_info[title_start_idx:]))
+                title = ",".join(curve_info[title_start_idx:])
+                if len(title) == 0:
+                    title = module_instance + " " + col_expr
+                
+                if not hf.module.config.has_section(module_instance):
+                    raise Exception("No such module")
+                module_class = hf.module.getModuleClass(hf.module.config.get(module_instance, "module"))
+                try:
+                    table = module_class.module_table if len(table_name) == 0 else module_class.subtables[table_name]
+                except IndexError, e:
+                    raise Exception("No such subtable")
+                data_sources.add((table, module_instance))
+                curve_dict[curve_name] = (title, table, module_instance, col_expr, table_name)
+            except Exception, e:
+                logger.warning("Parsing curve failed:\n"+traceback.format_exc())
+                errors.append("Curve '%s': %s" % (key, str(e)))
+        elif key.lower() == u"legend":
+            legend = (value.lower() == "true" or value == "1")
+        elif key.lower() == u"ylabel":
+            ylabel = value
+        elif key.lower() == u"title":
+            title = value
+            
+    return {
+        "curve_dict": curve_dict,
+        "data_sources": data_sources,
+        "title": title,
+        "legend": legend,
+        "ylabel": ylabel,
+        "timerange": timerange,
+        "renormalize": renormalize,
+        "auth_required": auth_required,
+        "timerange": timerange,
+        "errors": errors
+    }
 
 def timeseriesPlot(category_list, **kwargs):
     """
@@ -84,70 +238,25 @@ def timeseriesPlot(category_list, **kwargs):
                     constraint[t][curve].append(constr.split(','))
     errors = []
     try:
-        curve_list = []
-        data_sources = set()
-        retrieved_data = {}
-        title = ""
-        legend = False
-        ylabel = ""
-        timerange = None
-        renormalize = False
-        
-        # Set to true if special auth is required for a curve.
-        auth_required = False
-        
-        # extract timeranges
-        now = datetime.datetime.now()
-        end_date = kwargs['end_date'] if 'end_date' in kwargs else now.strftime('%Y-%m-%d')
-        start_date = kwargs['start_date'] if 'start_date' in kwargs else end_date
-        start_time = kwargs['start_time'] if 'start_time' in kwargs else "00:00"
-        end_time = kwargs['end_time'] if 'end_time' in kwargs else now.strftime('%H:%M')
-        start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
-        end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
-        timerange = [start, end]
-        
-        if 'renormalize' in kwargs:
-            if kwargs['renormalize'].lower() in ['true', '1']:
-                renormalize = True
-        
         # STAGE 1
-        # Parse curve data and scan for parameters.
-        # This gets a list from all tables that are to be retrieved in the next step.
-        for key, value in kwargs.iteritems():
-            if key.lower().startswith(u"curve_"):
-                try:
-                    curve_name = key[6:]
-                    curve_info = value.split(",")
-                    if len(curve_info) < 4:
-                        raise Exception("Insufficient number of arguments for plot curve")
-                    module_instance, table_name, col_expr = curve_info[:3]
-                    title = ",".join(curve_info[3:])
-                    if len(title) == 0:
-                        title = module_instance + " " + col_expr
-                    if not hf.module.config.has_section(module_instance):
-                        raise Exception("No such module")
-                    module_class = hf.module.getModuleClass(hf.module.config.get(module_instance, "module"))
-                    try:
-                        table = module_class.module_table if len(table_name) == 0 else module_class.subtables[table_name]
-                    except IndexError, e:
-                        raise Exception("No such subtable")
-                    data_sources.add((table, module_instance))
-                    curve_list.append((title, (table, module_instance, col_expr)))
-                except Exception, e:
-                    logger.warning("Parsing curve failed:\n"+traceback.format_exc())
-                    errors.append("Curve '%s': %s" % (key, str(e)))
-            elif key.lower() == u"legend":
-                legend = (value.lower() == "true" or value == "1")
-            elif key.lower() == u"ylabel":
-                ylabel = value
-            elif key.lower() == u"title":
-                title = value
-        
+        logger.debug("TEST")
+        dat = getTimeseriesPlotConfig(**kwargs)
+        logger.debug("config: %s", "\n".join(map(lambda x: str(x[0])+": "+str(x[1]), dat.iteritems())))
+        curve_dict = dat["curve_dict"]
+        data_sources = dat["data_sources"]
+        title = dat["title"]
+        legend = dat["legend"]
+        ylabel = dat["ylabel"]
+        timerange = dat["timerange"]
+        renormalize = dat["renormalize"]
+        auth_required = dat["auth_required"]
+        timerange = dat["timerange"]
+        errors.extend(dat["errors"])
         
         # STAGE 2
         # Download the data from all required tables
         # in the specified timerange.
-        table_data = {}
+        retrieved_data =  {}
         for table, module_instance in data_sources:
             try:
                 query_columns = [hf_runs.c.time]
@@ -174,12 +283,14 @@ def timeseriesPlot(category_list, **kwargs):
                 for exclude in constraint['exclude'][None]:
                     query = query.where(getattr(table.c, exclude[0]) != exclude[1])
                 # apply named constraints
-                if curve_name in constraint['filter']:
+                # TODO: named constraints
+                """if curve_name in constraint['filter']:
                     for include in constraint['filter'][curve_name]:
                         query = query.where(getattr(table.c, include[0]) == include[1])
                 if curve_name in constraint['exclude']:
                     for exclude in constraint['exclude'][curve_name]:
                         query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+                """
                 
                 # apply timerange selection
                 if timerange is not None:
@@ -202,18 +313,25 @@ def timeseriesPlot(category_list, **kwargs):
                 logger.warning("Retrieving plot data:\n"+traceback.format_exc())
                 errors.append("Data '%s': %s" % (key, str(e)))
         
+        logger.debug("data sets: %s", ", ".join(map(str, retrieved_data.iterkeys())))
+        
         # STAGE 3
         # Calculate the data structures for each curve
-        for curve_idx,(title, (table, module_instance, expr)) in enumerate(curve_list):
+        vardict_name = "__internal_column_value_dict__"
+        regexp_dollarvar = re.compile(r"\$([_a-zA-Z0-9]+)")
+        for curve_name, (title, table, module_instance, expr, subtable) in curve_dict.iteritems():
             try:
                 try:
                     column_index, source_data = retrieved_data[(table, module_instance)]
                 except IndexError:
+                    curve_dict[curve_name] = (title, [], [])
+                    logger.debug("curve not found in retrieved data")
                     continue # error in stage 2
                 
                 num_rows = len(source_data)
                 if num_rows == 0:
-                    curve_list[curve_idx]= (title, [], [])
+                    logger.debug("no data downloaded for curve")
+                    curve_dict[curve_name] = (title, [], [])
                     continue
                 
                 logger.debug("Entries in sources: %i" % num_rows)
@@ -221,10 +339,24 @@ def timeseriesPlot(category_list, **kwargs):
                 data_points = np.zeros(num_rows)
                 min_val = max_val = None
                 
+                use_matheval = False
+                math_expr = expr
+                # does the expression not match a column name?
+                # Replace $varnames by a dict call to create valid math expression.
+                if expr not in column_index:
+                    use_matheval = True
+                    math_expr = regexp_dollarvar.sub(vardict_name+"['\\1']", expr)
+                    logger.debug("Math expression "+repr(math_expr))
+                
                 for i,row in enumerate(source_data):
                     variables = dict((col, row[i]) for col,i in column_index.iteritems())
                     dates[i] = date2num(row[0])
-                    val = hf.utility.matheval(expr, variables)
+                    
+                    if use_matheval:
+                        val = hf.utility.matheval(math_expr, {vardict_name: variables})
+                    else:
+                        val = variables[expr]
+                    
                     data_points[i] = val
                     if min_val is None: min_val = val
                     elif min_val > val: min_val = val
@@ -236,8 +368,9 @@ def timeseriesPlot(category_list, **kwargs):
                 elif renormalize:
                     data_points = np.zeros(len(data_points)) + 0.5
                     
-                curve_list[curve_idx] = (title, dates, data_points)
+                curve_dict[curve_name] = (title, dates, data_points)
             except Exception, e:
+                curve_dict[curve_name] = (title, [], [])
                 logger.warning("Retrieving plot data:\n"+traceback.format_exc())
                 errors.append("Data '%s': %s" % (key, str(e)))
                 
@@ -265,7 +398,8 @@ def timeseriesPlot(category_list, **kwargs):
         '''''''''
         fig.autofmt_xdate()
         
-        for num,curve in enumerate(curve_list):
+        for num, curve in enumerate(curve_dict.itervalues()):
+            logger.debug(curve)
             if len(curve[1]) == 0:
                 continue
             options = {
@@ -293,6 +427,8 @@ def timeseriesPlot(category_list, **kwargs):
         logger.error("Plotting Failed: %s" % str(e))
         logger.error(traceback.format_exc())
         errors.append("Plotting Failed: %s" % str(e))
+        
+    logger.debug("errors gatherd during run: %s", "\n".join(errors))
     
     img_data = StringIO.StringIO()
     try:

@@ -69,19 +69,16 @@ class Dispatcher(object):
                 
                 end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M")))
                 
-                def extractCurve(d):
-                    try:
-                        d = d.split(',')
-                        data = d[0:3]
-                        data.append(','.join(d[3:]))
-                        return data
-                    except Exception:
-                        return None
+                plot_cfg = hf.plotgenerator.getTimeseriesPlotConfig(**kwargs)
                 
-                curve_dict = dict((int(name[6:]), extractCurve(val)) \
-                    for name,val in kwargs.iteritems() \
-                    if name.startswith("curve_"))
-                curve_dict = dict(filter(lambda x: x is not None, curve_dict.iteritems()))
+                curve_dict = {}
+                for name, curve in plot_cfg["curve_dict"].iteritems():
+                    #curve <=> (title, table, module_instance, col_expr)
+                    curve_dict[name] = (curve[2],\
+                        curve[4], \
+                        curve[3], \
+                        curve[0])
+                self.logger.debug(curve_dict)
                 
                 # Parse the constraints
                 constraint_dict = {}

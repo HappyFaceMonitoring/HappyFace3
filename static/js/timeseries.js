@@ -197,7 +197,7 @@ $("#update_plot").click(function() {
         var id_particle = "#curve_"+i;
         var mod = $(id_particle+"_module_instance option:selected").val();
         var table = $(id_particle+"_subtable option:selected").val();
-        var expression = $(id_particle+"_expression").val();
+        var expression = $(id_particle+"_expression").val().replace(",", "\\,");
         var variable = $(id_particle+"_variable option:selected").val();
         var title = $(id_particle+"_title").val();
         if(expression.length > 0)

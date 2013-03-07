@@ -16,7 +16,7 @@
 
 import hf, logging
 from dispatcher import Dispatcher
-from timeseries import timeseriesPlot, getTimeseriesUrl
+from timeseries import timeseriesPlot, getTimeseriesUrl, getTimeseriesPlotConfig
 
 logger = logging.getLogger(__name__)
 
