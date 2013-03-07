@@ -33,7 +33,7 @@ class RootDispatcher(object):
     _cp_config = {
         'tools.cert_auth.on': True,
         'tools.encode.on': True,
-        'tools.encode.encoding': 'utf8', 
+        'tools.encode.encoding': 'utf-8', 
     }
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
