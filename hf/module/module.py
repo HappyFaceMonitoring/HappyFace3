@@ -66,5 +66,7 @@ def getModuleClass(mod_name):
     :param mod_name: Name of the module
     :ptype mod_name: string
     """
-    return __module_class_list[mod_name] if mod_name in __module_class_list else None
+    if mod_name not in __module_class_list:
+        raise hf.ConfigError("Module class {0} not found".format(mod_name))
+    return __module_class_list[mod_name]
 
