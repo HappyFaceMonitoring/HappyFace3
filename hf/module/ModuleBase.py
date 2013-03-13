@@ -47,6 +47,9 @@ class ModuleMeta(type):
             raise hf.exceptions.ModuleProgrammingError(name, "table_colums not specified")
         if "subtable_columns" not in dct:
             self.subtable_columns = {}
+        
+        if "use_smart_filling" not in dct:
+            self.use_smart_filling = False
        
         self.subtables = {}
         
@@ -84,6 +87,10 @@ class ModuleMeta(type):
             pass
         
     def generateModuleTable(self, tabname, columns):
+        
+        if self.use_smart_filling:
+            columns.append(Column("sf_data_id", Integer, ForeignKey("mod_"+tabname+".id"), index = True))
+        
         table = Table("mod_"+tabname, hf.database.metadata,
             *([
                 Column('id', Integer, Sequence("mod_"+tabname+'_id_seq'), primary_key=True),
@@ -147,11 +154,53 @@ class ModuleBase:
         In practice, there is no "visual" difference between status -1 and -2, but there might
         be in future.
         
+        .. note::
+        
+            A lot of the configuration is done with class variables in the derived class.
+            All special variables are listed :ref:`here <mod-dev-classvars>`.
+            
+            Internaly, they are used to generate the database *Table* objects, generate
+            default configuration and set whether the :ref:`smart filling mechanism <mod-dev-smart_filling>`
+            shall be used.
+        
         It makes use of the :class:`ModuleMeta <hf.module.ModuleBase.ModuleMeta>` class internally.
        
         .. attribute:: module_table
         
             Sqlalchemy *Table* object of the modules main data table
+            
+        .. attribute:: smart_filling_current_dataset
+        
+            The data dictionary from the last run with data or *None* if the module never
+            inserted data in the databae before.
+            
+            .. note::
+                Has a meaning only if :attr:`.use_smart_filling` is *True* and in the methods
+                :meth:`.prepareAcquisition`, :meth:`.extractData` and :meth:`.getTemplateData`.
+                
+                Otherwise it is always *None*.
+            
+            Use *self.smart_filling_current_dataset["id"]* as parent ID for accessing data in subtables,
+            since it belongs to the correct run containing data.
+            
+            In :meth:`.getTemplateData`, it is equal to :attr:`.dataset` if the run to display
+            stored data.
+            
+            See :ref:`mod-dev-smart_filling` for more information,
+        
+        .. attribute:: smart_filling_keep_data
+        
+            Boolean flag to indicate that data shall be stored for the current run.
+            If it is set to *False*, :meth:`.fillSubtables` is not called.
+            
+            .. note::
+                Attribute is ignored if set outside of :meth:`.extractData`.
+                
+            .. warning::
+                The default on module creation is *None*, causing an exception to
+                be thrown if you don't set the flag to *True* or *False* in :meth:`.extractData`!
+                
+            See :ref:`mod-dev-smart_filling` for more information,
 
         .. attribute:: subtables
             
@@ -237,8 +286,20 @@ class ModuleBase:
         self.run = run
         self.dataset = dataset
         self.template = template
-        self.category = None # set by CategoryProxy.getCategroy() after creating specific module instances
+        # set by CategoryProxy.getCategroy() after creating specific module instances
+        self.category = None
         
+        self.smart_filling_current_dataset = None
+        self.smart_filling_keep_data = None
+        
+        if self.use_smart_filling:
+            tab = self.module_table
+            self.smart_filling_current_dataset = tab.select().where(tab.c.sf_data_id == None)\
+                    .order_by(tab.c.id).limit(1).execute().fetchone()
+            if self.smart_filling_current_dataset:
+                self.smart_filling_current_dataset = dict(self.smart_filling_current_dataset)
+            self.logger.debug("SF dataset: "+str(self.smart_filling_current_dataset))
+            
         if self.dataset and "error_string" in self.dataset:
             self.error_string = self.dataset['error_string']
         else:
@@ -278,6 +339,11 @@ class ModuleBase:
         one or more insert statements. The Table classes are available in
         the :attr:`subtables` dictionary, where the
         key is the name specified in :data:`subtable_columns`.
+        
+        .. note::
+        
+            This function is not called if smart filling is used and the current data does not need to be stored. Namely,
+            :attr:`.use_smart_filling` is *True* and :attr:`.smart_filling_keep_data` is *False*.
         
         For more information about subtables, see :ref:`mod-dev-subtable`
                 
@@ -380,6 +446,12 @@ class ModuleBase:
     
     @hf.url.absoluteUrl
     def ajaxUrl(self):
+        """
+        Get the URL where AJAX requests to the modules are processed.
+        
+        If the module does not implement the :meth:`.ajax` method, accessing this URL
+        returns a *404 File Not Found* response.
+        """
         return "ajax/{0}/{1}".format(self.instance_name, self.run["id"])
         
     def getStatusIcon(self):
@@ -486,7 +558,6 @@ class ModuleBase:
             cols[name] = [col.name for col in table.columns if col.name not in blacklist_sub]
         
         return cols
-    
     
     def render(self):
         """

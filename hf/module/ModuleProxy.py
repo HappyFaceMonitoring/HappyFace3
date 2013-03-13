@@ -112,9 +112,34 @@ class ModuleProxy:
                         elif hasattr(data[col], 'getArchiveFilename'):
                             data[col] = data[col].getArchiveFilename()
                     
+                    # Set the data ID pointing to the actual data if smart filling is used.
+                    if module.use_smart_filling:
+                        if module.smart_filling_keep_data is None:
+                            raise hf.ModuleRuntimeError("Smart filling is used but smart_filling_keep_data was not set!")
+                        elif module.smart_filling_keep_data:
+                            d["sf_data_id"] = None
+                        else:
+                            if module.smart_filling_current_dataset is None:
+                                raise hf.ModuleRuntimeError("Smart filling was instructed to copy old dataset, but no data is available in past")
+                            
+                            # remember where data is
+                            data["sf_data_id"] = module.smart_filling_current_dataset["id"]
+                            
+                            # copy over old data, ignoring certain fields
+                            ignore = ["id", "run_id", "description", "instruction", "sf_data_id"]
+                            data.update(dict(filter(lambda x: x[0] not in ignore,
+                                module.smart_filling_current_dataset.iteritems())))
+                    
                     dataExctractionSuccessfull = True
             except hf.DownloadError, e:
                 self.logger.info("Data exctraction failed because of failed download: "+str(e))
+                data.update({
+                    "status": -1,
+                    "error_string": str(e)
+                })
+            except hf.ModuleRuntimeError, e:
+                self.logger.error("Development error during data exctraction: "+str(e))
+                self.logger.error(traceback.format_exc())
                 data.update({
                     "status": -1,
                     "error_string": str(e)
@@ -137,7 +162,8 @@ class ModuleProxy:
             
             if dataExctractionSuccessfull:
                 try:
-                    module.fillSubtables(inserted_id)
+                    if module.use_smart_filling and module.smart_filling_keep_data:
+                        module.fillSubtables(inserted_id)
                 except Exception, e:
                     self.logger.error("Filling subtables failed: "+str(e))
                     self.logger.error(traceback.format_exc())

@@ -51,10 +51,26 @@ The following graph is a schematic overview over the relations between the main 
 .. image:: gfx/database.png
     :align: center
 
+.. _mod-dev-smart_filling:
+
 Smart Database Filling
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. todo:: Describe saving database space by using the *smart filling* method.
+Sometimes you encounter situations where you want a module to store *a lot* of information that only changes once in a while. For example, we weekly generate an overview of the stored files in our computing site. Obviously, this is a lot of data you don't want to store quarter hourly.
+
+To avoid rewriting detailed data in subtables, the smart filling mechanism can be used. It is an easy way to tell HappyFace whether or not subtable data shall be stored. In order to correctly display the module, one has the keep track when detailed information was stored last.
+
+In order to use smart filling, set the :ref:`class-level variable <mod-dev-classvars>` :dat:`use_smart_filling` to *True*.
+
+.. code-block:: python
+
+ class MyModule(hf.module.ModuleBase):
+     use_smart_filling = True
+     # [...]
+
+Internaly, HappyFace will then add another column named *sf_data_id* to the module table, pointing to the actual data, but this should be of no direct concern for module developers.
+
+When smart filling is used, the two attributes :attr:`smart_filling_current_dataset <hf.module.ModuleBase.smart_filling_current_dataset>` and :attr:`smart_filling_keep_data <hf.module.ModuleBase.smart_filling_keep_data>` are available.
 
 Example
 -------
@@ -130,6 +146,12 @@ HappyFace makes use of class wide variables to define several aspects of the mod
     The subtable names are not passed to the database as they are, but are prepended with the module name to ensure uniqueness. Therefore, two modules can use the same subtable name without problems.
 
     The resulting Table objects can be accessed via the :attr:`hf.module.ModuleBase.subtables` dictionary.
+
+.. data:: use_smart_filling
+
+    *optional*
+
+    Set to *True* if you want to enable :ref:`smart filling <mod-dev-smart_filling>` on the module.
 
 Class Methods
 -------------
