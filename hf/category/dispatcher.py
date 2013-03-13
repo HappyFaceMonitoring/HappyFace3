@@ -229,16 +229,16 @@ class AjaxDispatcher:
             
             run = hf_runs.select(hf_runs.c.id==run_id).execute().fetchone()
             if run is None:
-                raise Exception("The specified run ID was not found!")
+                raise cp.HTTPError(status=404, message="The specified run ID was not found!")
             
             specific_module = module.getModule(run)
             if not hasattr(specific_module, "ajax"):
-                raise Exception("Module does not export data via Ajax")
+                raise cp.HTTPError(status=404, message="Module does not export data via Ajax")
             
             if specific_module.error_string:
                 raise Exception(specific_module.error_string)
             if specific_module.dataset is None:
-                raise Exception("No data at this time")
+                raise cp.HTTPError(status=404, message="No data at this time")
             self.logger.debug(specific_module.error_string, specific_module.dataset)
             response["data"] = specific_module.ajax(**kwargs)
             response["status"] = "success"
