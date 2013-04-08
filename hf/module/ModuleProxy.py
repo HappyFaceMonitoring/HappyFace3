@@ -162,7 +162,8 @@ class ModuleProxy:
             
             if dataExctractionSuccessfull:
                 try:
-                    if module.use_smart_filling and module.smart_filling_keep_data:
+                    if (module.use_smart_filling and module.smart_filling_keep_data) \
+                        or not module.use_smart_filling:
                         module.fillSubtables(inserted_id)
                 except Exception, e:
                     self.logger.error("Filling subtables failed: "+str(e))
