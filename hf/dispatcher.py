@@ -98,20 +98,20 @@ Perhaps the corresponding module was removed from the HF config or the file does
                 
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
-                return template.render_unicode(**template_context)
+                return template.render_unicode(**template_context).encode("utf-8")
                 
             except Exception, e:
                 self.logger.debug("Fancy error page generation failed\n" + traceback.format_exc())
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "plain_error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
-                return template.render_unicode(**args)
+                return template.render_unicode(**args).encode("utf-8")
                 
         except Exception, e:
             self.logger.error(u"error page generation failed: "+unicode(e))
             self.logger.error(traceback.format_exc())
             return u"""<h1>Error Inception</h1>
             <p>An error occured while displaying an error. Embarrasing.</p>
-            <p>Please consult the log files!</p>"""
+            <p>Please consult the log files!</p>""".encode("utf-8")
             
             
 
