@@ -21,10 +21,16 @@ if __name__ != '__main__':
     # unfortunately we need this rather hacky path change
     # because mod_wsgi for some reason does not want to
     # set PYTHONPATH as we want it or the interpreted
-    # doesn't read it, idk
-    os.chdir(os.path.dirname(__file__))
-    sys.path.append(os.path.dirname(__file__))
-
+    # doesn't read it, idk.
+    
+    # __file__ is relative to the cwd, so if the dirname
+    # is not empty, the cwd is wrong, because HF3 requires
+    # it to point to the directory of the render.py script.
+    dirname = os.path.dirname(__file__)
+    if dirname:
+        os.chdir(dirname)
+        sys.path.append(dirname)
+    
 import hf, cherrypy, logging
 import ConfigParser
 import atexit
@@ -59,5 +65,11 @@ else:
     cherrypy.config.update({'environment': 'embedded'})
     if cherrypy.__version__.startswith('3.0') and cherrypy.engine.state == 0:
         cherrypy.engine.start(blocking=False)
+        atexit.register(hf.database.disconnect)
         atexit.register(cherrypy.engine.stop)
+    print hf.config.get("paths", "happyface_url")
     application = cherrypy.Application(root=hf.RootDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
+    cherrypy.tree.mount(application)
+    # FLUP server does not like autoreload.
+    cherrypy.config.update({'engine.autoreload_on':False})
+    
