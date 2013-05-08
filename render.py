@@ -67,7 +67,6 @@ else:
         cherrypy.engine.start(blocking=False)
         atexit.register(hf.database.disconnect)
         atexit.register(cherrypy.engine.stop)
-    print hf.config.get("paths", "happyface_url")
     application = cherrypy.Application(root=hf.RootDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
     cherrypy.tree.mount(application)
     # FLUP server does not like autoreload.
