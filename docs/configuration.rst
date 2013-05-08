@@ -214,6 +214,14 @@ Basically, the update flow is as follows
 
 4. run *python tools.py dbupdate -f*
 
+.. note::
+
+   You probably get warning messages when using *pkill* to restart your server process(es), because you might try to kill processes from other users. Just ignore those messages.
+   
+.. note::
+
+   The process name in newer versions of Apache seems to be *apach*, so to restart you need to call *pkill apach*.
+
 Updating the source code of HappyFace or its modules might render the database schema incompatible. In this case, HappyFace tries to throw supportive error messages, giving you hints that schema updates might be neccessary.
 
 To update the database schema, the :ref:`tool-dbupdate` tool is used. To check if updates are neccessary, you can do a dry run. This will list all required changes.
