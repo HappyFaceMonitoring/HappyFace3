@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 from sqlalchemy import *
-import hf, modules, traceback, os
+import hf, traceback, os, logging, sys
 from mako.template import Template
 import pkgutil
 
@@ -24,6 +24,7 @@ __column_file_list = {}
 # all imported module classes
 __module_class_list = {}
 
+logger = logging.getLogger(__file__)
 
 def getColumnFileReference(table):
     """
@@ -42,11 +43,17 @@ def moduleClassLoaded(mod_class):
 def importModuleClasses():
     module_paths = [os.path.join(hf.hf_dir, "modules")]
     exclude = ['.git', '.svn']
-    for path in module_paths:
-        subdirs = [d for d in\
-            (os.path.join(path, p) for p in os.listdir(path) if p not in exclude)\
-            if os.path.isdir(d)]
-        module_paths.extend(subdirs)
+    try:
+        for path in module_paths:
+            subdirs = [d for d in\
+                (os.path.join(path, p) for p in os.listdir(path) if p not in exclude)\
+                if os.path.isdir(d)]
+            module_paths.extend(subdirs)
+    except OSError:
+        logger.error("Cannot find modules directory!")
+        logger.error(traceback.format_exc())
+        sys.exit()
+        
     for imp, name, ispkg in pkgutil.iter_modules(path=module_paths):
         if ispkg:
             continue
