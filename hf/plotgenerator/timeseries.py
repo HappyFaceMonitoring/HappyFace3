@@ -432,7 +432,7 @@ def timeseriesPlot(category_list, **kwargs):
     
     img_data = StringIO.StringIO()
     try:
-        fig.savefig(img_data)
+        fig.savefig(img_data, transparent = True)
         cp.response.headers['Content-Type'] = "image/png"
         return img_data.getvalue()
     finally:
