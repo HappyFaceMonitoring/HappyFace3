@@ -40,9 +40,9 @@ past = run['time'] - timedelta(days = 2)
       <input name="submit" type="submit" value="Plot" />
      </form>
     </div>
-% if no_data and len(module.error_string) == 0:
+% if no_data and not error_occured:
     <p>No data at this point in time!</p>
-% elif len(module.error_string) > 0:
+% elif error_occured:
     <h3>Module Error</h3>
     <p>${module.error_string | hf.utility.addAutoLinks, n}</p>
 % else:

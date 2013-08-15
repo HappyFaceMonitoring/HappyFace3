@@ -578,20 +578,25 @@ class ModuleBase:
             # make error string a bit more fancy
             #if self.error_string and ":" in self.error_string:
             #    self.error_string = re.sub(r"^([^:]+:)", "<strong>\\1</strong>", self.error_string)
-            if self.dataset is None or len(self.error_string) > 0:
+            if self.dataset is None:
                 template_data['no_data'] = True
-                module_html = self.template.render_unicode(**template_data)
+                template_data['error_occured'] = True
+            elif self.error_string:
+                template_data.update(self.getTemplateData())
+                template_data['no_data'] = False
+                template_data['error_occured'] = True
             else:
                 try:
                     template_data.update(self.getTemplateData())
                     template_data['no_data'] = False
-                    module_html = self.template.render_unicode(**template_data)
+                    template_data['error_occured'] = False
                 except DatabaseError, e:
                     template_data['no_data'] = True
+                    template_data['error_occured'] = True
                     self.error_string = "A database error occured. Probably the database schema needs to be updated!"
-                    module_html = self.template.render_unicode(**template_data)
                     self.logger.error("Rendering failed: " + str(e))
                     self.logger.error(traceback.format_exc())
+            module_html = self.template.render_unicode(**template_data)
         except Exception, e:
             module_html = "<p class='error'>Final rendering of '%s' failed completely! Please refer to the log files</p>" % self.instance_name
             self.logger.error("Rendering failed: " + str(e))
