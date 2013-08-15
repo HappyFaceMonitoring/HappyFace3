@@ -36,7 +36,8 @@ One entry is added to the module table every time :mod:`acquire.py` is called. B
      * status = -2            Data could not be retrieved (download failed etc.)
 
  next term source_url
-    An URL to the data source, if applicable. At the moment only a single URL can be specified, this is to be regarded as a current limitation of HappyFace.
+    An URL to the data source, if applicable. Multiple URLs can be separated by pipe-characters. In older versions of HappyFace you directly set the
+    source_url field in the data dictionary via :meth:`extractData <hf.module.ModuleBase.extractData>`, this is deprecated! Now, you should set the :attr:`source_url *attribute*<hf.module.ModuleBase.source_url>` in the :meth:`prepareAcquisition <hf.module.ModuleBase.prepareAcquisition>` method.
 
 .. _mod-dev-subtable:
 
@@ -60,7 +61,7 @@ Sometimes you encounter situations where you want a module to store *a lot* of i
 
 To avoid rewriting detailed data in subtables, the smart filling mechanism can be used. It is an easy way to tell HappyFace whether or not subtable data shall be stored. In order to correctly display the module, one has the keep track when detailed information was stored last.
 
-In order to use smart filling, set the :ref:`class-level variable <mod-dev-classvars>` :dat:`use_smart_filling` to *True*.
+In order to use smart filling, set the :ref:`class-level variable <mod-dev-classvars>` :data:`use_smart_filling` to *True*.
 
 .. code-block:: python
 

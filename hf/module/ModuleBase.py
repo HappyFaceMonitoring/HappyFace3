@@ -207,6 +207,21 @@ class ModuleBase:
             A dictionary of sqlalchemy *Table* objects, with their given names
             as key.
 
+        .. attribute:: source_url
+
+            A list URLs for all the data sources of this module. You should set this already in
+            prepare acquisition, otherwise the soruce URLs won't be displayed on the web output
+            in case of an error.
+
+            .. note::
+                HappyFace will **not** quote your URL except pipes! Because the pipe symbol | is used as path
+                separator internaly, the URL must not contain pipes, so HappyFace replaces them by the encoded
+                equivalent %7C.
+
+            If *source_url* is None (default), the respective entry in the data dictionary returned
+            by :meth:`extractData <hf.module.ModuleBase.extractData>` is used. See also :ref:`smart filling <database_layout>`.
+            This ensures backward compatibility with older versions of HappyFace.
+
         .. attribute:: module_name
         
             The name of the module class.
