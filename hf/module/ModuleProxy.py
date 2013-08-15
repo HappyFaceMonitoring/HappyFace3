@@ -105,8 +105,10 @@ class ModuleProxy:
                     if module.source_url:
                         if(isinstance(module.source_url, str)
                            or isinstance(module.source_url, unicode)):
+                            module.source_url = module.source_url.replace("|", "%7C")
                             data["source_url"] = module.source_url
                         else:
+                            module.source_url = map(lambda x: x.replace("|", "%7C"), module.source_url)
                             data["source_url"] = "|".join(module.source_url)
                     
                     # we treat file columns specially!
