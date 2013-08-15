@@ -211,7 +211,7 @@ class DownloadFile:
 
 class File:
     def __init__(self, run, name):
-        self.name = name
+        self.name = os.path.basename(name)
         self.run = run
     
     def getArchivePath(self):
