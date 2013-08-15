@@ -26,7 +26,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: %s TOOL [options]\nUse the 'help'-tool for more information\n" % sys.argv[0]
         sys.exit(-1)
-    
+
     tool_name = sys.argv[1]
     sys.argv[0] += ' ' + sys.argv[1]
     del sys.argv[1]
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     except ImportError,e:
         logger.error("No tool called %s: %s" % (tool_name, str(e)))
         sys.exit(-1)
-    
+
     try:
         hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
         if tool.load_hf_environment:
@@ -52,10 +52,10 @@ if __name__ == '__main__':
             cfg_dir = None
             try:
                 hf.module.importModuleClasses()
-                
+
                 hf.database.connect(implicit_execution = True)
                 hf.database.metadata.create_all()
-                
+
                 category_list = hf.category.createCategoryObjects()
             except Exception, e:
                 print "Setting up HappyFace failed: %s", str(e)
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         except Exception, e:
             print "Tool execution failed: %s", str(e)
             print traceback.format_exc()
-        
+
     except Exception, e:
         logger.error("Uncaught HappyFace exception: %s", str(e))
         logger.error(traceback.format_exc())

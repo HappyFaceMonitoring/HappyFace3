@@ -23,7 +23,7 @@ All of them derive from :class:`ModuleBase`, and any other
     A config parser instance with the aggregated data
     from all module configuration files. It is created and populated
     at initialization by :func:`hf.configtools.readConfigurationAndEnv`.
-    
+
     Since this module variable is used by most category related methods,
     it is important to initialize it early.
 

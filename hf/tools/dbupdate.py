@@ -49,9 +49,9 @@ def execute():
     parser.add_argument('--dry', action='store_true', help="Just provide a summary of what will be done. Superseds any other options.")
     parser.add_argument('--new-only', action='store_true', help="Creates only new tables and does not check for changes in existing ones.")
     args = parser.parse_args()
-    
+
     args.interactive = not (args.force or args.dry)
-    
+
     try:
         import migrate
     except ImportError, e:
@@ -61,8 +61,8 @@ def execute():
     from migrate.versioning.util import load_model
     from migrate.versioning import genmodel, schemadiff
     from migrate.changeset import schema
-    
-    
+
+
     # Setup minimalistic, offline HF environment
     hf.configtools.readConfigurationAndEnv()
     hf.configtools.setupLogging('acquire_logging_cfg')
@@ -71,10 +71,10 @@ def execute():
 
     # calculate diff using sqlalchemy-migrate magic
     diff = schemadiff.getDiffOfModelAgainstDatabase(hf.database.metadata, hf.database.engine)
-    
+
     if args.dry:
         print "Dry run! Database will be unchanged"
-        
+
     # compatibility with newer versions of sqlalchemy-migrate
     if not hasattr(diff, "tablesMissingInDatabase"):
         diff.tablesMissingInDatabase = diff.tables_missing_from_B
@@ -83,7 +83,7 @@ def execute():
     if not hasattr(diff, "tablesWithDiff"):
         diff.tablesWithDiff = diff.tables_different.values()
     #import pdb; pdb.set_trace()
-    
+
     # create missing tables
     if len(diff.tablesMissingInDatabase) > 0:
         tables = "\033[1m" + '\033[0m, \033[1m'.join(t.name for t in diff.tablesMissingInDatabase) + '\033[0m'
@@ -91,7 +91,7 @@ def execute():
             print "\033[1m\033[32mAdd\033[0m table(s) " + tables
         if ask(args, "\033[1m\033[32mAdd\033[0m table(s) " + tables + "?"):
             hf.database.metadata.create_all(bind=hf.database.engine, tables=diff.tablesMissingInDatabase)
-    
+
     # delete residual tables
     deleted_tables = []
     if not args.new_only and len(diff.tablesMissingInModel) > 0:
@@ -100,7 +100,7 @@ def execute():
             print "\033[1m\033[31mDrop\033[0m table(s) " + tables
         if ask(args, "\033[1m\033[31mDrop\033[0m table(s) " + tables + "?\n\033[1m\033[31mWARNING\033[0m Not reversible! Procede?"):
             hf.database.metadata.drop_all(bind=hf.database.engine, tables=diff.tablesMissingInModel)
-            
+
     # apply changes in a table
     # This code was heavily influenced by the original
     # sqlalchemy migrate function:
@@ -128,14 +128,14 @@ def execute():
                 changes += '\n * \033[1m\033[33malter\033[0m column(s) \033[1m' + '\033[0m, \033[1m'.join(c[0].name for c in alter) + '\033[0m'
             if len(changes) > 0:
                 changes = changes[1:]
-                
+
             if args.new_only:
                 for col in add:
                     if not args.interactive: print " \033[1m\033[32madd\033[0m column '%s'" % col.name
                     if not ask(args, " \033[1m\033[32madd\033[0m column '%s'?" % col.name):
                         if not args.dry: model_table.columns[col.name].create()
                 continue
-                
+
             message = '''\033[1m\033[31mATTENTION\033[0m
 Due to SQLite language restrictions, we canonly alter the table as a whole, so you have to accept all changes or none!
 %s
@@ -143,7 +143,7 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
             if not args.interactive: print changes
             if not ask(args, message):
                 continue
-            
+
             # <COPY> All rights and hail to the SQLAlchemy Migrate project
             # Sqlite doesn't support drop column, so you have to
             # do more: create temp table, copy data to it, drop
@@ -170,9 +170,9 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
                     connection.execute(
                         'CREATE TEMPORARY TABLE %s as SELECT * from %s' % \
                             (temp_name, model_table.name))
-                            
+
                     connection.execute('pragma foreign_keys = off;') # added by Gregor Vollmer
-                    
+
                     # make sure the drop takes place inside our
                     # transaction with the bind parameter
                     model_table.drop(bind=connection)
@@ -200,7 +200,7 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
                     if not args.interactive: print " \033[1m\033[33malter\033[0m column '%s'" % model_col.name
                     if ask(args, " \033[1m\033[33malter\033[0m column '%s'? \033[1m\033[31mWARNING\033[0m Not reversible!" % model_col.name):
                         if not args.dry: database_col.alter(model_col)
-                    
+
     if args.dry:
         print "Dry run completed"
     else:

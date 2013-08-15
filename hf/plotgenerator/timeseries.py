@@ -42,9 +42,9 @@ def __plotableColumns(table):
 def getTimeseriesPlotConfig(**kwargs):
     """
     Extract the plot configuration from the URL arguments.
-    
+
     Possible arguments are a subset from the ones of :meth:`timeseriesPlot() <hf.plotgenerator.timeseries.timeseriesPlot>`, see there for details.
-    
+
     :param curve_XXX: colon-separated curve info: (module_instance,[subtable],expr,title)
     :param legend: Show legend in image
     :param title: (string) Display a title above plot
@@ -54,53 +54,53 @@ def getTimeseriesPlotConfig(**kwargs):
     :param start_time: Start time (H:M)
     :param end_date: End time (H:M)
     :param renormalize: (true, false / 1, 0) Scales all curves to a [0,1] interval
-    
+
     :return: A dictionary with the configuration. The entries are
-    
+
         *curve_dict*
             A dictionary encoding the curves to plot. Only curves are given where the user is authorized. to access.
             The key is the curve name, the value is a tuple of the following format: *(title, table, module_instance, col_expr, subtable)*
-            
+
             *title*
                 Title of the curve. Same as given in the URL.
-            
+
             *table*
                 sqlalchemy Table instance.
-                
+
             *module_instance*
                 Name of the module instance to plot data from. Same as given in the URL.
-                
+
             *col_expr*
                 The expression to plot. See :ref:`column_expressions` for syntax.
-                
+
             *subtable*
                 Subtable to plot from, empty string if plot from module table is requested. Same as given in the URL.
-        
+
         *title*
             Title of the plot
-        
+
         *legend*
             True or false, 0 or 1, flag to indicate if legend should be displayed.
-            
+
         *ylabel*
             Label of the y-axis
-        
+
         *timerange*
             Tuple of datetime objects, *(start, end)*
-        
+
         *renormalize*
             If *True*, each curve is scaled into a [0,1] interval.
-        
+
         *auth_required*
             Flag if authorization is required for any curve.
-        
+
         *errors*
             A list of error messages that occured during the function call
     """
     logger = logging.getLogger(__name__+".getTimeseriesPlotConfig")
-    
+
     logger.debug(kwargs)
-    
+
     curve_dict = {}
     data_sources = set()
     title = ""
@@ -109,10 +109,10 @@ def getTimeseriesPlotConfig(**kwargs):
     timerange = None
     renormalize = False
     errors = []
-    
+
     # Set to true if special auth is required for a curve.
     auth_required = False
-    
+
     # extract timeranges
     now = datetime.datetime.now()
     end_date = kwargs['end_date'] if 'end_date' in kwargs else now.strftime('%Y-%m-%d')
@@ -122,11 +122,11 @@ def getTimeseriesPlotConfig(**kwargs):
     start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
     end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
     timerange = [start, end]
-    
+
     if 'renormalize' in kwargs:
         if kwargs['renormalize'].lower() in ['true', '1']:
             renormalize = True
-    
+
     # STAGE 1
     # Parse curve data and scan for parameters.
     # This gets a list from all tables that are to be retrieved in the next step.
@@ -140,7 +140,7 @@ def getTimeseriesPlotConfig(**kwargs):
                     raise Exception("Insufficient number of arguments for plot curve")
                 module_instance, table_name, col_expr = curve_info[:3]
                 logger.debug("Preliminary column expression: %s", col_expr)
-                
+
                 # join expression at \, occurences. Increase the index where the
                 # curve title starts.
                 title_start_idx = 3
@@ -151,7 +151,7 @@ def getTimeseriesPlotConfig(**kwargs):
                     else:
                         break
                 logger.debug("Column expression: %s", col_expr)
-                
+
                 # Since the title was split at "," before, join them together again.
                 # If it is empty, auto generate title.
                 logger.debug("title_start_idx %i", title_start_idx)
@@ -159,7 +159,7 @@ def getTimeseriesPlotConfig(**kwargs):
                 title = ",".join(curve_info[title_start_idx:])
                 if len(title) == 0:
                     title = module_instance + " " + col_expr
-                
+
                 if not hf.module.config.has_section(module_instance):
                     raise Exception("No such module")
                 module_class = hf.module.getModuleClass(hf.module.config.get(module_instance, "module"))
@@ -178,7 +178,7 @@ def getTimeseriesPlotConfig(**kwargs):
             ylabel = value
         elif key.lower() == u"title":
             title = value
-            
+
     return {
         "curve_dict": curve_dict,
         "data_sources": data_sources,
@@ -195,7 +195,7 @@ def getTimeseriesPlotConfig(**kwargs):
 def timeseriesPlot(category_list, **kwargs):
     """
     Supported arguments (via \**kwargs):
-    
+
     :param curve_XXX: colon-separated curve info: (module_instance,[subtable],expr,title)
     :param filter: include only rows where specified column in result set matches value, can be specified more than once: col,value
     :param filter_XXX: include only rows where specified column in result set matches value for curve XXX, can be specified more than once: col,value
@@ -215,12 +215,12 @@ def timeseriesPlot(category_list, **kwargs):
     from matplotlib.dates import AutoDateFormatter, AutoDateLocator, date2num
     import matplotlib.pyplot as plt
     logger = logging.getLogger(__name__+".timeseriesPlot")
-    
+
     # generate plot
     fig = plt.figure()
     ax = Axes(fig, [.12, .15, .84, 0.78])
     fig.add_axes(ax)
-    
+
     # extract constraints from kwargs dictionary
     constraint = {'filter': {None: []}, 'exclude':{None: []}}
     for t in constraint.iterkeys():
@@ -252,7 +252,7 @@ def timeseriesPlot(category_list, **kwargs):
         auth_required = dat["auth_required"]
         timerange = dat["timerange"]
         errors.extend(dat["errors"])
-        
+
         # STAGE 2
         # Download the data from all required tables
         # in the specified timerange.
@@ -291,7 +291,7 @@ def timeseriesPlot(category_list, **kwargs):
                     for exclude in constraint['exclude'][curve_name]:
                         query = query.where(getattr(table.c, exclude[0]) != exclude[1])
                 """
-                
+
                 # apply timerange selection
                 if timerange is not None:
                     query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
@@ -312,9 +312,9 @@ def timeseriesPlot(category_list, **kwargs):
             except Exception, e:
                 logger.warning("Retrieving plot data:\n"+traceback.format_exc())
                 errors.append("Data '%s': %s" % (key, str(e)))
-        
+
         logger.debug("data sets: %s", ", ".join(map(str, retrieved_data.iterkeys())))
-        
+
         # STAGE 3
         # Calculate the data structures for each curve
         vardict_name = "__internal_column_value_dict__"
@@ -327,18 +327,18 @@ def timeseriesPlot(category_list, **kwargs):
                     curve_dict[curve_name] = (title, [], [])
                     logger.debug("curve not found in retrieved data")
                     continue # error in stage 2
-                
+
                 num_rows = len(source_data)
                 if num_rows == 0:
                     logger.debug("no data downloaded for curve")
                     curve_dict[curve_name] = (title, [], [])
                     continue
-                
+
                 logger.debug("Entries in sources: %i" % num_rows)
                 dates = np.zeros(num_rows)
                 data_points = np.zeros(num_rows)
                 min_val = max_val = None
-                
+
                 use_matheval = False
                 math_expr = expr
                 # does the expression not match a column name?
@@ -347,33 +347,33 @@ def timeseriesPlot(category_list, **kwargs):
                     use_matheval = True
                     math_expr = regexp_dollarvar.sub(vardict_name+"['\\1']", expr)
                     logger.debug("Math expression "+repr(math_expr))
-                
+
                 for i,row in enumerate(source_data):
                     variables = dict((col, row[i]) for col,i in column_index.iteritems())
                     dates[i] = date2num(row[0])
-                    
+
                     if use_matheval:
                         val = hf.utility.matheval(math_expr, {vardict_name: variables})
                     else:
                         val = variables[expr]
-                    
+
                     data_points[i] = val
                     if min_val is None: min_val = val
                     elif min_val > val: min_val = val
                     if max_val is None: max_val = val
                     elif max_val < val: max_val = val
-                
+
                 if renormalize and max_val - min_val != 0:
                     data_points = (data_points- min_val)/(max_val - min_val)
                 elif renormalize:
                     data_points = np.zeros(len(data_points)) + 0.5
-                    
+
                 curve_dict[curve_name] = (title, dates, data_points)
             except Exception, e:
                 curve_dict[curve_name] = (title, [], [])
                 logger.warning("Retrieving plot data:\n"+traceback.format_exc())
                 errors.append("Data '%s': %s" % (key, str(e)))
-                
+
         # generate plot
         try:
             if renormalize:
@@ -389,15 +389,15 @@ def timeseriesPlot(category_list, **kwargs):
             'bo-', 'go-', 'ro-', 'co-', 'mo-', 'yo-', 'ko-', 'wo-', 
             'bo--', 'go--', 'ro--', 'co--', 'mo--', 'yo--', 'ko--', 'wo--', 
         ]
-        
+
         '''locator = AutoDateLocator()
         ax.xaxis.set_major_locator(locator)
         formatter = AutoDateFormatter(AutoDateLocator())
-        
+
         ax.xaxis.set_major_formatter(formatter)
         '''''''''
         fig.autofmt_xdate()
-        
+
         for num, curve in enumerate(curve_dict.itervalues()):
             logger.debug(curve)
             if len(curve[1]) == 0:
@@ -427,9 +427,9 @@ def timeseriesPlot(category_list, **kwargs):
         logger.error("Plotting Failed: %s" % str(e))
         logger.error(traceback.format_exc())
         errors.append("Plotting Failed: %s" % str(e))
-        
+
     logger.debug("errors gatherd during run: %s", "\n".join(errors))
-    
+
     img_data = StringIO.StringIO()
     try:
         fig.savefig(img_data, transparent = True)

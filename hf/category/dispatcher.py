@@ -26,7 +26,7 @@ class CategoryCachingTool(cp._cptools.CachingTool):
     """
     Extends the default caching tool to distinguish between category page
     requests with and without explicit time parameter set.
-    
+
     If no explicit time is given (-> most recent run shall be displayed)
     it is checked if the cached page is older than the most recent run
     in the database. If that is the case, all variants of the current
@@ -57,16 +57,16 @@ class Dispatcher(object):
     """
     Show a page for displaying the contents of a category.
     """
-    
+
     def __init__(self, category_list):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = category_list
-            
+
     def prepareDisplay(self, category=None, **kwargs):
         """
         generate the data and template context required to display
         a page containing the navbar.
-        
+
         :param string: Name of the ca
         :returns: tuple (template_context, category_dict, run)
         """
@@ -78,9 +78,9 @@ class Dispatcher(object):
         to pad with extra 59 seconds (note: 59 because it will be the same minute
         but there will only be a single "dead" second, we can live with that).
         '''
-        
+
         time_error_message = ''
-        
+
         time_obj = datetime.datetime.fromtimestamp(int(time.time()))
         try:
             timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
@@ -90,17 +90,17 @@ class Dispatcher(object):
 
         except Exception:
             time_error_message = "The passed time was invalid"
-        
+
         if time_obj > datetime.datetime.fromtimestamp(int(time.time())+59):
             time_error_message = "HappyFace is not an oracle"
             time_obj = datetime.datetime.fromtimestamp(int(time.time())+59)
-            
+
         try:
             test = hf_runs.select().execute().fetchone()
             self.logger.error("Test "+str(test))
         except Exception, e:
             self.logger.error(traceback.format_exc())
-            
+
         run = hf_runs.select(hf_runs.c.time <= time_obj).\
             where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
             order_by(hf_runs.c.time.desc()).\
@@ -113,26 +113,26 @@ class Dispatcher(object):
             execute().fetchone()
             time_obj = run["time"]
         run = {"id":run["id"], "time":run["time"]}
-        
+
         # if the run is older than a certain time threshold,
         # then mark it as stale
         stale_threshold = datetime.timedelta(0, 0, 0, 0,\
             int(hf.config.get('happyface', 'stale_data_threshold_minutes')))
         data_stale = (run['time'] + stale_threshold) < datetime.datetime.now()
         run['stale'] = data_stale
-        
+
         category_list = [cat.getCategory(run) for cat in self.category_list]
         category_dict = dict((cat.name, cat) for cat in category_list)
-        
+
         selected_category = None
         for c in category_list:
             if c.name == category:
                 selected_category = c
                 break
-        
+
         lock_icon = 'lock_icon_on.png' if cp.request.cert_authorized else 'lock_icon_off.png'
         lock_icon = os.path.join(hf.config.get('paths', 'template_icons_url'), lock_icon)
-        
+
         template_context = {
             "static_url": hf.config.get('paths', 'static_url'),
             "happyface_url": hf.config.get('paths', 'happyface_url'),
@@ -169,9 +169,9 @@ class Dispatcher(object):
             else:
                 cp.lib.caching.expires(secs=1, force=True)
             template_context, category_dict, run = self.prepareDisplay(category, **kwargs)
-            
+
             doc = u""
-            
+
             if 'action' in kwargs:
                 if kwargs['action'].lower() == 'getxml':
                     template_context['category_list'] = filter(lambda x: not x.isUnauthorized(),
@@ -213,7 +213,7 @@ class AjaxDispatcher:
             for module in category.module_list:
                 self.modules[module.instance_name] = module
         self.logger.debug(self.modules)
-        
+
     @cp.expose
     @cp.tools.caching()
     def default(self, module, run_id, **kwargs):
@@ -221,20 +221,20 @@ class AjaxDispatcher:
         try:
             if module not in self.modules:
                 raise Exception("Module not found")
-            
+
             module = self.modules[module]
-            
+
             if module.isUnauthorized():
                 raise cp.HTTPError(status=403, message="You are not allowed to access this resource.")
-            
+
             run = hf_runs.select(hf_runs.c.id==run_id).execute().fetchone()
             if run is None:
                 raise cp.HTTPError(status=404, message="The specified run ID was not found!")
-            
+
             specific_module = module.getModule(run)
             if not hasattr(specific_module, "ajax"):
                 raise cp.HTTPError(status=404, message="Module does not export data via Ajax")
-            
+
             if specific_module.error_string:
                 raise Exception(specific_module.error_string)
             if specific_module.dataset is None:
@@ -242,9 +242,9 @@ class AjaxDispatcher:
             self.logger.debug(specific_module.error_string, specific_module.dataset)
             response["data"] = specific_module.ajax(**kwargs)
             response["status"] = "success"
-            
+
             cp.lib.caching.expires(secs=9999999, force=True) # ajax data never goes bad, since it is supposed to be static
-            
+
         except cp.HTTPError, e:
             cp.lib.caching.expires(secs=0, force=False)
             response = {
@@ -263,6 +263,6 @@ class AjaxDispatcher:
                 "reason": str(e),
                 "data":[]
             }
-            
+
         finally:
             return json.dumps(response)

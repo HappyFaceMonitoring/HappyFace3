@@ -24,24 +24,24 @@ class CategoryProxy:
     """
     A run independant Category object.
     Can create run dependant category objects efficently.
-    
+
     For the meaning of status values, see ModuleBase docstring.
     """
     template = None
-    
+
     def __init__(self, name, conf, module_conf):
         self.logger = logging.getLogger(self.__module__+'('+name+')')
         self.name = name
         self.config = conf
         self.module_config = module_conf
         self.module_list = []
-        
+
         if 'access' not in self.config:
             self.config['access'] = 'permod'
         if self.config['access'] not in ['open', 'permod', 'restricted']:
             self.logger.warning("Unknown access option '%s', assume 'permod'" % self.config['access'])
             self.config['access'] = 'permod'
-        
+
         for instance_name in self.config["modules"].split(","):
             if len(instance_name) == 0: continue
             try:
@@ -56,7 +56,7 @@ class CategoryProxy:
             except Exception, e:
                 self.logger.error("Cannot add module instance %s: %s" %(instance_name, str(e)))
                 self.logger.error(traceback.format_exc())
-        
+
         try:
             filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "category.html")
             self.template = Template(filename=filename, lookup=hf.template_lookup)
@@ -64,13 +64,13 @@ class CategoryProxy:
             self.logger.error("Cannot load category template: %s" % str(e))
             self.logger.error(traceback.format_exc())
             self.template = None
-    
+
     def isAccessRestricted(self):
         return self.config['access'] != 'open'
-    
+
     def isUnauthorized(self):
         return self.config['access'] == 'restricted' and not cp.request.cert_authorized
-    
+
     def hasUnauthorizedModules(self):
         if self.isUnauthorized():
             return True
@@ -78,11 +78,11 @@ class CategoryProxy:
             if module.isUnauthorized():
                 return True
         return False
-    
+
     def prepareAcquisition(self, run):
         '''
         Prepare data acquisition for a certain run.
-        
+
         The ModuleProxy takes care that the call is
         "independant", so we do not need to care here =)
         '''
@@ -92,11 +92,11 @@ class CategoryProxy:
             except Exception, e:
                 self.logger.error("prepareAcquisition() failed on %s: %s" % (module.instance_name, str(e)))
                 self.logger.error(traceback.format_exc())
-    
+
     def acquire(self, run):
         '''
         Acquire data and fill tables for a certain run.
-        
+
         The ModuleProxy takes care that the call is
         "independant", so we do not need to care here =)
         '''
@@ -106,11 +106,10 @@ class CategoryProxy:
             except Exception, e:
                 self.logger.error("acquire() failed on %s: %s" % (module.instance_name, str(e)))
                 self.logger.error(traceback.format_exc())
-    
+
     def getCategory(self, run):
         specific_modules = [m.getModule(run) for m in self.module_list]
         category = hf.category.Category(self.name, self.config, specific_modules, run, self.template)
         for s in specific_modules:
             s.category = category
         return category
-        

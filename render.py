@@ -22,7 +22,7 @@ if __name__ != '__main__':
     # because mod_wsgi for some reason does not want to
     # set PYTHONPATH as we want it or the interpreted
     # doesn't read it, idk.
-    
+
     # __file__ is relative to the cwd, so if the dirname
     # is not empty, the cwd is wrong, because HF3 requires
     # it to point to the directory of the render.py script.
@@ -30,7 +30,7 @@ if __name__ != '__main__':
     if dirname:
         os.chdir(dirname)
         sys.path.append(dirname)
-    
+
 import hf, cherrypy, logging
 import ConfigParser
 import atexit
@@ -71,4 +71,3 @@ else:
     cherrypy.tree.mount(application)
     # FLUP server does not like autoreload.
     cherrypy.config.update({'engine.autoreload_on':False})
-    

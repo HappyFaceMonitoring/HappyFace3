@@ -18,7 +18,7 @@ import hf, os, traceback
 import cherrypy as cp
 from mako.template import Template
 import logging
-      
+
 class Category:
     """
     For the meaning of status values, see ModuleBase docstring.
@@ -39,7 +39,7 @@ class Category:
             self.logger.warn("Status algorithm '%s' not supported, use 'worst'", self.config['algorithm'])
         except hf.ConfigError, e:
             self.logger.warn("Status algorithm not specified, use 'worst'")
-        
+
         if not "type" in self.config:
             self.type = "rated"
             self.logger.warn("Category type not specified, using 'rated'")
@@ -48,9 +48,9 @@ class Category:
         if self.type not in ('rated', 'plots'):
             self.logger.warn("Unknown type '%s', using 'rated'" % self.type)
             self.type = "rated"
-            
+
         self.status = self.algorithm(self)
-        
+
         self.data_missing = False
         min_status = 1.0
         for module in self.module_list:
@@ -58,7 +58,7 @@ class Category:
                 self.data_missing = True
             elif module.dataset['status'] < 0.0:
                 self.data_missing = True
-    
+
     def getStatusIcon(self):
         icon = 'cat_noinfo.png'
         if self.type == 'plots':
@@ -75,20 +75,20 @@ class Category:
         if self.isUnauthorized():
             icon = 'cat_noinfo.png'
         return os.path.join(hf.config.get('paths', 'template_icons_url'), icon)
-    
+
     def getIndexIcon(self):
         if self.isUnauthorized():
             return os.path.join(hf.config.get('paths', 'template_icons_url'),
                 "index_warn.png")
         return os.path.join(hf.config.get('paths', 'template_icons_url'),
             "index_warn.png" if self.data_missing else "index_ok.png")
-            
+
     def getLockIcon(self):
         return os.path.join(hf.config.get('paths', 'template_icons_url'), "index_lock.png")
-        
+
     def __unicode__(self):
         return self.name
-    
+
     def __str__(self):
         return self.name
 
@@ -98,13 +98,13 @@ class Category:
         if time is not None:
             url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'), time.strftime('%H:%M'))
         return url
-        
+
     def isAccessRestricted(self):
         return self.config['access'] != 'open'
-    
+
     def isUnauthorized(self):
         return self.config['access'] == 'restricted' and not cp.request.cert_authorized
-    
+
     def hasUnauthorizedModules(self):
         if self.isUnauthorized():
             return True
@@ -112,7 +112,7 @@ class Category:
             if module.isUnauthorized():
                 return True
         return False
-    
+
     def render(self, template_context):
         module_contents = []
         for module in self.module_list:

@@ -49,16 +49,16 @@ class RootDispatcher(object):
             'error_page.default': self.errorPage,
         })
 
-    
+
     @cp.expose
     def index(self):
         raise cp.HTTPRedirect(hf.url.join(hf.config.get('paths', 'happyface_url'), 'category'))
-    
+
     @cp.expose
     @cp.tools.caching()
     def static(self, *args):
         cp.lib.caching.expires(secs=timedelta(1), force=True)
-        
+
         path = os.path.join(hf.hf_dir, hf.config.get('paths', 'static_dir'), *args)
         # archive/Y/M/D/H/M/file -> 7
         if len(args) == 7 and args[0] == 'archive':
@@ -69,7 +69,7 @@ class RootDispatcher(object):
                 raise cp.HTTPError(status=403, message="You are not allowed to access this resource.")
         else:
             return serve_file(path)
-    
+
     def archiveFileAuthorized(self, filename):
         for instance, module in self.module_map.iteritems():
             if filename.startswith(instance):
@@ -91,38 +91,38 @@ Perhaps the corresponding module was removed from the HF config or the file does
             if issubclass(exception_class, DatabaseError):
                 args['details'] = "An database error occured, please consult the log files."
                 args['hint'] = "Maybe the database schema needs to be updated after an code update?"
-            
+
             try:
                 template_context, category_dict, run = self.category.prepareDisplay()
                 template_context.update(args)
-                
+
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
                 return template.render_unicode(**template_context).encode("utf-8")
-                
+
             except Exception, e:
                 self.logger.debug("Fancy error page generation failed\n" + traceback.format_exc())
                 filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "plain_error.html")
                 template = Template(filename=filename, lookup=hf.template_lookup)
                 return template.render_unicode(**args).encode("utf-8")
-                
+
         except Exception, e:
             self.logger.error(u"error page generation failed: "+unicode(e))
             self.logger.error(traceback.format_exc())
             return u"""<h1>Error Inception</h1>
             <p>An error occured while displaying an error. Embarrasing.</p>
             <p>Please consult the log files!</p>""".encode("utf-8")
-            
-            
+
+
 
 class CachegrindHandler(cp.dispatch.LateParamPageHandler):
     """Callable which profiles the subsequent handlers and writes the results to disk.
-    
+
     Based on _`http://tools.cherrypy.org/wiki/Cachegrind`
     """
     def __init__(self, next_handler):
         self.next_handler = next_handler
- 
+
     def __call__(self):
         """ 
         Profile this request and output results in a cachegrind compatible format.
@@ -158,15 +158,15 @@ class CachegrindHandler(cp.dispatch.LateParamPageHandler):
 
 def cachegrind():
     """A CherryPy 3 Tool for loading Profiling requests.
-    
+
     To enable the tool, just put something like this in a
     HappyFace configuration file:
-    
+
     .. code-block:: ini
-        
+
         [/category]
         tools.cachegrind.on = True
-    
+
     This will enable profiling of the CherryPy code only for the category pages,
     not static content or the plot generator. As a result the performance
     impact is reduced and no files with uninteressting data are created.

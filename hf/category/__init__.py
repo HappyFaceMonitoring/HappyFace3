@@ -50,8 +50,8 @@ def createCategoryObjects():
             except NoSectionError, e:
                 msg = "Tried to use module '%s' in category '%s', but it was never mentioned in module configuration"
                 raise hf.exceptions.ConfigError(msg % (module, category))
-                
-                
+
+
         category_list.append(hf.category.CategoryProxy(category, conf, module_conf))
     return category_list
 

@@ -23,12 +23,12 @@ from sqlalchemy.exc import DatabaseError
 class ModuleProxy:
     """
     The access class to actual instances of the module class.
-    
+
     Since the module instances have to be independant and thread-safe
     for rendering, the common state is stored in the proxy, which
     creates a specific, run-time dependant module object for rendering.
     """
-    
+
     def __init__(self, ModuleClass, instance_name, config):
         self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
         self.ModuleClass = ModuleClass
@@ -38,20 +38,20 @@ class ModuleProxy:
         self.instance_name = instance_name
         self.config = config
         self.acquisitionModules = {}
-        
+
         if 'access' not in self.config:
             self.config['access'] = 'open'
         if self.config['access'] not in ['open', 'restricted']:
             self.logger.warning("Unknown access option '%s', assume 'open'" % self.config['access'])
             self.config['access'] = 'open'
-        
+
         # check if instance is in database and of correct type
         instance = hf.module.database.module_instances.select(hf.module.database.module_instances.c.instance==instance_name).execute().fetchone()
         if instance is None:
             hf.module.database.module_instances.insert().values(instance=instance_name, module=self.module_name).execute()
         elif instance["module"] != self.module_name:
             raise hf.ConsistencyError("The module type of instance '%s' changed" % instance_name)
-        
+
         # get the common module template
         try:
             filename = os.path.join(os.path.dirname(self.ModuleClass.filepath), self.module_name+".html")
@@ -60,13 +60,13 @@ class ModuleProxy:
             self.logger.error("Cannot create template, " + str(e))
             self.logger.error(traceback.format_exc())
             self.template = None
-            
+
     def isAccessRestricted(self):
         return self.config['access'] != 'open'
-    
+
     def isUnauthorized(self):
         return self.config['access'] == 'restricted' and not cp.request.cert_authorized
-        
+
     def prepareAcquisition(self, run):
         # create module instance solely for that purpose
         module = self.ModuleClass(self.instance_name, self.config, run, None, None)
@@ -81,7 +81,7 @@ class ModuleProxy:
             module.error_string = exc_name + " " + str(e)
             module.logger.error("prepareAcquisition() failed: %s" % str(e))
             module.logger.error(traceback.format_exc())
-    
+
     def acquire(self, run):
         module = self.acquisitionModules[run['id']]
         try:
@@ -101,7 +101,7 @@ class ModuleProxy:
                 else:
                     d = module.extractData()
                     data.update(d)
-                    
+
                     if module.source_url:
                         if(isinstance(module.source_url, str)
                            or isinstance(module.source_url, unicode)):
@@ -110,7 +110,7 @@ class ModuleProxy:
                         else:
                             module.source_url = map(lambda x: x.replace("|", "%7C"), module.source_url)
                             data["source_url"] = "|".join(module.source_url)
-                    
+
                     # we treat file columns specially!
                     # If they are None -> Empty String
                     # If they are a downloaded file obj -> getArchiveFilename
@@ -120,7 +120,7 @@ class ModuleProxy:
                             data[col] = ''
                         elif hasattr(data[col], 'getArchiveFilename'):
                             data[col] = data[col].getArchiveFilename()
-                    
+
                     # Set the data ID pointing to the actual data if smart filling is used.
                     if module.use_smart_filling:
                         if module.smart_filling_keep_data is None:
@@ -130,15 +130,15 @@ class ModuleProxy:
                         else:
                             if module.smart_filling_current_dataset is None:
                                 raise hf.ModuleRuntimeError("Smart filling was instructed to copy old dataset, but no data is available in past")
-                            
+
                             # remember where data is
                             data["sf_data_id"] = module.smart_filling_current_dataset["id"]
-                            
+
                             # copy over old data, ignoring certain fields
                             ignore = ["id", "run_id", "description", "instruction", "sf_data_id"]
                             data.update(dict(filter(lambda x: x[0] not in ignore,
                                 module.smart_filling_current_dataset.iteritems())))
-                    
+
                     dataExctractionSuccessfull = True
             except hf.DownloadError, e:
                 self.logger.info("Data exctraction failed because of failed download: "+str(e))
@@ -162,13 +162,13 @@ class ModuleProxy:
                 })
             finally:
                 result = module.module_table.insert().values(**data).execute()
-            
+
             # compatibility between different sqlalchemy versions
             try:
                 inserted_id = result.inserted_primary_key[0]
             except AttributeError:
                 inserted_id = result.last_inserted_ids()[0]
-            
+
             if dataExctractionSuccessfull:
                 try:
                     if (module.use_smart_filling and module.smart_filling_keep_data) \
@@ -181,13 +181,13 @@ class ModuleProxy:
                         data["error_string"] += "; "
                     data["error_string"] += str(e)
                     module.module_table.update().where(module.module_table.c.id == inserted_id).values(error_string=data["error_string"]).execute()
-        
+
         except Exception, e:
             module.logger.error("data acquisition failed: %s" % str(e))
             module.logger.error(traceback.format_exc())
         finally:
             del self.acquisitionModules[run['id']]
-    
+
     def getModule(self, run):
         """
         Generate a module instance object for a specific
@@ -220,4 +220,4 @@ class ModuleProxy:
         module = self.ModuleClass(self.instance_name, self.config, run, dataset, self.template)
         return module
 
-    
+

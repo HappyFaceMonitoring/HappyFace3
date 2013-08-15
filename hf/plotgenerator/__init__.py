@@ -27,4 +27,3 @@ def init():
         matplotlib.use(hf.config.get('plotgenerator', 'backend'))
     except Exception, e:
         logger.error("Cannot initialize matplotlib %s" % str(e))
-    

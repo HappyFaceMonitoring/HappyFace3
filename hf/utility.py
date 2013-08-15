@@ -51,9 +51,9 @@ matheval_context = {
 def matheval(input, variables={}):
     """
     A safe way to evaluate mathematical expressions.
-    
+
     The following Python functions are available
-    
+
      * abs
      * sin
      * cos
@@ -65,12 +65,12 @@ def matheval(input, variables={}):
      * min
      * float
      * int
-    
+
     :param input: String with mathematical expression
     :param variables: A dictionary with variables available for  input expression
     :returns: The result of the expression, or *None* in case of error.
     """
-    
+
     # block everything, even builtins, and add "safe" mathematical functions.
     # Statements won't work, as well as potentially dangerous things like
     # __import__ or open.
@@ -80,7 +80,7 @@ def matheval(input, variables={}):
     except Exception, e:
         logging.error(traceback.format_exc())
         return None
-        
+
 __regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\.\?!&/=~:]+)")
 def addAutoLinks(string):
     """

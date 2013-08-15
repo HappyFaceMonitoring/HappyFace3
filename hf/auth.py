@@ -41,7 +41,7 @@ def cert_auth():
     except KeyError:
         logging.debug("No certificate information found in WSGI environment")
         return
-    
+
     if s_dn in hf.auth.authorized_dn_list:
         cp.request.cert_authorized = True
     try:            
@@ -54,5 +54,5 @@ def cert_auth():
         logging.error("Script authorization failed")
         logging.debug(traceback.format_exc())
 
-    
+
 cp.tools.cert_auth = cp.Tool('before_handler', cert_auth)

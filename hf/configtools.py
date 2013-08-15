@@ -58,7 +58,7 @@ def _getGitSvnRevision():
         return str(revision)
     except Exception, e:
         return 'exported'
-    
+
 class ConfigDict(dict):
     def __getitem__(self, key):
         try:
@@ -70,7 +70,7 @@ class ConfigDict(dict):
 
 def readConfigurationAndEnv():
     logger = logging.getLogger(__name__)
-    
+
     if hf.__version__ is None:
         hf.__version__ = _getSvnRevision()
         rev_number_regex = re.compile(r"[0-9]+(:[0-9]+)?(M|S|P)*")
@@ -78,20 +78,20 @@ def readConfigurationAndEnv():
             hf.__version__ = _getGitSvnRevision()
         if rev_number_regex.search(hf.__version__) is None:
             hf.__version__ = "exported"
-            
+
     '''
     Read configuration files for HappyFace from defaultconf directory and subsequently from
     the local HappyFace config directory. The HappyFace config is then accessible by hf.config
-    
+
     After the default configuration is read, the environment variables are searched for
     HF_DEBUG (controls exception output on webpage, implies HF_LOGLEVEL=DEBUG), HF_LOGLEVEL
     and HF_WGETOPTIONS (extra global options)
-    
+
     Also, read category and module config in hf.category.config and hf.module.config and create
     a template lookup object in hf.template_lookup with the appropriate paths from the configuration.
     '''
     defaults = {}
-    
+
     hf.config = ConfigParser.ConfigParser(defaults=defaults)
     for file in _getCfgInDirectory(os.path.join(hf.hf_dir, "defaultconfig")):
         try:
@@ -110,7 +110,7 @@ def readConfigurationAndEnv():
                 raise
     else:
         logger.info('Configuration directory does not exist, use only defaults')
-    
+
     directories = [hf.config.get("paths", "hf_template_dir"), hf.config.get("paths", "module_template_dir")]
     directories = map(lambda x: os.path.join(hf.hf_dir, x), directories)
     hf.template_lookup = TemplateLookup(directories=directories,
@@ -124,12 +124,12 @@ def readConfigurationAndEnv():
     except ImportError:
         hf.template_escape_lookup = hf.template_lookup
         logger.warning("Python module 'markupsafe' not found. Web-output will not be HTML escaped!")
-    
+
     if not os.path.exists(hf.config.get("paths", "category_cfg_dir")):
         raise hf.exceptions.ConfigError("Category config directory not found")
     if not os.path.exists(hf.config.get("paths", "module_cfg_dir")):
         raise hf.exceptions.ConfigError("Module config directory not found")
-    
+
     hf.category.config = ConfigParser.ConfigParser()
     category_config_files = os.path.join(hf.hf_dir, hf.config.get("paths", "category_cfg_dir"))
     for file in _getCfgInDirectory(category_config_files):
@@ -139,7 +139,7 @@ def readConfigurationAndEnv():
         except Exception, e:
             logger.error("Cannot parse category config '%s'" % file)
             logger.error(traceback.format_exc())
-    
+
     hf.module.config = ConfigParser.ConfigParser(defaults=hf.module.ModuleBase.config_defaults)
     module_config_files = os.path.join(hf.hf_dir, hf.config.get("paths", "module_cfg_dir"))
     for file in _getCfgInDirectory(module_config_files):
@@ -149,21 +149,21 @@ def readConfigurationAndEnv():
         except Exception, e:
             logger.error("Cannot parse category config '%s'" % file)
             logger.error(traceback.format_exc())
-    
+
 
 def setupLogging(logging_cfg):
     """
     Setup the python logging module and apply loglevel from
     environment variables if specified.
-    
+
     The argument to this function is the name of the configuration key
     in the 'paths' section containing the path to the loggin configuration.
     For the format of the config, please see the Python docs
     http://docs.python.org/library/logging.config.html#configuration-file-format
-    
+
     If None is specified, console logging only is setup. This is particularily
     useful for tools e.g. for migration or cleanup.
-    
+
     The environment variable HF_LOGLEVEL can contain a level from DEFAULT, INFO,
     WARNING, ERROR or CRITICAL. If HF_DEBUG is set, HF_LOGLEVEL=DEBUG is implied.
     """

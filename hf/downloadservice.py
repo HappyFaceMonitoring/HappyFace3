@@ -26,7 +26,7 @@ class DownloadSlave(threading.Thread):
         self.file = file
         self.archive_dir = archive_dir
         self.global_options = global_options
-        
+
     def run(self):
         try:
             if self.file.url.startswith("file://"):
@@ -54,7 +54,7 @@ class DownloadSlave(threading.Thread):
         except:
             self.file.error += "Failed to download file"
             traceback.print_exc()
-            
+
 class DownloadService:
     '''
     Note when copying files to the archive directory:
@@ -67,7 +67,7 @@ class DownloadService:
         self.archive_dir = None
         self.archive_url = None
         self.runtime = None
-        
+
     def addDownload(self, download_command):
         if download_command in self.file_list:
             return self.file_list[download_command]
@@ -80,7 +80,7 @@ class DownloadService:
             self.runtime = runtime
             self.archive_dir = os.path.join(hf.config.get("paths", "archive_dir"), runtime.strftime("%Y/%m/%d/%H/%M"))
             self.archive_url = os.path.join(hf.config.get("paths", "archive_url"), runtime.strftime("%Y/%m/%d/%H/%M"))
-            
+
             try:
                 os.makedirs(self.archive_dir)
             except Exception, e:
@@ -88,19 +88,19 @@ class DownloadService:
                 self.logger.error(traceback.format_exc())
                 raise Exception("Cannot create archive directory")
             slaves = [DownloadSlave(file, self.global_options, self.archive_dir) for file in self.file_list.itervalues()]
-            
+
             tmp_dir = hf.config.get("paths", "tmp_dir")
             if not os.path.exists(tmp_dir):
                 os.makedirs(tmp_dir)
-            
+
             file_prefix = os.path.join(tmp_dir, runtime.strftime("%Y%m%d_%H%M%s_"))
-            
+
             timeout = hf.config.getint("downloadService", "timeout")
-            
+
             for number, slave in enumerate(slaves):
                 slave.file.tmp_filename = os.path.abspath(file_prefix + "%03i.download"%number)
                 slave.start()
-            
+
             for slave in slaves:
                 start_time = int(time.time())
                 slave.join(timeout)
@@ -120,18 +120,18 @@ class DownloadService:
             for file in self.file_list.itervalues():
                 file.error = str(e)
             raise
-    
+
     def getArchivePath(self, run, filename):
         return os.path.join(hf.config.get('paths', 'archive_dir'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
     def getArchiveUrl(self, run, filename):
         return os.path.join(hf.config.get('paths', 'archive_url'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
-    
+
     def cleanup(self):
         for file in self.file_list.itervalues():
             if not file.keep_tmp and file.isDownloaded():
                 if os.path.exists(file.getTmpPath()):
                     os.unlink(file.getTmpPath())
-        
+
 class DownloadFile:
     def __init__(self, download_command):
         try:
@@ -149,19 +149,19 @@ class DownloadFile:
         self.file_url = ""
         self.keep_tmp = False
         self.is_archived = False
-    
+
     def isDownloaded(self):
         return self.is_downloaded
-    
+
     def isArchived(self):
         return self.is_archived
-    
+
     def errorOccured(self):
         return len(self.error) > 0
-        
+
     def getFile(self):
         return open(self.getTmpPath(), "r")
-        
+
     def getTmpPath(self, no_exception=False):
         """
         :arg no_exception: default False. If set to True, no exception is thrown
@@ -174,7 +174,7 @@ class DownloadFile:
         except AttributeError:
             if not no_exception:
                 raise hf.DownloadError(self)
-    
+
     def getArchivePath(self):
         if not self.isDownloaded() or self.errorOccured():
             raise hf.DownloadError(self)
@@ -182,7 +182,7 @@ class DownloadFile:
             return os.path.join(hf.downloadService.archive_dir, self.filename)
         except AttributeError:
             raise hf.DownloadError(self)
-    
+
     def getArchiveUrl(self):
         if not self.isDownloaded() or self.errorOccured():
             raise hf.DownloadError(self)
@@ -190,15 +190,15 @@ class DownloadFile:
             return os.path.join(hf.downloadService.archive_url, self.filename)
         except AttributeError:
             raise hf.DownloadError(self)
-    
+
     def getArchiveFilename(self):
         if not self.isDownloaded() or self.errorOccured():
             raise hf.DownloadError(self)
         return self.filename
-    
+
     def getSourceUrl(self):
         return self.url
-    
+
     def copyToArchive(self, module, name):
         ''' Copy the file to the archive directory. The name is prefixed
         with the instance name of the module, thus the name should be always
@@ -213,23 +213,23 @@ class File:
     def __init__(self, run, name):
         self.name = os.path.basename(name)
         self.run = run
-    
+
     def getArchivePath(self):
         return hf.downloadService.getArchivePath(self.run, self.name)
-    
+
     def getArchiveUrl(self):
         return hf.downloadService.getArchiveUrl(self.run, self.name)
-    
+
     def getArchiveFilename(self):
         return self.name
-    
+
     def __repr__(self):
         return '%s(%s, %s)' % (self.__class__.__name__, repr(self.run), repr(self.name))
-    
+
     def __str__(self):
         return self.getArchiveUrl()
-            
+
     def __unicode__(self):
         return self.getArchiveUrl()
-    
+
 downloadService = DownloadService()

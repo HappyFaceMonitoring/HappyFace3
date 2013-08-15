@@ -36,10 +36,10 @@ def getColumnFileReference(table):
     """
     name = table.name if isinstance(table, Table) else table
     return __column_file_list[name] if name in __column_file_list else []
-    
+
 def moduleClassLoaded(mod_class):
     return mod_class in __module_class_list
-    
+
 def importModuleClasses():
     module_paths = [os.path.join(hf.hf_dir, "modules")]
     exclude = ['.git', '.svn']
@@ -53,19 +53,19 @@ def importModuleClasses():
         logger.error("Cannot find modules directory!")
         logger.error(traceback.format_exc())
         sys.exit()
-        
+
     for imp, name, ispkg in pkgutil.iter_modules(path=module_paths):
         if ispkg:
             continue
         imported_modules = __module_class_list.keys()
-        
+
         loader = imp.find_module(name)
         loader.load_module(name)
-        
+
         new_modules = [mod for mod in __module_class_list.keys() if mod not in imported_modules]
         for mod in new_modules:
             __module_class_list[mod].filepath = loader.filename
-        
+
 
 def getModuleClass(mod_name):
     """

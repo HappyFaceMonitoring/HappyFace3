@@ -20,7 +20,7 @@ def worst(category):
     type as the category (only plots or rated modules, depending) with
     positive status value (no error, data acquisition succeeded).
     'unrated' modules are always per definition excluded.
-    
+
     If there is no correct module with positive status, the
     category status is set to -1 (no information).
     """
@@ -45,5 +45,5 @@ def weighted(category):
         if mod.dataset['status'] >= 0 and mod.type != "unrated":
             status += mod.dataset['status'] * mod.weigth
             total += mod.dataset*mod.weight
-    
+
     return status/total

@@ -51,10 +51,10 @@ if __name__ == '__main__':
         cfg_dir = None
         try:
             hf.module.importModuleClasses()
-            
+
             hf.database.connect(implicit_execution = True)
             hf.database.metadata.create_all()
-            
+
             category_list = hf.category.createCategoryObjects()
         except hf.exceptions.ModuleProgrammingError, e:
             logger.error("Module Programming Error: %s", str(e))
@@ -64,11 +64,11 @@ if __name__ == '__main__':
             logger.error("Setting up HappyFace failed: %s", str(e))
             logger.error(traceback.format_exc())
             sys.exit(-1)
-            
+
         # initialize plotgenerator, even if "the plot generator" is disabled.
         # All we actually do is configuring the matplotlib backend.
         hf.plotgenerator.init()
-        
+
         runtime = datetime.datetime.fromtimestamp(int(time.time()))
         result = hf_runs.insert().values(time=runtime, completed=False).execute()
         try:
@@ -76,33 +76,32 @@ if __name__ == '__main__':
         except AttributeError:
             inserted_id = result.last_inserted_ids()[0]
         run = {"id": inserted_id, "time":runtime}
-        
+
         logger.info("Prepare data acquisition")
         for category in category_list:
             logger.info("Prepare category %s..." % category.config["name"])
             category.prepareAcquisition(run)
-        
+
         logger.info("Download files...")
         try:
             hf.downloadService.performDownloads(runtime)
             logger.info("Download done")
         except Exception, e:
             logger.warn("Downloading of all files failed")
-            
+
         logger.info("Acquire data and fill database")
         for category in category_list:
             logger.info("Acquire in category %s..." % category.config["name"])
             category.acquire(run)
-        
+
         hf_runs.update(hf_runs.c.id == inserted_id).values(completed=True).execute()
-        
+
         # cleanup temporary directory
 	hf.downloadService.cleanup()
-        
+
         hf.database.disconnect()
     except Exception, e:
         logger.error("Uncaught HappyFace exception: %s", str(e))
         logger.error(traceback.format_exc())
     finally:
         os.remove("acquire.lock")
-        

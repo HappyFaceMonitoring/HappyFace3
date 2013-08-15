@@ -32,11 +32,11 @@ def execute():
     parser.add_argument('--no-comment', '-o', action='store_true', help="Disable comments in the generated configuration")
     parser.add_argument('module', help="Name of the module to get the configuration from")
     args = parser.parse_args()
-    
+
     if not hf.module.moduleClassLoaded(args.module):
         print >> sys.stderr, sys.argv[0]+": The module '%s' was not found" % args.module
         sys.exit(-1)
-    
+
     ModuleClass = hf.module.getModuleClass(args.module)
     print '[INSTANCE_NAME]'
     print 'module =', args.module

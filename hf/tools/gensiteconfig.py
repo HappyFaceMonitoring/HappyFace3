@@ -39,7 +39,7 @@ def generateConfigFiles(configuration):
         if not section in config_output:
             config_output[section] = {}
         config_output[section][key] = val
-        
+
     def sectionToFile(directory, section, contents):
         with open(os.path.join(directory, section+'.cfg'), 'w') as f:
             f.write('\n[' + section + ']\n')
@@ -71,14 +71,14 @@ def generateConfigFiles(configuration):
     if 'defpaths' in config_output:
         sectionToFile('defaultconfig/', 'paths', config_output['defpaths'])
         del config_output['defpaths']
-    
+
     config_dir = configuration['local_happyface_cfg_dir'] if 'local_happyface_cfg_dir' in configuration else 'config/'
     if not os.path.exists(config_dir):
         os.makedirs(config_dir)
-    
+
     for section, contents in config_output.iteritems():
         sectionToFile(config_dir, section, contents)
-        
+
         # set database configuration to be not world readable
     if 'database' in config_output:
         os.chmod(os.path.join(config_dir, 'database.cfg'), stat.S_IRWXU | stat.S_IRWXG)
@@ -95,7 +95,7 @@ def execute():
     args = parser.parse_args()
     if args.presets == None:
         args.interactive = True
-    
+
     '''
     This dictionary defines the structure of the interactive query.
     The keys are a dictionary (varname, question, type, preset) with
@@ -106,9 +106,9 @@ def execute():
     The values are dictionaries of the same type or None. If it is not None, the
     type of the corresponding key *must* be yesno, asking the user if he wants that
     feature.
-    
+
     The tree represented by this dict is the flow of the interactive input generation.
-    
+
     Hitting enter, to use the preset, should always result in a minimal usable
     configuration, if possible. No big magic things.
     '''
@@ -116,26 +116,26 @@ def execute():
         ('happyface_url', 'Base URL of the HappyFace instance', 'data', '/', None),
         ('database_url', 'Database connection URL. Might contain plaintext passwords!', 'data', 'sqlite:///HappyFace.db', None),
         ('web_title', 'Name of the HappyFace instance', 'data', 'HappyFace Project', None),
-        
+
         ('local_happyface_cfg_dir', 'Site configuration directory', 'data', 'config/', None),
         ('category_cfg_dir', 'Category configuration directory', 'data', 'config/categories-enabled/', None),
         ('module_cfg_dir', 'Module configuration directory', 'data', 'config/modules-enabled/', None),
 
         ('archive_dir', 'Storage path of archive directory', 'data', '%(static_dir)s/archive', None),
         ('tmp_dir', 'Temporary files path, might want to change to non-public directory', 'data', '%(static_dir)s/tmp', None),
-        
+
         ('categories', 'Colon separated list of categories, may be empty', 'data', '', None),
         ('stale_data_threshold_minutes', 'Minutes to pass until data is marked stale', 'data', '60', None),
-        
+
         ('auth', 'Configure authorization sources?', 'yn', 'n', [
             ('dn_file', 'Path to file with authorized DNs', 'data', '', None),
             ('auth_script', 'Path to executable authorization script', 'data', '', None),
         ]),
-        
+
         ('plotgenerator', 'Do you want to use the plotgenerator?', 'yn', 'y', [
             ('backend', 'Which Matplotlib backend for HappyFace?', 'data', 'cairo.png', None),
         ]),
-        
+
         #('apache', 'Do you want to create an Apache2 configuration?', 'yn', 'n', [
         #    ('cert', 'Do you want to use certificate authentication?', 'yn', 'n', [
         #        ('cacert', 'CA certificate for client certificates', 'data', '', None),
@@ -146,12 +146,12 @@ def execute():
     ]
     loaded_presets = {}
     preset_output = {}
-    
+
     def process_question_branch(prefix, question_list, always_set_output=False):
         for varname, question, qtype, default_preset, sub_questions in question_list:
             full_name = prefix+'.'+varname if len(prefix) > 0 else varname
             preset = loaded_presets[full_name] if full_name in loaded_presets else default_preset
-            
+
             if qtype == 'yn':
                 while True:
                     print question, ('(y/N) ' if preset.lower() == 'n' else '(Y/n) '),
@@ -168,13 +168,13 @@ def execute():
                 answer = preset if answer == '\n' else answer[:-1]
             else:
                 print "The Universe exploded!"
-            
+
             if answer != default_preset or always_set_output:
                 preset_output[full_name] = answer
-            
+
             if sub_questions and answer == 'y':
                 process_question_branch(full_name, sub_questions, always_set_output)
-                
+
     if args.presets is not None:
         with open(args.presets, 'r') as f:
             for line in f:
@@ -184,18 +184,18 @@ def execute():
                 var = splits[0]
                 preset = '='.join(splits[1:])[:-1]
                 loaded_presets[var] = preset
-    
+
     if args.interactive:
         process_question_branch('', question_structure)
         site_presets = preset_output
     else:
         site_presets = loaded_presets
-    
+
     if not args.no_cfg:
         generateConfigFiles(site_presets)
         if apache in site_presets and site_presets['apache'] == 'y':
             generateApache(site_presets)
-    
+
     if args.outfile is None and args.interactive:
         question_structure = [
             ('preset_out', 'Save presets into file?', 'yn', 'y', [
@@ -206,7 +206,7 @@ def execute():
         process_question_branch('', question_structure, True)
         if preset_output['preset_out'] == 'y':
             args.outfile = preset_output['preset_out.path']
-    
+
     if args.outfile is not None:
         with open(args.outfile, 'w') as f:
             for var, preset in site_presets.iteritems():
