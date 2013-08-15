@@ -102,6 +102,13 @@ class ModuleProxy:
                     d = module.extractData()
                     data.update(d)
                     
+                    if module.source_url:
+                        if(isinstance(module.source_url, str)
+                           or isinstance(module.source_url, unicode)):
+                            data["source_url"] = module.source_url
+                        else:
+                            data["source_url"] = "|".join(module.source_url)
+                    
                     # we treat file columns specially!
                     # If they are None -> Empty String
                     # If they are a downloaded file obj -> getArchiveFilename
@@ -193,6 +200,7 @@ class ModuleProxy:
                 file_columns = hf.module.getColumnFileReference(self.module_table)
                 # create access objects for files if name is not empty, in this case None
                 dataset = dict((col, (hf.downloadservice.File(run, val) if val else None) if col in file_columns else val) for col,val in dataset.items())
+                dataset["source_url"] = dataset["source_url"].split("|")
         except DatabaseError, e:
             dataset = {
                 'error_string': "Unable to acquire data for module. Probably the database schema needs an update!",

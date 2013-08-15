@@ -288,6 +288,7 @@ class ModuleBase:
         self.template = template
         # set by CategoryProxy.getCategroy() after creating specific module instances
         self.category = None
+        self.source_url = None
         
         self.smart_filling_current_dataset = None
         self.smart_filling_keep_data = None

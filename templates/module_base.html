@@ -22,7 +22,14 @@ past = run['time'] - timedelta(days = 2)
       <li><span class="key">Status</span><span class="value">${module.dataset["status"]}</span></li>
       <li><span class="key">Description</span><span class="value">${module.dataset["description"]}</span></li>
       <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
-      <li><span class="key">Data source</span><span class="value"><a href="${module.dataset["source_url"]}">${module.dataset["source_url"]}</a></span></li>
+      <li><span class="key">Data source</span><span class="value">
+% for i, url in enumerate(dataset["source_url"]):
+       <a href="${url}">${url}</a>
+% if (i+1) < len(dataset["source_url"]):
+       <br />
+% endif
+% endfor
+      </span></li>
 % endif
      </ul>
      <form class="PlotMask" action="${hf.plotgenerator.getTimeseriesUrl()}" method="get" target="_blank">
