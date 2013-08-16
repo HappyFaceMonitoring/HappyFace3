@@ -181,7 +181,6 @@ class ModuleProxy:
                     "error_string": str(e)
                 })
             finally:
-                print "ADD THE SHIT!", self.instance_name
                 result = module.module_table.insert().values(**data).execute()
 
             # compatibility between different sqlalchemy versions
