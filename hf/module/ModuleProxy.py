@@ -131,6 +131,10 @@ class ModuleProxy:
                                 self.module_name,
                                 "source_url has unexpected type {0}"
                                 .format(type(module.source_url)))
+                    elif "source_url" in data:
+                        self.logger.warning("DEPRECATED: source_url specified over extractData() return value")
+                    else:
+                        self.logger.info("No data source specified")
 
                     # Set the data ID pointing to the actual data if smart filling is used.
                     if module.use_smart_filling:
