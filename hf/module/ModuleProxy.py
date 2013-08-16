@@ -102,15 +102,6 @@ class ModuleProxy:
                     d = module.extractData()
                     data.update(d)
 
-                    if module.source_url:
-                        if(isinstance(module.source_url, str)
-                           or isinstance(module.source_url, unicode)):
-                            module.source_url = module.source_url.replace("|", "%7C")
-                            data["source_url"] = module.source_url
-                        else:
-                            module.source_url = map(lambda x: x.replace("|", "%7C"), module.source_url)
-                            data["source_url"] = "|".join(module.source_url)
-
                     # we treat file columns specially!
                     # If they are None -> Empty String
                     # If they are a downloaded file obj -> getArchiveFilename
@@ -120,6 +111,20 @@ class ModuleProxy:
                             data[col] = ''
                         elif hasattr(data[col], 'getArchiveFilename'):
                             data[col] = data[col].getArchiveFilename()
+
+                    if module.source_url:
+                        if(isinstance(module.source_url, str)
+                           or isinstance(module.source_url, unicode)):
+                            module.source_url = module.source_url.replace("|", "%7C")
+                            data["source_url"] = module.source_url
+                        elif hasattr(module.source_url, "__iter__"):
+                            module.source_url = map(lambda x: x.replace("|", "%7C"), module.source_url)
+                            data["source_url"] = "|".join(module.source_url)
+                        else:
+                            raise hf.ModuleProgrammingError(
+                                self.module_name,
+                                "source_url has unexpected type {0}"
+                                .format(type(module.source_url)))
 
                     # Set the data ID pointing to the actual data if smart filling is used.
                     if module.use_smart_filling:
