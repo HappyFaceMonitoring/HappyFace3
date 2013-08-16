@@ -14,7 +14,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import logging, traceback, math, re
+import logging
+import traceback
+import math
+import re
+
 
 def prettyDataSize(size_in_bytes):
     """ Takes a data size in bytes and formats a pretty string. """
@@ -32,8 +36,8 @@ def prettyDataSize(size_in_bytes):
     if size_in_bytes > 1024:
         size_in_bytes /= 1024
         unit = "TiB"
-    print size_in_bytes, "%.1f "%size_in_bytes + unit
-    return "%.1f "%size_in_bytes + unit
+    print size_in_bytes, "%.1f " % size_in_bytes + unit
+    return "%.1f " % size_in_bytes + unit
 
 matheval_context = {
     "abs": abs,
@@ -48,6 +52,8 @@ matheval_context = {
     "float": float,
     "int": int,
 }
+
+
 def matheval(input, variables={}):
     """
     A safe way to evaluate mathematical expressions.
@@ -82,6 +88,8 @@ def matheval(input, variables={}):
         return None
 
 __regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\.\?!&/=~:]+)")
+
+
 def addAutoLinks(string):
     """
     Searches for URLs in string using a regular expression and

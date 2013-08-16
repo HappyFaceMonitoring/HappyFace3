@@ -15,12 +15,18 @@
 #   limitations under the License.
 
 import cherrypy as cp
-import hf, datetime, time, logging, traceback, os
+import hf
+import datetime
+import time
+import logging
+import traceback
+import os
 from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
 from mako.template import Template
 import json
+
 
 class CategoryCachingTool(cp._cptools.CachingTool):
     """
@@ -38,20 +44,25 @@ class CategoryCachingTool(cp._cptools.CachingTool):
         # dirty check if we want "the most current" page
         # When HappyFace is first started, there is no cp._cache variable.
         # It is created by the first call to cp.lib.caching.get() !
-        if hasattr(cp, "_cache") and ("time" not in params or "date" not in params):
+        if hasattr(cp, "_cache") and ("time" not in params or
+                                      "date" not in params):
             cached_data = cp._cache.get()
             if cached_data is None:
                 super(CategoryCachingTool, self)._wrapper(**kwargs)
                 return
             cached_run_date = datetime.datetime.fromtimestamp(cached_data[3])
             hf_runs = hf.module.database.hf_runs
-            newest_run_date = select([hf_runs.c.time], hf_runs.c.completed==True).order_by(hf_runs.c.time.desc()).execute().fetchone()[0]
+            newest_run_date = select([hf_runs.c.time], hf_runs.c.completed) \
+                .order_by(hf_runs.c.time.desc()).execute().fetchone()[0]
             if cached_run_date < newest_run_date:
                 cp._cache.delete()
         super(CategoryCachingTool, self)._wrapper(**kwargs)
     _wrapper.priority = 20
 
-cp.tools.category_caching = CategoryCachingTool('before_handler', cp.lib.caching.get, 'category_caching')
+cp.tools.category_caching = CategoryCachingTool('before_handler',
+                                                cp.lib.caching.get,
+                                                'category_caching')
+
 
 class Dispatcher(object):
     """
@@ -108,16 +119,17 @@ class Dispatcher(object):
         if run is None:
             time_error_message = "No data so far in past"
             run = hf_runs.select(hf_runs.c.time >= time_obj).\
-            where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
-            order_by(hf_runs.c.time.asc()).\
-            execute().fetchone()
+                where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
+                order_by(hf_runs.c.time.asc()).\
+                execute().fetchone()
             time_obj = run["time"]
-        run = {"id":run["id"], "time":run["time"]}
+        run = {"id": run["id"],
+               "time": run["time"]}
 
         # if the run is older than a certain time threshold,
         # then mark it as stale
-        stale_threshold = datetime.timedelta(0, 0, 0, 0,\
-            int(hf.config.get('happyface', 'stale_data_threshold_minutes')))
+        stale_threshold = datetime.timedelta(0, 0, 0, 0,
+                                             int(hf.config.get('happyface', 'stale_data_threshold_minutes')))
         data_stale = (run['time'] + stale_threshold) < datetime.datetime.now()
         run['stale'] = data_stale
 
@@ -175,7 +187,7 @@ class Dispatcher(object):
             if 'action' in kwargs:
                 if kwargs['action'].lower() == 'getxml':
                     template_context['category_list'] = filter(lambda x: not x.isUnauthorized(),
-                        template_context['category_list'])
+                                                               template_context['category_list'])
                     doc = hf.category.renderXmlOverview(run, template_context)
                 else:
                     doc = u'''<h2>Unkown action</h2>
@@ -186,8 +198,12 @@ class Dispatcher(object):
                 no category is specified.
                 '''
                 if category is None:
-                    filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "index.html")
-                    index_template = Template(filename=filename, lookup=hf.template_lookup)
+                    filename = os.path.join(hf.hf_dir,
+                                            hf.config.get("paths",
+                                                          "hf_template_dir"),
+                                            "index.html")
+                    index_template = Template(filename=filename,
+                                              lookup=hf.template_lookup)
                     doc = index_template.render_unicode(**template_context)
                 elif category is not None and not category in category_dict:
                     raise cp.HTTPError(404)
@@ -203,6 +219,7 @@ class Dispatcher(object):
             self.logger.error("Page request threw exception: %s" % str(e))
             self.logger.error(traceback.format_exc())
             raise
+
 
 class AjaxDispatcher:
     def __init__(self, category_list):
@@ -227,7 +244,7 @@ class AjaxDispatcher:
             if module.isUnauthorized():
                 raise cp.HTTPError(status=403, message="You are not allowed to access this resource.")
 
-            run = hf_runs.select(hf_runs.c.id==run_id).execute().fetchone()
+            run = hf_runs.select(hf_runs.c.id == run_id).execute().fetchone()
             if run is None:
                 raise cp.HTTPError(status=404, message="The specified run ID was not found!")
 
@@ -239,11 +256,13 @@ class AjaxDispatcher:
                 raise Exception(specific_module.error_string)
             if specific_module.dataset is None:
                 raise cp.HTTPError(status=404, message="No data at this time")
-            self.logger.debug(specific_module.error_string, specific_module.dataset)
+            self.logger.debug(specific_module.error_string,
+                              specific_module.dataset)
             response["data"] = specific_module.ajax(**kwargs)
             response["status"] = "success"
 
-            cp.lib.caching.expires(secs=9999999, force=True) # ajax data never goes bad, since it is supposed to be static
+            # ajax data never goes bad, since it is supposed to be static
+            cp.lib.caching.expires(secs=9999999, force=True)
 
         except cp.HTTPError, e:
             cp.lib.caching.expires(secs=0, force=False)
@@ -254,14 +273,15 @@ class AjaxDispatcher:
                 "data": []
             }
         except Exception, e:
-            cp.lib.caching.expires(secs=30, force=True) # ajax data never goes bad, since it is supposed to be static
+            # ajax data never goes bad, since it is supposed to be static
+            cp.lib.caching.expires(secs=30, force=True)
             self.logger.error("Ajax request threw exception: %s" % str(e))
             self.logger.error(traceback.format_exc())
             response = {
                 "status": "error",
                 "code": 500,
                 "reason": str(e),
-                "data":[]
+                "data": []
             }
 
         finally:

@@ -15,7 +15,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import os,sys
+import os
+import sys
 
 if __name__ != '__main__':
     # unfortunately we need this rather hacky path change
@@ -31,7 +32,9 @@ if __name__ != '__main__':
         os.chdir(dirname)
         sys.path.append(dirname)
 
-import hf, cherrypy, logging
+import hf
+import cherrypy
+import logging
 import ConfigParser
 import atexit
 
@@ -45,7 +48,7 @@ cp_config = {}
 for section in hf.config.sections():
     if section == "global" or section.startswith("/"):
         config = dict(hf.config.items(section))
-        for key,val in config.iteritems():
+        for key, val in config.iteritems():
             try:
                 config[key] = eval(val)
             except ValueError:
@@ -56,10 +59,12 @@ cherrypy.config.update(cp_config)
 hf.module.importModuleClasses()
 hf.auth.init()
 
-hf.database.connect(implicit_execution = True)
+hf.database.connect(implicit_execution=True)
 
 if __name__ == '__main__':
-    cherrypy.quickstart(root=hf.RootDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
+    cherrypy.quickstart(root=hf.RootDispatcher(),
+                        script_name=hf.config.get("paths", "happyface_url"),
+                        config=cp_config)
     hf.database.disconnect()
 else:
     cherrypy.config.update({'environment': 'embedded'})
@@ -67,7 +72,9 @@ else:
         cherrypy.engine.start(blocking=False)
         atexit.register(hf.database.disconnect)
         atexit.register(cherrypy.engine.stop)
-    application = cherrypy.Application(root=hf.RootDispatcher(), script_name=hf.config.get("paths", "happyface_url"), config=cp_config)
+    application = cherrypy.Application(root=hf.RootDispatcher(),
+                                       script_name=hf.config.get("paths", "happyface_url"),
+                                       config=cp_config)
     cherrypy.tree.mount(application)
     # FLUP server does not like autoreload.
-    cherrypy.config.update({'engine.autoreload_on':False})
+    cherrypy.config.update({'engine.autoreload_on': False})

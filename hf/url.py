@@ -14,10 +14,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import hf, os
+import hf
+import os
+
 
 def staticUrl(file):
     return join(hf.config.get("paths", "static_url"), file)
+
 
 def join(url, suffix):
     if len(suffix) == 0:
@@ -30,6 +33,7 @@ def join(url, suffix):
         url = url[0:-1]
     return url+suffix
 
+
 def absoluteUrl(arg):
     """
     Decorator!
@@ -38,9 +42,11 @@ def absoluteUrl(arg):
     that root URL
     """
     def joinCfg(*args, **kwargs):
-        return join(hf.config.get("paths", "happyface_url"), arg(*args, **kwargs))
+        return join(hf.config.get("paths", "happyface_url"),
+                    arg(*args, **kwargs))
     if isinstance(arg, str):
-        return join(hf.config.get("paths", "happyface_url"), arg)
+        return join(hf.config.get("paths", "happyface_url"),
+                    arg)
     return joinCfg
 
 
@@ -48,9 +54,12 @@ def get(**kwargs):
     """
     Generate a GET line from a dictionary
     """
-    opt_list = [(key,val) for key,val in kwargs.iteritems() if type(val) is not list and type(val) is not tuple]
-    for key,val in kwargs.iteritems():
+    opt_list = [(key, val)
+                for key, val in kwargs.iteritems()
+                if type(val) is not list and type(val) is not tuple]
+    for key, val in kwargs.iteritems():
         if type(val) is not list and type(val) is not tuple:
             continue
-        opt_list.extend((key,v) for v in val)
-    return u"?" + u"&".join(unicode(key)+"="+unicode(val) for key,val in opt_list)
+        opt_list.extend((key, v) for v in val)
+    return u"?" + u"&".join(unicode(key) + "=" + unicode(val)
+                            for key, val in opt_list)

@@ -14,10 +14,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import hf, os, traceback
+import hf
+import os
+import traceback
 import cherrypy as cp
 from mako.template import Template
 import logging
+
 
 class Category:
     """
@@ -28,15 +31,18 @@ class Category:
         self.name = category_name
         self.config = conf
         self.module_list = module_list
-        self.accessible_module_list = filter(lambda x: not x.isUnauthorized(), module_list)
+        self.accessible_module_list = filter(lambda x: not x.isUnauthorized(),
+                                             module_list)
         self.run = run
         self.status = -1
         self.template = template
         try:
             self.algorithm = hf.category.algorithms.worst
-            self.algorithm = getattr(hf.category.algorithms, self.config['algorithm'])
+            self.algorithm = getattr(hf.category.algorithms,
+                                     self.config['algorithm'])
         except AttributeError, e:
-            self.logger.warn("Status algorithm '%s' not supported, use 'worst'", self.config['algorithm'])
+            self.logger.warn("Status algorithm '%s' not supported, use 'worst'",
+                             self.config['algorithm'])
         except hf.ConfigError, e:
             self.logger.warn("Status algorithm not specified, use 'worst'")
 
@@ -79,12 +85,15 @@ class Category:
     def getIndexIcon(self):
         if self.isUnauthorized():
             return os.path.join(hf.config.get('paths', 'template_icons_url'),
-                "index_warn.png")
+                                "index_warn.png")
         return os.path.join(hf.config.get('paths', 'template_icons_url'),
-            "index_warn.png" if self.data_missing else "index_ok.png")
+                            "index_warn.png"
+                            if self.data_missing
+                            else "index_ok.png")
 
     def getLockIcon(self):
-        return os.path.join(hf.config.get('paths', 'template_icons_url'), "index_lock.png")
+        return os.path.join(hf.config.get('paths', 'template_icons_url'),
+                            "index_lock.png")
 
     def __unicode__(self):
         return self.name
@@ -96,7 +105,8 @@ class Category:
     def url(self, time=None):
         url = "/category/"+self.name
         if time is not None:
-            url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'), time.strftime('%H:%M'))
+            url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'),
+                                             time.strftime('%H:%M'))
         return url
 
     def isAccessRestricted(self):

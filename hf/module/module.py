@@ -15,7 +15,11 @@
 #   limitations under the License.
 
 from sqlalchemy import *
-import hf, traceback, os, logging, sys
+import hf
+import traceback
+import os
+import logging
+import sys
 from mako.template import Template
 import pkgutil
 
@@ -25,6 +29,7 @@ __column_file_list = {}
 __module_class_list = {}
 
 logger = logging.getLogger(__file__)
+
 
 def getColumnFileReference(table):
     """
@@ -37,17 +42,21 @@ def getColumnFileReference(table):
     name = table.name if isinstance(table, Table) else table
     return __column_file_list[name] if name in __column_file_list else []
 
+
 def moduleClassLoaded(mod_class):
     return mod_class in __module_class_list
+
 
 def importModuleClasses():
     module_paths = [os.path.join(hf.hf_dir, "modules")]
     exclude = ['.git', '.svn']
     try:
         for path in module_paths:
-            subdirs = [d for d in\
-                (os.path.join(path, p) for p in os.listdir(path) if p not in exclude)\
-                if os.path.isdir(d)]
+            subdirs = [d for d in
+                       (os.path.join(path, p)
+                        for p in os.listdir(path)
+                        if p not in exclude)
+                       if os.path.isdir(d)]
             module_paths.extend(subdirs)
     except OSError:
         logger.error("Cannot find modules directory!")
@@ -62,7 +71,9 @@ def importModuleClasses():
         loader = imp.find_module(name)
         loader.load_module(name)
 
-        new_modules = [mod for mod in __module_class_list.keys() if mod not in imported_modules]
+        new_modules = [mod
+                       for mod in __module_class_list.keys()
+                       if mod not in imported_modules]
         for mod in new_modules:
             __module_class_list[mod].filepath = loader.filename
 

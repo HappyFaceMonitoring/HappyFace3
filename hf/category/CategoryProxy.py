@@ -14,11 +14,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import hf, os, traceback
+import hf
+import os
+import traceback
 from mako.template import Template
 import logging
 import cherrypy as cp
 config = None
+
 
 class CategoryProxy:
     """
@@ -39,11 +42,13 @@ class CategoryProxy:
         if 'access' not in self.config:
             self.config['access'] = 'permod'
         if self.config['access'] not in ['open', 'permod', 'restricted']:
-            self.logger.warning("Unknown access option '%s', assume 'permod'" % self.config['access'])
+            self.logger.warning("Unknown access option '%s', assume 'permod'"
+                                % self.config['access'])
             self.config['access'] = 'permod'
 
         for instance_name in self.config["modules"].split(","):
-            if len(instance_name) == 0: continue
+            if len(instance_name) == 0:
+                continue
             try:
                 cfg = self.module_config[instance_name]
                 if self.config['access'] == 'open':
@@ -52,14 +57,20 @@ class CategoryProxy:
                     cfg['access'] = 'restricted'
                 hf.module.getModuleClass(cfg["module"])
                 ModuleClass = hf.module.getModuleClass(cfg["module"])
-                self.module_list.append(hf.module.ModuleProxy(ModuleClass, instance_name, cfg))
+                self.module_list.append(hf.module.ModuleProxy(ModuleClass,
+                                                              instance_name,
+                                                              cfg))
             except Exception, e:
-                self.logger.error("Cannot add module instance %s: %s" %(instance_name, str(e)))
+                self.logger.error("Cannot add module instance %s: %s" %
+                                  (instance_name, str(e)))
                 self.logger.error(traceback.format_exc())
 
         try:
-            filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "category.html")
-            self.template = Template(filename=filename, lookup=hf.template_lookup)
+            filename = os.path.join(hf.hf_dir,
+                                    hf.config.get("paths", "hf_template_dir"),
+                                    "category.html")
+            self.template = Template(filename=filename,
+                                     lookup=hf.template_lookup)
         except Exception, e:
             self.logger.error("Cannot load category template: %s" % str(e))
             self.logger.error(traceback.format_exc())
@@ -90,7 +101,8 @@ class CategoryProxy:
             try:
                 module.prepareAcquisition(run)
             except Exception, e:
-                self.logger.error("prepareAcquisition() failed on %s: %s" % (module.instance_name, str(e)))
+                self.logger.error("prepareAcquisition() failed on %s: %s" %
+                                  (module.instance_name, str(e)))
                 self.logger.error(traceback.format_exc())
 
     def acquire(self, run):
@@ -104,12 +116,14 @@ class CategoryProxy:
             try:
                 module.acquire(run)
             except Exception, e:
-                self.logger.error("acquire() failed on %s: %s" % (module.instance_name, str(e)))
+                self.logger.error("acquire() failed on %s: %s" %
+                                  (module.instance_name, str(e)))
                 self.logger.error(traceback.format_exc())
 
     def getCategory(self, run):
         specific_modules = [m.getModule(run) for m in self.module_list]
-        category = hf.category.Category(self.name, self.config, specific_modules, run, self.template)
+        category = hf.category.Category(self.name, self.config,
+                                        specific_modules, run, self.template)
         for s in specific_modules:
             s.category = category
         return category

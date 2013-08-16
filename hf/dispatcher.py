@@ -16,7 +16,13 @@
 
 import cherrypy as cp
 from cherrypy.lib.static import serve_file
-import hf, datetime, time, logging, traceback, os, subprocess
+import hf
+import datetime
+import time
+import logging
+import traceback
+import os
+import subprocess
 from hf.module.database import hf_runs
 import hf.plotgenerator
 from sqlalchemy import *
@@ -33,8 +39,9 @@ class RootDispatcher(object):
     _cp_config = {
         'tools.cert_auth.on': True,
         'tools.encode.on': True,
-        'tools.encode.encoding': 'utf-8', 
+        'tools.encode.encoding': 'utf-8',
     }
+
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.category_list = hf.category.createCategoryObjects()
@@ -49,17 +56,20 @@ class RootDispatcher(object):
             'error_page.default': self.errorPage,
         })
 
-
     @cp.expose
     def index(self):
-        raise cp.HTTPRedirect(hf.url.join(hf.config.get('paths', 'happyface_url'), 'category'))
+        raise cp.HTTPRedirect(hf.url.join(hf.config.get('paths',
+                                                        'happyface_url'),
+                                          'category'))
 
     @cp.expose
     @cp.tools.caching()
     def static(self, *args):
         cp.lib.caching.expires(secs=timedelta(1), force=True)
 
-        path = os.path.join(hf.hf_dir, hf.config.get('paths', 'static_dir'), *args)
+        path = os.path.join(hf.hf_dir,
+                            hf.config.get('paths', 'static_dir'),
+                            *args)
         # archive/Y/M/D/H/M/file -> 7
         if len(args) == 7 and args[0] == 'archive':
             authorized = self.archiveFileAuthorized(args[6])
@@ -114,7 +124,6 @@ Perhaps the corresponding module was removed from the HF config or the file does
             <p>Please consult the log files!</p>""".encode("utf-8")
 
 
-
 class CachegrindHandler(cp.dispatch.LateParamPageHandler):
     """Callable which profiles the subsequent handlers and writes the results to disk.
 
@@ -124,9 +133,9 @@ class CachegrindHandler(cp.dispatch.LateParamPageHandler):
         self.next_handler = next_handler
 
     def __call__(self):
-        """ 
+        """
         Profile this request and output results in a cachegrind compatible format.
-        """ 
+        """
         import cProfile
         try:
             import lsprofcalltree

@@ -14,21 +14,29 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import hf, os, logging, subprocess, traceback
+import hf
+import os
+import logging
+import subprocess
+import traceback
 import cherrypy as cp
 
 authorized_dn_list = []
 
 logger = logging.getLogger()
 
+
 def init():
     try:
-        dn_file_path = os.path.join(hf.hf_dir, hf.config.get('auth', 'dn_file'))
+        dn_file_path = os.path.join(hf.hf_dir,
+                                    hf.config.get('auth', 'dn_file'))
         with open(dn_file_path) as f:
-            hf.auth.authorized_dn_list = [line.strip() for line in f if len(line.strip()) > 0]
+            hf.auth.authorized_dn_list = [line.strip() for line in f
+                                          if len(line.strip()) > 0]
         cp.engine.autoreload.files.add(dn_file_path)
     except IOError:
         logger.debug("No DN file found for authorization.")
+
 
 def cert_auth():
     cp.request.cert_authorized = False
@@ -44,7 +52,7 @@ def cert_auth():
 
     if s_dn in hf.auth.authorized_dn_list:
         cp.request.cert_authorized = True
-    try:            
+    try:
         script_file = hf.config.get('auth', 'auth_script')
         if not cp.request.cert_authorized and len(script_file) > 0:
             script_file = os.path.join(hf.hf_dir, script_file)

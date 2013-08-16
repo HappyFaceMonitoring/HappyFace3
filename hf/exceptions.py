@@ -14,25 +14,33 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+
 class ConfigError(Exception):
     pass
+
 
 class ConsistencyError(Exception):
     pass
 
+
 class ModuleError(Exception):
     pass
+
 
 class ModuleRuntimeError(Exception):
     pass
 
+
 class DownloadError(Exception):
     def __init__(self, file):
         self.file = file
+
     def __str__(self):
         return "Download of %s failed: %s" % (self.file.url, self.file.error)
+
     def __unicode__(self):
         return u"Download of %s failed: %s" % (self.file.url, self.file.error)
+
 
 class ModuleProgrammingError(Exception):
     def __init__(self, module, msg):
@@ -41,3 +49,6 @@ class ModuleProgrammingError(Exception):
 
     def __str__(self):
         return "%s: %s" % (self.module, super(ModuleProgrammingError, self).__str__())
+
+    def __unicode__(self):
+        return "%s: %s" % (self.module, super(ModuleProgrammingError, self).__unicode__())

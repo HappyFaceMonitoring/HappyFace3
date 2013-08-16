@@ -15,11 +15,15 @@
 #   limitations under the License.
 
 
-import hf, logging, traceback, os
+import hf
+import logging
+import traceback
+import os
 import cherrypy as cp
 from mako.template import Template
 
 logger = logging.getLogger(__name__)
+
 
 def renderXmlOverview(run, template_context):
     '''
@@ -30,7 +34,9 @@ def renderXmlOverview(run, template_context):
     HappyFace AndroidApp.
     '''
     try:
-        filename = os.path.join(hf.hf_dir, hf.config.get("paths", "hf_template_dir"), "overview.xml")
+        filename = os.path.join(hf.hf_dir,
+                                hf.config.get("paths", "hf_template_dir"),
+                                "overview.xml")
         template = Template(filename=filename, lookup=hf.template_lookup)
     except Exception, e:
         logger.error("Cannot load XML overview template: %s" % str(e))

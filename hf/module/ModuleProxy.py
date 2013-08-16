@@ -15,10 +15,13 @@
 #   limitations under the License.
 
 import hf
-import logging, traceback, os
+import logging
+import traceback
+import os
 from mako.template import Template
 import cherrypy as cp
 from sqlalchemy.exc import DatabaseError
+
 
 class ModuleProxy:
     """
@@ -42,7 +45,7 @@ class ModuleProxy:
         if 'access' not in self.config:
             self.config['access'] = 'open'
         if self.config['access'] not in ['open', 'restricted']:
-            self.logger.warning("Unknown access option '%s', assume 'open'" % self.config['access'])
+            self.logger.warning("Unknown access option '%s', assume 'open'"% self.config['access'])
             self.config['access'] = 'open'
 
         # check if instance is in database and of correct type
@@ -56,6 +59,7 @@ class ModuleProxy:
         try:
             filename = os.path.join(os.path.dirname(self.ModuleClass.filepath), self.module_name+".html")
             self.template = Template(filename=filename, lookup=hf.template_escape_lookup)
+            self.logger.debug(self.template.code)
         except Exception, e:
             self.logger.error("Cannot create template, " + str(e))
             self.logger.error(traceback.format_exc())
@@ -65,11 +69,13 @@ class ModuleProxy:
         return self.config['access'] != 'open'
 
     def isUnauthorized(self):
-        return self.config['access'] == 'restricted' and not cp.request.cert_authorized
+        return (self.config['access'] == 'restricted' and
+                not cp.request.cert_authorized)
 
     def prepareAcquisition(self, run):
         # create module instance solely for that purpose
-        module = self.ModuleClass(self.instance_name, self.config, run, None, None)
+        module = self.ModuleClass(self.instance_name, self.config,
+                                  run, None, None)
         self.acquisitionModules[run['id']] = module
         try:
             module.prepareAcquisition()
@@ -140,8 +146,10 @@ class ModuleProxy:
                             data["sf_data_id"] = module.smart_filling_current_dataset["id"]
 
                             # copy over old data, ignoring certain fields
-                            ignore = ["id", "run_id", "description", "instruction", "sf_data_id"]
-                            data.update(dict(filter(lambda x: x[0] not in ignore,
+                            ignore = ["id", "run_id", "description",
+                                      "instruction", "sf_data_id"]
+                            data.update(dict(filter(
+                                lambda x: x[0] not in ignore,
                                 module.smart_filling_current_dataset.iteritems())))
 
                     dataExctractionSuccessfull = True
@@ -152,20 +160,28 @@ class ModuleProxy:
                     "error_string": str(e)
                 })
             except hf.ModuleRuntimeError, e:
-                self.logger.error("Development error during data exctraction: "+str(e))
+                self.logger.error("Runtime error during data exctraction: "+str(e))
+                self.logger.error(traceback.format_exc())
+                data.update({
+                    "status": -1,
+                    "error_string": str(e)
+                })
+            except hf.ModuleProgrammingError, e:
+                self.logger.error("Programming error during data extraction: "+str(e))
                 self.logger.error(traceback.format_exc())
                 data.update({
                     "status": -1,
                     "error_string": str(e)
                 })
             except Exception, e:
-                self.logger.error("Data extraction failed: "+str(e))
+                self.logger.error("Data extraction failed: {0.__class__.__name__}: {0}".format(e))
                 self.logger.error(traceback.format_exc())
                 data.update({
                     "status": -1,
                     "error_string": str(e)
                 })
             finally:
+                print "ADD THE SHIT!", self.instance_name
                 result = module.module_table.insert().values(**data).execute()
 
             # compatibility between different sqlalchemy versions
@@ -176,8 +192,9 @@ class ModuleProxy:
 
             if dataExctractionSuccessfull:
                 try:
-                    if (module.use_smart_filling and module.smart_filling_keep_data) \
-                        or not module.use_smart_filling:
+                    if((module.use_smart_filling and
+                        module.smart_filling_keep_data) or
+                       not module.use_smart_filling):
                         module.fillSubtables(inserted_id)
                 except Exception, e:
                     self.logger.error("Filling subtables failed: "+str(e))
@@ -185,7 +202,10 @@ class ModuleProxy:
                     if len(data["error_string"]) > 0:
                         data["error_string"] += "; "
                     data["error_string"] += str(e)
-                    module.module_table.update().where(module.module_table.c.id == inserted_id).values(error_string=data["error_string"]).execute()
+                    module.module_table.update().\
+                        where(module.module_table.c.id == inserted_id).\
+                        values(error_string=data["error_string"]).\
+                        execute()
 
         except Exception, e:
             module.logger.error("data acquisition failed: %s" % str(e))
@@ -200,13 +220,17 @@ class ModuleProxy:
         """
         try:
             dataset = self.module_table.select(self.module_table.c.run_id==run["id"])\
-                    .where(self.module_table.c.instance==self.instance_name)\
-                    .execute()\
-                    .fetchone()
+                                               .where(self.module_table.c.instance ==
+                                                      self.instance_name)\
+                                               .execute()\
+                                               .fetchone()
             if dataset is not None:
                 file_columns = hf.module.getColumnFileReference(self.module_table)
                 # create access objects for files if name is not empty, in this case None
-                dataset = dict((col, (hf.downloadservice.File(run, val) if val else None) if col in file_columns else val) for col,val in dataset.items())
+                dataset = dict((col, (hf.downloadservice.File(run, val)
+                                      if val else None)
+                                if col in file_columns else val)
+                               for col, val in dataset.items())
                 dataset["source_url"] = dataset["source_url"].split("|")
         except DatabaseError, e:
             dataset = {

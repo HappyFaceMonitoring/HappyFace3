@@ -18,10 +18,13 @@
  An interactive execution shell for HappyFace
 """
 
-import code, traceback, sys
+import code
+import traceback
+import sys
 import hf
 
 load_hf_environment = True
+
 
 def execute():
     try:
@@ -33,4 +36,5 @@ def execute():
             print "Interactive HappyFace Shell"
             sh()
     except Exception:
-        code.interact("Interactive HappyFace Shell", local={'hf':hf})
+        code.interact("Interactive HappyFace Shell",
+                      local={'hf': hf})

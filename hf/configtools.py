@@ -15,17 +15,29 @@
 #   limitations under the License.
 
 import ConfigParser
-import os, hf, cherrypy, traceback, logging, subprocess, re
+import os
+import hf
+import cherrypy
+import traceback
+import logging
+import subprocess
+import re
 import logging.config
 from mako.lookup import TemplateLookup
 
+
 def _getCfgInDirectory(dir):
-    return sorted(filter(lambda x: x.lower().endswith(".cfg") and os.path.isfile(x), map(lambda x:os.path.join(dir,x), os.listdir(dir))))
+    return sorted(filter(lambda x: x.lower().endswith(".cfg") and
+                         os.path.isfile(x),
+                         map(lambda x: os.path.join(dir, x),
+                             os.listdir(dir))))
+
 
 def _getSvnRevision():
     try:
         try:
-            proc = subprocess.Popen(['svnversion'], 0, None, None, subprocess.PIPE)
+            proc = subprocess.Popen(['svnversion'],
+                                    0, None, None, subprocess.PIPE)
             return proc.stdout.read().strip()
         finally:
             proc.poll()
@@ -33,6 +45,7 @@ def _getSvnRevision():
                 proc.kill()
     except Exception, e:
         return 'exported'
+
 
 def _getGitSvnRevision():
     """
@@ -42,7 +55,8 @@ def _getGitSvnRevision():
     try:
         revision = 0
         try:
-            proc = subprocess.Popen(['git', 'svn', 'info'], 0, None, None, subprocess.PIPE)
+            proc = subprocess.Popen(['git', 'svn', 'info'],
+                                    0, None, None, subprocess.PIPE)
             git_svn_info = proc.stdout.read()
             match = re.search(r"Revision: ([0-9]+)", git_svn_info)
             if match:
@@ -59,6 +73,7 @@ def _getGitSvnRevision():
     except Exception, e:
         return 'exported'
 
+
 class ConfigDict(dict):
     def __getitem__(self, key):
         try:
@@ -67,6 +82,7 @@ class ConfigDict(dict):
             raise hf.ConfigError("Required parameter '{0}' not specified".format(key))
         except KeyError:
             raise hf.ConfigError("Required parameter '{0}' not specified".format(key))
+
 
 def readConfigurationAndEnv():
     logger = logging.getLogger(__name__)
@@ -111,14 +127,16 @@ def readConfigurationAndEnv():
     else:
         logger.info('Configuration directory does not exist, use only defaults')
 
-    directories = [hf.config.get("paths", "hf_template_dir"), hf.config.get("paths", "module_template_dir")]
+    directories = [hf.config.get("paths", "hf_template_dir"),
+                   hf.config.get("paths", "module_template_dir")
+                  ]
     directories = map(lambda x: os.path.join(hf.hf_dir, x), directories)
     hf.template_lookup = TemplateLookup(directories=directories,
-        module_directory=hf.config.get("paths", "template_cache_dir"))
+                                        module_directory=hf.config.get("paths", "template_cache_dir"))
     try:
         import markupsafe
         hf.template_escape_lookup = TemplateLookup(directories=directories,
-            module_directory=hf.config.get("paths", "template_cache_dir"), 
+            module_directory=hf.config.get("paths", "template_cache_dir"),
             default_filters=["unicode", 'markupsafe.escape'],
             imports=["import markupsafe"])
     except ImportError:

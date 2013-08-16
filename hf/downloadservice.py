@@ -16,9 +16,19 @@
 """
 """
 
-import hf, threading, time, os, subprocess, shutil, traceback, shlex, re, logging
+import hf
+import threading
+import time
+import os
+import subprocess
+import shutil
+import traceback
+import shlex
+import re
+import logging
 
 logger = logging.getLogger(__name__)
+
 
 class DownloadSlave(threading.Thread):
     def __init__(self, file, global_options, archive_dir):
@@ -33,7 +43,13 @@ class DownloadSlave(threading.Thread):
                 path = self.file.url[len("file://"):]
                 shutil.copy(path, self.file.getTmpPath(True))
             else:
-                command = "wget --output-document=\"%s\" %s %s \"%s\"" % (self.file.getTmpPath(True), "" if self.file.config_source == "local" else self.global_options, self.file.options, self.file.url)
+                command = "wget --output-document=\"%s\" %s %s \"%s\"" % \
+                          (self.file.getTmpPath(True),
+                           "" if self.file.config_source == "local"
+                           else self.global_options,
+                           self.file.options,
+                           self.file.url
+                           )
                 process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
                 stderr = process.communicate()[1]
                 if process.returncode != 0:
@@ -43,7 +59,7 @@ class DownloadSlave(threading.Thread):
                         http_errorcode = int(match.group(1))
                     self.file.error = "Downloading failed"
                     if http_errorcode != 0:
-                         self.file.error += " with error code %i" % http_errorcode
+                        self.file.error += " with error code %i" % http_errorcode
                     try:
                         os.unlink(self.file.getTmpPath(True))
                     except Exception:
@@ -54,6 +70,7 @@ class DownloadSlave(threading.Thread):
         except:
             self.file.error += "Failed to download file"
             traceback.print_exc()
+
 
 class DownloadService:
     '''
@@ -87,7 +104,8 @@ class DownloadService:
                 self.logger.error("Cannot create archive directory")
                 self.logger.error(traceback.format_exc())
                 raise Exception("Cannot create archive directory")
-            slaves = [DownloadSlave(file, self.global_options, self.archive_dir) for file in self.file_list.itervalues()]
+            slaves = [DownloadSlave(file, self.global_options, self.archive_dir)
+                      for file in self.file_list.itervalues()]
 
             tmp_dir = hf.config.get("paths", "tmp_dir")
             if not os.path.exists(tmp_dir):
@@ -123,6 +141,7 @@ class DownloadService:
 
     def getArchivePath(self, run, filename):
         return os.path.join(hf.config.get('paths', 'archive_dir'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
+
     def getArchiveUrl(self, run, filename):
         return os.path.join(hf.config.get('paths', 'archive_url'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
 
@@ -131,6 +150,7 @@ class DownloadService:
             if not file.keep_tmp and file.isDownloaded():
                 if os.path.exists(file.getTmpPath()):
                     os.unlink(file.getTmpPath())
+
 
 class DownloadFile:
     def __init__(self, download_command):
@@ -170,7 +190,8 @@ class DownloadFile:
         if (not self.isDownloaded() or self.errorOccured()) and not no_exception:
             raise hf.DownloadError(self)
         try:
-            return os.path.join(hf.config.get('paths', 'tmp_dir'), self.tmp_filename)
+            return os.path.join(hf.config.get('paths', 'tmp_dir'),
+                                self.tmp_filename)
         except AttributeError:
             if not no_exception:
                 raise hf.DownloadError(self)
@@ -208,6 +229,7 @@ class DownloadFile:
             self.is_archived = True
             self.filename = module.instance_name + name
             shutil.copy(self.getTmpPath(), self.getArchivePath())
+
 
 class File:
     def __init__(self, run, name):

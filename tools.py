@@ -15,8 +15,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import hf,sys
-import os, datetime, time, traceback
+import hf
+import sys
+import os
+import datetime
+import time
+import traceback
 import ConfigParser
 import logging
 
@@ -33,8 +37,10 @@ if __name__ == '__main__':
 
     import hf.tools
     try:
-        tool = __import__("hf.tools."+tool_name, fromlist=[hf.tools], globals=globals())
-    except ImportError,e:
+        tool = __import__("hf.tools." + tool_name,
+                          fromlist=[hf.tools],
+                          globals=globals())
+    except ImportError, e:
         logger.error("No tool called %s: %s" % (tool_name, str(e)))
         sys.exit(-1)
 
@@ -44,7 +50,7 @@ if __name__ == '__main__':
             try:
                 hf.configtools.readConfigurationAndEnv()
                 hf.configtools.setupLogging('acquire_logging_cfg')
-            except Exception,e:
+            except Exception, e:
                 print "Setting up HappyFace failed"
                 traceback.print_exc()
                 sys.exit(-1)
@@ -53,7 +59,7 @@ if __name__ == '__main__':
             try:
                 hf.module.importModuleClasses()
 
-                hf.database.connect(implicit_execution = True)
+                hf.database.connect(implicit_execution=True)
                 hf.database.metadata.create_all()
 
                 category_list = hf.category.createCategoryObjects()

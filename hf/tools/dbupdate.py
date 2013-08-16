@@ -18,7 +18,10 @@
  Execute database schema updates
 """
 
-import hf, sys, traceback
+import hf
+import sys
+import traceback
+
 try:
     import argparse
 except ImportError:
@@ -28,18 +31,20 @@ import code
 
 load_hf_environment = False
 
+
 def ask(args, message):
     if not args.interactive or args.force or args.dry:
         return True
-    print message, 
+    print message,
     while 1:
-        print "[y/N] ", 
+        print "[y/N] ",
         line = sys.stdin.readline()
         if line.lower()[0] == 'y':
             return True
         elif line.lower()[0] == 'n' or len(line) == 1:
             return False
     return True
+
 
 def execute():
     parser = argparse.ArgumentParser(description='Update the database schema as neccessary')
@@ -62,7 +67,6 @@ def execute():
     from migrate.versioning import genmodel, schemadiff
     from migrate.changeset import schema
 
-
     # Setup minimalistic, offline HF environment
     hf.configtools.readConfigurationAndEnv()
     hf.configtools.setupLogging('acquire_logging_cfg')
@@ -70,7 +74,8 @@ def execute():
     hf.database.connect(implicit_execution=True)
 
     # calculate diff using sqlalchemy-migrate magic
-    diff = schemadiff.getDiffOfModelAgainstDatabase(hf.database.metadata, hf.database.engine)
+    diff = schemadiff.getDiffOfModelAgainstDatabase(hf.database.metadata,
+                                                    hf.database.engine)
 
     if args.dry:
         print "Dry run! Database will be unchanged"

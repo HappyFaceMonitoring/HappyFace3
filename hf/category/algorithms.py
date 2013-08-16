@@ -14,6 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+
 def worst(category):
     """
     Category status is the worst lowest status of all modules of the same
@@ -32,6 +33,7 @@ def worst(category):
             status = mod.dataset['status']
     return status
 
+
 def weighted(category):
     """
     Category status is the average over each weighted module status. Unrated
@@ -40,7 +42,8 @@ def weighted(category):
     status = 0.0
     total = 0.0
     for mod in category.module_list:
-        if mod.dataset is None: # equivalent to status == -1 :P
+        # equivalent to status == -1 :P
+        if mod.dataset is None:
             continue
         if mod.dataset['status'] >= 0 and mod.type != "unrated":
             status += mod.dataset['status'] * mod.weigth

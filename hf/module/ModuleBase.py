@@ -121,6 +121,7 @@ class ModuleMeta(type):
         name = table.name if isinstance(table, Table) else table
         _column_file_list[name] = _column_file_list[name]+[column] if name in _column_file_list else [column]
 
+
 class ModuleBase:
     """ Base class for HappyFace modules.
         A module provides two core functions:
@@ -443,7 +444,7 @@ class ModuleBase:
                 else:
                     icon = 'unhappy'
             elif self.type == 'unrated':
-                icon ='happy'
+                icon = 'happy'
             else:
                 icon = 'avail_plot' if self.dataset['status'] > 0.9 else 'unavail_plot'
         return icon
@@ -478,7 +479,8 @@ class ModuleBase:
         .. note::
             This method only works in the render process.
         """
-        return os.path.join(hf.config.get('paths', 'template_icons_url'), 'mod_'+self.getStatusString()+'.png')
+        return os.path.join(hf.config.get('paths', 'template_icons_url'),
+                            'mod_'+self.getStatusString()+'.png')
 
     def getNavStatusIcon(self):
         """
@@ -489,7 +491,8 @@ class ModuleBase:
         .. note::
             This method only works in the render process.
         """
-        return os.path.join(hf.config.get('paths', 'template_icons_url'), 'nav_'+self.getStatusString()+'.png')
+        return os.path.join(hf.config.get('paths', 'template_icons_url'),
+                            'nav_'+self.getStatusString()+'.png')
 
     def getPlotableColumns(self):
         """
@@ -498,11 +501,13 @@ class ModuleBase:
 
         :rtype: list
         """
-        blacklist = ['id', 'run_id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
+        blacklist = ['id', 'run_id', 'instance', 'description',
+                     'instruction', 'error_string', 'source_url']
         types = [Integer, Float, Numeric]
+
         def isnumeric(cls):
             for t in types:
-                if isinstance(cls,t):
+                if isinstance(cls, t):
                     return True
             return False
         numerical_cols = filter(lambda x: isnumeric(x.type), self.module_table.columns)
@@ -546,15 +551,18 @@ class ModuleBase:
 
         blacklist = ['id', 'parent_id']
         types = [Integer, Float, Numeric]
+
         def isnumeric(cls):
             for t in types:
-                if isinstance(cls,t):
+                if isinstance(cls, t):
                     return True
             return False
 
         for name, table in self.subtables.iteritems():
             numerical_cols = filter(lambda x: isnumeric(x.type), table.columns)
-            cols[name] = [col.name for col in numerical_cols if col.name not in blacklist]
+            cols[name] = [col.name
+                          for col in numerical_cols
+                          if col.name not in blacklist]
 
         return cols
 
@@ -566,11 +574,16 @@ class ModuleBase:
 
         :rtype: dict (subtable => list of columns)
         """
-        blacklist = ['id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
+        blacklist = ['id', 'instance', 'description',
+                     'instruction', 'error_string', 'source_url']
         blacklist_sub = ['id', 'parent_id']
-        cols = {'': [col.name for col in self.module_table.columns if col.name not in blacklist]}
+        cols = {'': [col.name
+                     for col in self.module_table.columns
+                     if col.name not in blacklist]}
         for name, table in self.subtables.iteritems():
-            cols[name] = [col.name for col in table.columns if col.name not in blacklist_sub]
+            cols[name] = [col.name
+                          for col in table.columns
+                          if col.name not in blacklist_sub]
 
         return cols
 

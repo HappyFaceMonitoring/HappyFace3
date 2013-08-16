@@ -19,13 +19,16 @@ Generate a skeleton module configuration
 from the hints in the module code.
 """
 
-import hf, sys, traceback
+import hf
+import sys
+import traceback
 try:
     import argparse
 except ImportError:
     import hf.external.argparse as argparse
 
 load_hf_environment = True
+
 
 def execute():
     parser = argparse.ArgumentParser(description='Get a configuration skeleton for a module')
