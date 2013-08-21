@@ -48,6 +48,7 @@ class RootDispatcher(object):
         self.category = hf.category.Dispatcher(self.category_list)
         self.ajax = hf.category.AjaxDispatcher(self.category_list)
         self.plot = hf.plotgenerator.Dispatcher(self.category_list)
+        self.upload = hf.upload.Dispatcher()
         self.module_map = {}
         for category in self.category_list:
             for module in category.module_list:

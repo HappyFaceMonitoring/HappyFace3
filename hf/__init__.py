@@ -20,6 +20,7 @@ from dispatcher import RootDispatcher
 import database
 import configtools
 import category
+import upload
 import utility
 import auth
 from downloadservice import downloadService
