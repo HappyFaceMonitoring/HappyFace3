@@ -87,7 +87,7 @@ def matheval(input, variables={}):
         logging.error(traceback.format_exc())
         return None
 
-__regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\.\?!&/=~:]+)")
+__regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\.\?!&/=~:\*%]+)")
 
 
 def addAutoLinks(string):
