@@ -91,12 +91,27 @@ class ModuleProxy:
     def acquire(self, run):
         module = self.acquisitionModules[run['id']]
         try:
+            if module.source_url:
+                if(isinstance(module.source_url, str)
+                   or isinstance(module.source_url, unicode)):
+                    module.source_url = module.source_url.replace("|", "%7C")
+                    source_url = module.source_url
+                elif hasattr(module.source_url, "__iter__"):
+                    module.source_url = map(lambda x: x.replace("|", "%7C"),
+                                            module.source_url)
+                    source_url = "|".join(module.source_url)
+            else:
+                raise hf.ModuleProgrammingError(
+                    self.module_name,
+                    "source_url has unexpected type {0}"
+                    .format(type(module.source_url)))
+
             self.acquisitionModules[run['id']] = module
             data = {"instance": self.instance_name,
                     "run_id": run["id"],
                     "status": 1.0,
                     "error_string": module.error_string,
-                    "source_url": "",
+                    "source_url": source_url,
                     "description": self.config["description"],
                     "instruction": self.config["instruction"]
                     }
@@ -118,22 +133,9 @@ class ModuleProxy:
                         elif hasattr(data[col], 'getArchiveFilename'):
                             data[col] = data[col].getArchiveFilename()
 
-                    if module.source_url:
-                        if(isinstance(module.source_url, str)
-                           or isinstance(module.source_url, unicode)):
-                            module.source_url = module.source_url.replace("|", "%7C")
-                            data["source_url"] = module.source_url
-                        elif hasattr(module.source_url, "__iter__"):
-                            module.source_url = map(lambda x: x.replace("|", "%7C"), module.source_url)
-                            data["source_url"] = "|".join(module.source_url)
-                        else:
-                            raise hf.ModuleProgrammingError(
-                                self.module_name,
-                                "source_url has unexpected type {0}"
-                                .format(type(module.source_url)))
-                    elif "source_url" in data:
+                    if not module.source_url and "source_url" in data:
                         self.logger.warning("DEPRECATED: source_url specified over extractData() return value")
-                    else:
+                    elif not module.source_url:
                         self.logger.info("No data source specified")
 
                     # Set the data ID pointing to the actual data if smart filling is used.
