@@ -42,16 +42,16 @@ class Dispatcher(object):
         try:
             with open(self.htpasswd_file) as f:
                     pass
-        except FileNotFoundError:
+        except IOError:
             if self.enabled:
                 self.logger.error("Cannot open htpasswd!")
 
-        Dispatcher._cp_config.update(
-            {
-                "tools.auth_basic.on": True,
-                "tools.auth_basic.realm": self.realm,
-                "tools.auth_basic.checkpassword": self.checkBasicPassword,
-            })
+        auth_cfg = {"tools.auth_basic.on": True,
+                    "tools.auth_basic.realm": self.realm,
+                    "tools.auth_basic.checkpassword": self.checkBasicPassword,
+                    }
+        if self.enabled:
+            Dispatcher._cp_config.update(auth_cfg)
 
     def checkBasicPassword(self, realm, username, password):
         if realm != self.realm:
@@ -90,9 +90,9 @@ salt, maybe algorithm is not supported?\
     @cp.expose
     def default(self, file=None):
         if not self.enabled:
-            raise cp.HTTPError(404)
+            raise cp.HTTPError(403, "Feature Disabled")
         if not cp.request.login:
-            raise cp.HTTPError(403)
+            raise cp.HTTPError(403, "Not Authorized")
         if file:
             filename = os.path.join(self.directory,
                                     # prevent name forgery attacks
