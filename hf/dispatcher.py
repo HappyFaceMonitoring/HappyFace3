@@ -102,6 +102,8 @@ Perhaps the corresponding module was removed from the HF config or the file does
             if issubclass(exception_class, DatabaseError):
                 args['details'] = "An database error occured, please consult the log files."
                 args['hint'] = "Maybe the database schema needs to be updated after an code update?"
+            elif args["message"].startswith("4"):
+                args["details"] = kwargs["message"]
 
             try:
                 template_context, category_dict, run = self.category.prepareDisplay()
