@@ -28,6 +28,7 @@ HappyFace – The Meta Monitoring Framework
     configuration.rst
     module_dev.rst
     plotgenerator.rst
+    fileupload.rst
     core.rst
     tools.rst
     documentation.rst
