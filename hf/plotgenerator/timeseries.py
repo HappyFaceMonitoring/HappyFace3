@@ -17,20 +17,29 @@
 import hf
 import re
 import cherrypy as cp
-import json, StringIO, traceback, logging, datetime, time
+import json
+import StringIO
+import traceback
+import logging
+import datetime
+import time
 import numpy as np
 import timeit
 from sqlalchemy.sql import select, func, or_
 from sqlalchemy import Integer, Float, Numeric
 from hf.module.database import hf_runs
 
+
 @hf.url.absoluteUrl
 def getTimeseriesUrl():
     return "/plot/time/"
 
+
 def __plotableColumns(table):
-    blacklist = ['id', 'run_id', 'instance', 'description', 'instruction', 'error_string', 'source_url']
+    blacklist = ['id', 'run_id', 'instance', 'description', 'instruction',
+                 'error_string', 'source_url']
     types = [Integer, Float, Numeric]
+
     def isnumeric(cls):
         for t in types:
             if isinstance(cls,t):
@@ -38,6 +47,7 @@ def __plotableColumns(table):
         return False
     numerical_cols = filter(lambda x: isnumeric(x.type), table.columns)
     return [col for col in numerical_cols if col.name not in blacklist]
+
 
 def getTimeseriesPlotConfig(**kwargs):
     """
@@ -115,12 +125,16 @@ def getTimeseriesPlotConfig(**kwargs):
 
     # extract timeranges
     now = datetime.datetime.now()
-    end_date = kwargs['end_date'] if 'end_date' in kwargs else now.strftime('%Y-%m-%d')
+    end_date = (kwargs['end_date'] if 'end_date' in kwargs
+                else now.strftime('%Y-%m-%d'))
     start_date = kwargs['start_date'] if 'start_date' in kwargs else end_date
     start_time = kwargs['start_time'] if 'start_time' in kwargs else "00:00"
-    end_time = kwargs['end_time'] if 'end_time' in kwargs else now.strftime('%H:%M')
-    start = datetime.datetime.fromtimestamp(time.mktime(time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
-    end = datetime.datetime.fromtimestamp(time.mktime(time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
+    end_time = (kwargs['end_time'] if 'end_time' in kwargs
+                else now.strftime('%H:%M'))
+    start = datetime.datetime.fromtimestamp(time.mktime(
+        time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
+    end = datetime.datetime.fromtimestamp(time.mktime(
+        time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
     timerange = [start, end]
 
     if 'renormalize' in kwargs:
@@ -129,7 +143,8 @@ def getTimeseriesPlotConfig(**kwargs):
 
     # STAGE 1
     # Parse curve data and scan for parameters.
-    # This gets a list from all tables that are to be retrieved in the next step.
+    # This gets a list from all tables that are to
+    # be retrieved in the next step.
     for key, value in kwargs.iteritems():
         if key.lower().startswith(u"curve_"):
             try:
@@ -141,8 +156,8 @@ def getTimeseriesPlotConfig(**kwargs):
                 module_instance, table_name, col_expr = curve_info[:3]
                 logger.debug("Preliminary column expression: %s", col_expr)
 
-                # join expression at \, occurences. Increase the index where the
-                # curve title starts.
+                # join expression at \, occurences. Increase the
+                # index where the curve title starts.
                 title_start_idx = 3
                 for fragment in curve_info[title_start_idx:]:
                     if col_expr.endswith("\\"):
@@ -192,6 +207,50 @@ def getTimeseriesPlotConfig(**kwargs):
         "errors": errors
     }
 
+
+def __timeseriesTableQuery(curve, table, module_instance, constraint, timerange):
+    logger = logging.getLogger(__name__+".__timeseriesTableQuery")
+    try:
+        query_columns = [hf_runs.c.time]
+        query_columns.extend(__plotableColumns(table))
+        if table.name.startswith("mod"):
+            # query from module table
+            query = select(query_columns,
+                           table.c.instance == module_instance) \
+                .where(table.c.run_id == hf_runs.c.id)
+        else:
+            # query from subtable
+            mod_table = table.module_class.module_table
+            #query_columns[1] = mod_table.c.id
+            query = select(query_columns, \
+                           mod_table.c.instance == module_instance) \
+                           .where(table.c.parent_id == mod_table.c.id) \
+                           .where(mod_table.c.run_id == hf_runs.c.id)
+        query = query.where(or_(hf_runs.c.completed == True,
+                                hf_runs.c.completed == None))
+        # apply constraints
+        for constr_curve in [None, curve]:
+            if constr_curve in constraint['filter']:
+                constraint_list = [
+                    getattr(table.c, include[0]) == include[1]
+                    for include in constraint['filter'][constr_curve]]
+                query = query.where(or_(*constraint_list))
+            if constr_curve in constraint['exclude']:
+                for exclude in constraint['exclude'][constr_curve]:
+                    query = query.where(getattr(table.c, exclude[0]) != exclude[1])
+
+        # apply timerange selection
+        if timerange is not None:
+            query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
+        # sort ascending by date
+        query = query.order_by(hf_runs.c.time)
+        logger.debug(query)
+        return query
+    except Exception, e:
+        logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+        raise Exception("Curve '%s': %s" % (curve, str(e)))
+
+
 def timeseriesPlot(category_list, **kwargs):
     """
     Supported arguments (via \**kwargs):
@@ -222,7 +281,7 @@ def timeseriesPlot(category_list, **kwargs):
     fig.add_axes(ax)
 
     # extract constraints from kwargs dictionary
-    constraint = {'filter': {None: []}, 'exclude':{None: []}}
+    constraint = {'filter': {}, 'exclude': {}}
     for t in constraint.iterkeys():
         for key, value in kwargs.iteritems():
             if key.startswith(t):
@@ -241,7 +300,9 @@ def timeseriesPlot(category_list, **kwargs):
         # STAGE 1
         logger.debug("TEST")
         dat = getTimeseriesPlotConfig(**kwargs)
-        logger.debug("config: %s", "\n".join(map(lambda x: str(x[0])+": "+str(x[1]), dat.iteritems())))
+        logger.debug("config: %s", "\n".join(map(lambda x: str(x[0]) +
+                                                 ": " + str(x[1]),
+                                                 dat.iteritems())))
         curve_dict = dat["curve_dict"]
         data_sources = dat["data_sources"]
         title = dat["title"]
@@ -253,81 +314,27 @@ def timeseriesPlot(category_list, **kwargs):
         timerange = dat["timerange"]
         errors.extend(dat["errors"])
 
-        # STAGE 2
-        # Download the data from all required tables
-        # in the specified timerange.
-        retrieved_data =  {}
-        for table, module_instance in data_sources:
-            try:
-                query_columns = [hf_runs.c.time]
-                query_columns.extend(__plotableColumns(table))
-                if table.name.startswith("mod"):
-                    # query from module table
-                    query = select(query_columns, \
-                        table.c.instance == module_instance) \
-                        .where(table.c.run_id == hf_runs.c.id)
-                else:
-                    # query from subtable
-                    mod_table = table.module_class.module_table
-                    #query_columns[1] = mod_table.c.id
-                    query = select(query_columns, \
-                        mod_table.c.instance == module_instance) \
-                        .where(table.c.parent_id == mod_table.c.id) \
-                        .where(mod_table.c.run_id == hf_runs.c.id)
-                query = query.where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None))
-                # apply constraints
-                if len(constraint['filter'][None]) > 0:
-                    constraint_list = [getattr(table.c, include[0]) == include[1] \
-                        for include in constraint['filter'][None]]
-                    query = query.where(or_(*constraint_list))
-                for exclude in constraint['exclude'][None]:
-                    query = query.where(getattr(table.c, exclude[0]) != exclude[1])
-                # apply named constraints
-                # TODO: named constraints
-                """if curve_name in constraint['filter']:
-                    for include in constraint['filter'][curve_name]:
-                        query = query.where(getattr(table.c, include[0]) == include[1])
-                if curve_name in constraint['exclude']:
-                    for exclude in constraint['exclude'][curve_name]:
-                        query = query.where(getattr(table.c, exclude[0]) != exclude[1])
-                """
-
-                # apply timerange selection
-                if timerange is not None:
-                    query = query.where(hf_runs.c.time >= timerange[0]).where(hf_runs.c.time < timerange[1])
-                # sort ascending by date
-                query = query.order_by(hf_runs.c.time)
-                logger.debug(query)
-                result = query.execute()
-                try:
-                    column_index = dict((col, i) for i,col in enumerate(result.keys()))
-                except TypeError: # backward compatibility
-                    column_index = dict((col, i) for i,col in enumerate(result.keys))
-
-                retrieved_data[(table, module_instance)] = (
-                    column_index,
-                    result.fetchall()
-                )
-
-            except Exception, e:
-                logger.warning("Retrieving plot data:\n"+traceback.format_exc())
-                errors.append("Data '%s': %s" % (key, str(e)))
-
-        logger.debug("data sets: %s", ", ".join(map(str, retrieved_data.iterkeys())))
-
         # STAGE 3
         # Calculate the data structures for each curve
         vardict_name = "__internal_column_value_dict__"
         regexp_dollarvar = re.compile(r"\$([_a-zA-Z0-9]+)")
-        for curve_name, (title, table, module_instance, expr, subtable) in curve_dict.iteritems():
+        for curve_name, (title, table, module_instance, expr, table_name) in curve_dict.iteritems():
+            query = __timeseriesTableQuery(curve_name, table, module_instance, constraint, timerange)
             try:
+                result = query.execute()
                 try:
-                    column_index, source_data = retrieved_data[(table, module_instance)]
-                except IndexError:
-                    curve_dict[curve_name] = (title, [], [])
-                    logger.debug("curve not found in retrieved data")
-                    continue # error in stage 2
+                    column_index = dict((col, i)
+                                        for i, col in enumerate(result.keys()))
+                except TypeError:  # backward compatibility
+                    column_index = dict((col, i)
+                                        for i, col in enumerate(result.keys))
 
+                source_data = result.fetchall()
+            except Exception, e:
+                logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+                errors.append("Data '%s': %s" % (key, str(e)))
+                continue
+            try:
                 num_rows = len(source_data)
                 if num_rows == 0:
                     logger.debug("no data downloaded for curve")
@@ -348,12 +355,15 @@ def timeseriesPlot(category_list, **kwargs):
                     math_expr = regexp_dollarvar.sub(vardict_name+"['\\1']", expr)
                     logger.debug("Math expression "+repr(math_expr))
 
-                for i,row in enumerate(source_data):
-                    variables = dict((col, row[i]) for col,i in column_index.iteritems())
+                for i, row in enumerate(source_data):
+                    variables = dict((col, row[i])
+                                     for col, i
+                                     in column_index.iteritems())
                     dates[i] = date2num(row[0])
 
                     if use_matheval:
-                        val = hf.utility.matheval(math_expr, {vardict_name: variables})
+                        val = hf.utility.matheval(math_expr,
+                                                  {vardict_name: variables})
                     else:
                         val = variables[expr]
 
@@ -364,7 +374,7 @@ def timeseriesPlot(category_list, **kwargs):
                     elif max_val < val: max_val = val
 
                 if renormalize and max_val - min_val != 0:
-                    data_points = (data_points- min_val)/(max_val - min_val)
+                    data_points = (data_points - min_val)/(max_val - min_val)
                 elif renormalize:
                     data_points = np.zeros(len(data_points)) + 0.5
 
@@ -386,8 +396,8 @@ def timeseriesPlot(category_list, **kwargs):
             # old matplotlib versions
             pass
         plot_format_list = [
-            'bo-', 'go-', 'ro-', 'co-', 'mo-', 'yo-', 'ko-', 'wo-', 
-            'bo--', 'go--', 'ro--', 'co--', 'mo--', 'yo--', 'ko--', 'wo--', 
+            'bo-', 'go-', 'ro-', 'co-', 'mo-', 'yo-', 'ko-', 'wo-',
+            'bo--', 'go--', 'ro--', 'co--', 'mo--', 'yo--', 'ko--', 'wo--',
         ]
 
         '''locator = AutoDateLocator()
@@ -403,7 +413,7 @@ def timeseriesPlot(category_list, **kwargs):
             if len(curve[1]) == 0:
                 continue
             options = {
-                'fmt': plot_format_list[num%len(plot_format_list)],
+                'fmt': plot_format_list[num % len(plot_format_list)],
                 'label': curve[0],
                 'markersize': 4.0,
             }
@@ -432,7 +442,7 @@ def timeseriesPlot(category_list, **kwargs):
 
     img_data = StringIO.StringIO()
     try:
-        fig.savefig(img_data, transparent = True)
+        fig.savefig(img_data, transparent=True)
         cp.response.headers['Content-Type'] = "image/png"
         return img_data.getvalue()
     finally:

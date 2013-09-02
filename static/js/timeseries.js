@@ -130,24 +130,25 @@ function add_curve(initial_mod, initial_table, initial_variable, initial_title) 
 
 var constraint_id = 0;
 function add_constraint(curve, variable, value) {
+    console.debug("Constraint for curve "+curve);
     var id = "constraint_" + constraint_id;
     html  = "<fieldset id='" + id + "' class=\"floating\">";
     html += "<legend><a id='" + id + "_remove' href=\"#\">Remove</a></legend>";
     html += "<p><label><span>Apply to</span><select id='" + id + "_curve' name='" + id + "_curve'>";
     html += " <option value=''>(all)</option>";
     for(var i=1; i<= curve_num; i += 1) {
-        if("curve_"+i == curve)
+        if("_"+i == curve)
             html += " <option selected='selected' ";
         else
             html += " <option ";
         html += "value='_"+i+"'>Curve "+i+"</option>";
     }
-    if(curve < 1)
-        curve = 1;
+    if(curve == "")
+        curve = "_1";
     html += "</select></label></p>";
     html += "<p><label><span>Variable</span><select id='" + id + "_variable' name='" + id + "_variable'>";
-    var module = $("#curve_"+curve+"_module_instance option:selected").val();
-    var subtable = $("#curve_"+curve+"_subtable option:selected").val();
+    var module = $("#curve"+curve+"_module_instance option:selected").val();
+    var subtable = $("#curve"+curve+"_subtable option:selected").val();
     for(var idx in module_all_vars[module][subtable]) {
         if(module_all_vars[module][subtable][idx] == variable)
             html += "<option selected='selected'>";
