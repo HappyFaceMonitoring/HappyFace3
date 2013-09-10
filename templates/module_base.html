@@ -24,7 +24,7 @@ past = run['time'] - timedelta(days = 2)
       <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
       <li><span class="key">Data source</span><span class="value">
 % for i, url in enumerate(dataset["source_url"]):
-       ${url | entity,hf.utility.addAutoLinks,n}
+       ${url | hf.utility.addAutoLinksAndEscape, n}
 % if (i+1) < len(dataset["source_url"]):
        <br />
 % endif
@@ -51,7 +51,7 @@ past = run['time'] - timedelta(days = 2)
     <p>No data at this point in time!</p>
 % elif error_occured:
     <h3>Module Error</h3>
-    <p>${module.error_string | entity, hf.utility.addAutoLinks, n}</p>
+    <p>${module.error_string | hf.utility.addAutoLinksAndEscape, n}</p>
 % else:
     ${self.content()}
 % endif

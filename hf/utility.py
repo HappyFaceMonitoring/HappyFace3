@@ -18,7 +18,7 @@ import logging
 import traceback
 import math
 import re
-
+import markupsafe
 
 def prettyDataSize(size_in_bytes):
     """ Takes a data size in bytes and formats a pretty string. """
@@ -87,7 +87,7 @@ def matheval(input, variables={}):
         logging.error(traceback.format_exc())
         return None
 
-__regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\$\.\+!=\*'(),;/\?:@&\"#]+)")
+__regex_url = re.compile(r"([-\+a-zA-Z]{2,7}://[-_a-zA-Z0-9\$\.\+!=\*'(),;/\?:@&\"#~]+)")
 
 
 def addAutoLinks(string):
@@ -95,4 +95,26 @@ def addAutoLinks(string):
     Searches for URLs in string using a regular expression and
     adds <a>-Tags around them.
     """
-    return __regex_url.sub("<a href=\"\\1\">\\1</a>", string)
+    return __regex_url.sub(r"<a href=\"\\1\">\\1</a>", string)
+
+
+def addAutoLinksAndEscape(string):
+    """
+    Searches for URLs in string using a regular expression and
+    adds <a>-Tags around them, additionally HTML entities are
+    substituted in the rest of the string.
+
+    This overcomes issues with filters like
+
+    .. codeblock:
+
+        ${url | entity, hf.utility.addAutoLinks, n}
+
+    In this case, valid URL characters are escaped in the href-attribute.
+    This function overcomes this issue.
+    """
+    return "".join("<a href=\"{0}\">{1}</a>".format(m, markupsafe.escape(m))
+                   if i % 2
+                   else markupsafe.escape(m)
+                   for i, m
+                   in enumerate(__regex_url.split(string)))
