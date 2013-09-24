@@ -105,8 +105,17 @@ import cherrypy as cp
     <legend>Misc.</legend>
     <p><label><span>Title</span><input type="text" name="title" value="${title}" /></label></p>
     <p><label><span>Legend</span><select name="legend">
-     <option value="0">None</option>
-     <option value="1">Inside top right</option>
+     <option value="0" ${legend_select[0]}>None</option>
+     <option value="1" ${legend_select[1]}>Inside upper right</option>
+     <option value="2" ${legend_select[2]}>Inside upper left</option>
+     <option value="3" ${legend_select[3]}>Inside lower left</option>
+     <option value="4" ${legend_select[4]}>Inside lower right</option>
+     <option value="5" ${legend_select[5]}>Inside right</option>
+     <option value="6" ${legend_select[6]}>Inside center left</option>
+     <option value="7" ${legend_select[7]}>Inside center right</option>
+     <option value="8" ${legend_select[8]}>Inside lower center</option>
+     <option value="9" ${legend_select[9]}>Inside upper center</option>
+     <option value="10 ${legend_select[10]}">Inside center</option>
     </select></label></p>
 % if trendplot:
     <p><label><span>Trendplot</span><input type="checkbox" name="renormalize" value="1" checked="checked" /></label></p>

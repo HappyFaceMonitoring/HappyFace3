@@ -102,6 +102,10 @@ class Dispatcher(object):
                             constraint_dict[name] = [[include, var, value],]
                 trendplot = (kwargs['renormalize'].lower() if 'renormalize' in kwargs else 'false') in ['1', 'true']
 
+                legend_select = dict((i, "") for i in xrange(11))
+                if 'legend' in kwargs:
+                    legend_select[int(kwargs['legend'])] = "selected='selected'";
+
                 template_context = {
                         "static_url": hf.config.get('paths', 'static_url'),
                         "happyface_url": hf.config.get('paths', 'happyface_url'),
@@ -114,6 +118,7 @@ class Dispatcher(object):
                         "trendplot": trendplot,
                         "title": kwargs["title"] if 'title' in kwargs else '',
                         "hf": hf,
+                        "legend_select": legend_select,
                     }
 
                 for cat in category_list:
