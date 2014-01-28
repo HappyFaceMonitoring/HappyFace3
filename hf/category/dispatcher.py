@@ -165,6 +165,7 @@ class Dispatcher(object):
             'include_time_in_url': ('date' in kwargs or 'time' in kwargs),
             'automatic_reload': not ('date' in kwargs or 'time' in kwargs),
             'reload_interval': int(hf.config.get('happyface', 'reload_interval')),
+            'hf_css': cp.request.hf_css
         }
 
         for cat in category_list:

@@ -16,6 +16,7 @@
 
 import hf
 import os
+import cherrypy as cp
 
 
 def staticUrl(file):
@@ -63,3 +64,18 @@ def get(**kwargs):
         opt_list.extend((key, v) for v in val)
     return u"?" + u"&".join(unicode(key) + "=" + unicode(val)
                             for key, val in opt_list)
+
+
+def create_link_here(additional_get_params):
+    """
+    Create a link pointing to the currently requested page
+    (relative URL with GET parameters) and append any
+    specified parameters from the input dictionary.
+    """
+    params = cp.request.params
+    params.update(additional_get_params)
+    query = get(**params)
+    url = hf.url.join(cp.request.script_name,
+                      cp.request.path_info)
+    return url + (query if len(params) else "")
+

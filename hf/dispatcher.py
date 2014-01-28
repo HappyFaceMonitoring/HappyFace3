@@ -40,6 +40,7 @@ class RootDispatcher(object):
         'tools.cert_auth.on': True,
         'tools.encode.on': True,
         'tools.encode.encoding': 'utf-8',
+        'tools.switch_css.on': True,
     }
 
     def __init__(self):
