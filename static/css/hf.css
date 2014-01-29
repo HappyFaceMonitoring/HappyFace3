@@ -41,6 +41,10 @@ p.error {
     font: bold 15px "HelveticaNeue-Light", Helvetica, Arial, Verdana, sans-serif;
 }
 
+.clear {
+    clear: both;
+}
+
 a         { color:#1369bf; text-decoration:none; outline:0; }
 a:visited { color:#5f9ddb; }
 a:focus   { color:#1369bf; border:none; }
@@ -95,45 +99,44 @@ p { display: block; margin-bottom: 15px}
 .hidden { display: none }
 #header {
     background-color: #fff;
-    border-bottom: 1px solid #999;
 }
 
-@media screen and (min-width: 1024px) {
-	#header {
-		position: fixed;
-		top: 0px;
-		left: 0px;
-		width: 100%;
-		z-index: 10000;
-	}
+@media screen and (min-width: 960px) {
+    #header {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        z-index: 10000;
+    }
 }
 
 
 /* Main container for the complete site tabs */
 .HappyPanels {
-	margin: 0px;
-	padding: 0px 0px;
-	float: left;
-	clear: none;
-	width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
-	border-left: solid 0px #999;
+    margin: 0px;
+    padding: 0px 0px;
+    float: left;
+    width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
+    border-left: solid 0px #999;
 }
 
 /* Main container for the navigation tabs */
 #category_bar {
     background-color: white;
     border-left: solid 1px #999;
-	display: block;
-	white-space: nowrap;
+    display: block;
+    white-space: nowrap;
 }
 
 /* Container for the each tab button */
 #category_bar li {
-	display: inline-block;
+    float: left;
+    display: block;
     font: bold 11px sans-serif;
     list-style: none;
-    border-top: solid 1px #999;
     border-right: solid 1px #999;
+    border-bottom: 1px solid #999;
     min-width: 110px;
 }
 
@@ -141,10 +144,8 @@ p { display: block; margin-bottom: 15px}
 
 #category_bar span, #category_bar a {
     position: relative;
-	display: block;
-	padding: 80px 5px 5px 10px;
-    background-repeat: no-repeat;
-    background-position: 18px 5px;
+    display: block;
+    padding: 5px;
     text-align: center;
 }
 
@@ -155,21 +156,76 @@ p { display: block; margin-bottom: 15px}
 }
 #category_bar a:hover { background-color: #CCC; }
 
-
-/* Style for the index symbol for each category */
-#category_bar .index {
-    position: absolute;
-    left:  67px;
-    top:   55px;
-    width: 25px;
+#category_bar a>div,
+#category_bar span>div {
+    display: block;
 }
 
-/* Style for the lock icon, if displayed */
+#category_bar .status {
+    display: inline-block;
+    background-repeat: no-repeat;
+    width: 32px;
+    height: 32px;
+}
+#category_bar .index {
+    display: inline;
+}
 #category_bar .lock {
-    position: absolute;
-    left:  67px;
-    top:   25px;
-    width: 25px;
+    display: inline;
+}
+
+#category_bar .happy { background-image: url(../themes/armin_box_arrows/nav_happy.png); }
+#category_bar .neutral { background-image: url(../themes/armin_box_arrows/nav_neutral.png); }
+#category_bar .unhappy { background-image: url(../themes/armin_box_arrows/nav_unhappy.png); }
+#category_bar .noinfo { background-image: url(../themes/armin_box_arrows/nav_noinfo.png); }
+#category_bar .avail_plot { background-image: url(../themes/armin_box_arrows/nav_avail_plot.png); }
+#category_bar .unavail_plot { background-image: url(../themes/armin_box_arrows/nav_unavail_plot.png); }
+
+@media screen and (min-width: 600px) {
+    #category_bar li {
+        display: inline-block;
+        float: none;
+    }
+}
+
+@media screen and (min-width: 480px) {
+    #category_bar span, #category_bar a {
+        padding: 80px 5px 5px 10px;
+        background-position: 18px 5px;
+    }
+
+    #category_bar a>div,
+    #category_bar span>div {
+        display: block;
+    }
+
+    #category_bar .status {
+        position: absolute;
+        left:  16px;
+        top:   8px;
+	width: 64px;
+	height: 64px;
+    }
+    /* Style for the index symbol for each category */
+    #category_bar .index {
+        position: absolute;
+        left:  67px;
+        top:   55px;
+        width: 25px;
+    }
+    /* Style for the lock icon, if displayed */
+    #category_bar .lock {
+        position: absolute;
+        left:  67px;
+        top:   25px;
+        width: 25px;
+    }
+    #category_bar .happy { background-image: url(../themes/armin_box_arrows/cat_happy.png); }
+    #category_bar .neutral { background-image: url(../themes/armin_box_arrows/cat_neutral.png); }
+    #category_bar .unhappy { background-image: url(../themes/armin_box_arrows/cat_unhappy.png); }
+    #category_bar .noinfo { background-image: url(../themes/armin_box_arrows/cat_noinfo.png); }
+    #category_bar .avail_plot { background-image: url(../themes/armin_box_arrows/cat_avail_plot.png); }
+    #category_bar .unavail_plot { background-image: url(../themes/armin_box_arrows/cat_unavail_plot.png); }
 }
 
 #content {
@@ -181,15 +237,15 @@ p { display: block; margin-bottom: 15px}
  */
 /*
 @media screen and (min-width: 480px) {
-	#content {
-		margin-left: 48px;
-	}
+    #content {
+        margin-left: 48px;
+    }
 }*/
-@media screen and (min-width: 1024px) {
-	#content {
-		margin-top: 154px;
-		/* margin-left: 256px; */
-	}
+@media screen and (min-width: 960px) {
+    #content {
+        margin-top: 154px;
+        /* margin-left: 256px; */
+    }
 }
 
 dl.module_list dt.module{
@@ -284,8 +340,8 @@ dl.module_list .panel .value {
     background-color: #464646;
     width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
     overflow: hidden;
-	display: block;
-	white-space: nowrap;
+    display: block;
+    white-space: nowrap;
 }
 #timemachine li {
     display: inline-block;
@@ -350,21 +406,22 @@ dl.module_list .panel .value {
 }
 
 #fastnavbar {
-	background-color: #696969;
-	white-space: nowrap;
+    background-color: #696969;
+    white-space: nowrap;
 }
 #fastnavbar li {
-	display: inline;
+    display: inline;
 }
 #fastnavbar span {
-	display: none;
+    display: none;
 }
 #fastnavbar img {
-	display: inline;
-	vertical-align: bottom;
+    display: inline;
+    vertical-align: bottom;
+    float: none;
 }
 #fastnavbar a:link, a:visited {
-	text-decoration:none;
+    text-decoration:none;
         background-color:#696969;
         color:#f8f8ff;
 }
@@ -375,54 +432,63 @@ dl.module_list .panel .value {
 @media screen and (min-width: 480px) {
         #fastnavbar {
                 float: left;
-		display: block;
-		width: 32px;
-		white-space: normal;
+        display: block;
+        width: 32px;
+        white-space: normal;
         }
         #fastnavbar li {
                 display: block;
         }
-	#fastnavbar a {
+    #fastnavbar a {
                 width: 100%;
                 display: block;
-		padding: 0 4px 4px 4px;
+        padding: 0 4px 4px 4px;
         }
-	#fastnavbar li:first-child a {
-		padding-top: 4px;
-	}
-	/* set #content margin to account for
-	 * navbar width. We do this only if
-	 * the bar exists.
-	 * */
-	#fastnavbar+#content {
-		margin-left: 48px;
-	}
+    #fastnavbar li:first-child a {
+        padding-top: 4px;
+    }
+    /* set #content margin to account for
+     * navbar width. We do this only if
+     * the bar exists.
+     * */
+    #fastnavbar+#content {
+        margin-left: 48px;
+    }
 }
-@media screen and (min-width: 1024px) {
-	#fastnavbar {
-		width: 240px;
-		margin-top: -8px;
-	}
-        #fastnavbar span {
-                display: inline;
-        }
-	/* dito */
-	#fastnavbar+#content {
-		margin-left: 256px;
-	}
+@media screen and (min-width:  960px) {
+    #fastnavbar {
+	position: fixed;
+	/* glue Fastnav to header
+	 remove the next two lines to alter
+	 behaviour.*/
+        width: 240px;
+        top: 147px;
+    }
+    #fastnavbar span {
+	display: block;
+	margin-left: 37px;
+	min-height: 32px;
+    }
+    #fastnavbar img {
+        float: left;
+    }
+    /* dito */
+    #fastnavbar+#content {
+        margin-left: 256px;
+    }
 }
 
 /* The infor box displaying the certificate information */
 #HappyCertInfoDiv {
-	position: absolute;
-	left: 260px;
-	top: 40px;
-	background-color: #DDD;
-	border: solid 1px #999;
+    position: absolute;
+    left: 260px;
+    top: 40px;
+    background-color: #DDD;
+    border: solid 1px #999;
         text-align: left;
         font: bold 0.7em sans-serif;
-	margin: 0px;
-	padding: 5px;
-	z-index: 15;
-	visibility: hidden;
+    margin: 0px;
+    padding: 5px;
+    z-index: 15;
+    visibility: hidden;
 }

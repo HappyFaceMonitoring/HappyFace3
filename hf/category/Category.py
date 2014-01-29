@@ -65,21 +65,25 @@ class Category:
             elif module.dataset['status'] < 0.0:
                 self.data_missing = True
 
-    def getStatusIcon(self):
-        icon = 'cat_noinfo.png'
+    def getStatusString(self):
+        icon = 'noinfo'
         if self.type == 'plots':
-            icon = 'cat_avail_plot.png' if self.status > 0.9 else 'cat_unavail_plot.png'
+            icon = 'avail_plot' if self.status > 0.9 else 'unavail_plot'
         else:
             if self.status > 0.66:
-                icon = 'cat_happy.png'
+                icon = 'happy'
             elif self.status > 0.33:
-                icon = 'cat_neutral.png'
+                icon = 'neutral'
             elif int(self.status) >= 0:
-                icon = 'cat_unhappy.png'
+                icon = 'unhappy'
             else:
-                icon = 'cat_noinfo.png'
+                icon = 'noinfo'
         if self.isUnauthorized():
-            icon = 'cat_noinfo.png'
+            icon = 'noinfo'
+        return icon
+
+    def getStatusIcon(self):
+        icon = 'cat_'+self.getStatusString()+'.png'
         return os.path.join(hf.config.get('paths', 'template_icons_url'), icon)
 
     def getIndexIcon(self):

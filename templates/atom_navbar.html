@@ -4,15 +4,18 @@
 % for category in category_list:
 % if category == selected_category:
 ><li id="${category.name}_tab" >
-  <span style="background-image:url('${category.getStatusIcon()}')">
+  <span>
 % else:
 ><li id="${category.name}_tab">
-  <a href="${category.url(run['time'] if include_time_in_url else None)}" title="${category.config["name"]}" style="background-image:url('${category.getStatusIcon()}')">
+  <a href="${category.url(run['time'] if include_time_in_url else None)}" title="${category.config["name"]}">
 %endif
+   <div>
+    <div class="status ${category.getStatusString()}"></div>
     <img alt="" class="index" src="${category.getIndexIcon()}" />
 % if category.hasUnauthorizedModules():
     <img alt="" class="lock" src="${category.getLockIcon()}" />
 %endif
+   </div>
    ${category.config["name"]}
 % if category == selected_category:
   </span>
@@ -20,6 +23,5 @@
   </a>
 % endif
  </li
-## r
 % endfor
-></ul>
+></ul><div class="clear"></div>
