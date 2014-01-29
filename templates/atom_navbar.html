@@ -2,11 +2,10 @@
 <!-- ugly because of display:inline-block :-( -->
 <ul id="category_bar"
 % for category in category_list:
+><li id="${category.name}_tab" class="${category.getStatusString()}">
 % if category == selected_category:
-><li id="${category.name}_tab" >
   <span>
 % else:
-><li id="${category.name}_tab">
   <a href="${category.url(run['time'] if include_time_in_url else None)}" title="${category.config["name"]}">
 %endif
    <div>

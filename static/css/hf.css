@@ -174,12 +174,12 @@ p { display: block; margin-bottom: 15px}
     display: inline;
 }
 
-#category_bar .happy { background-image: url(../themes/armin_box_arrows/nav_happy.png); }
-#category_bar .neutral { background-image: url(../themes/armin_box_arrows/nav_neutral.png); }
-#category_bar .unhappy { background-image: url(../themes/armin_box_arrows/nav_unhappy.png); }
-#category_bar .noinfo { background-image: url(../themes/armin_box_arrows/nav_noinfo.png); }
-#category_bar .avail_plot { background-image: url(../themes/armin_box_arrows/nav_avail_plot.png); }
-#category_bar .unavail_plot { background-image: url(../themes/armin_box_arrows/nav_unavail_plot.png); }
+#category_bar .happy .status { background-image: url(../themes/armin_box_arrows/nav_happy.png); }
+#category_bar .neutral .status { background-image: url(../themes/armin_box_arrows/nav_neutral.png); }
+#category_bar .unhappy .status { background-image: url(../themes/armin_box_arrows/nav_unhappy.png); }
+#category_bar .noinfo .status { background-image: url(../themes/armin_box_arrows/nav_noinfo.png); }
+#category_bar .avail_plot .status { background-image: url(../themes/armin_box_arrows/nav_avail_plot.png); }
+#category_bar .unavail_plot .status { background-image: url(../themes/armin_box_arrows/nav_unavail_plot.png); }
 
 @media screen and (min-width: 600px) {
     #category_bar li {
@@ -220,12 +220,12 @@ p { display: block; margin-bottom: 15px}
         top:   25px;
         width: 25px;
     }
-    #category_bar .happy { background-image: url(../themes/armin_box_arrows/cat_happy.png); }
-    #category_bar .neutral { background-image: url(../themes/armin_box_arrows/cat_neutral.png); }
-    #category_bar .unhappy { background-image: url(../themes/armin_box_arrows/cat_unhappy.png); }
-    #category_bar .noinfo { background-image: url(../themes/armin_box_arrows/cat_noinfo.png); }
-    #category_bar .avail_plot { background-image: url(../themes/armin_box_arrows/cat_avail_plot.png); }
-    #category_bar .unavail_plot { background-image: url(../themes/armin_box_arrows/cat_unavail_plot.png); }
+    #category_bar .happy .status { background-image: url(../themes/armin_box_arrows/cat_happy.png); }
+    #category_bar .neutral .status { background-image: url(../themes/armin_box_arrows/cat_neutral.png); }
+    #category_bar .unhappy .status { background-image: url(../themes/armin_box_arrows/cat_unhappy.png); }
+    #category_bar .noinfo .status { background-image: url(../themes/armin_box_arrows/cat_noinfo.png); }
+    #category_bar .avail_plot .status { background-image: url(../themes/armin_box_arrows/cat_avail_plot.png); }
+    #category_bar .unavail_plot .status { background-image: url(../themes/armin_box_arrows/cat_unavail_plot.png); }
 }
 
 #content {
