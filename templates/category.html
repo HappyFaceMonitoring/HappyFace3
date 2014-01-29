@@ -2,48 +2,24 @@
 <%inherit file="/base.html" />
 
 <%def name="content()">
-###<script type="text/javascript">getFNSize("HappyFNnav_${category_name}");</script>
+<%
+troubeling_modules = list(filter(lambda mod: mod.dataset is None or
+                                             mod.dataset["status"] < 1.0,
+                                 category_module_list))
+%>
+% if troubeling_modules:
+### UGLY BY INTENTION!
+### "inline-block" rendering is whitespace sensitive!
+### There must not be any whitespace around the <li>s
+<ul id="fastnavbar"
+% for module in troubeling_modules:
+><li><a href="${module.url(True)}" title="${module.config['name']}"><img src='${module.getNavStatusIcon()}' /><span>${module.config["name"]}</span></a><li/
+% endfor
+></ul>
+% endif
 <dl id="content" class="module_list">
 % for contents in module_contents:
      ${contents}
 % endfor
 </dl>
-<div id="HappyFNnav_${category_name}" class="HappyFNnav">
- <ul>
-  <li>
-   <table class="HappyFNnaventry" style="border-top: solid 1px #999;">
-    <tr>
-     <td style="width:200px;" align="left">
-      <div class="HappyFNtopdiv">Fast Navigation Bar</div>
-     </td>
-     <td style="width:40px;" align="center">
-      <div class="HappyFNtopdiv">
-       <a href="javascript:movenav('HappyFNnav_${category_name}')" onfocus="this.blur()">
-        <img id="HappyFNnav_${category_name}arrow" alt="" style="width:32px;border:0px;" src="${hf.url.staticUrl("images/rightarrow.png")}" />
-       </a>
-      </div>
-     </td>
-    </tr>
-   </table>
-  </li>
-% for module in category_module_list:
-  <li>
-   <table class="HappyFNnaventry">
-    <tr style="border-bottom:1px solid #FFF;">
-     <td style="width:200px;" align="left">
-      <a href="javascript:goto('${module.instance_name}')" onfocus="this.blur()" ondblclick="HappyReloadPage('${category_name}', '${module.instance_name}')">${module.config["name"]}</a>
-     </td>
-     <td style="width:40px;" align="left">
-      <div class="HappyFNnavimg">
-       <a href="#${module.instance_name}" title="${module.config["name"]}">
-        <img id="FNImage_${module.instance_name}" class="HappyFNnavpic" src='${module.getNavStatusIcon()}' title="${module.config['name']}" />
-       </a>
-      </div>
-     </td>
-    </tr>
-   </table>
-  </li>
-% endfor
- </ul>
-</div>
 </%def>
