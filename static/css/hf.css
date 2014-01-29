@@ -176,16 +176,19 @@ p { display: block; margin-bottom: 15px}
     margin-top: 8px;
     margin-left: 8px;
 }
-
+/* set margin-left for #content only if #fastnavbar exists,
+ * see #fastnavbar stuff for defintions
+ */
+/*
 @media screen and (min-width: 480px) {
 	#content {
 		margin-left: 48px;
 	}
-}
+}*/
 @media screen and (min-width: 1024px) {
 	#content {
 		margin-top: 154px;
-		margin-left: 256px;
+		/* margin-left: 256px; */
 	}
 }
 
@@ -387,6 +390,13 @@ dl.module_list .panel .value {
 	#fastnavbar li:first-child a {
 		padding-top: 4px;
 	}
+	/* set #content margin to account for
+	 * navbar width. We do this only if
+	 * the bar exists.
+	 * */
+	#fastnavbar+#content {
+		margin-left: 48px;
+	}
 }
 @media screen and (min-width: 1024px) {
 	#fastnavbar {
@@ -396,6 +406,10 @@ dl.module_list .panel .value {
         #fastnavbar span {
                 display: inline;
         }
+	/* dito */
+	#fastnavbar+#content {
+		margin-left: 256px;
+	}
 }
 
 /* The infor box displaying the certificate information */
