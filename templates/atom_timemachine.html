@@ -1,13 +1,13 @@
 ## -*- coding: utf-8 -*-
-<ul id="timemachine">
- <li>
-  <img style="border:solid 1px #000;height:35px;" alt="Logo" src="${hf.url.join(hf.config.get('paths', 'static_url'), hf.config.get('template', 'logo_img'))}" />
- </li>
- <li>
+<ul id="timemachine"
+ ><li>
+  <img class="logo" alt="Logo" src="${hf.url.join(hf.config.get('paths', 'static_url'), hf.config.get('template', 'logo_img'))}" />
+ </li
+ ><li>
   <div class="title">The Happy Face Project</div>
   <div class="version">Version 3, rev. ${svn_rev}</div>
- </li>
- <li>
+ </li
+ ><li>
   <div>
    <a href="${hf.url.absoluteUrl('category')}?action=getxml&amp;date=${date_string}&amp;time=${time_string}" onfocus="this.blur()">
     <img src="${static_url}/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: middle;"/>
@@ -19,12 +19,12 @@
     <img src="${static_url}/images/help_icon.gif" width="15" height="13" alt="Help icon" style="border: none; vertical-align: middle;"/>
    </a>
   </div>
- </li>
- <li>
+ </li
+ ><li>
   <div class="${'stale' if data_stale else ''}">${run['time'].strftime('%d. %b %Y')}</div>
   <div class="${'stale' if data_stale else ''}">${run['time'].strftime('%H:%M')}</div>
- </li>
- <li>
+ </li
+ ><li>
 ## Fix weird placement behaviour of HistoStep by relative displacement
 % if selected_category is None:
   <form id="HistoForm1" action="${hf.url.absoluteUrl('category')}" method="get" style="position: relative">
@@ -37,9 +37,9 @@
    <input type="hidden" id="HistoNavTime" name="time" value="${time_string}" />
    <img id="HistoFwd" src="${static_url}/images/right_icon.gif" width="22" height="22" alt="forwards" style="border: none; padding-top: 2px; margin: 0px 2px;" />
   </form>
- </li>
+ </li
 
- <li>
+ ><li>
 % if selected_category is None:
   <form id="HistoForm2" class="" action="${hf.config.get('paths', 'happyface_url')}" method="get">
 % else:
@@ -50,16 +50,16 @@
    <input name="time" type="text" size="5" value="${time_string}" />
    <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
   </form>
- </li>
- <li class="form">
+ </li
+ ><li class="form">
 % if selected_category is None:
   <a class="button" href="${hf.url.absoluteUrl('category')}" title="Reset to default settings and current time">Reset</a>
 % else:
   <a class="button" href="${selected_category.url()}" title="Reset to default settings and current time">Reset</a>
 % endif
- </li>
+ </li
 % if len(time_error_message) > 0:
-<li>
+><li>
  <table border="0" class="HappyTitleBarElementTable">
   <tr>
    <td>
@@ -67,7 +67,8 @@
    </td>
   </tr>
  </table>
-</li>
+></li
 % endif
 
-</ul>
+></ul>
+<div class="clear"></div>

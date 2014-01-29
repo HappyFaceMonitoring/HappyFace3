@@ -337,28 +337,37 @@ dl.module_list .panel .value {
 
 #timemachine {
     list-style: none;
-    background-color: #464646;
-    width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
-    overflow: hidden;
     display: block;
-    white-space: nowrap;
 }
+
 #timemachine li {
-    display: inline-block;
-    padding: 2px 10px 0;
+    background-color: #464646;
+    display: block;
+    float: left;
+    padding: 2px;
     margin: 0px 0px 0px 0px;
-    font: bold 0.90em sans-serif;
     color: white;
-    list-style: none;
     border-right: solid 1px #999;
-    height: 100%;
+    border-bottom: solid 1px #999;
     font: bold 15px sans-serif;
+    height: 42px;
+    vertical-align: bottom;
+}
+
+#timemachine>li:nth-child(1),
+#timemachine>li:nth-child(3) {
+    display: none;
 }
 
 #timemachine li div {
     display: block;
     /*vertical-align: top;*/
     text-align: center;
+}
+
+#timemachine .logo {
+    border:solid 1px #000;
+    height:41px;
 }
 
 #timemachine .title {
@@ -372,13 +381,40 @@ dl.module_list .panel .value {
     text-align: right;
 }
 
-#timemachine .stale {
-    color: #f00;
+#timemachine .stale { color: #f00; }
+
+#HistoStep { display: none; }
+#timemachine form { padding-top: 0; }
+#timemachine .form { padding-top: 0; }
+
+@media screen and (min-width: 480px) {
+
+    #timemachine {
+        white-space: nowrap;
+    }
+    #timemachine li {
+        display: inline-block;
+        float: none;
+        border-bottom: 0;
+    }
+    
+    #timemachine>li:nth-child(1),
+    #timemachine>li:nth-child(3) {
+        display: inline-block;
+    }
+
+    #timemachine li div {}
+
+    #timemachine .title {}
+
+    #timemachine .version {}
+
+    #timemachine .stale {}
+
+    #HistoStep { display: inline; }
+    #timemachine form {}
+    #timemachine .form {}
 }
-
-#timemachine form { padding-top: 7px; }
-#timemachine .form { padding-top: 10px; }
-
 
 .PlotMask label {
     display: block;
