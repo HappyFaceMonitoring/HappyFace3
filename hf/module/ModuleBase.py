@@ -232,6 +232,32 @@ class ModuleBase:
 
             The name of the instance of the module currently processed.
 
+        .. attribute:: short_name
+
+            A short variant of the instance name. This will mainly be used in
+            the fastnav bar and is useful if the name is very
+            descriptive and therefore quite long.
+
+            The short name is specified with the short_name variable in the
+            module configuration. If not specified, the
+            long name will be
+            used and :attr:`explicit_short_name <hf.module.ModuleBase.explicit_short_name>`
+            will be set to *False*.
+
+            .. seealso:: :ref:`config_module_variables`
+
+        .. attribute:: explicit_short_name
+
+            Flag indicating whether the short name in
+            :attr:`short_name <hf.module.ModuleBase.short_name>` was specified
+            explicitly in the module configuration or is just the
+            normal name is used.
+
+            This is currently used in the module information panel to show the
+            short name only if it was not "auto generated".
+
+            .. seealso:: :ref:`config_module_variables`
+
         .. attribute:: config
 
             A dictionary with the module configuration
@@ -293,11 +319,17 @@ class ModuleBase:
 
     def __init__(self, instance_name, config, run, dataset, template):
         self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
+        self.config = config
         self.module_name = self.__class__.module_name
         self.module_table = self.__class__.module_table
         self.subtables = self.__class__.subtables
         self.instance_name = instance_name
-        self.config = config
+        try:
+            self.short_name = self.config["short_name"]
+            self.explicit_short_name = True
+        except hf.exceptions.ConfigError:
+            self.short_name = self.config["name"]
+            self.explicit_short_name = False
         self.run = run
         self.dataset = dataset
         self.template = template

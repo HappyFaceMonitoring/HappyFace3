@@ -90,6 +90,8 @@ As with other configuration directories, all files ending in *.cfg* are parsed i
 
 We advice you to use one file per category, with the same name as the category, and a similarily named file for the modules, containing all the configuration for all modules in that one category. This supports the original Debian-style configuration idea, but is also a nice grouping, since it is always clear where the module is located. This also makes the maintenance and setup of similar categories rather simple.
 
+.. _config_module_variables:
+
 Create and Configure Module Instances
 -------------------------------------
 Each module instance has to be assigned a unique name that, it should only contain alphanumerical characters and underscores. We advice you to use a C-style **underscore_separated_name**, *not* CamelCase or something. The name is used at several places, internally, e.g. as anchor in HTML hyper links.
@@ -105,6 +107,13 @@ Common module configuration variables are
 
 **name**
     A verbose name for the generated output
+
+**short_name**
+    *Optional!* A short version of the name, available in the module class through the :attr:`short_name <hf.module.ModuleBase.short_name>` attribute in the module class.
+
+    If the configuration variable is not specified, **name** is used instead and :attr:`explicit_short_name <hf.module.ModuleBase.explicit_short_name>` will be set to *False*. On the other hand, if **short_name** is specified, :attr:`explicit_short_name <hf.module.ModuleBase.explicit_short_name>` will be *True*.
+
+    The short name should be specified for modules with a very long name, so that there is (almost) no line wrapping in the fast navigation bar, the primary use for the short name.
 
 **description**
     .. todo:: what is it?

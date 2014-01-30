@@ -13,7 +13,7 @@ troubeling_modules = list(filter(lambda mod: mod.dataset is None or
 ### There must not be any whitespace around the <li>s
 <ul id="fastnavbar"
 % for module in troubeling_modules:
-><li><a href="${module.url(True)}" title="${module.config['name']}"><img src='${module.getNavStatusIcon()}' /><span>${module.config["name"]}</span></a><li/
+><li><a href="${module.url(True)}" title="${module.config['name']}"><img src='${module.getNavStatusIcon()}' /><span>${module.short_name}</span></a><li/
 % endfor
 ></ul>
 % endif
