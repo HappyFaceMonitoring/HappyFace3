@@ -86,6 +86,9 @@ A minimalistic, working example of a Python module is presented here
  class Dummy(hf.module.ModuleBase):
      config_keys = {'test': ('A config variable that is directly passed into the database', '')}
      table_columns = [Column('test',  INT)], []
+
+     def prepareAcquisition(self):
+         self.source_url = ['http://example.com/some/URL/sources.xml']
  
      def extractData(self):
          return {
