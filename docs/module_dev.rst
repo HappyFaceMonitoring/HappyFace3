@@ -92,7 +92,7 @@ A minimalistic, working example of a Python module is presented here
  
      def extractData(self):
          return {
-             "status": '',
+             "status": 1.0,
              "test": int(self.config['test'])
          }
 
