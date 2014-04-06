@@ -125,7 +125,7 @@ e.g. SQLite VACUUM is \033[1m\033[31mnot\033[0m performed.""")
 def get_module_instances():
     # classes_by_mod_table = dict((table_name, cls) for hf.module.module.__)
     module_instances = hf.module.database.module_instances
-    ret = []
+    ret = set()
     for table_name, table in hf.database.metadata.tables.iteritems():
         if not table_name.startswith("mod_"):
             continue
@@ -138,7 +138,21 @@ def get_module_instances():
                 used = inst in hf.module.config.sections()
             else:
                 used = None
-            ret.append((inst, mod, table, used))
+            ret.add((inst, mod, table, used))
+    query = select([module_instances.c.instance, module_instances.c.module]).\
+            distinct()
+    for inst, mod in query.execute():
+        if hf.module.moduleClassLoaded(mod):
+            # is instance it really in configuration?
+            used = inst in hf.module.config.sections()
+        else:
+            used = None
+        try:
+            table = hf.module.getModuleClass(mod).module_table
+            ret.add((inst, mod, table, used))
+        except hf.exceptions.ConfigError:
+            continue
+    ret = [a for a in ret]
     return ret
 
 
@@ -161,15 +175,19 @@ def _list_modules(parser, args):
                    module_table.c.run_id) \
             .where(module_table.c.instance == instance)\
             .order_by(hf_runs.c.time.asc())
-        oldest = expr.execute().fetchone()[0]
-        age_days = (datetime.datetime.now()-oldest).days
+        try:
+            oldest = expr.execute().fetchone()[0]
+            age_days = str((datetime.datetime.now()-oldest).days)+"d"
+        except TypeError:
+            age_days = "N/A"
+
         if used is not None:
             status = ("used" if used else "\033[1m\033[31munused\033[0m")
         else:
             status = "\033[1m\033[31mNOT FOUND\033[0m"
         print fmt.format(instance=instance,
                          module=module if module != prev_module else " | ",
-                         oldest="{0}d".format(age_days),
+                         oldest=age_days,
                          status=status)
         prev_module = module
 
