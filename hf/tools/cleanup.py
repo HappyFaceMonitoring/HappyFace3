@@ -86,6 +86,25 @@ e.g. SQLite VACUUM is \033[1m\033[31mnot\033[0m performed.""")
                      help="Do not ask for user confirmation on critical actions.")
     sub.set_defaults(func=_clear)
 
+    sub = subparsers.add_parser("vacuum",
+                                help="Clean database heuristicaly from old data.",
+                                description="""""")
+    parser_dict[sub.prog.split()[-1]] = sub
+    sub.add_argument("-i", "--interactive",
+                     action="store_true", default=False,
+                     help="Ask before cleaning a table. Ignores --silent.")
+    sub.add_argument("--all", action="store_true", default=False,
+                        help="Remove all data from database.")
+    sub.add_argument("-d", "--days", nargs=1, metavar="N",
+                        help="Remove data older than N days.")
+    sub.add_argument("--stop-date", nargs=1, metavar="ISODATE_STOP",
+                        help="Data before ISODATE_STOP is removed from the database. Use ISO date format 'YYYY-MM-DD HH:MM'.")
+    sub.add_argument("--start-date", nargs=1, metavar="ISODATE_START",
+                        help="Data after ISODATE_START is removed from the database. Use ISO date format 'YYYY-MM-DD HH:MM'. Be caution when using this, potentialy new and useful data is removed! Use with --stop-date.")
+    sub.add_argument("--silent", action="store_true", default=False,
+                     help="Do not ask for user confirmation on critical actions.")
+    sub.set_defaults(func=_vacuum)
+
     args = parser.parse_args()
     tools.load_env()
     logger = logging.getLogger()
@@ -227,6 +246,40 @@ def _clear(parser, args):
     for instance, mod, mod_table, used in get_module_instances():
         if not used:
             continue
+        if args.interactive and not confirm(
+                "Clear module {0} of type {1}?".format(
+                    instance, mod)):
+            continue
+        logger.info("Clear module {0}, type {1}".format(
+                    instance, mod))
+        clear_contents(instance, mod, mod_table, timerange, logger)
+
+
+def _vacuum(parser, args):
+    logger = logging.getLogger("vacuum")
+    timerange = [None, None]
+    if not (args.days or args.start_date or args.stop_date) and not args.all:
+        parser.error("No timerange specified! To delete all data, use --all.")
+    if args.days and (args.start_date or args.stop_date):
+        parser.error("Cannot use --days with --start-date or --stop-date!")
+    if args.days:
+        timerange[1] = datetime.datetime.now() - datetime.timedelta(days=int(args.days[0]))
+    else:
+        if args.start_date:
+            timerange[0] = datetime.datetime.strptime(
+                args.start_date[0],
+                "%Y-%m-%d %H:%M"
+                )
+        if args.stop_date:
+            timerange[1] = datetime.datetime.strptime(
+                args.stop_date[0],
+                "%Y-%m-%d %H:%M"
+                )
+    if not confirm("--all specifed, you are about to delete all data! Continue?",
+                   silent=args.silent):
+        return
+    to_remove = get_module_instances()
+    for instance, mod, mod_table, used in get_module_instances():
         if args.interactive and not confirm(
                 "Clear module {0} of type {1}?".format(
                     instance, mod)):
