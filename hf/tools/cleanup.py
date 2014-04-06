@@ -65,11 +65,9 @@ def execute():
                      help="List only modules found in the database but unreferenced in the configuration.")
     sub.set_defaults(func=_list_modules)
 
-
     sub = subparsers.add_parser("clear",
                                 help="Remove unused data from configured modules.",
                                 description="""Remove all data from used modules in specified timerange.
-
 Data from unused tables is not removed. Database backend dependent cleanup,
 e.g. SQLite VACUUM is \033[1m\033[31mnot\033[0m performed.""")
     parser_dict[sub.prog.split()[-1]] = sub
@@ -120,6 +118,16 @@ e.g. SQLite VACUUM is \033[1m\033[31mnot\033[0m performed.""")
             #print "Clearing {0}".format(instance)
             #clear_contents(instance, module, module_table,
                            #keep_files=args.keep_files, timerange=timerange)
+
+
+def confirm(message, silent=False):
+    if silent:
+        return True
+    print message, "[Y/n]"
+    line = sys.stdin.readline().strip().lower()
+    while line not in ("y", "n", ""):
+        line = sys.stdin.readline().strip().lower()
+    return line != "n"
 
 
 def get_module_instances():
@@ -212,6 +220,9 @@ def _clear(parser, args):
                 args.stop_date[0],
                 "%Y-%m-%d %H:%M"
                 )
+    if not confirm("--all specifed, you are about to delete all data! Continue?",
+                   silent=args.silent):
+        return
     to_remove = get_module_instances()
     for instance, mod, mod_table, used in get_module_instances():
         if not used:
