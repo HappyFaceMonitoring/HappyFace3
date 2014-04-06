@@ -24,6 +24,33 @@ import traceback
 import ConfigParser
 import logging
 
+
+env_loaded = False
+
+
+def load_env():
+    global env_loaded
+    env_loaded = True
+    try:
+        hf.configtools.readConfigurationAndEnv()
+        hf.configtools.setupLogging('acquire_logging_cfg')
+    except Exception, e:
+        print "Setting up HappyFace failed"
+        traceback.print_exc()
+        sys.exit(-1)
+
+    cfg_dir = None
+    try:
+        hf.module.importModuleClasses()
+
+        hf.database.connect(implicit_execution=True)
+        hf.database.metadata.create_all()
+
+        category_list = hf.category.createCategoryObjects()
+    except Exception, e:
+        print "Setting up HappyFace failed: %s", str(e)
+        print traceback.format_exc()
+
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
@@ -46,26 +73,6 @@ if __name__ == '__main__':
 
     try:
         hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
-        if tool.load_hf_environment:
-            try:
-                hf.configtools.readConfigurationAndEnv()
-                hf.configtools.setupLogging('acquire_logging_cfg')
-            except Exception, e:
-                print "Setting up HappyFace failed"
-                traceback.print_exc()
-                sys.exit(-1)
-
-            cfg_dir = None
-            try:
-                hf.module.importModuleClasses()
-
-                hf.database.connect(implicit_execution=True)
-                hf.database.metadata.create_all()
-
-                category_list = hf.category.createCategoryObjects()
-            except Exception, e:
-                print "Setting up HappyFace failed: %s", str(e)
-                print traceback.format_exc()
         try:
             tool.execute()
         except Exception, e:
@@ -76,5 +83,5 @@ if __name__ == '__main__':
         logger.error("Uncaught HappyFace exception: %s", str(e))
         logger.error(traceback.format_exc())
     finally:
-        if tool.load_hf_environment:
+        if env_loaded:
             hf.database.disconnect()

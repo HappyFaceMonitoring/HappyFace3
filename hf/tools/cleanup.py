@@ -25,8 +25,8 @@ import datetime
 import os
 from hf.module.database import hf_runs
 from hf.downloadservice import downloadService
+import tools
 
-load_hf_environment = True
 
 try:
     import argparse
@@ -71,6 +71,7 @@ def execute():
     parser.add_argument("--drop-module", nargs="+", metavar="dropmodule",
                         help="Drop tables of all specified modules")
     args = parser.parse_args()
+    tools.load_env()
     hf.database.metadata.reflect(hf.database.engine)
     # check no-action commands
     if args.days is not None:

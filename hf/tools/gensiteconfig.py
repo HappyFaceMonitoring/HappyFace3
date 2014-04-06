@@ -31,7 +31,6 @@ try:
 except ImportError:
     import hf.external.argparse as argparse
 
-load_hf_environment = False
 
 def generateConfigFiles(configuration):
     config_output = {}

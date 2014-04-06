@@ -29,8 +29,6 @@ except ImportError:
 from sqlalchemy import *
 import code
 
-load_hf_environment = False
-
 
 def ask(args, message):
     if not args.interactive or args.force or args.dry:
