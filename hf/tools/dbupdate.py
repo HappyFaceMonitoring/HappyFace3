@@ -30,6 +30,7 @@ except ImportError:
 from sqlalchemy import *
 import code
 
+#load_hf_environment = False
 
 def ask(args, message):
     if not args.interactive or args.force or args.dry:
@@ -49,7 +50,7 @@ def execute():
     parser = argparse.ArgumentParser(description='Update the database schema as neccessary')
     #parser.add_argument('--verbose', '-v', action='store_true', help="Provide more detailed output")
     parser.add_argument('--force', '-f', action='store_true', help="Do not ask user to perform action. Might cause data loss!")
-    #parser.add_argument('--interactive', '-i', action='store_true', help="Asks the user before applying any changeset.")
+    parser.add_argument('--interactive', '-i', action='store_true', help="Asks the user before applying any changeset.")
     parser.add_argument('--dry', action='store_true', help="Just provide a summary of what will be done. Superseds any other options.")
     parser.add_argument('--new-only', action='store_true', help="Creates only new tables and does not check for changes in existing ones.")
     args = parser.parse_args()
@@ -125,7 +126,7 @@ def execute():
         
         message = 'Do you really want to drop those columns?\n'
         print drops
-        if len(drop) > 0 and: print drops
+        if len(drop) > 0 and not args.interactive: print drops
         if len(drop) > 0 and ask(args, message):
             copy_list = set(copy_list) - set(drop_list)
         

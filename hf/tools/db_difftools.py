@@ -73,6 +73,7 @@ class TableDiff(object):
         self.columnsAlterInDb = dict([
             (c_name, [self.dbTable.columns[c_name], mod])
             for c_name, mod in self.columns_alter_in_database.iteritems()])
+	#import pdb; pdb.set_trace()
         return (self.columnsDropFromDb, self.columnsAddToDb, self.columnsAlterInDb)
         
     def __nonzero__(self):
