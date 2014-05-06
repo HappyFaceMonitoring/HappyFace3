@@ -68,9 +68,10 @@ if __name__ == '__main__':
                           fromlist=[hf.tools],
                           globals=globals())
     except ImportError, e:
+        print e
         logger.error("No tool called %s: %s" % (tool_name, str(e)))
         sys.exit(-1)
-
+        
     try:
         hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
         try:
