@@ -19,12 +19,14 @@ class DbDiff(object):
         
         self.tables_different = {}
         for table_name in self.tablesInDatabase ^ self.tables_missing_in_database:
-            self.diff_table = TableDiff(self.model.tables[table_name],
-                                        self.database.tables[table_name],
-                                        table_name)
-            if self.diff_table:
-                self.tables_different[table_name] = self.diff_table
-        
+	    try:
+		self.diff_table = TableDiff(self.model.tables[table_name],
+					    self.database.tables[table_name],
+					    table_name)
+		if self.diff_table:
+		    self.tables_different[table_name] = self.diff_table
+	    except KeyError:
+		continue
         self.differences = bool(self.tables_missing_in_database or self.tables_extra_in_database or
                                 self.tables_different)
         
