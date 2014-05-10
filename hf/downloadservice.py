@@ -75,6 +75,9 @@ class DownloadSlave(threading.Thread):
 
 class DownloadService:
     '''
+    The globaly shared download service, available as the
+    singleton *hf.downloadService*.
+
     Note when copying files to the archive directory:
     The name must start with the name of the module instance,
     otherwise certificate auth will always disable the file!
@@ -83,6 +86,7 @@ class DownloadService:
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.file_list = {}
+        self.module_files = {}
         self.archive_dir = None
         self.archive_url = None
         self.runtime = None
@@ -91,6 +95,17 @@ class DownloadService:
         if download_command in self.file_list:
             return self.file_list[download_command]
         self.file_list[download_command] = DownloadFile(download_command)
+        # get calling module from stack and remember the module<->file association
+        frame = inspect.stack()[1]
+        module = frame[0].f_locals.get('self', None)
+        if module:
+            try:
+                self.module_files[module.instance_name].append(download_command)
+            except KeyError:
+                self.module_files[module.instance_name] = [download_command]
+            except AttributeError:
+                # not called by a HappyFace module. Strange, but might happen!
+                pass
         return self.file_list[download_command]
 
     def performDownloads(self, runtime):
@@ -152,6 +167,15 @@ class DownloadService:
             if not file.keep_tmp and file.isDownloaded():
                 if os.path.exists(file.getTmpPath()):
                     os.unlink(file.getTmpPath())
+
+    def getFilesForInstance(self, instance):
+        if hasattr(instance, "instance_name"):
+            instance = instance.instance_name
+        try:
+            download_commands = self.module_files[instance]
+        except KeyError:
+            return []
+        return [self.file_list[cmd] for cmd in download_commands]
 
 
 class DownloadFile:
