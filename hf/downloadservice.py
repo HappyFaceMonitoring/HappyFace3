@@ -184,6 +184,14 @@ class DownloadFile:
     def getFile(self):
         return open(self.getTmpPath(), "r")
 
+    @hf.url.absoluteUrl
+    def getTmpUrl(self):
+        if hf.config.get('paths', 'tmp_url'):
+            return hf.url.join(hf.config.get('paths', 'tmp_url'),
+                                self.getTmpFilename())
+        else:
+            return "file://"+self.tmp_filename
+
     def getTmpPath(self, no_exception=False):
         """
         :arg no_exception: default False. If set to True, no exception is thrown
@@ -192,8 +200,7 @@ class DownloadFile:
         if (not self.isDownloaded() or self.errorOccured()) and not no_exception:
             raise hf.DownloadError(self)
         try:
-            return os.path.join(hf.config.get('paths', 'tmp_dir'),
-                                self.tmp_filename)
+            return os.path.join(self.tmp_filename)
         except AttributeError:
             if not no_exception:
                 raise hf.DownloadError(self)
@@ -206,11 +213,12 @@ class DownloadFile:
         except AttributeError:
             raise hf.DownloadError(self)
 
+    @hf.url.absoluteUrl
     def getArchiveUrl(self):
         if not self.isDownloaded() or self.errorOccured():
             raise hf.DownloadError(self)
         try:
-            return os.path.join(hf.downloadService.archive_url, self.filename)
+            return hf.url.join(hf.downloadService.archive_url, self.filename)
         except AttributeError:
             raise hf.DownloadError(self)
 
@@ -218,6 +226,11 @@ class DownloadFile:
         if not self.isDownloaded() or self.errorOccured():
             raise hf.DownloadError(self)
         return self.filename
+
+    def getTmpFilename(self):
+        if not self.isDownloaded() or self.errorOccured():
+            raise hf.DownloadError(self)
+        return os.path.basename(self.tmp_filename)
 
     def getSourceUrl(self):
         return self.url
