@@ -107,12 +107,6 @@ class Dispatcher(object):
             time_error_message = "HappyFace is not an oracle"
             time_obj = datetime.datetime.fromtimestamp(int(time.time()) + 59)
 
-        try:
-            test = hf_runs.select().execute().fetchone()
-            self.logger.error("Test " + str(test))
-        except Exception, e:
-            self.logger.error(traceback.format_exc())
-
         run = hf_runs.select(hf_runs.c.time <= time_obj). \
             where(or_(hf_runs.c.completed == True, hf_runs.c.completed == None)). \
             order_by(hf_runs.c.time.desc()). \
