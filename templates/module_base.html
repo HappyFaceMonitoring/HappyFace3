@@ -21,13 +21,13 @@ past = run['time'] - timedelta(days = 2)
 % endif
       <li><span class="key">Type</span><span class="value">${module.type}</span></li>
       <li><span class="key">Weight</span><span class="value">${module.weight}</span></li>
+% if not no_data:
 % for i, url in enumerate(dataset["source_url"]):
        ${url | hf.utility.addAutoLinksAndEscape, n}
 % endfor
 % if (i+1) < len(dataset["source_url"]):
        <br />
 % endif
-% if not no_data:
       <li><span class="key">Status</span><span class="value">${module.dataset["status"]}</span></li>
       <li><span class="key">Description</span><span class="value">${module.dataset["description"]}</span></li>
       <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
@@ -61,6 +61,14 @@ past = run['time'] - timedelta(days = 2)
 % elif error_occured:
     <h3>Module Error</h3>
     <p>${module.error_string | hf.utility.addAutoLinksAndEscape, n}</p>
+% if module.downloaded_files:
+    <p>List of downloaded files:</p>
+    <ul>
+% for source_url, filename, url in module.downloaded_files:
+     <li>(<a href=${source_url}>Source URL</a>) <a href="${url}">${filename}</a></li>
+% endfor
+    </ul>
+% endif
 % else:
     ${self.content()}
 % endif

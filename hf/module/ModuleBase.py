@@ -292,6 +292,22 @@ class ModuleBase:
 
             Either *plots*, *rated* or *unrated*.
 
+        .. attribute:: error_string
+
+            In case of an error this attribute contains the error string,
+            otherwise it is an empty string.
+
+            It is the error string from the database except downloaded files
+            if the data can be retrieved. When no data is found in the database,
+            or retrieving it failed, a new error string is generated.
+
+        .. attribute:: downloaded_files:
+
+            When an error occured, this list provides information about
+            input files. It is a list of pairs. The first item is the source
+            URL of the file, the second is the URL to the temporary directory
+            containing it.
+
         .. method:: extractData()
 
             Mandatory function to process some data and return it in a format that can be used to
@@ -353,9 +369,18 @@ class ModuleBase:
             self.logger.debug("SF dataset: " + str(self.smart_filling_current_dataset))
 
         if self.dataset and "error_string" in self.dataset:
-            self.error_string = self.dataset['error_string']
+            error_info = self.dataset['error_string'].split("\0")
+            if len(error_info) == 1:
+                self.error_string = error_info[0]
+                self.downloaded_files = []
+            else:
+                self.error_string = error_info[0]
+                self.downloaded_files = [info.split("|||")
+                                         for info in error_info[1:]]
+
         else:
             self.error_string = ''
+            self.downloaded_files = []
 
         if not "type" in self.config:
             self.type = "unrated"

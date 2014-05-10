@@ -187,6 +187,29 @@ class ModuleProxy:
                     "error_string": str(e)
                 })
             finally:
+                # If an error occured, append list of downloaded files for this module.
+                # Failed downloads *not* included!
+                # FORMAT: ERROR_MSG (\0 SOURCE_URL ||| FILENAME ||| URL)+
+                if data["error_string"] or data["status"] == -1:
+                    files = hf.downloadService.\
+                            getFilesForInstance(self.instance_name)
+                    file_string = "\0".join(
+                        download.getSourceUrl()+"|||"+(
+                            download.getArchiveFilename() if
+                            download.isArchived() else
+                            download.getTmpFilename()
+                        )+"|||"+(
+                            download.getArchiveUrl() if
+                            download.isArchived() else
+                            download.getTmpUrl()
+                        )
+                        for download in files
+                        if download.isDownloaded()
+                    )
+                    if file_string:
+                        data["error_string"] += "\0" + file_string
+                    for download in files:
+                        download.keep_tmp = True
                 result = module.module_table.insert().values(**data).execute()
 
             # compatibility between different sqlalchemy versions
