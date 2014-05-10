@@ -25,6 +25,7 @@ import shutil
 import traceback
 import shlex
 import re
+import inspect
 import logging
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,7 @@ class DownloadService:
     The name must start with the name of the module instance,
     otherwise certificate auth will always disable the file!
     '''
+
     def __init__(self):
         self.logger = logging.getLogger(self.__module__)
         self.file_list = {}
@@ -116,7 +118,7 @@ class DownloadService:
             timeout = hf.config.getint("downloadService", "timeout")
 
             for number, slave in enumerate(slaves):
-                slave.file.tmp_filename = os.path.abspath(file_prefix + "%03i.download"%number)
+                slave.file.tmp_filename = os.path.abspath(file_prefix + "%03i.download" % number)
                 slave.start()
 
             for slave in slaves:

@@ -87,4 +87,3 @@ def getModuleClass(mod_name):
     if mod_name not in __module_class_list:
         raise hf.ConfigError("Module class {0} not found".format(mod_name))
     return __module_class_list[mod_name]
-

@@ -33,7 +33,7 @@ class ModuleProxy:
     """
 
     def __init__(self, ModuleClass, instance_name, config):
-        self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
+        self.logger = logging.getLogger(self.__module__ + '(' + instance_name + ')')
         self.ModuleClass = ModuleClass
         self.module_name = ModuleClass.module_name
         self.module_table = ModuleClass.module_table
@@ -45,11 +45,11 @@ class ModuleProxy:
         if 'access' not in self.config:
             self.config['access'] = 'open'
         if self.config['access'] not in ['open', 'restricted']:
-            self.logger.warning("Unknown access option '%s', assume 'open'"% self.config['access'])
+            self.logger.warning("Unknown access option '%s', assume 'open'" % self.config['access'])
             self.config['access'] = 'open'
 
         # check if instance is in database and of correct type
-        instance = hf.module.database.module_instances.select(hf.module.database.module_instances.c.instance==instance_name).execute().fetchone()
+        instance = hf.module.database.module_instances.select(hf.module.database.module_instances.c.instance == instance_name).execute().fetchone()
         if instance is None:
             hf.module.database.module_instances.insert().values(instance=instance_name, module=self.module_name).execute()
         elif instance["module"] != self.module_name:
@@ -57,7 +57,7 @@ class ModuleProxy:
 
         # get the common module template
         try:
-            filename = os.path.join(os.path.dirname(self.ModuleClass.filepath), self.module_name+".html")
+            filename = os.path.join(os.path.dirname(self.ModuleClass.filepath), self.module_name + ".html")
             self.template = Template(filename=filename, lookup=hf.template_escape_lookup)
             self.logger.debug(self.template.code)
         except Exception, e:
@@ -160,20 +160,20 @@ class ModuleProxy:
 
                     dataExctractionSuccessfull = True
             except hf.DownloadError, e:
-                self.logger.info("Data exctraction failed because of failed download: "+str(e))
+                self.logger.info("Data exctraction failed because of failed download: " + str(e))
                 data.update({
                     "status": -1,
                     "error_string": str(e)
                 })
             except hf.ModuleRuntimeError, e:
-                self.logger.error("Runtime error during data exctraction: "+str(e))
+                self.logger.error("Runtime error during data exctraction: " + str(e))
                 self.logger.error(traceback.format_exc())
                 data.update({
                     "status": -1,
                     "error_string": str(e)
                 })
             except hf.ModuleProgrammingError, e:
-                self.logger.error("Programming error during data extraction: "+str(e))
+                self.logger.error("Programming error during data extraction: " + str(e))
                 self.logger.error(traceback.format_exc())
                 data.update({
                     "status": -1,
@@ -202,14 +202,14 @@ class ModuleProxy:
                        not module.use_smart_filling):
                         module.fillSubtables(inserted_id)
                 except Exception, e:
-                    self.logger.error("Filling subtables failed: "+str(e))
+                    self.logger.error("Filling subtables failed: " + str(e))
                     self.logger.error(traceback.format_exc())
                     if len(data["error_string"]) > 0:
                         data["error_string"] += "; "
                     data["error_string"] += str(e)
-                    module.module_table.update().\
-                        where(module.module_table.c.id == inserted_id).\
-                        values(error_string=data["error_string"]).\
+                    module.module_table.update(). \
+                        where(module.module_table.c.id == inserted_id). \
+                        values(error_string=data["error_string"]). \
                         execute()
 
         except Exception, e:
@@ -224,10 +224,10 @@ class ModuleProxy:
         HappyFace run.
         """
         try:
-            dataset = self.module_table.select(self.module_table.c.run_id==run["id"])\
+            dataset = self.module_table.select(self.module_table.c.run_id == run["id"]) \
                                                .where(self.module_table.c.instance ==
-                                                      self.instance_name)\
-                                               .execute()\
+                                                      self.instance_name) \
+                                               .execute() \
                                                .fetchone()
             if dataset is not None:
                 file_columns = hf.module.getColumnFileReference(self.module_table)
@@ -253,5 +253,3 @@ class ModuleProxy:
             self.logger.error(traceback.format_exc())
         module = self.ModuleClass(self.instance_name, self.config, run, dataset, self.template)
         return module
-
-

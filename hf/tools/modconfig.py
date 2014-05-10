@@ -37,7 +37,7 @@ def execute():
     tools.load_env()
 
     if not hf.module.moduleClassLoaded(args.module):
-        print >> sys.stderr, sys.argv[0]+": The module '%s' was not found" % args.module
+        print >> sys.stderr, sys.argv[0] + ": The module '%s' was not found" % args.module
         sys.exit(-1)
 
     ModuleClass = hf.module.getModuleClass(args.module)

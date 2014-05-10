@@ -33,7 +33,7 @@ class CategoryProxy:
     template = None
 
     def __init__(self, name, conf, module_conf):
-        self.logger = logging.getLogger(self.__module__+'('+name+')')
+        self.logger = logging.getLogger(self.__module__ + '(' + name + ')')
         self.name = name
         self.config = conf
         self.module_config = module_conf

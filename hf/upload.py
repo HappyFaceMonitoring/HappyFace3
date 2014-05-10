@@ -41,7 +41,7 @@ class Dispatcher(object):
         # Do this to display error right after startup, if necessary
         try:
             with open(self.htpasswd_file) as f:
-                    pass
+                pass
         except IOError:
             if self.enabled:
                 self.logger.error("Cannot open htpasswd!")

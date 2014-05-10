@@ -42,7 +42,7 @@ def __plotableColumns(table):
 
     def isnumeric(cls):
         for t in types:
-            if isinstance(cls,t):
+            if isinstance(cls, t):
                 return True
         return False
     numerical_cols = filter(lambda x: isnumeric(x.type), table.columns)
@@ -107,7 +107,7 @@ def getTimeseriesPlotConfig(**kwargs):
         *errors*
             A list of error messages that occured during the function call
     """
-    logger = logging.getLogger(__name__+".getTimeseriesPlotConfig")
+    logger = logging.getLogger(__name__ + ".getTimeseriesPlotConfig")
 
     logger.debug(kwargs)
 
@@ -132,9 +132,9 @@ def getTimeseriesPlotConfig(**kwargs):
     end_time = (kwargs['end_time'] if 'end_time' in kwargs
                 else now.strftime('%H:%M'))
     start = datetime.datetime.fromtimestamp(time.mktime(
-        time.strptime(start_date+'_'+start_time, "%Y-%m-%d_%H:%M")))
+        time.strptime(start_date + '_' + start_time, "%Y-%m-%d_%H:%M")))
     end = datetime.datetime.fromtimestamp(time.mktime(
-        time.strptime(end_date+'_'+end_time, "%Y-%m-%d_%H:%M"))+60)
+        time.strptime(end_date + '_' + end_time, "%Y-%m-%d_%H:%M")) + 60)
     timerange = [start, end]
 
     if 'renormalize' in kwargs:
@@ -185,7 +185,7 @@ def getTimeseriesPlotConfig(**kwargs):
                 data_sources.add((table, module_instance))
                 curve_dict[curve_name] = (title, table, module_instance, col_expr, table_name)
             except Exception, e:
-                logger.warning("Parsing curve failed:\n"+traceback.format_exc())
+                logger.warning("Parsing curve failed:\n" + traceback.format_exc())
                 errors.append("Curve '%s': %s" % (key, str(e)))
         elif key.lower() == u"legend":
             legend = (value.lower() == "true" or value == "1")
@@ -209,7 +209,7 @@ def getTimeseriesPlotConfig(**kwargs):
 
 
 def __timeseriesTableQuery(curve, table, module_instance, constraint, timerange):
-    logger = logging.getLogger(__name__+".__timeseriesTableQuery")
+    logger = logging.getLogger(__name__ + ".__timeseriesTableQuery")
     try:
         query_columns = [hf_runs.c.time]
         query_columns.extend(__plotableColumns(table))
@@ -247,7 +247,7 @@ def __timeseriesTableQuery(curve, table, module_instance, constraint, timerange)
         logger.debug(query)
         return query
     except Exception, e:
-        logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+        logger.warning("Retrieving plot data:\n" + traceback.format_exc())
         raise Exception("Curve '%s': %s" % (curve, str(e)))
 
 
@@ -273,7 +273,7 @@ def timeseriesPlot(category_list, **kwargs):
     from matplotlib.figure import Figure
     from matplotlib.dates import AutoDateFormatter, AutoDateLocator, date2num
     import matplotlib.pyplot as plt
-    logger = logging.getLogger(__name__+".timeseriesPlot")
+    logger = logging.getLogger(__name__ + ".timeseriesPlot")
 
     # generate plot
     fig = plt.figure()
@@ -285,12 +285,12 @@ def timeseriesPlot(category_list, **kwargs):
     for t in constraint.iterkeys():
         for key, value in kwargs.iteritems():
             if key.startswith(t):
-                if len(key) <= len(t)+1:
+                if len(key) <= len(t) + 1:
                     curve = None
                 else:
-                    curve = key[len(t)+1:]
+                    curve = key[len(t) + 1:]
                 if type(value) is not list:
-                    value = [value,]
+                    value = [value, ]
                 for constr in value:
                     if curve not in constraint[t]:
                         constraint[t][curve] = []
@@ -331,7 +331,7 @@ def timeseriesPlot(category_list, **kwargs):
 
                 source_data = result.fetchall()
             except Exception, e:
-                logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+                logger.warning("Retrieving plot data:\n" + traceback.format_exc())
                 errors.append("Data '%s': %s" % (key, str(e)))
                 continue
             try:
@@ -352,8 +352,8 @@ def timeseriesPlot(category_list, **kwargs):
                 # Replace $varnames by a dict call to create valid math expression.
                 if expr not in column_index:
                     use_matheval = True
-                    math_expr = regexp_dollarvar.sub(vardict_name+"['\\1']", expr)
-                    logger.debug("Math expression "+repr(math_expr))
+                    math_expr = regexp_dollarvar.sub(vardict_name + "['\\1']", expr)
+                    logger.debug("Math expression " + repr(math_expr))
 
                 for i, row in enumerate(source_data):
                     variables = dict((col, row[i])
@@ -368,20 +368,24 @@ def timeseriesPlot(category_list, **kwargs):
                         val = variables[expr]
 
                     data_points[i] = val
-                    if min_val is None: min_val = val
-                    elif min_val > val: min_val = val
-                    if max_val is None: max_val = val
-                    elif max_val < val: max_val = val
+                    if min_val is None:
+                        min_val = val
+                    elif min_val > val:
+                        min_val = val
+                    if max_val is None:
+                        max_val = val
+                    elif max_val < val:
+                        max_val = val
 
                 if renormalize and max_val - min_val != 0:
-                    data_points = (data_points - min_val)/(max_val - min_val)
+                    data_points = (data_points - min_val) / (max_val - min_val)
                 elif renormalize:
                     data_points = np.zeros(len(data_points)) + 0.5
 
                 curve_dict[curve_name] = (title, dates, data_points)
             except Exception, e:
                 curve_dict[curve_name] = (title, [], [])
-                logger.warning("Retrieving plot data:\n"+traceback.format_exc())
+                logger.warning("Retrieving plot data:\n" + traceback.format_exc())
                 errors.append("Data '%s': %s" % (key, str(e)))
 
         # generate plot
@@ -420,15 +424,15 @@ def timeseriesPlot(category_list, **kwargs):
             ax.plot_date(curve[1], curve[2], **options)
         # custom date formats
         ax.xaxis.get_major_formatter().scaled = {
-            365.0  : '%Y',
-            30.    : '%Y-%m',
-            1.0    : '%Y-%m-%d',
-            1./24. : '%H:%M %y-%m-%d',
+            365.0: '%Y',
+            30.: '%Y-%m',
+            1.0: '%Y-%m-%d',
+            1. / 24.: '%H:%M %y-%m-%d',
         }
         if 'title' in kwargs:
             ax.set_title(kwargs['title'])
         if 'legend' in kwargs:
-                ax.legend(loc=int(kwargs['legend']), numpoints=1)
+            ax.legend(loc=int(kwargs['legend']), numpoints=1)
         ax.set_ylabel(ylabel)
         if auth_required:
             ax.text(0.02, 0.5, "One or more curves require certificate authentification", color="#ff0000", fontsize=14)

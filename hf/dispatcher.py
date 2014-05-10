@@ -121,7 +121,7 @@ Perhaps the corresponding module was removed from the HF config or the file does
                 return template.render_unicode(**args).encode("utf-8")
 
         except Exception, e:
-            self.logger.error(u"error page generation failed: "+unicode(e))
+            self.logger.error(u"error page generation failed: " + unicode(e))
             self.logger.error(traceback.format_exc())
             return u"""<h1>Error Inception</h1>
             <p>An error occured while displaying an error. Embarrasing.</p>
@@ -133,6 +133,7 @@ class CachegrindHandler(cp.dispatch.LateParamPageHandler):
 
     Based on _`http://tools.cherrypy.org/wiki/Cachegrind`
     """
+
     def __init__(self, next_handler):
         self.next_handler = next_handler
 
@@ -149,7 +150,7 @@ class CachegrindHandler(cp.dispatch.LateParamPageHandler):
             p = cProfile.Profile()
             p.runctx('self._real_call()', globals(), locals())
         finally:
-            count = 1 
+            count = 1
             filename = None
             path = cp.request.path_info.strip("/").replace("/", "_")
             script = cp.request.app.script_name.strip("/").replace("/", "_")
@@ -186,7 +187,7 @@ def cachegrind():
     """
     cp.request.handler = CachegrindHandler(cp.request.handler)
 
-# Priority of 100 is meant to ensure that this tool runs later than all others, such that 
+# Priority of 100 is meant to ensure that this tool runs later than all others, such that
 # CachegrindHandler wraps all other handlers and therefore can profile them along with
 # the controller.
 cp.tools.cachegrind = cp.Tool('before_handler', cachegrind, priority=100)

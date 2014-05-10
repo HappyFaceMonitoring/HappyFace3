@@ -19,7 +19,10 @@ from hf.module.module import __module_class_list as _module_class_list
 from hf.module.module import __column_file_list as _column_file_list
 from mako.template import Template
 import cherrypy as cp
-import logging, traceback, os, re
+import logging
+import traceback
+import os
+import re
 from sqlalchemy import Integer, Float, Numeric, Table, Column, Sequence, Text, Integer, Float, ForeignKey
 from sqlalchemy.exc import DatabaseError
 
@@ -32,6 +35,7 @@ class ModuleMeta(type):
     as well as registering module classes in the system and creating additional variables based on the
     declaration.
     """
+
     def __init__(self, name, bases, dct):
         if name == "ModuleBase":
             super(ModuleMeta, self).__init__(name, bases, dct)
@@ -88,13 +92,13 @@ class ModuleMeta(type):
     def generateModuleTable(self, tabname, columns):
 
         if self.use_smart_filling:
-            columns.append(Column("sf_data_id", Integer, ForeignKey("mod_"+tabname+".id"), index = True))
+            columns.append(Column("sf_data_id", Integer, ForeignKey("mod_" + tabname + ".id"), index=True))
 
-        table = Table("mod_"+tabname, hf.database.metadata,
+        table = Table("mod_" + tabname, hf.database.metadata,
             *([
-                Column('id', Integer, Sequence("mod_"+tabname+'_id_seq'), primary_key=True),
-                Column('instance', Text, ForeignKey("module_instances.instance"), index = True),
-                Column('run_id', Integer, ForeignKey("hf_runs.id"), index = True,),
+                Column('id', Integer, Sequence("mod_" + tabname + '_id_seq'), primary_key=True),
+                Column('instance', Text, ForeignKey("module_instances.instance"), index=True),
+                Column('run_id', Integer, ForeignKey("hf_runs.id"), index=True, ),
                 Column('status', Float),
                 Column('description', Text),
                 Column('instruction', Text),
@@ -106,12 +110,12 @@ class ModuleMeta(type):
         return table
 
     def generateModuleSubtable(self, name, columns):
-        tabname = "sub_"+self.module_table.name[4:] + '_' + name
+        tabname = "sub_" + self.module_table.name[4:] + '_' + name
         table = Table(tabname,
             hf.database.metadata,
             *([
-                Column('id', Integer, Sequence(tabname+'_id_seq'), primary_key=True),
-                Column('parent_id', Integer, ForeignKey(self.module_table.c.id), index = True),
+                Column('id', Integer, Sequence(tabname + '_id_seq'), primary_key=True),
+                Column('parent_id', Integer, ForeignKey(self.module_table.c.id), index=True),
             ] + columns))
         self.subtables[name] = table
         table.module_class = self
@@ -119,7 +123,7 @@ class ModuleMeta(type):
 
     def addColumnFileReference(self, table, column):
         name = table.name if isinstance(table, Table) else table
-        _column_file_list[name] = _column_file_list[name]+[column] if name in _column_file_list else [column]
+        _column_file_list[name] = _column_file_list[name] + [column] if name in _column_file_list else [column]
 
 
 class ModuleBase:
@@ -318,7 +322,7 @@ class ModuleBase:
     filepath = None
 
     def __init__(self, instance_name, config, run, dataset, template):
-        self.logger = logging.getLogger(self.__module__+'('+instance_name+')')
+        self.logger = logging.getLogger(self.__module__ + '(' + instance_name + ')')
         self.config = config
         self.module_name = self.__class__.module_name
         self.module_table = self.__class__.module_table
@@ -342,11 +346,11 @@ class ModuleBase:
 
         if self.use_smart_filling:
             tab = self.module_table
-            self.smart_filling_current_dataset = tab.select().where(tab.c.sf_data_id == None)\
+            self.smart_filling_current_dataset = tab.select().where(tab.c.sf_data_id == None) \
                     .order_by(tab.c.id).limit(1).execute().fetchone()
             if self.smart_filling_current_dataset:
                 self.smart_filling_current_dataset = dict(self.smart_filling_current_dataset)
-            self.logger.debug("SF dataset: "+str(self.smart_filling_current_dataset))
+            self.logger.debug("SF dataset: " + str(self.smart_filling_current_dataset))
 
         if self.dataset and "error_string" in self.dataset:
             self.error_string = self.dataset['error_string']
@@ -512,7 +516,7 @@ class ModuleBase:
             This method only works in the render process.
         """
         return os.path.join(hf.config.get('paths', 'template_icons_url'),
-                            'mod_'+self.getStatusString()+'.png')
+                            'mod_' + self.getStatusString() + '.png')
 
     def getNavStatusIcon(self):
         """
@@ -524,7 +528,7 @@ class ModuleBase:
             This method only works in the render process.
         """
         return os.path.join(hf.config.get('paths', 'template_icons_url'),
-                            'nav_'+self.getStatusString()+'.png')
+                            'nav_' + self.getStatusString() + '.png')
 
     def getPlotableColumns(self):
         """

@@ -20,6 +20,7 @@ import math
 import re
 import markupsafe
 
+
 def prettyDataSize(size_in_bytes):
     """ Takes a data size in bytes and formats a pretty string. """
     unit = "B"

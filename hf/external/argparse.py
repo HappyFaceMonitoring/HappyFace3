@@ -83,7 +83,6 @@ __all__ = [
     'ZERO_OR_MORE',
 ]
 
-
 import collections as _collections
 import copy as _copy
 import os as _os
@@ -96,7 +95,6 @@ from gettext import gettext as _
 
 def _callable(obj):
     return hasattr(obj, '__call__') or hasattr(obj, '__bases__')
-
 
 SUPPRESS = '==SUPPRESS=='
 
@@ -140,7 +138,6 @@ def _ensure_value(namespace, name, value):
     if getattr(namespace, name, None) is None:
         setattr(namespace, name, value)
     return getattr(namespace, name)
-
 
 # ===============
 # Formatting Help
@@ -664,7 +661,6 @@ class ArgumentDefaultsHelpFormatter(HelpFormatter):
                     help += ' (default: %(default)s)'
         return help
 
-
 # =====================
 # Options and Arguments
 # =====================
@@ -705,7 +701,6 @@ class ArgumentError(Exception):
 class ArgumentTypeError(Exception):
     """An error from trying to convert a command line string to a type."""
     pass
-
 
 # ==============
 # Action classes
@@ -1094,7 +1089,6 @@ class _SubParsersAction(Action):
             vars(namespace).setdefault(_UNRECOGNIZED_ARGS_ATTR, [])
             getattr(namespace, _UNRECOGNIZED_ARGS_ATTR).extend(arg_strings)
 
-
 # ==============
 # Type classes
 # ==============
@@ -1245,7 +1239,6 @@ class _ActionsContainer(object):
                 return action.default
         return self._defaults.get(dest, None)
 
-
     # =======================
     # Adding argument actions
     # =======================
@@ -1279,13 +1272,13 @@ class _ActionsContainer(object):
         # create the action object, and add it to the parser
         action_class = self._pop_action_class(kwargs)
         if not _callable(action_class):
-            raise ValueError('unknown action "%s"' % (action_class,))
+            raise ValueError('unknown action "%s"' % (action_class, ))
         action = action_class(**kwargs)
 
         # raise an error if the action type is not callable
         type_func = self._registry_get('type', action.type, action.type)
         if not _callable(type_func):
-            raise ValueError('%r is not callable' % (type_func,))
+            raise ValueError('%r is not callable' % (type_func, ))
 
         # raise an error if the metavar does not match the type
         if hasattr(self, "_get_formatter"):
@@ -1597,12 +1590,12 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         default_prefix = '-' if '-' in prefix_chars else prefix_chars[0]
         if self.add_help:
             self.add_argument(
-                default_prefix+'h', default_prefix*2+'help',
+                default_prefix + 'h', default_prefix * 2 + 'help',
                 action='help', default=SUPPRESS,
                 help=_('show this help message and exit'))
         if self.version:
             self.add_argument(
-                default_prefix+'v', default_prefix*2+'version',
+                default_prefix + 'v', default_prefix * 2 + 'version',
                 action='version', default=SUPPRESS,
                 version=self.version,
                 help=_("show program's version number and exit"))

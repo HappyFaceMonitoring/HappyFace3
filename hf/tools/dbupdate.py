@@ -58,11 +58,11 @@ def execute():
     args.interactive = not (args.force or args.dry)
 
     #try:
-        #import migrate
+    #import migrate
     #except ImportError, e:
-        #print 'The sqlalchemy-migrate Python module was not found.\nThis is required for the dbupdate functionallity'
-        #traceback.print_exc()
-        #return
+    #print 'The sqlalchemy-migrate Python module was not found.\nThis is required for the dbupdate functionallity'
+    #traceback.print_exc()
+    #return
     #from migrate.versioning.util import load_model
     #from migrate.versioning import genmodel, schemadiff
     #from migrate.changeset import schema
@@ -96,11 +96,12 @@ def execute():
         if ask(args, "\033[1m\033[31mDrop\033[0m table(s) " + tables + "?\n\033[1m\033[31mWARNING\033[0m Not reversible! Procede?"):
             deleted_tables = [t.name for t in tablesRemoveFromDb]
             hf.database.metadata.drop_all(bind=hf.database.engine, tables=tablesRemoveFromDb)
-            
+
     for table_name, [db_table, table_diff] in tablesAlterInDb.iteritems():
         if table_name in deleted_tables:
             continue
-        if not args.interactive: print "\033[1m\033[33malter\033[0m table \033[1m%s\033[0m" % table_name
+        if not args.interactive:
+            print "\033[1m\033[33malter\033[0m table \033[1m%s\033[0m" % table_name
         if not ask(args, "Do \033[1m\033[33malterations\033[0m in table \033[1m%s\033[0m?" % table_name):
             continue
         drop, add, alter = table_diff.columns_to_operate()
@@ -111,7 +112,7 @@ def execute():
         additional and altered columns.'''
         changes = ''
         drops = ''
-        temp_name = '__temp_%s' %table_name
+        temp_name = '__temp_%s' % table_name
         copy_list = [c.name for c in db_table.columns]
         alter_list = [c[0].name for c in alter]
         if len(add) > 0:
@@ -123,21 +124,23 @@ def execute():
             changes += '\n * \033[1m\033[33malter\033[0m column(s) \033[1m' + '\033[0m, \033[1m'.join(c[0].name for c in alter) + '\033[0m'
         if len(changes) > 0:
             changes = changes[1:]
-        
+
         message = 'Do you really want to drop those columns?\n'
         print drops
-        if len(drop) > 0 and not args.interactive: print drops
+        if len(drop) > 0 and not args.interactive:
+            print drops
         if len(drop) > 0 and ask(args, message):
             copy_list = set(copy_list) - set(drop_list)
-        
+
         message = '''\033[1m\033[31mATTENTION\033[0m
 Due to SQL-Backend restrictions, we can only alter the table as a whole, so you have to accept all changes or none!
 %s
 Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible!''' % changes
-        if not args.interactive: print changes
+        if not args.interactive:
+            print changes
         if not ask(args, message):
-                continue
-        
+            continue
+
         new_db_columns = []
         for col_name in copy_list:
             #import pdb; pdb.set_trace()
@@ -145,33 +148,34 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
                 c_type = map(strip, alter[col_name].strip().split('=>'))[1]
                 c_null = db_table.columns[col_name].nullable
                 c_key = db_table.columns[col_name].primary_key
-                new_db_columns.append(Column(col_name, c_type, nullable = c_null, primary_key = c_key))
+                new_db_columns.append(Column(col_name, c_type, nullable=c_null, primary_key=c_key))
             else:
                 c_type = db_table.columns[col_name].type
                 c_null = db_table.columns[col_name].nullable
                 c_key = db_table.columns[col_name].primary_key
-                new_db_columns.append(Column(col_name, c_type, nullable = c_null, primary_key = c_key))
-        
-        copy_string = ', '.join(copy_list) 
+                new_db_columns.append(Column(col_name, c_type, nullable=c_null, primary_key=c_key))
+
+        copy_string = ', '.join(copy_list)
         connection = diff.conn.connect()
         trans = connection.begin()
         try:
-            connection.execute('CREATE TEMPORARY TABLE %s as SELECT %s from %s' %(temp_name, copy_string, table_name))
+            connection.execute('CREATE TEMPORARY TABLE %s as SELECT %s from %s' % (temp_name, copy_string, table_name))
             connection.execute('pragma foreign_keys = off;')
             hf.database.metadata.drop_all(bind=hf.database.engine, tables=[db_table])
             #import pdb; pdb.set_trace()
             db_table = Table(table_name, hf.database.metadata, *new_db_columns, extend_existing=True)
             hf.database.metadata.create_all(bind=hf.database.engine, tables=[db_table])
-            connection.execute('INSERT INTO %s (%s) SELECT %s FROM %s' %(table_name, copy_string, copy_string, temp_name))
-            connection.execute('DROP TABLE %s' %temp_name)
+            connection.execute('INSERT INTO %s (%s) SELECT %s FROM %s' % (table_name, copy_string, copy_string, temp_name))
+            connection.execute('DROP TABLE %s' % temp_name)
             connection.execute('pragma foreign_keys = on;')
             trans.commit()
         except:
             trans.rollback()
             raise
+
         
         
-        
+
     if args.dry:
         print "Dry run completed"
     else:

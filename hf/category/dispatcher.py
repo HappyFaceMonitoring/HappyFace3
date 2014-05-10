@@ -39,6 +39,7 @@ class CategoryCachingTool(cp._cptools.CachingTool):
     URI is removed from cache (it is not possible to remove *this* variant
     as far as I know).
     """
+
     def _wrapper(self, **kwargs):
         params = cp.serving.request.params
         # dirty check if we want "the most current" page
@@ -97,30 +98,30 @@ class Dispatcher(object):
             timestamp = kwargs['date'] if 'date' in kwargs is not None else time_obj.strftime('%Y-%m-%d')
             timestamp += '_' + (kwargs['time'] if 'time' in kwargs else time_obj.strftime('%H:%M'))
             # notice the extra seconds to avoid microsecond and minute issues
-            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M"))+59)
+            time_obj = datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestamp, "%Y-%m-%d_%H:%M")) + 59)
 
         except Exception:
             time_error_message = "The passed time was invalid"
 
-        if time_obj > datetime.datetime.fromtimestamp(int(time.time())+59):
+        if time_obj > datetime.datetime.fromtimestamp(int(time.time()) + 59):
             time_error_message = "HappyFace is not an oracle"
-            time_obj = datetime.datetime.fromtimestamp(int(time.time())+59)
+            time_obj = datetime.datetime.fromtimestamp(int(time.time()) + 59)
 
         try:
             test = hf_runs.select().execute().fetchone()
-            self.logger.error("Test "+str(test))
+            self.logger.error("Test " + str(test))
         except Exception, e:
             self.logger.error(traceback.format_exc())
 
-        run = hf_runs.select(hf_runs.c.time <= time_obj).\
-            where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
-            order_by(hf_runs.c.time.desc()).\
+        run = hf_runs.select(hf_runs.c.time <= time_obj). \
+            where(or_(hf_runs.c.completed == True, hf_runs.c.completed == None)). \
+            order_by(hf_runs.c.time.desc()). \
             execute().fetchone()
         if run is None:
             time_error_message = "No data so far in past"
-            run = hf_runs.select(hf_runs.c.time >= time_obj).\
-                where(or_(hf_runs.c.completed==True, hf_runs.c.completed==None)).\
-                order_by(hf_runs.c.time.asc()).\
+            run = hf_runs.select(hf_runs.c.time >= time_obj). \
+                where(or_(hf_runs.c.completed == True, hf_runs.c.completed == None)). \
+                order_by(hf_runs.c.time.asc()). \
                 execute().fetchone()
             time_obj = run["time"]
         run = {"id": run["id"],

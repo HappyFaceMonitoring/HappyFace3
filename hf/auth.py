@@ -62,5 +62,4 @@ def cert_auth():
         logging.error("Script authorization failed")
         logging.debug(traceback.format_exc())
 
-
 cp.tools.cert_auth = cp.Tool('before_handler', cert_auth)

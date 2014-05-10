@@ -26,8 +26,9 @@ class Category:
     """
     For the meaning of status values, see ModuleBase docstring.
     """
+
     def __init__(self, category_name, conf, module_list, run, template):
-        self.logger = logging.getLogger(self.__module__+'('+category_name+')')
+        self.logger = logging.getLogger(self.__module__ + '(' + category_name + ')')
         self.name = category_name
         self.config = conf
         self.module_list = module_list
@@ -83,7 +84,7 @@ class Category:
         return icon
 
     def getStatusIcon(self):
-        icon = 'cat_'+self.getStatusString()+'.png'
+        icon = 'cat_' + self.getStatusString() + '.png'
         return os.path.join(hf.config.get('paths', 'template_icons_url'), icon)
 
     def getIndexIcon(self):
@@ -107,7 +108,7 @@ class Category:
 
     @hf.url.absoluteUrl
     def url(self, time=None):
-        url = "/category/"+self.name
+        url = "/category/" + self.name
         if time is not None:
             url += "?date=%s&amp;time=%s" % (time.strftime('%Y-%m-%d'),
                                              time.strftime('%H:%M'))

@@ -12,6 +12,7 @@ try:
 except ImportError:
     raise SystemExit("This script requires cProfile from Python 2.5")
 
+
 def label(code):
     if isinstance(code, str):
         return ('~', 0, code)    # built-in functions ('~' sorts at the end)
@@ -19,6 +20,7 @@ def label(code):
         return '%s %s:%d' % (code.co_name,
                              code.co_filename,
                              code.co_firstlineno)
+
 
 class KCacheGrind(object):
     def __init__(self, profiler):
@@ -37,7 +39,7 @@ class KCacheGrind(object):
         for entry in self.data:
             totaltime = int(entry.totaltime * 1000)
             max_cost = max(max_cost, totaltime)
-        print >> self.out_file, 'summary: %d' % (max_cost,)
+        print >> self.out_file, 'summary: %d' % (max_cost, )
 
     def _entry(self, entry):
         out_file = self.out_file
@@ -47,8 +49,8 @@ class KCacheGrind(object):
         if isinstance(code, str):
             print >> out_file, 'fi=~'
         else:
-            print >> out_file, 'fi=%s' % (code.co_filename,)
-        print >> out_file, 'fn=%s' % (label(code),)
+            print >> out_file, 'fi=%s' % (code.co_filename, )
+        print >> out_file, 'fn=%s' % (label(code), )
 
         inlinetime = int(entry.inlinetime * 1000)
         if isinstance(code, str):
@@ -75,17 +77,18 @@ class KCacheGrind(object):
         out_file = self.out_file
         code = subentry.code
         #print >> out_file, 'cob=%s' % (code.co_filename,)
-        print >> out_file, 'cfn=%s' % (label(code),)
+        print >> out_file, 'cfn=%s' % (label(code), )
         if isinstance(code, str):
             print >> out_file, 'cfi=~'
-            print >> out_file, 'calls=%d 0' % (subentry.callcount,)
+            print >> out_file, 'calls=%d 0' % (subentry.callcount, )
         else:
-            print >> out_file, 'cfi=%s' % (code.co_filename,)
+            print >> out_file, 'cfi=%s' % (code.co_filename, )
             print >> out_file, 'calls=%d %d' % (
                 subentry.callcount, code.co_firstlineno)
 
         totaltime = int(subentry.totaltime * 1000)
         print >> out_file, '%d %d' % (lineno, totaltime)
+
 
 def main(args):
     usage = "%s [-o output_file_path] scriptfile [arg] ..."
@@ -108,7 +111,7 @@ def main(args):
     prof = cProfile.Profile()
     try:
         try:
-            prof = prof.run('execfile(%r)' % (sys.argv[0],))
+            prof = prof.run('execfile(%r)' % (sys.argv[0], ))
         except SystemExit:
             pass
     finally:

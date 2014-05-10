@@ -24,8 +24,11 @@ so you can always recreate the same base state after manual adjustments.
 
 Always hitting enter results in a minimal configuration.
 """
-
-import hf, sys, traceback, os, stat
+import hf
+import sys
+import traceback
+import os
+import stat
 try:
     import argparse
 except ImportError:
@@ -34,13 +37,14 @@ except ImportError:
 
 def generateConfigFiles(configuration):
     config_output = {}
+
     def addToSection(section, key, val):
         if not section in config_output:
             config_output[section] = {}
         config_output[section][key] = val
 
     def sectionToFile(directory, section, contents):
-        with open(os.path.join(directory, section+'.cfg'), 'w') as f:
+        with open(os.path.join(directory, section + '.cfg'), 'w') as f:
             f.write('\n[' + section + ']\n')
             for key, val in contents.iteritems():
                 f.write(key + ' = ' + val + '\n')
@@ -82,8 +86,10 @@ def generateConfigFiles(configuration):
     if 'database' in config_output:
         os.chmod(os.path.join(config_dir, 'database.cfg'), stat.S_IRWXU | stat.S_IRWXG)
 
+
 def generateApache(configuration):
     pass
+
 
 def execute():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -148,7 +154,7 @@ def execute():
 
     def process_question_branch(prefix, question_list, always_set_output=False):
         for varname, question, qtype, default_preset, sub_questions in question_list:
-            full_name = prefix+'.'+varname if len(prefix) > 0 else varname
+            full_name = prefix + '.' + varname if len(prefix) > 0 else varname
             preset = loaded_presets[full_name] if full_name in loaded_presets else default_preset
 
             if qtype == 'yn':
@@ -162,7 +168,7 @@ def execute():
                 else:
                     answer = 'y' if answer.lower()[:-1] in ('y', 'yes') else 'n'
             elif qtype == 'data':
-                print question, '['+str(preset)+']: ',
+                print question, '[' + str(preset) + ']: ',
                 answer = sys.stdin.readline()
                 answer = preset if answer == '\n' else answer[:-1]
             else:
@@ -209,4 +215,4 @@ def execute():
     if args.outfile is not None:
         with open(args.outfile, 'w') as f:
             for var, preset in site_presets.iteritems():
-                f.write(str(var)+'='+str(preset)+'\n')
+                f.write(str(var) + '=' + str(preset) + '\n')

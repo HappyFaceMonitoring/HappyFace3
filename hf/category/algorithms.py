@@ -47,6 +47,6 @@ def weighted(category):
             continue
         if mod.dataset['status'] >= 0 and mod.type != "unrated":
             status += mod.dataset['status'] * mod.weigth
-            total += mod.dataset*mod.weight
+            total += mod.dataset * mod.weight
 
-    return status/total
+    return status / total

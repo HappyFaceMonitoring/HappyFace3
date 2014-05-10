@@ -75,7 +75,7 @@ def __set_css_handler__():
 
 def set_css(css_file):
     cp.response.cookie["css"] = css_file if css_file else ""
-    cp.response.cookie["css"]["expires"] = (formatdate(time()+30758400,
+    cp.response.cookie["css"]["expires"] = (formatdate(time() + 30758400,
                                                        usegmt=True)
                                             if css_file else 0)
     cp.response.cookie["css"]["version"] = 1

@@ -39,4 +39,3 @@ config = None
 __all__ = ["ModuleBase", "ModuleProxy", "database", "config",
            "getColumnFileReference", "moduleClassLoaded",
            "importModuleClasses", "getModuleClass"]
-

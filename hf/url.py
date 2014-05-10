@@ -29,10 +29,10 @@ def join(url, suffix):
     if len(url) == 0:
         return suffix
     if url[-1] != "/" and suffix[0] != "/":
-        url = url+"/"
+        url = url + "/"
     elif url[-1] == "/" and suffix[0] == "/":
         url = url[0:-1]
-    return url+suffix
+    return url + suffix
 
 
 def absoluteUrl(arg):
@@ -42,6 +42,7 @@ def absoluteUrl(arg):
     of happyface and make it absolute respective to
     that root URL
     """
+
     def joinCfg(*args, **kwargs):
         return join(hf.config.get("paths", "happyface_url"),
                     arg(*args, **kwargs))
@@ -78,4 +79,3 @@ def create_link_here(additional_get_params):
     url = hf.url.join(cp.request.script_name,
                       cp.request.path_info)
     return url + (query if len(params) else "")
-

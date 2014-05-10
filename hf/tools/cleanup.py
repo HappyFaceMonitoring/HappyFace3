@@ -156,8 +156,8 @@ def get_module_instances():
     for table_name, table in hf.database.metadata.tables.iteritems():
         if not table_name.startswith("mod_"):
             continue
-        query = select([table.c.instance, module_instances.c.module]).\
-                where(table.c.instance == module_instances.c.instance).\
+        query = select([table.c.instance, module_instances.c.module]). \
+                where(table.c.instance == module_instances.c.instance). \
                 distinct()
         for inst, mod in query.execute():
             if hf.module.moduleClassLoaded(mod):
@@ -166,7 +166,7 @@ def get_module_instances():
             else:
                 used = None
             ret.add((inst, mod, table, used))
-    query = select([module_instances.c.instance, module_instances.c.module]).\
+    query = select([module_instances.c.instance, module_instances.c.module]). \
             distinct()
     for inst, mod in query.execute():
         if hf.module.moduleClassLoaded(mod):
@@ -197,14 +197,14 @@ def _list_modules(parser, args):
            not (args.used and used) and
            not (args.not_used and not used)):
             continue
-        expr = select([hf_runs.c.time])\
+        expr = select([hf_runs.c.time]) \
             .where(hf_runs.c.id ==
                    module_table.c.run_id) \
-            .where(module_table.c.instance == instance)\
+            .where(module_table.c.instance == instance) \
             .order_by(hf_runs.c.time.asc())
         try:
             oldest = expr.execute().fetchone()[0]
-            age_days = str((datetime.datetime.now()-oldest).days)+"d"
+            age_days = str((datetime.datetime.now() - oldest).days) + "d"
         except TypeError:
             age_days = "N/A"
 
@@ -291,7 +291,7 @@ def _vacuum(parser, args):
 
 def clear_contents(module_instance_name, module,
                    module_table, timerange, logger, keep_files=False):
-    subtables = dict(filter(lambda x: x[0].startswith("sub_"+module_table.name[4:]+"_"),
+    subtables = dict(filter(lambda x: x[0].startswith("sub_" + module_table.name[4:] + "_"),
                             hf.database.metadata.tables.iteritems()))
     ModuleClass = None
     if not keep_files:
@@ -314,14 +314,14 @@ def clear_contents(module_instance_name, module,
         return query
 
     query = where_clauses(select(columns))
-    cnt = where_clauses(select([func.count(hf_runs.c.id)]))\
+    cnt = where_clauses(select([func.count(hf_runs.c.id)])) \
           .execute().fetchone()[0]
     to_delete = []
     for i, x in enumerate(list(query.execute())):
         ###
         # Find files from main and subtables
         entry_id, time, files = just(3, x)
-        sys.stdout.write("\33[2K\r{0} of {1}".format(i+1, cnt))
+        sys.stdout.write("\33[2K\r{0} of {1}".format(i + 1, cnt))
         sys.stdout.flush()
         files_to_delete = []
         for filename in filter(lambda x: x and len(x) > 0, files):
