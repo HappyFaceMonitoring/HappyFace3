@@ -13,7 +13,11 @@
    <name>${module.instance_name}</name>
    <title>${module.config["name"]| x}</title>
    <type>${module.type}</type>
+% if module.dataset:
    <status>${module.dataset['status']}</status>
+% elif
+   <status>-1</status>
+% endif
    <time>${run['time'].strftime('%Y-%m-%d %H:%M')}</time>
    <link>${hf.url.join(protocol_host, module.url(only_anchor=False, time=run['time']))}</link>
   </module>
