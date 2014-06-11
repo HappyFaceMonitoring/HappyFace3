@@ -1,0 +1,26 @@
+## -*- coding: utf-8 -*-
+<!-- ugly because of display:inline-block :-( -->
+<ul id="category_bar"
+% for category in category_list:
+><li id="${category.name}_tab" class="${category.getStatusString()}">
+% if category == selected_category:
+  <span>
+% else:
+  <a href="${category.url(run['time'] if include_time_in_url else None)}" title="${category.config["name"]}">
+%endif
+   <div>
+    <div class="status ${category.getStatusString()}"></div>
+    <img alt="" class="index" src="${category.getIndexIcon()}" />
+% if category.hasUnauthorizedModules():
+    <img alt="" class="lock" src="${category.getLockIcon()}" />
+%endif
+   </div>
+   ${category.config["name"]}
+% if category == selected_category:
+  </span>
+% else:
+  </a>
+% endif
+ </li
+% endfor
+></ul><div class="clear"></div>

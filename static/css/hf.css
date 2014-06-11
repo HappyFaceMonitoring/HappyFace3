@@ -1,0 +1,530 @@
+@charset "UTF-8";
+/* With courtesy of Dominik Pschenitschni */
+/* CSS configuration for the main HappyFace setup and the tabbed browsing
+ * part.
+ *
+ * Stylesheet configurations for the FastNavigation bar can be found in
+ * FastNavigation.css.
+ *
+ * The module dependent stylesheets are placed in:
+ * .../webpage/config/modules/*.css
+ *
+ * Naming convention TabNavigation:
+ * All class/id definitions should start with Happy...
+ */
+ 
+/* http://meyerweb.com/eric/thoughts/2007/05/01/reset-reloaded/ mit eigenen Ãnderungen */
+* {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-weight:inherit;
+    font-style:inherit;
+    font-size:100%;
+    font-family:inherit;
+    vertical-align:baseline;
+}
+:focus, :hover, :active { outline:0; }
+body {
+    font:14px/22px "HelveticaNeue-Light", Helvetica, Arial, Verdana, sans-serif;
+    text-align:left; /*zwingt den IE zur mittigen Positionierung...*/
+    font-weight:normal;
+    color:#000;
+}
+
+p.error {
+    color: #800;
+    /*margin-left: 5px;*/
+    padding: 5px;
+    margin-left: 10px;
+    font: bold 15px "HelveticaNeue-Light", Helvetica, Arial, Verdana, sans-serif;
+}
+
+.clear {
+    clear: both;
+}
+
+a         { color:#1369bf; text-decoration:none; outline:0; }
+a:visited { color:#5f9ddb; }
+a:focus   { color:#1369bf; border:none; }
+a:hover   { color:#1369bf; text-decoration:underline; }
+a:active  { color:#333   ; }
+
+h1,h2,h3     { text-align: left }
+h1           { color:#333   ; font-size:28px; line-height:36px; padding-top:15px; margin-bottom:15px; }
+h2           { color:#333   ; border-bottom:2px solid #eee; font-size:20px; line-height:26px; padding-top:10px; margin-bottom:10px; }
+h3           { color:#333   ; border-bottom:2px solid #eee; font-size:15px; line-height:20px; padding-top:10px; margin-bottom:5px; }
+h2 a         { color:#33a; }
+
+dt { padding-top: 5px;  font-size: 17px }
+strong { font-weight: bold; }
+form { display: block; }
+
+input, button, .button {
+        background-color: #d6d2d0;
+        color: #000;
+        border-top:1px solid #fff;
+        border-left:1px solid #fff;
+        border-bottom:1px solid #000;
+        border-right:1px solid #000;
+        padding: 3px !important;
+        font-size: 12px;
+        font-family: sans-serif;
+        font-weight: normal !important;
+}
+
+a.button { padding: 4px }
+a.button:hover, a.button:active, a.button:focus, a.button:visited, a.button:link { color: #000; text-decoration: none }
+
+input:active, button:active, a.button:active {
+        background-color: #a6a2a0;
+        border-right:1px solid #fff;
+        border-bottom:1px solid #fff;
+        border-top:1px solid #000;
+        border-left:1px solid #000;
+}
+
+input[type=text] {
+        background-color: #fff;
+        color: #000;
+        border-right:1px solid #fff;
+        border-bottom:1px solid #fff;
+        border-top:1px solid #000;
+        border-left:1px solid #000;
+}
+
+p { display: block; margin-bottom: 15px}
+
+.hidden { display: none }
+#header {
+    background-color: #fff;
+}
+
+@media screen and (min-width: 960px) {
+    #header {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        z-index: 10000;
+    }
+}
+
+
+/* Main container for the complete site tabs */
+.HappyPanels {
+    margin: 0px;
+    padding: 0px 0px;
+    float: left;
+    width: 100%; /* IE Hack to force proper layout when preceded by a paragraph. (hasLayout Bug)*/
+    border-left: solid 0px #999;
+}
+
+/* Main container for the navigation tabs */
+#category_bar {
+    background-color: white;
+    border-left: solid 1px #999;
+    display: block;
+    white-space: nowrap;
+}
+
+/* Container for the each tab button */
+#category_bar li {
+    float: left;
+    display: block;
+    font: bold 11px sans-serif;
+    list-style: none;
+    border-right: solid 1px #999;
+    border-bottom: 1px solid #999;
+    min-width: 110px;
+}
+
+#category_bar:first-child { border-left: solid 1px #999; }
+
+#category_bar span, #category_bar a {
+    position: relative;
+    display: block;
+    padding: 5px;
+    text-align: center;
+}
+
+#category_bar a {
+    background-color: #DDD;
+    color: black;
+    text-decoration: none;
+}
+#category_bar a:hover { background-color: #CCC; }
+
+#category_bar a>div,
+#category_bar span>div {
+    display: block;
+}
+
+#category_bar .status {
+    display: inline-block;
+    background-repeat: no-repeat;
+    width: 32px;
+    height: 32px;
+}
+#category_bar .index {
+    display: inline;
+}
+#category_bar .lock {
+    display: inline;
+}
+
+#category_bar .happy .status { background-image: url(../themes/armin_box_arrows/nav_happy.png); }
+#category_bar .neutral .status { background-image: url(../themes/armin_box_arrows/nav_neutral.png); }
+#category_bar .unhappy .status { background-image: url(../themes/armin_box_arrows/nav_unhappy.png); }
+#category_bar .noinfo .status { background-image: url(../themes/armin_box_arrows/nav_noinfo.png); }
+#category_bar .avail_plot .status { background-image: url(../themes/armin_box_arrows/nav_avail_plot.png); }
+#category_bar .unavail_plot .status { background-image: url(../themes/armin_box_arrows/nav_unavail_plot.png); }
+
+@media screen and (min-width: 600px) {
+    #category_bar li {
+        display: inline-block;
+        float: none;
+    }
+}
+
+@media screen and (min-width: 480px) {
+    #category_bar span, #category_bar a {
+        padding: 80px 5px 5px 10px;
+        background-position: 18px 5px;
+    }
+
+    #category_bar a>div,
+    #category_bar span>div {
+        display: block;
+    }
+
+    #category_bar .status {
+        position: absolute;
+        left:  16px;
+        top:   8px;
+	width: 64px;
+	height: 64px;
+    }
+    /* Style for the index symbol for each category */
+    #category_bar .index {
+        position: absolute;
+        left:  67px;
+        top:   55px;
+        width: 25px;
+    }
+    /* Style for the lock icon, if displayed */
+    #category_bar .lock {
+        position: absolute;
+        left:  67px;
+        top:   25px;
+        width: 25px;
+    }
+    #category_bar .happy .status { background-image: url(../themes/armin_box_arrows/cat_happy.png); }
+    #category_bar .neutral .status { background-image: url(../themes/armin_box_arrows/cat_neutral.png); }
+    #category_bar .unhappy .status { background-image: url(../themes/armin_box_arrows/cat_unhappy.png); }
+    #category_bar .noinfo .status { background-image: url(../themes/armin_box_arrows/cat_noinfo.png); }
+    #category_bar .avail_plot .status { background-image: url(../themes/armin_box_arrows/cat_avail_plot.png); }
+    #category_bar .unavail_plot .status { background-image: url(../themes/armin_box_arrows/cat_unavail_plot.png); }
+}
+
+#content {
+    margin-top: 8px;
+    margin-left: 8px;
+}
+/* set margin-left for #content only if #fastnavbar exists,
+ * see #fastnavbar stuff for defintions
+ */
+/*
+@media screen and (min-width: 480px) {
+    #content {
+        margin-left: 48px;
+    }
+}*/
+@media screen and (min-width: 960px) {
+    #content {
+        margin-top: 154px;
+        /* margin-left: 256px; */
+    }
+}
+
+dl.module_list dt.module{
+    color:#333;
+    border-top: 2px solid #eee;
+    font-size: 20px;
+    line-height: 26px;
+    padding-top: 15px;
+    padding-left: 52px;
+    margin-bottom: 10px;
+    background-position: 0 5px;
+    background-repeat: no-repeat;
+}
+
+dl.module_list dt.module a { color: inherit; }
+dl.module_list dt.module a:hover { color: #555; text-decoration: None}
+dl.module_list dt.module a:visited { color: inherit; text-decoration: None}
+dl.module_list dt.module a:focus { color: inherit; text-decoration: None}
+dl.module_list dt.module a:active { color: inherit; text-decoration: None}
+
+dl.module_list dt.module:first-child {
+    border-top-width: 0;
+    background-position: 0 0;
+    padding-top: 10px;
+}
+
+dl.module_list dt.module .details{
+    font: bold 11px sans-serif;
+    color: #999;
+    display: block;
+}
+
+
+dl.module_list dt.module .stale{
+    color: #f66;
+}
+
+dl.module_list dt.module .details a {
+    color: #f93;
+}
+dl.module_list dt.module .details a:hover {
+    color: #fc0;
+}
+
+dl.module_list dd.module{
+    margin-left: 60px;
+    margin-bottom: 20px;
+    width: 1000px;
+}
+
+dl.module_list .panel {
+    background-color: #ddd;
+    border: 1px solid #999;
+}
+
+/* Information panel for each module which shows up after clicking
+ * on the status button.
+ */
+dl.module_list .panel {
+    position: relative;
+    text-align: left;
+    width:800px;
+    background-color: #ddd;
+    border: 1px #999 solid;
+    font: bold 11px sans-serif;
+}
+dl.module_list .panel td {
+    color: #000;
+    padding: 2px;
+    text-align: left;
+}
+dl.module_list .panel > ul {
+    list-style: none outside none;
+    /*font-size: 0.7em; */
+}
+dl.module_list .panel .key {
+    position: absolute;
+    left: 10px;
+    display: block;
+    padding-top: 0.5em;
+}
+dl.module_list .panel .value {
+    position: relative;
+    padding-left: 150px;
+    display: block;
+    padding-top: 0.5em;
+    min-height: 1.1em;
+}
+
+#timemachine {
+    list-style: none;
+    display: block;
+}
+
+#timemachine li {
+    background-color: #464646;
+    display: block;
+    float: left;
+    padding: 2px;
+    margin: 0px 0px 0px 0px;
+    color: white;
+    border-right: solid 1px #999;
+    border-bottom: solid 1px #999;
+    font: bold 15px sans-serif;
+    height: 42px;
+    vertical-align: bottom;
+}
+
+#timemachine>li:nth-child(1),
+#timemachine>li:nth-child(3) {
+    display: none;
+}
+
+#timemachine li div {
+    display: block;
+    /*vertical-align: top;*/
+    text-align: center;
+}
+
+#timemachine .logo {
+    border:solid 1px #000;
+    height:41px;
+}
+
+#timemachine .title {
+    font-size: 15px;
+    color: #f90;
+    text-align: left;
+}
+
+#timemachine .version {
+    font-size: 10px;
+    text-align: right;
+}
+
+#timemachine .stale { color: #f00; }
+
+#HistoStep { display: none; }
+#timemachine form { padding-top: 0; }
+#timemachine .form { padding-top: 0; }
+
+@media screen and (min-width: 480px) {
+
+    #timemachine {
+        white-space: nowrap;
+    }
+    #timemachine li {
+        display: inline-block;
+        float: none;
+        border-bottom: 0;
+    }
+    
+    #timemachine>li:nth-child(1),
+    #timemachine>li:nth-child(3) {
+        display: inline-block;
+    }
+
+    #timemachine li div {}
+
+    #timemachine .title {}
+
+    #timemachine .version {}
+
+    #timemachine .stale {}
+
+    #HistoStep { display: inline; }
+    #timemachine form {}
+    #timemachine .form {}
+}
+
+.PlotMask label {
+    display: block;
+}
+.PlotMask label span {
+    position: absolute;
+    left: 80px;
+}
+.PlotMask input {
+    position: relative;
+    left: 69px;
+}
+.PlotMask label input, .PlotMask label select {
+    position: relative;
+    left: 70px;
+}
+
+.DateField {
+    width: 6em;
+    text-align: right;
+}
+.TimeField {
+    width: 4em;
+    text-align: right;
+}
+
+#fastnavbar {
+    background-color: #696969;
+    white-space: nowrap;
+}
+#fastnavbar li {
+    display: inline;
+}
+#fastnavbar span {
+    display: none;
+}
+#fastnavbar img {
+    display: inline;
+    vertical-align: bottom;
+    float: none;
+}
+#fastnavbar a:link, a:visited {
+    text-decoration:none;
+        background-color:#696969;
+        color:#a9a9a9;
+}
+#fastnavbar a:hover {
+        background-color:#a9a9a9;
+}
+
+@media screen and (min-width: 480px) {
+        #fastnavbar {
+                float: left;
+        display: block;
+        width: 32px;
+        white-space: normal;
+        }
+        #fastnavbar li {
+                display: block;
+        }
+    #fastnavbar a {
+                width: 100%;
+                display: block;
+        padding: 0 4px 4px 4px;
+        }
+    #fastnavbar li:first-child a {
+        padding-top: 4px;
+    }
+    /* set #content margin to account for
+     * navbar width. We do this only if
+     * the bar exists.
+     * */
+    #fastnavbar+#content {
+        margin-left: 48px;
+    }
+}
+@media screen and (min-width:  960px) {
+    #fastnavbar {
+	position: fixed;
+	/* glue Fastnav to header
+	 remove the next two lines to alter
+	 behaviour.*/
+        width: 240px;
+        top: 147px;
+    }
+    #fastnavbar span {
+	display: block;
+	margin-left: 37px;
+	min-height: 32px;
+    }
+    #fastnavbar img {
+        float: left;
+    }
+    /* dito */
+    #fastnavbar+#content {
+        margin-left: 256px;
+    }
+}
+
+/* The infor box displaying the certificate information */
+#HappyCertInfoDiv {
+    position: absolute;
+    left: 260px;
+    top: 40px;
+    background-color: #DDD;
+    border: solid 1px #999;
+        text-align: left;
+        font: bold 0.7em sans-serif;
+    margin: 0px;
+    padding: 5px;
+    z-index: 15;
+    visibility: hidden;
+}

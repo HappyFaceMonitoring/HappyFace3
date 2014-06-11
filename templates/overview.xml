@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<happyface>
+ <title>${hf.config.get('template', 'web_title')| x}</title>
+% for category in category_list:
+ <category>
+  <name>${category.name}</name>
+  <title>${category.config['name']| x}</title>
+  <status>${category.status}</status>
+  <type>${category.type}</type>
+  <link>${hf.url.join(protocol_host, category.url(time=run['time']))}</link>
+ % for module in category.accessible_module_list:
+  <module>
+   <name>${module.instance_name}</name>
+   <title>${module.config["name"]| x}</title>
+   <type>${module.type}</type>
+% if module.dataset:
+   <status>${module.dataset['status']}</status>
+% elif
+   <status>-1</status>
+% endif
+   <time>${run['time'].strftime('%Y-%m-%d %H:%M')}</time>
+   <link>${hf.url.join(protocol_host, module.url(only_anchor=False, time=run['time']))}</link>
+  </module>
+ % endfor
+ </category>
+% endfor
+</happyface>

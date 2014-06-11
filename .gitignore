@@ -1,0 +1,15 @@
+*~
+*.pyc
+*.db
+mako_cache/*
+static/archive/*
+static/tmp/*
+.svn/*
+modules/*
+config/*
+log/*
+modules
+config
+docs/_build/
+cachegrind*
+*.kdev4

@@ -1,0 +1,74 @@
+## -*- coding: utf-8 -*-
+<ul id="timemachine"
+ ><li>
+  <img class="logo" alt="Logo" src="${hf.url.join(hf.config.get('paths', 'static_url'), hf.config.get('template', 'logo_img'))}" />
+ </li
+ ><li>
+  <div class="title">The Happy Face Project</div>
+  <div class="version">Version 3, rev. ${svn_rev}</div>
+ </li
+ ><li>
+  <div>
+   <a href="${hf.url.absoluteUrl('category')}?action=getxml&amp;date=${date_string}&amp;time=${time_string}" onfocus="this.blur()">
+    <img src="${static_url}/images/xml_icon.gif" width="34" height="13" alt="XML icon" style="border: none; vertical-align: middle;"/>
+   </a>
+  </div>
+  <div>
+   <img src="${lock_icon}" width="15" height="13" alt="Lock icon" style="border: none; vertical-align: middle;"/>
+   <a href="${hf.config.get("template", "documentation_url")}" onfocus="this.blur()">
+    <img src="${static_url}/images/help_icon.gif" width="15" height="13" alt="Help icon" style="border: none; vertical-align: middle;"/>
+   </a>
+  </div>
+ </li
+ ><li>
+  <div class="${'stale' if data_stale else ''}">${run['time'].strftime('%d. %b %Y')}</div>
+  <div class="${'stale' if data_stale else ''}">${run['time'].strftime('%H:%M')}</div>
+ </li
+ ><li>
+## Fix weird placement behaviour of HistoStep by relative displacement
+% if selected_category is None:
+  <form id="HistoForm1" action="${hf.url.absoluteUrl('category')}" method="get" style="position: relative">
+% else:
+  <form id="HistoForm1" action="${selected_category.url()}" method="get">
+% endif
+   <img id="HistoBack" src="${static_url}/images/left_icon.gif" width="22" height="22" alt="backwards" style="border: none; padding-top: 2px; margin: 0px 2px;" />
+   <input type="text" id="HistoStep" name="s" size="4" value="${histo_step}" style="position: relative; top: -7px" />
+   <input type="hidden" id="HistoNavDate" name="date" value="${date_string}" />
+   <input type="hidden" id="HistoNavTime" name="time" value="${time_string}" />
+   <img id="HistoFwd" src="${static_url}/images/right_icon.gif" width="22" height="22" alt="forwards" style="border: none; padding-top: 2px; margin: 0px 2px;" />
+  </form>
+ </li
+
+ ><li>
+% if selected_category is None:
+  <form id="HistoForm2" class="" action="${hf.config.get('paths', 'happyface_url')}" method="get">
+% else:
+  <form id="HistoForm2" class="" action="${selected_category.url()}" method="get">
+% endif
+   <input name="date" type="text" size="10" value="${date_string}" />
+   -
+   <input name="time" type="text" size="5" value="${time_string}" />
+   <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
+  </form>
+ </li
+ ><li class="form">
+% if selected_category is None:
+  <a class="button" href="${hf.url.absoluteUrl('category')}" title="Reset to default settings and current time">Reset</a>
+% else:
+  <a class="button" href="${selected_category.url()}" title="Reset to default settings and current time">Reset</a>
+% endif
+ </li
+% if len(time_error_message) > 0:
+><li>
+ <table border="0" class="HappyTitleBarElementTable">
+  <tr>
+   <td>
+    ${time_error_message}
+   </td>
+  </tr>
+ </table>
+></li
+% endif
+
+></ul>
+<div class="clear"></div>

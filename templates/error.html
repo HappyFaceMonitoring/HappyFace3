@@ -1,0 +1,12 @@
+<%inherit file="/base.html" />
+
+<%def name="content()">
+<div id="content">
+ <h1>${message}</h1>
+ <p>${details}</p>
+% if len(hint) > 0:
+ <h2>Hint</h2>
+ <p>${hint}</p>
+% endif
+</div>
+</%def>

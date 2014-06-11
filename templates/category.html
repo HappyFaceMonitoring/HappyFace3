@@ -1,0 +1,25 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base.html" />
+
+<%def name="content()">
+<%
+troubeling_modules = list(filter(lambda mod: mod.dataset is None or
+                                             mod.dataset["status"] < 1.0,
+                                 category_module_list))
+%>
+% if troubeling_modules:
+### UGLY BY INTENTION!
+### "inline-block" rendering is whitespace sensitive!
+### There must not be any whitespace around the <li>s
+<ul id="fastnavbar"
+% for module in troubeling_modules:
+><li><a href="${module.url(True)}" title="${module.config['name']}"><img src='${module.getNavStatusIcon()}' /><span>${module.short_name}</span></a><li/
+% endfor
+></ul>
+% endif
+<dl id="content" class="module_list">
+% for contents in module_contents:
+     ${contents}
+% endfor
+</dl>
+</%def>

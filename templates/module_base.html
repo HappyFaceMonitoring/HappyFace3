@@ -1,0 +1,75 @@
+## -*- coding: utf-8 -*-
+<%
+from datetime import timedelta
+past = run['time'] - timedelta(days = 2)
+%>
+<dt style="background-image:url('${module.getStatusIcon()}')" class="module">
+ <div id="${module.instance_name}" style="position: relative; top: -165px"></div>
+ <a href="${module.url(false, run["time"])}" title="">${module.config["name"]}</a>
+ <span class="details ${'stale' if data_stale else ''}" >${run["time"].strftime("%d. %b %Y, %H:%M")}
+  -
+  <a href="#"  id="${module.instance_name}_info_link">Show module information</a>
+ </span>
+</dt>
+<dd class="module">
+    <div style="display:none;" class='panel' id="${module.instance_name}_info_box">
+     <ul>
+      <li><span class="key">Module</span><span class="value">${module.module_name}</span></li>
+      <li><span class="key">Instance</span><span class="value">${module.instance_name}</span></li>
+% if module.explicit_short_name:
+      <li><span class="key">Short Name</span><span class="value">${module.short_name}</span></li>
+% endif
+      <li><span class="key">Type</span><span class="value">${module.type}</span></li>
+      <li><span class="key">Weight</span><span class="value">${module.weight}</span></li>
+% if not no_data:
+% for i, url in enumerate(dataset["source_url"]):
+       ${url | hf.utility.addAutoLinksAndEscape, n}
+% endfor
+% if (i+1) < len(dataset["source_url"]):
+       <br />
+% endif
+      <li><span class="key">Status</span><span class="value">${module.dataset["status"]}</span></li>
+      <li><span class="key">Description</span><span class="value">${module.dataset["description"]}</span></li>
+      <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
+      <li><span class="key">Data source</span><span class="value">
+% for i, url in enumerate(dataset["source_url"]):
+       ${url | hf.utility.addAutoLinksAndEscape, n}
+% if (i+1) < len(dataset["source_url"]):
+       <br />
+% endif
+% endfor
+      </span></li>
+% endif
+     </ul>
+     <form class="PlotMask" action="${hf.plotgenerator.getTimeseriesUrl()}" method="get" target="_blank">
+      <label><span>Start</span><input type="text" name="start_date" value="${past.strftime("%Y-%m-%d")}" class="DateField" />
+      <input type="text" name="start_time" value="${past.strftime("%H:%M")}" class="TimeField" /></label>
+      <label><span>End</span><input type="text" name="end_date" value="${run["time"].strftime("%Y-%m-%d")}" class="DateField" />
+      <input type="text" name="end_time" value="${run["time"].strftime("%H:%M")}" class="TimeField" /></label>
+      <input type="hidden" name="title" value="${module.instance_name}" />
+      <input type="hidden" name="legend" value="1" />
+      <label><span>Variable</span><select name="curve_1">
+% for var in module.getPlotableColumns():
+       <option value="${module.instance_name},,${var},${var}">${var}</option>
+% endfor
+      </select></label>
+      <input name="submit" type="submit" value="Plot" />
+     </form>
+    </div>
+% if no_data:
+    <p>No data at this point in time!</p>
+% elif error_occured:
+    <h3>Module Error</h3>
+    <p>${module.error_string | hf.utility.addAutoLinksAndEscape, n}</p>
+% if module.downloaded_files:
+    <p>List of downloaded files:</p>
+    <ul>
+% for source_url, filename, url in module.downloaded_files:
+     <li>(<a href=${source_url}>Source URL</a>) <a href="${url}">${filename}</a></li>
+% endfor
+    </ul>
+% endif
+% else:
+    ${self.content()}
+% endif
+</dd>
