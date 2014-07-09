@@ -87,7 +87,7 @@ class RootDispatcher(object):
             if filename.startswith(instance):
                 return not module.isUnauthorized()
         self.logger.warning("""Unable to map file '%s' to module!
-Perhaps the corresponding module was removed from the HF config or the file does not start with the module instance name (this is an error in the module).""")
+Perhaps the corresponding module was removed from the HF config or the file does not start with the module instance name (this is an error in the module).""" % filename)
         return False
 
     def errorPage(self, **kwargs):

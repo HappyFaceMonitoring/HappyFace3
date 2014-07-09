@@ -160,14 +160,14 @@ Do you want to apply these changes? \033[1m\033[31mWARNING\033[0m Not reversible
         trans = connection.begin()
         try:
             connection.execute('CREATE TEMPORARY TABLE %s as SELECT %s from %s' % (temp_name, copy_string, table_name))
-            connection.execute('pragma foreign_keys = off;')
+            #connection.execute('pragma foreign_keys = off;')
             hf.database.metadata.drop_all(bind=hf.database.engine, tables=[db_table])
             #import pdb; pdb.set_trace()
             db_table = Table(table_name, hf.database.metadata, *new_db_columns, extend_existing=True)
             hf.database.metadata.create_all(bind=hf.database.engine, tables=[db_table])
             connection.execute('INSERT INTO %s (%s) SELECT %s FROM %s' % (table_name, copy_string, copy_string, temp_name))
             connection.execute('DROP TABLE %s' % temp_name)
-            connection.execute('pragma foreign_keys = on;')
+            #connection.execute('pragma foreign_keys = on;')
             trans.commit()
         except:
             trans.rollback()
