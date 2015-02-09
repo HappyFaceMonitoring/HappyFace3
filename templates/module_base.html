@@ -22,12 +22,6 @@ past = run['time'] - timedelta(days = 2)
       <li><span class="key">Type</span><span class="value">${module.type}</span></li>
       <li><span class="key">Weight</span><span class="value">${module.weight}</span></li>
 % if not no_data:
-% for i, url in enumerate(dataset["source_url"]):
-       ${url | hf.utility.addAutoLinksAndEscape, n}
-% endfor
-% if (i+1) < len(dataset["source_url"]):
-       <br />
-% endif
       <li><span class="key">Status</span><span class="value">${module.dataset["status"]}</span></li>
       <li><span class="key">Description</span><span class="value">${module.dataset["description"]}</span></li>
       <li><span class="key">Instruction</span><span class="value">${module.dataset["instruction"]}</span></li>
