@@ -687,7 +687,7 @@ class ModuleBase:
                     self.logger.error(traceback.format_exc())
             module_html = self.template.render_unicode(**template_data)
         except Exception, e:
-            module_html = "<p class='error'>Final rendering of '%s' failed completely! Please refer to the log files</p>" % self.instance_name
+            module_html = "<p class='error' id='%s'>Final rendering of '%s' failed completely! Please refer to the log files</p>" % (self.instance_name, self.instance_name)
             self.logger.error("Rendering failed: " + str(e))
             self.logger.error(traceback.format_exc())
         return module_html
