@@ -15,7 +15,7 @@
    <type>${module.type}</type>
 % if module.dataset:
    <status>${module.dataset['status']}</status>
-% elif
+% else:
    <status>-1</status>
 % endif
    <time>${run['time'].strftime('%Y-%m-%d %H:%M')}</time>

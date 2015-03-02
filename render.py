@@ -18,6 +18,12 @@
 import os
 import sys
 
+try:
+    import resource
+    resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+except ImportError:
+    pass
+
 if __name__ != '__main__':
     # unfortunately we need this rather hacky path change
     # because mod_wsgi for some reason does not want to
