@@ -13,6 +13,7 @@ HappyFace currently requires the following Python dependencies (Debian package n
 * python-sqlalchemy (version >= 0.5)
 * python-migrate (for *dbupdate*-tool)
 * python-mako
+* python-beautifulsoup
 
 The following are some optional packages
 
