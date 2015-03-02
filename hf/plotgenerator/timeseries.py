@@ -431,8 +431,10 @@ def timeseriesPlot(category_list, **kwargs):
         }
         if 'title' in kwargs:
             ax.set_title(kwargs['title'])
-        if 'legend' in kwargs:
+        if 'legend' in kwargs and int(kwargs['legend']) <= 10:
             ax.legend(loc=int(kwargs['legend']), numpoints=1)
+	elif 'legend' in kwargs and int(kwargs['legend']) == 11:
+	    ax.legend().set_visible(False)
         ax.set_ylabel(ylabel)
         if auth_required:
             ax.text(0.02, 0.5, "One or more curves require certificate authentification", color="#ff0000", fontsize=14)
