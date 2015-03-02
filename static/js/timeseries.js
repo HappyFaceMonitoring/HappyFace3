@@ -75,7 +75,8 @@ function changed_constraint_curve(e)
 
 function add_curve(initial_mod, initial_table, initial_variable, initial_title) {
     curve_num += 1;
-    html  = "<fieldset class=\"floating\"><legend>Curve "+curve_num+"</legend>";
+    html  = "<fieldset class=\"floating\" id='curve_" + curve_num +"' ><legend>Curve "+curve_num+"</legend>";
+    html += "<legend><a id='curve_" + curve_num + "_remove' href=\"#\">Remove</a></legend>";
     html += " <p><label><span>Module</span><select id=\"curve_"+curve_num+"_module_instance\" name=\"curve_"+curve_num+"_module_instance\">";
     var first_mod = initial_mod;
     for(var mod in module_plotable_vars) {
@@ -118,10 +119,10 @@ function add_curve(initial_mod, initial_table, initial_variable, initial_title) 
         html += "<p><label><span>Math Expression</span><input id=\"curve_"+curve_num+"_expression\" type=\"edit\" name=\"curve_"+curve_num+"_title\" value=\""+initial_variable+"\"></label></p>";
     html += " <p><label><span>Title</span><input id=\"curve_"+curve_num+"_title\" type=\"edit\" name=\"curve_"+curve_num+"_title\" value=\"";
     html += initial_title+"\"></label></p>";
-    html += "<!--<p class='button_box floating'><a class='small add' href='#'>+</a><a class='small remove' href='#'>-</a></p>"
-    html += "<h3>Constraints</h3>-->";
     html += "</fieldset>";
     $("#curve_controls").before(html);
+    var id = "curve_" + curve_num;
+    $("#curve_"+curve_num+ "_remove").click(function() {$("#" + id).remove(); });
     $("#curve_"+curve_num+"_module_instance").change({'curve': "curve_"+curve_num}, changed_module);
     $("#curve_"+curve_num+"_subtable").change({'curve': "curve_"+curve_num}, changed_subtable);
     
@@ -169,13 +170,13 @@ function add_constraint(curve, variable, value) {
 }
 
 $("#add_curve").click(function() {add_curve('', '', '', '') });
-$("#remove_curve").click(function() {
-    if(curve_num > 1) {
-        $("#curve_controls").prev().remove();
-        curve_num -= 1;
-    }
-    return false;
-});
+// $("#remove_curve").click(function() {
+//     if(curve_num > 1) {
+//         $("#curve_controls").prev().remove();
+//         curve_num -= 1;
+//     }
+//     return false;
+// });
 $("#add_constraint").click(function() {add_constraint('', '', '') });
 
 $("#show_curve_form").click(function() {
@@ -194,16 +195,22 @@ $("#hide_curve_form").click(function() {
 $("#update_plot").click(function() {
     var html = "";
     for(var i=1; i <= curve_num; i++)
-    {
+    {	
         var id_particle = "#curve_"+i;
         var mod = $(id_particle+"_module_instance option:selected").val();
         var table = $(id_particle+"_subtable option:selected").val();
-        var expression = $(id_particle+"_expression").val().replace(",", "\\,");
-        var variable = $(id_particle+"_variable option:selected").val();
+	var expression;
+	var variable = $(id_particle+"_variable option:selected").val();
         var title = $(id_particle+"_title").val();
-        if(expression.length > 0)
+	try{
+	    expression = $(id_particle+"_expression").val().replace(",", "\\,");
+	    if(expression.length > 0)
             variable = expression
-        html += "<input type=\"hidden\" name=\"curve_"+i+"\" value=\""+mod+","+table+","+variable+","+title+"\" />\n";
+	    html += "<input type=\"hidden\" name=\"curve_"+i+"\" value=\""+mod+","+table+","+variable+","+title+"\" />\n";
+	}
+	catch(err){
+	    //just skip
+	}
     }
     $("#common_constraints_form fieldset").each(function(idx) {
         var constraint_id = "#"+$(this).attr('id');
