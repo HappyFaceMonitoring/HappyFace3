@@ -103,6 +103,8 @@ class Dispatcher(object):
         except Exception:
             time_error_message = "The passed time was invalid"
 
+        requested_time_obj = time_obj # store time as specified by the user
+
         if time_obj > datetime.datetime.fromtimestamp(int(time.time()) + 59):
             time_error_message = "HappyFace is not an oracle"
             time_obj = datetime.datetime.fromtimestamp(int(time.time()) + 59)
@@ -119,7 +121,8 @@ class Dispatcher(object):
                 execute().fetchone()
             time_obj = run["time"]
         run = {"id": run["id"],
-               "time": run["time"]}
+               "time": run["time"],
+               "requested_time": requested_time_obj}
 
         # if the run is older than a certain time threshold,
         # then mark it as stale
