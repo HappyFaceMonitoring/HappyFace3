@@ -115,6 +115,7 @@ class Dispatcher(object):
 
                 template_context = {
                         "static_url": hf.config.get('paths', 'static_url'),
+                        "url_short_api_key": hf.config.get('plotgenerator', 'url_short_api_key'),
                         "happyface_url": hf.config.get('paths', 'happyface_url'),
                         "category_list": category_list,
                         "module_list": [],

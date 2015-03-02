@@ -11,6 +11,33 @@ import cherrypy as cp
   <link href="${static_url}/timeseries.css" rel="stylesheet" type="text/css" />
   <script src="${static_url}/js/jquery-1.7.2.min.js" type="text/javascript"></script>
   <script src="${static_url}/js/hf.js" type="text/javascript"></script>
+  <script src="https://apis.google.com/js/client.js"></script>
+  <script>
+  $(function(){
+      function appendResults(text) {
+        var results = document.getElementById('results');
+        results.value = text;
+	results.style.display = "initial";
+      }
+
+      function makeRequest() {
+        var request = gapi.client.urlshortener.url.insert({
+          'resource': {
+          'longUrl': document.URL,
+          'key':'${url_short_api_key}'
+        }});
+        request.execute(function(response) {
+	    appendResults(response.id);
+        });
+      }
+      
+      $("#get_short_url").click(function() {
+	gapi.client.setApiKey('${url_short_api_key}');
+	gapi.client.load('urlshortener', 'v1', makeRequest);
+      });
+    });
+    </script>
+    
   <script type="text/javascript">
     var module_plotable_vars = {
 % for mod in module_list:
@@ -61,6 +88,8 @@ import cherrypy as cp
 <div id="content">
  <h1>Timeseries Plot Generator</h1>
  <p class="button_box">
+  <input id="results" type='text' value='No short URL' style="display:none">
+  <a id="get_short_url" href="#" class="">Get short URL</a>
   <a id="show_curve_form" href="#" class="">Show curve forms</a>
   <a id="hide_curve_form" href="#" class="hidden">Hide curve forms</a>
   <a id="update_plot" href="#">Update Plot</a>
