@@ -47,6 +47,23 @@ def _getSvnRevision():
         return 'exported'
 
 
+def _getGitRevision():
+    """
+    Use git-svn to find out local SVN repository revision. Error-checking is quite bad here, it
+    will produce 'exported' in that case and logs nothing to the logfiles =(
+    """
+    revision = None
+    try:
+        proc = subprocess.Popen(['git', 'log', '--oneline'],
+                                0, None, None, subprocess.PIPE)
+        revision = proc.stdout.read().splitlines()[0].split()[0]
+    finally:
+        proc.poll()
+        if proc.returncode is None:
+            proc.kill()
+    return revision
+
+
 def _getGitSvnRevision():
     """
     Use git-svn to find out local SVN repository revision. Error-checking is quite bad here, it
@@ -90,6 +107,8 @@ def readConfigurationAndEnv():
     if hf.__version__ is None:
         hf.__version__ = _getSvnRevision()
         rev_number_regex = re.compile(r"[0-9]+(:[0-9]+)?(M|S|P)*")
+        if rev_number_regex.search(hf.__version__) is None:
+            hf.__version__ = _getGitRevision()
         if rev_number_regex.search(hf.__version__) is None:
             hf.__version__ = _getGitSvnRevision()
         if rev_number_regex.search(hf.__version__) is None:
