@@ -40,6 +40,9 @@ class ModuleProxy:
         self.subtables = ModuleClass.subtables
         self.instance_name = instance_name
         self.config = config
+        for key in self.ModuleClass.config_keys:
+                if key not in self.config:
+                        self.config[key] = self.ModuleClass.config_keys[key][1]
         self.acquisitionModules = {}
 
         if 'access' not in self.config:
@@ -100,6 +103,8 @@ class ModuleProxy:
                     module.source_url = map(lambda x: x.replace("|", "%7C"),
                                             module.source_url)
                     source_url = "|".join(module.source_url)
+            elif module.source_url == None:
+                source_url = ''
             else:
                 raise hf.ModuleProgrammingError(
                     self.module_name,
@@ -160,7 +165,7 @@ class ModuleProxy:
 
                     dataExctractionSuccessfull = True
             except hf.DownloadError, e:
-                self.logger.info("Data exctraction failed because of failed download: " + str(e))
+                self.logger.info("Data extraction failed because of failed download: " + str(e))
                 data.update({
                     "status": -1,
                     "error_string": str(e)
