@@ -207,6 +207,9 @@ def setupLogging(logging_cfg):
     if logging_cfg is None:
         logging.basicConfig(level=logging.WARNING)
     else:
+        pathtolog = 'log'
+        if not os.path.exists(pathtolog):
+            os.makedirs(pathtolog)
         logging.config.fileConfig(hf.config.get("paths", logging_cfg), disable_existing_loggers=False)
     if "HF_LOGLEVEL" in os.environ:
         logging.root.setLevel(getattr(logging, os.environ["HF_LOGLEVEL"].upper()))
