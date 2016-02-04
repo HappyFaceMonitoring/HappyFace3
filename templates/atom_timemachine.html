@@ -1,4 +1,17 @@
 ## -*- coding: utf-8 -*-
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.css">
+<script src="${static_url}/js/jquery-1.7.2.min.js"></script>
+<script src="${static_url}/js/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script>
+$(function() {
+  $( "#datepicker" ).datepicker({
+    dateFormat: "yy-mm-dd",
+    changeMonth: true,
+    changeYear: true
+  });
+});
+</script>
 <ul id="timemachine"
  ><li>
   <img class="logo" alt="Logo" src="${hf.url.join(hf.config.get('paths', 'static_url'), hf.config.get('template', 'logo_img'))}" />
@@ -45,7 +58,7 @@
 % else:
   <form id="HistoForm2" class="" action="${selected_category.url()}" method="get">
 % endif
-   <input name="date" type="text" size="10" value="${date_string}" />
+   <input name="date" type="text" id="datepicker" size="10" value="${date_string}" />
    -
    <input name="time" type="text" size="5" value="${time_string}" />
    <button onclick="javascript:submit()" onfocus="this.blur()">Goto</button>
