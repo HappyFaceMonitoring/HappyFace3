@@ -1,11 +1,15 @@
 ## -*- coding: utf-8 -*-
-<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
-<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.css">
+<script src="${static_url}/js/jquery-1.7.2.min.js"></script>
+<script src="${static_url}/js/jquery-ui.js"></script>
 <link rel="stylesheet" href="/resources/demos/style.css">
 <script>
 $(function() {
-  $( "#datepicker" ).datepicker({dateFormat: "yy-mm-dd"});
+  $( "#datepicker" ).datepicker({
+    dateFormat: "yy-mm-dd",
+    changeMonth: true,
+    changeYear: true
+  });
 });
 </script>
 <ul id="timemachine"
