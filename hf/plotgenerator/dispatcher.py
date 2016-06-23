@@ -56,6 +56,8 @@ class Dispatcher(object):
             if plt_type == "time":
                 return hf.plotgenerator.timeseriesPlot(self.category_list, **kwargs)
         else:
+            if plt_type == "custom":
+                return hf.plotgenerator.customPlot(self.category_list, **kwargs)
             try:
                 # just get the lastest run, we don't really need it
                 run = hf_runs.select(). \
