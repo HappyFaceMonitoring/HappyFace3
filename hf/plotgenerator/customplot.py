@@ -45,5 +45,10 @@ def customPlot(category_list, **kwargs):
         ax.axhline(y=statusnumber, color=color, linewidth=8)
     
     img_data = StringIO.StringIO()
-    return img_data
+    try:
+        fig.savefig(img_data, transparent=True)
+        cp.response.headers['Content-Type'] = "image/png"
+        return img_data.getvalue()
+    finally:
+        img_data.close()
 
