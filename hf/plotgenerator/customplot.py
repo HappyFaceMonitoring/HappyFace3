@@ -33,6 +33,10 @@ from hf.module.database import hf_runs
 def getCustomPlotUrl():
     return "/plot/custom/"
 
+def __getCustomPlotTemplatePath(module_instance_name):
+    return os.path.join(hf.hf_dir, hf.config.get("paths", "customplot_template_dir"), module_instance_name,"_template")
+
+
 def customPlot(category_list, **kwargs):
     
     import matplotlib.pyplot as plt
@@ -40,7 +44,9 @@ def customPlot(category_list, **kwargs):
     ylabel_list = ["other", "error", "warning", "ok"]
     color_list = ["gray", "red", "orange", "green"]
     fig, ax = plt.subplots()
-    
+    template = __getCustomPlotTemplatePath(kwargs["module_instance_name"])
+    __import__(template)
+    ax.set_title(custom_plot_dict["title"])
     for color, statusnumber in zip(color_list, np.arange(1,5)):
         ax.axhline(y=statusnumber, color=color, linewidth=8)
     
