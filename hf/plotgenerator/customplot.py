@@ -26,6 +26,7 @@ import time
 import os
 import sys
 import importlib
+from hf.module.database import hf_runs
 import numpy as np
 import timeit
 from sqlalchemy.sql import select, func, or_ 
@@ -68,19 +69,25 @@ def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_co
     x_column = [col for col in subtable.columns if col.name == x_name][0]
     y_column = [col for col in subtable.columns if col.name == y_name][0]
     quantity_column = [col for col in subtable.columns if col.name == quantity_column_name][0]
+    
 
+    (r_id,r_time,r_s) = hf_runs.select(). \
+        where(or_(hf_runs.c.completed == True, hf_runs.c.completed == None)). \
+        order_by(hf_runs.c.time.desc()). \
+        execute().fetchone()
+    logger.error(r_id)
     data_point_columns = [quantity_column,x_column,y_column]
     mod_table = subtable.module_class.module_table
     data_point_query = select(data_point_columns, \
         mod_table.c.instance == module_instance_name) \
         .where(subtable.c.parent_id == mod_table.c.id) \
-        .where(mod_table.c.run_id == hf_runs.c.id) \
+        .where(mod_table.c.run_id == r_id) \
         .where(getattr(subtable.c, quantity_column_name) == chosen_quantity_name)
     logger.error(data_point_query)
     result = data_point_query.execute()
     source_data = result.fetchall()
     logger.error(source_data)
-    return
+    return source_data
 
 def customPlot(**kwargs):
 
@@ -94,9 +101,15 @@ def customPlot(**kwargs):
     for color, statusnumber in zip(color_list, np.arange(1,5)):
         ax.axhline(y=statusnumber, color=color, linewidth=8)
     
-    __getDataPoints(kwargs["module_instance_name"],kwargs["subtable_name"],kwargs["x_name"],kwargs["y_name"],
+    source_data = __getDataPoints(kwargs["module_instance_name"],kwargs["subtable_name"],kwargs["x_name"],kwargs["y_name"],
         kwargs["quantity_column_name"],kwargs["chosen_quantity_name"])
-    
+    time_list = []
+    status_list = []
+    for name,t,s in source_data:
+        time_list.append(t)
+        status_list.append(s)
+    logger.error(time_list)
+    ax.plot(np.array(time_list),np.array(status_list), color='white', marker='o', linestyle='None')
     img_data = StringIO.StringIO()
     try:
         fig.savefig(img_data, transparent=True)
