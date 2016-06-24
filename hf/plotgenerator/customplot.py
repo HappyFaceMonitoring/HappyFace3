@@ -23,6 +23,9 @@ import traceback
 import logging
 import datetime
 import time
+import os
+import sys
+import importlib
 import numpy as np
 import timeit
 from sqlalchemy.sql import select, func, or_
@@ -33,9 +36,15 @@ from hf.module.database import hf_runs
 def getCustomPlotUrl():
     return "/plot/custom/"
 
-def __getCustomPlotTemplatePath(module_instance_name):
-    return os.path.join(hf.hf_dir, hf.config.get("paths", "customplot_template_dir"), module_instance_name,"_template")
-
+def __getCustomPlotTemplateDict(module_instance_name):
+    template_name = module_instance_name + "_template" 
+    template_dir= os.path.join(hf.hf_dir, hf.config.get("paths", "customplot_template_dir"))
+    logger = logging.getLogger(__name__ + "__getCustomPlotTemplateDict")
+    logger.error(template_dir)
+    sys.path.append(template_dir)
+    logger.error(sys.path)
+    template = importlib.import_module(template_name)
+    return template.custom_plot_dict
 
 def customPlot(category_list, **kwargs):
     
@@ -44,8 +53,7 @@ def customPlot(category_list, **kwargs):
     ylabel_list = ["other", "error", "warning", "ok"]
     color_list = ["gray", "red", "orange", "green"]
     fig, ax = plt.subplots()
-    template = __getCustomPlotTemplatePath(kwargs["module_instance_name"])
-    __import__(template)
+    custom_plot_dict = __getCustomPlotTemplateDict(kwargs["module_instance_name"])
     ax.set_title(custom_plot_dict["title"])
     for color, statusnumber in zip(color_list, np.arange(1,5)):
         ax.axhline(y=statusnumber, color=color, linewidth=8)
