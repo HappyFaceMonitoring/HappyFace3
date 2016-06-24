@@ -37,17 +37,56 @@ def getCustomPlotUrl():
     return "/plot/custom/"
 
 def __getCustomPlotTemplateDict(module_instance_name):
-    template_name = module_instance_name + "_template" 
-    template_dir= os.path.join(hf.hf_dir, hf.config.get("paths", "customplot_template_dir"))
+
     logger = logging.getLogger(__name__ + "__getCustomPlotTemplateDict")
-    logger.error(template_dir)
+    
+    if not hf.module.config.has_section(module_instance_name):
+        raise Exception("No such module")
+    
+    template_name = module_instance_name + "_template" 
+    template_dir = os.path.join(hf.hf_dir, hf.config.get("paths", "customplot_template_dir"))
     sys.path.append(template_dir)
-    logger.error(sys.path)
-    template = importlib.import_module(template_name)
+    try:
+        template = importlib.import_module(template_name)
+    except ImportError, e:
+        raise Exception("No such plot template")
     return template.custom_plot_dict
 
-def customPlot(category_list, **kwargs):
+def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_column_name,chosen_quantity_name):
+
+    logger = logging.getLogger(__name__ + "__getDataPoints")
     
+    if not hf.module.config.has_section(module_instance_name):
+        raise Exception("No such module")
+    
+    module_class = hf.module.getModuleClass(hf.module.config.get(module_instance_name, "module"))
+    try:
+        subtable = module_class.subtables[subtable_name]
+    except IndexError, e:
+        raise Exception("No such subtable")
+    
+    x_column = col in subtable.columns if col.name == x_name
+    y_column = col in subtable.columns if col.name == y_name
+    quantity_column = col in subtable.columns if col.name == quantity_column_name
+    
+    data_point_columns = [quantity_column,x_column,y_column]
+    
+    mod_table = subtable.module_class.module_table
+    data_point_query = select(data_point_columns, \
+        mod_table.c.instance == module_instance_name) \
+        .where(subtable.c.parent_id == mod_table.c.id) \
+        .where(mod_table.c.run_id == hf_runs.c.id) \
+        .where(getattr(subtable.c, quantity_column_name) == chosen_quantity_name)
+    
+    data_point_query = data_point_query.where(or_(hf_runs.c.completed == True,
+        hf_runs.c.completed == None))
+    result = data_point_query.execute()
+    source_data = result.fetchall()
+    logger.error(source_data)
+    return
+
+def customPlot(**kwargs):
+
     import matplotlib.pyplot as plt
     logger = logging.getLogger(__name__ + ".customPlot")
     ylabel_list = ["other", "error", "warning", "ok"]
@@ -57,6 +96,9 @@ def customPlot(category_list, **kwargs):
     ax.set_title(custom_plot_dict["title"])
     for color, statusnumber in zip(color_list, np.arange(1,5)):
         ax.axhline(y=statusnumber, color=color, linewidth=8)
+    
+    __getDataPoints(kwargs["module_instance_name"],kwargs["subtable_name"],kwargs["x_name"],kwargs["y_name"],
+        kwargs["quantity_column_name",kwargs["chosen_quantity_name"])
     
     img_data = StringIO.StringIO()
     try:
