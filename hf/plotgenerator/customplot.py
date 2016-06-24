@@ -28,7 +28,7 @@ import sys
 import importlib
 import numpy as np
 import timeit
-from sqlalchemy.sql import select, func, or_
+from sqlalchemy.sql import select, func, or_ 
 from sqlalchemy import Integer, Float, Numeric
 from hf.module.database import hf_runs
 
@@ -65,21 +65,18 @@ def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_co
     except IndexError, e:
         raise Exception("No such subtable")
     
-    x_column = col in subtable.columns if col.name == x_name
-    y_column = col in subtable.columns if col.name == y_name
-    quantity_column = col in subtable.columns if col.name == quantity_column_name
-    
+    x_column = [col for col in subtable.columns if col.name == x_name][0]
+    y_column = [col for col in subtable.columns if col.name == y_name][0]
+    quantity_column = [col for col in subtable.columns if col.name == quantity_column_name][0]
+
     data_point_columns = [quantity_column,x_column,y_column]
-    
     mod_table = subtable.module_class.module_table
     data_point_query = select(data_point_columns, \
         mod_table.c.instance == module_instance_name) \
         .where(subtable.c.parent_id == mod_table.c.id) \
         .where(mod_table.c.run_id == hf_runs.c.id) \
         .where(getattr(subtable.c, quantity_column_name) == chosen_quantity_name)
-    
-    data_point_query = data_point_query.where(or_(hf_runs.c.completed == True,
-        hf_runs.c.completed == None))
+    logger.error(data_point_query)
     result = data_point_query.execute()
     source_data = result.fetchall()
     logger.error(source_data)
@@ -98,7 +95,7 @@ def customPlot(**kwargs):
         ax.axhline(y=statusnumber, color=color, linewidth=8)
     
     __getDataPoints(kwargs["module_instance_name"],kwargs["subtable_name"],kwargs["x_name"],kwargs["y_name"],
-        kwargs["quantity_column_name",kwargs["chosen_quantity_name"])
+        kwargs["quantity_column_name"],kwargs["chosen_quantity_name"])
     
     img_data = StringIO.StringIO()
     try:
