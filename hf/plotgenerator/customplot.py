@@ -104,7 +104,7 @@ def customPlot(**kwargs):
     if custom_plot_dict["search_for_title_placeholders"]:
         placeholder_list = re.findall(r"\[\@\](.*?)\[\@\]", custom_plot_dict["title"])
         for placeholder in placeholder_list:
-            for key,value in kwargs.interitems():
+            for key,value in kwargs.iteritems():
                 if key == placeholder:
                     title = title.replace("[@]"+placeholder+"[@]",value)
                     break
