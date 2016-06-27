@@ -115,7 +115,7 @@ def customPlot(**kwargs):
     custom_y_tick_colors = [d["color"] for d in custom_plot_dict["custom_y_ticks"]]
     
     ax.set_yticks(custom_y_ticks)
-    ax.set_yticklabels(custom_y_labels)
+    ax.set_yticklabels(custom_y_tick_labels)
     
     tick_labels = ax.get_yticklabels()
     for color,label in zip(custom_y_tick_colors,tick_labels):
@@ -128,7 +128,7 @@ def customPlot(**kwargs):
         pos_old.x0+custom_plot_dict["plot_position_changes"]["x0_shift"],
         pos_old.y0+custom_plot_dict["plot_position_changes"]["y0_shift"],
         pos_old.width+custom_plot_dict["plot_position_changes"]["x_width_change"],
-        pos1_old.height+custom_plot_dict["plot_position_changes"]["y_height_change"]
+        pos_old.height+custom_plot_dict["plot_position_changes"]["y_height_change"]
         ])
     
     # retrieving data
@@ -137,8 +137,8 @@ def customPlot(**kwargs):
     x_list = []
     y_list = []
     for name,x,y in source_data:
-        time_list.append(x)
-        status_list.append(y)
+        x_list.append(x)
+        y_list.append(y)
     logger.error(x_list)
     ax.plot(np.array(x_list),np.array(y_list), color='white', marker='o', linestyle='None')
     
@@ -149,7 +149,7 @@ def customPlot(**kwargs):
     ax.set_xticks(x_tick_list)
     if custom_plot_dict["x_is_time"]:
         x_ticklabel_list = [time.asctime(time.gmtime(t)) for t in x_tick_list]
-        ax.set_xticklabels(time_ticklabel_list, rotation='vertical', fontsize=9)
+        ax.set_xticklabels(x_ticklabel_list, rotation='vertical', fontsize=9)
     ax.set_xlabel(custom_plot_dict["x_label"])
     
     # saving figure

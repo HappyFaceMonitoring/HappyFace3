@@ -14,6 +14,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import numpy as np
+
 custom_plot_dict = {}
 
 custom_plot_dict["title"] = "Dashboard Summary: Metric {METRIC} for {SITE}"
@@ -33,7 +35,7 @@ custom_plot_dict["x_label"] = "UTC Time"
 color_list = ["gray", "red", "orange", "green"]
 y_tick_label_list = ["other", "error", "warning", "ok"]
 
-for color, y_label, statusnumber in zip(color_list, y_tick_label_list, np.arange(1,5)):
+for color, y_tick_label, statusnumber in zip(color_list, y_tick_label_list, np.arange(1,5)):
     custom_plot_dict["additional_hlines"].append({"y_value" : statusnumber, "color" : color, "linewidth" : 8})
     custom_plot_dict["custom_y_ticks"].append({"y_value" : statusnumber, "color" : color, "y_tick_label" : y_tick_label})
 
