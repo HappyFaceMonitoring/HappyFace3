@@ -93,23 +93,66 @@ def customPlot(**kwargs):
 
     import matplotlib.pyplot as plt
     logger = logging.getLogger(__name__ + ".customPlot")
-    ylabel_list = ["other", "error", "warning", "ok"]
-    color_list = ["gray", "red", "orange", "green"]
+
     fig, ax = plt.subplots()
-    custom_plot_dict = __getCustomPlotTemplateDict(kwargs["module_instance_name"])
-    ax.set_title(custom_plot_dict["title"])
-    for color, statusnumber in zip(color_list, np.arange(1,5)):
-        ax.axhline(y=statusnumber, color=color, linewidth=8)
     
+    # retrieving configuration
+    custom_plot_dict = __getCustomPlotTemplateDict(kwargs["module_instance_name"])
+    
+    # setting and modifying title
+    ax.set_title(custom_plot_dict["title"])
+    
+    # adding horizontal lines if available
+    for add_hline in custom_plot_dict["additional_hlines"]:
+        ax.axhline(y=add_hline["y_value"], color=add_hline["color"], linewidth=add_hline["linewidth"])
+    
+    # modifying y axis
+    ax.set_ylim(custom_plot_dict["y_lims"][0],custom_plot_dict["y_lims"][1])
+    ax.set_ylabel(custom_plot_dict["y_label"])
+    
+    custom_y_ticks = [d["y_value"] for d in custom_plot_dict["custom_y_ticks"]]
+    custom_y_tick_labels = [d["y_tick_label"] for d in custom_plot_dict["custom_y_ticks"]]
+    custom_y_tick_colors = [d["color"] for d in custom_plot_dict["custom_y_ticks"]]
+    
+    ax.set_yticks(custom_y_ticks)
+    ax.set_yticklabels(custom_y_labels)
+    
+    tick_labels = ax.get_yticklabels()
+    for color,label in zip(custom_y_tick_colors,tick_labels):
+        label.set_color(color)
+        label.set_weight('bold')
+    
+    # changing plot position
+    pos_old = ax.get_position()
+    ax.set_position([
+        pos_old.x0+custom_plot_dict["plot_position_changes"]["x0_shift"],
+        pos_old.y0+custom_plot_dict["plot_position_changes"]["y0_shift"],
+        pos_old.width+custom_plot_dict["plot_position_changes"]["x_width_change"],
+        pos1_old.height+custom_plot_dict["plot_position_changes"]["y_height_change"]
+        ])
+    
+    # retrieving data
     source_data = __getDataPoints(kwargs["module_instance_name"],kwargs["subtable_name"],kwargs["x_name"],kwargs["y_name"],
         kwargs["quantity_column_name"],kwargs["chosen_quantity_name"])
-    time_list = []
-    status_list = []
-    for name,t,s in source_data:
-        time_list.append(t)
-        status_list.append(s)
-    logger.error(time_list)
-    ax.plot(np.array(time_list),np.array(status_list), color='white', marker='o', linestyle='None')
+    x_list = []
+    y_list = []
+    for name,x,y in source_data:
+        time_list.append(x)
+        status_list.append(y)
+    logger.error(x_list)
+    ax.plot(np.array(x_list),np.array(y_list), color='white', marker='o', linestyle='None')
+    
+    # modifying x axis (here is assumed, that len(data) > 1)
+    step_size = (x_list[-1]-x_list[0])/10.
+    x_tick_list = np.arange(x_list[0], x_list[-1], step_size)
+    ax.set_xlim([x_tick_list[0]-step_size*0.8,x_tick_list[-1]+step_size*0.8])
+    ax.set_xticks(x_tick_list)
+    if custom_plot_dict["x_is_time"]:
+        x_ticklabel_list = [time.asctime(time.gmtime(t)) for t in x_tick_list]
+        ax.set_xticklabels(time_ticklabel_list, rotation='vertical', fontsize=9)
+    ax.set_xlabel(custom_plot_dict["x_label"])
+    
+    # saving figure
     img_data = StringIO.StringIO()
     try:
         fig.savefig(img_data, transparent=True)

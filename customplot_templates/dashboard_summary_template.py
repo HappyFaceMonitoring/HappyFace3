@@ -14,7 +14,28 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
 custom_plot_dict = {}
-custom_plot_dict["title"] = "Dashboard Summary"
+
+custom_plot_dict["title"] = "Dashboard Summary: Metric {METRIC} for {SITE}"
+custom_plot_dict["search_for_title_placeholders"] = True
+
+custom_plot_dict["additional_hlines"] = []
+
+custom_plot_dict["y_lims"] = [0.5,4.5]
+custom_plot_dict["y_label"] = ""
+custom_plot_dict["custom_y_ticks"] = []
+
+custom_plot_dict["plot_position_changes"] = {"x0_shift":0.,"y0_shift": 0.3, "x_width_change": 0.0, "y_height_change":-0.3}
+
+custom_plot_dict["x_is_time"] = True
+custom_plot_dict["x_label"] = "UTC Time"
+
+color_list = ["gray", "red", "orange", "green"]
+y_tick_label_list = ["other", "error", "warning", "ok"]
+
+for color, y_label, statusnumber in zip(color_list, y_tick_label_list, np.arange(1,5)):
+    custom_plot_dict["additional_hlines"].append({"y_value" : statusnumber, "color" : color, "linewidth" : 8})
+    custom_plot_dict["custom_y_ticks"].append({"y_value" : statusnumber, "color" : color, "y_tick_label" : y_tick_label})
+
+
 
