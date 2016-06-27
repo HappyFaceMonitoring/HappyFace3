@@ -100,7 +100,15 @@ def customPlot(**kwargs):
     custom_plot_dict = __getCustomPlotTemplateDict(kwargs["module_instance_name"])
     
     # setting and modifying title
-    ax.set_title(custom_plot_dict["title"])
+    title = custom_plot_dict["title"]
+    if custom_plot_dict["search_for_title_placeholders"]:
+        placeholder_list = re.findall(r"\[\@\](.*?)\[\@\]", custom_plot_dict["title"])
+        for placeholder in placeholder_list:
+            for key,value in kwargs.interitems():
+                if key == placeholder:
+                    title = title.replace("[@]"+placeholder+"[@]",value)
+                    break
+    ax.set_title(title)
     
     # adding horizontal lines if available
     for add_hline in custom_plot_dict["additional_hlines"]:

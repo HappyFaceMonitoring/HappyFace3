@@ -18,7 +18,7 @@ import numpy as np
 
 custom_plot_dict = {}
 
-custom_plot_dict["title"] = "Dashboard Summary: Metric {METRIC} for {SITE}"
+custom_plot_dict["title"] = "Metric [@]chosen_quantity_name[@] for [@]tier_name[@]"
 custom_plot_dict["search_for_title_placeholders"] = True
 
 custom_plot_dict["additional_hlines"] = []
