@@ -32,6 +32,8 @@ custom_plot_dict["plot_position_changes"] = {"x0_shift":0.,"y0_shift": 0.3, "x_w
 custom_plot_dict["x_is_time"] = True
 custom_plot_dict["x_label"] = "UTC Time"
 
+custom_plot_dict["curve_style"] = {"color" : "white", "marker" : "o", "linestyle" : "None"}
+
 color_list = ["gray", "red", "orange", "green"]
 y_tick_label_list = ["other", "error", "warning", "ok"]
 
