@@ -77,10 +77,8 @@ def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_co
         .where(subtable.c.parent_id == mod_table.c.id) \
         .where(mod_table.c.run_id == run_id ) \
         .where(getattr(subtable.c, quantity_column_name) == chosen_quantity_name)
-    logger.error(data_point_query)
     result = data_point_query.execute()
     source_data = result.fetchall()
-    logger.error(source_data)
     return source_data
 
 def customPlot(**kwargs):
@@ -111,18 +109,20 @@ def customPlot(**kwargs):
     # modifying y axis
     ax.set_ylim(custom_plot_dict["y_lims"][0],custom_plot_dict["y_lims"][1])
     ax.set_ylabel(custom_plot_dict["y_label"])
-    
-    custom_y_ticks = [d["y_value"] for d in custom_plot_dict["custom_y_ticks"]]
-    custom_y_tick_labels = [d["y_tick_label"] for d in custom_plot_dict["custom_y_ticks"]]
-    custom_y_tick_colors = [d["color"] for d in custom_plot_dict["custom_y_ticks"]]
-    
-    ax.set_yticks(custom_y_ticks)
-    ax.set_yticklabels(custom_y_tick_labels)
-    
-    tick_labels = ax.get_yticklabels()
-    for color,label in zip(custom_y_tick_colors,tick_labels):
-        label.set_color(color)
-        label.set_weight('bold')
+   
+    if len(custom_plot_dict["custom_y_ticks"]) > 0:
+        
+        custom_y_ticks = [d["y_value"] for d in custom_plot_dict["custom_y_ticks"]]
+        custom_y_tick_labels = [d["y_tick_label"] for d in custom_plot_dict["custom_y_ticks"]]
+        custom_y_tick_colors = [d["color"] for d in custom_plot_dict["custom_y_ticks"]]
+        
+        ax.set_yticks(custom_y_ticks)
+        ax.set_yticklabels(custom_y_tick_labels)
+        
+        tick_labels = ax.get_yticklabels()
+        for color,label in zip(custom_y_tick_colors,tick_labels):
+            label.set_color(color)
+            label.set_weight('bold')
     
     # changing plot position
     pos_old = ax.get_position()
@@ -147,7 +147,7 @@ def customPlot(**kwargs):
     # modifying x axis (here is assumed, that len(data) > 1)
     step_size = (x_list[-1]-x_list[0])/10.
     x_tick_list = np.arange(x_list[0], x_list[-1], step_size)
-    ax.set_xlim([x_tick_list[0]-step_size*0.8,x_tick_list[-1]+step_size*0.8])
+    ax.set_xlim([x_tick_list[0]-step_size,x_tick_list[-1]+step_size])
     ax.set_xticks(x_tick_list)
     if custom_plot_dict["x_is_time"]:
         x_ticklabel_list = [time.asctime(time.gmtime(t)) for t in x_tick_list]
