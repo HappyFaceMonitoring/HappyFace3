@@ -17,21 +17,14 @@
 import hf
 import re
 import cherrypy as cp
-import json
 import StringIO
-import traceback
 import logging
-import datetime
 import time
 import os
 import sys
 import importlib
-from hf.module.database import hf_runs
 import numpy as np
-import timeit
-from sqlalchemy.sql import select, func, or_ 
-from sqlalchemy import Integer, Float, Numeric
-from hf.module.database import hf_runs
+from sqlalchemy.sql import select
 
 @hf.url.absoluteUrl
 def getCustomPlotUrl():
@@ -82,7 +75,23 @@ def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_co
     return source_data
 
 def customPlot(**kwargs):
-
+    """
+    Necessary arguments given by keyword arguments **kwargs built by corresponding .html file:
+    
+    module_instance_name: Name of the module instance of the .html file used. Needed to access the corresponding data
+                          and configuration.
+    subtable_name: Name of the subtable, where the data to be plotted is stored.
+    x_name: Name of the column in the subtable, which contains data for the x-axis.
+    y_name: Name of the column in the subtable, which contains data for the y-axis.
+    quantity_column_name: Name of the column in the subtable, which contains the quantity names
+    defining the meaning of y values.
+    chosen_quantity_name: Quantity specified for plotting. Chosen from the names in the column 'quantity_column_name'.
+    run_id: Plotting is done only for one explicit run given by the run id. Needed to proper select data.
+    
+    Additional arguments can be given to replace 'placeholders' in the title of the plot.
+    See '# setting and modifying title'.
+    
+    """
     import matplotlib.pyplot as plt
     logger = logging.getLogger(__name__ + ".customPlot")
 
