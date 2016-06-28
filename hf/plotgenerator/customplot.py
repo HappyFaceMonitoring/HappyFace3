@@ -53,7 +53,7 @@ def __getCustomPlotTemplateDict(module_instance_name):
         raise Exception("No such plot template")
     return template.custom_plot_dict
 
-def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_column_name,chosen_quantity_name):
+def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_column_name,chosen_quantity_name,run_id):
 
     logger = logging.getLogger(__name__ + "__getDataPoints")
     
@@ -70,18 +70,12 @@ def __getDataPoints(module_instance_name,subtable_name,x_name,y_name,quantity_co
     y_column = [col for col in subtable.columns if col.name == y_name][0]
     quantity_column = [col for col in subtable.columns if col.name == quantity_column_name][0]
     
-
-    (r_id,r_time,r_s) = hf_runs.select(). \
-        where(or_(hf_runs.c.completed == True, hf_runs.c.completed == None)). \
-        order_by(hf_runs.c.time.desc()). \
-        execute().fetchone()
-    logger.error(r_id)
     data_point_columns = [quantity_column,x_column,y_column]
     mod_table = subtable.module_class.module_table
     data_point_query = select(data_point_columns, \
         mod_table.c.instance == module_instance_name) \
         .where(subtable.c.parent_id == mod_table.c.id) \
-        .where(mod_table.c.run_id == r_id) \
+        .where(mod_table.c.run_id == run_id ) \
         .where(getattr(subtable.c, quantity_column_name) == chosen_quantity_name)
     logger.error(data_point_query)
     result = data_point_query.execute()
@@ -141,7 +135,7 @@ def customPlot(**kwargs):
     
     # retrieving data
     source_data = __getDataPoints(kwargs["module_instance_name"],kwargs["subtable_name"],kwargs["x_name"],kwargs["y_name"],
-        kwargs["quantity_column_name"],kwargs["chosen_quantity_name"])
+        kwargs["quantity_column_name"],kwargs["chosen_quantity_name"],kwargs["run_id"])
     x_list = []
     y_list = []
     for name,x,y in source_data:
