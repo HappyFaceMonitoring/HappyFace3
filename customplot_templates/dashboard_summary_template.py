@@ -19,7 +19,6 @@ import numpy as np
 custom_plot_dict = {}
 
 custom_plot_dict["title"] = "Metric [@]chosen_quantity_name[@] for [@]tier_name[@]"
-custom_plot_dict["search_for_title_placeholders"] = True
 
 custom_plot_dict["additional_hlines"] = []
 
@@ -40,6 +39,3 @@ y_tick_label_list = ["other", "error", "warning", "ok"]
 for color, y_tick_label, statusnumber in zip(color_list, y_tick_label_list, np.arange(1,5)):
     custom_plot_dict["additional_hlines"].append({"y_value" : statusnumber, "color" : color, "linewidth" : 8})
     custom_plot_dict["custom_y_ticks"].append({"y_value" : statusnumber, "color" : color, "y_tick_label" : y_tick_label})
-
-
-
