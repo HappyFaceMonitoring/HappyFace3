@@ -2,6 +2,7 @@ import hf
 import logging
 from dispatcher import Dispatcher
 from timeseries import timeseriesPlot, getTimeseriesUrl, getTimeseriesPlotConfig
+from customplot import customPlot, getCustomPlotUrl
 
 logger = logging.getLogger(__name__)
 
