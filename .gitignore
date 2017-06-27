@@ -13,3 +13,5 @@ config
 docs/_build/
 cachegrind*
 *.kdev4
+.idea/*
+.idea
