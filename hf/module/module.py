@@ -14,6 +14,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+"""This file contains the main functions and variables that let the acquire and render scripts interface with the
+happyface framework"""
+
 from sqlalchemy import *
 import hf
 import traceback
@@ -48,6 +51,8 @@ def moduleClassLoaded(mod_class):
 
 
 def importModuleClasses():
+    """ We look for modules and if we find them instantiate them"""
+    #here we build the list of modules we want to load
     module_paths = [os.path.join(hf.hf_dir, "modules")]
     exclude = ['.git', '.svn']
     try:
@@ -62,7 +67,7 @@ def importModuleClasses():
         logger.error("Cannot find modules directory!")
         logger.error(traceback.format_exc())
         sys.exit()
-
+    # here we start loading the modules
     for imp, name, ispkg in pkgutil.iter_modules(path=module_paths):
         if ispkg:
             continue

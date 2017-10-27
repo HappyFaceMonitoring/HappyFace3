@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     try:
+        # figure out if an acuire proccess is allready spawned if so exit if not so then run the acuire step.
         hf.hf_dir = os.path.dirname(os.path.abspath(__file__))
         hf.configtools.readConfigurationAndEnv()
         hf.configtools.setupLogging('acquire_logging_cfg')
@@ -52,6 +53,7 @@ if __name__ == '__main__':
         print "Setting up HappyFace failed"
         traceback.print_exc()
         sys.exit(-1)
+    # if we reach this we are the only process running and therefor we want to now update the database
     try:
         cfg_dir = None
         try:

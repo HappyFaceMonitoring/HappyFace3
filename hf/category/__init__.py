@@ -32,6 +32,9 @@ config = None
 
 def createCategoryObjects():
     '''
+    Generates the category objects from the happyface configuration
+    :return:
+    :rtype:
     '''
     category_list = []
     used_modules = []
