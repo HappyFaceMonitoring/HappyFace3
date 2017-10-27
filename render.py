@@ -83,4 +83,4 @@ else:
                                        config=cp_config)
     cherrypy.tree.mount(application)
     # FLUP server does not like autoreload.
-    cherrypy.config.update({'engine.autoreload_on': False})
+    cherrypy.config.update({'engine.autoreload.on': False})
