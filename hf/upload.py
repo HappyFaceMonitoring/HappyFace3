@@ -46,7 +46,7 @@ class Dispatcher(object):
             if self.enabled:
                 self.logger.error("Cannot open htpasswd!")
 
-        auth_cfg = {"tools.auth_basic.on": True,
+        auth_cfg = {"tools.auth_basic.on": False,
                     "tools.auth_basic.realm": self.realm,
                     "tools.auth_basic.checkpassword": self.checkBasicPassword,
                     }
