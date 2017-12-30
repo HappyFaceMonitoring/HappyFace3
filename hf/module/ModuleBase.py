@@ -37,10 +37,12 @@ class ModuleMeta(type):
     """
 
     def __init__(self, name, bases, dct):
+        # if we are the ModuleBase class we do nothing
         if name == "ModuleBase":
             super(ModuleMeta, self).__init__(name, bases, dct)
             return
 
+        # check for errors in the implementation of the 3. party Module given
         if "config_keys" not in dct:
             raise hf.exceptions.ModuleProgrammingError(name, "No config_keys dictionary specified")
         if "config_hint" not in dct:
@@ -56,11 +58,14 @@ class ModuleMeta(type):
 
         self.subtables = {}
 
+        #if none of the errors triggered we are able to instantiate the class.
         super(ModuleMeta, self).__init__(name, bases, dct)
 
+        # check if methods are implemented
         if not hasattr(self, 'extractData'):
             raise hf.exceptions.ModuleProgrammingError(name, "extractData not implemented")
 
+        # check if a module of that name has not allready been created.
         if name in _module_class_list:
             raise hf.exceptions.ConfigError('A module with the name %s was already imported!' % name)
         self.module_name = name
@@ -90,7 +95,6 @@ class ModuleMeta(type):
             pass
 
     def generateModuleTable(self, tabname, columns):
-
         if self.use_smart_filling:
             columns.append(Column("sf_data_id", Integer, ForeignKey("mod_" + tabname + ".id"), index=True))
 
@@ -136,7 +140,7 @@ class ModuleBase:
             2) extractData: Return a dictionary with data to fill into the database
             3) fillSubtables: to write the datasets for the modules subtables
 
-        2) Rendering the module by returning a template data dictionaryin method getTemplateData.
+        2) Rendering the module by returning a template data dictionary in method getTemplateData.
 
         Because thread-safety is required for concurrent rendering, the module itself
         MUST NOT save its state during rendering. The modules functions are internally
