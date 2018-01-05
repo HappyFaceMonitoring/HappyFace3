@@ -36,7 +36,10 @@ class DownloadSlave(threading.Thread):
         threading.Thread.__init__(self)
         self.file = file
         self.archive_dir = archive_dir
-        self.global_options = global_options
+
+        self.options = file.options
+        if file.config_source != "local":
+            self.options += " " + global_options
 
     def run(self):
         try:
@@ -44,11 +47,9 @@ class DownloadSlave(threading.Thread):
                 path = self.file.url[len("file://"):]
                 shutil.copy(path, self.file.getTmpPath(True))
             else:
-                command = "wget --output-document=\"%s\" %s %s \"%s\"" % \
+                command = "wget --output-document=\"%s\" %s \"%s\"" % \
                           (self.file.getTmpPath(True),
-                           "" if self.file.config_source == "local"
-                           else self.global_options,
-                           self.file.options,
+                           self.options,
                            self.file.url
                            )
                 process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
