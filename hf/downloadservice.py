@@ -27,6 +27,8 @@ import shlex
 import re
 import inspect
 import logging
+import urllib2
+import httplib
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +48,10 @@ class DownloadSlave(threading.Thread):
             if self.file.url.startswith("file://"):
                 path = self.file.url[len("file://"):]
                 shutil.copy(path, self.file.getTmpPath(True))
-            else:
+            elif '<native>' not in self.options:
                 self._download_wget()
+            else:
+                self._download_native()
         except Exception, e:
             self.file.error += "Failed to download file: %s" % e
             traceback.print_exc()
@@ -75,6 +79,40 @@ class DownloadSlave(threading.Thread):
                 os.unlink(self.file.getTmpPath(True))
             except Exception:
                 pass
+
+    def _download_native(self):
+        # monkey patch for python 2.7.9+
+        # see https://bugs.python.org/issue22417
+        import ssl
+        if hasattr(ssl, '_create_unverified_context'):
+            ssl._create_default_https_context = ssl._create_unverified_context
+
+        proxy_fn = hf.config.get('downloadService', 'voms_proxy_file')
+        if proxy_fn == '$X509_USER_PROXY':
+            proxy_fn = os.environ['X509_USER_PROXY']
+
+        https_opener = self._HTTPSAuthHandler.build_opener(proxy_fn)
+        response = https_opener.open(self.file.url)
+        with open(self.file.getTmpPath(True), 'w') as out_f:
+            out_f.write(response.read())
+
+    class _HTTPSAuthHandler(urllib2.HTTPSHandler):
+        def __init__(self, proxy_fn):
+            urllib2.HTTPSHandler.__init__(self)
+            self.proxy_fn = proxy_fn
+
+        def https_open(self, request):
+            return self.do_open(self.get_connection, request)
+
+        def get_connection(self, host, **kwargs):
+            return httplib.HTTPSConnection(host,
+                                           key_file=self.proxy_fn,
+                                           cert_file=self.proxy_fn)
+
+        @classmethod
+        def build_opener(cls, proxy_fn):
+            return urllib2.build_opener(cls(proxy_fn))
+
 
 class DownloadService:
     '''
