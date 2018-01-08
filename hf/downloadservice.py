@@ -47,25 +47,7 @@ class DownloadSlave(threading.Thread):
                 path = self.file.url[len("file://"):]
                 shutil.copy(path, self.file.getTmpPath(True))
             else:
-                command = "wget --output-document=\"%s\" %s \"%s\"" % \
-                          (self.file.getTmpPath(True),
-                           self.options,
-                           self.file.url
-                           )
-                process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
-                stderr = process.communicate()[1]
-                if process.returncode != 0:
-                    match = re.search("ERROR ([0-9][0-9][0-9])", stderr)
-                    http_errorcode = 0
-                    if match:
-                        http_errorcode = int(match.group(1))
-                    self.file.error = "Downloading failed"
-                    if http_errorcode != 0:
-                        self.file.error += " with error code %i" % http_errorcode
-                    try:
-                        os.unlink(self.file.getTmpPath(True))
-                    except Exception:
-                        pass
+                self._download_wget()
         except Exception, e:
             self.file.error += "Failed to download file: %s" % e
             traceback.print_exc()
@@ -73,6 +55,26 @@ class DownloadSlave(threading.Thread):
             self.file.error += "Failed to download file"
             traceback.print_exc()
 
+    def _download_wget(self):
+        command = "wget --output-document=\"%s\" %s \"%s\"" % \
+                  (self.file.getTmpPath(True),
+                   self.options,
+                   self.file.url
+                   )
+        process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
+        stderr = process.communicate()[1]
+        if process.returncode != 0:
+            match = re.search("ERROR ([0-9][0-9][0-9])", stderr)
+            http_errorcode = 0
+            if match:
+                http_errorcode = int(match.group(1))
+            self.file.error = "Downloading failed"
+            if http_errorcode != 0:
+                self.file.error += " with error code %i" % http_errorcode
+            try:
+                os.unlink(self.file.getTmpPath(True))
+            except Exception:
+                pass
 
 class DownloadService:
     '''
