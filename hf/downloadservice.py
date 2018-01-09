@@ -27,6 +27,8 @@ import shlex
 import re
 import inspect
 import logging
+import urllib2
+import httplib
 
 logger = logging.getLogger(__name__)
 
@@ -36,41 +38,80 @@ class DownloadSlave(threading.Thread):
         threading.Thread.__init__(self)
         self.file = file
         self.archive_dir = archive_dir
-        self.global_options = global_options
+
+        self.options = file.options
+        if file.config_source != "local":
+            self.options += " " + global_options
 
     def run(self):
         try:
             if self.file.url.startswith("file://"):
                 path = self.file.url[len("file://"):]
                 shutil.copy(path, self.file.getTmpPath(True))
+            elif '<native>' not in self.options:
+                self._download_wget()
             else:
-                command = "wget --output-document=\"%s\" %s %s \"%s\"" % \
-                          (self.file.getTmpPath(True),
-                           "" if self.file.config_source == "local"
-                           else self.global_options,
-                           self.file.options,
-                           self.file.url
-                           )
-                process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
-                stderr = process.communicate()[1]
-                if process.returncode != 0:
-                    match = re.search("ERROR ([0-9][0-9][0-9])", stderr)
-                    http_errorcode = 0
-                    if match:
-                        http_errorcode = int(match.group(1))
-                    self.file.error = "Downloading failed"
-                    if http_errorcode != 0:
-                        self.file.error += " with error code %i" % http_errorcode
-                    try:
-                        os.unlink(self.file.getTmpPath(True))
-                    except Exception:
-                        pass
+                self._download_native()
         except Exception, e:
             self.file.error += "Failed to download file: %s" % e
             traceback.print_exc()
         except:
             self.file.error += "Failed to download file"
             traceback.print_exc()
+
+    def _download_wget(self):
+        command = "wget --output-document=\"%s\" %s \"%s\"" % \
+                  (self.file.getTmpPath(True),
+                   self.options,
+                   self.file.url
+                   )
+        process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
+        stderr = process.communicate()[1]
+        if process.returncode != 0:
+            match = re.search("ERROR ([0-9][0-9][0-9])", stderr)
+            http_errorcode = 0
+            if match:
+                http_errorcode = int(match.group(1))
+            self.file.error = "Downloading failed"
+            if http_errorcode != 0:
+                self.file.error += " with error code %i" % http_errorcode
+            try:
+                os.unlink(self.file.getTmpPath(True))
+            except Exception:
+                pass
+
+    def _download_native(self):
+        # monkey patch for python 2.7.9+
+        # see https://bugs.python.org/issue22417
+        import ssl
+        if hasattr(ssl, '_create_unverified_context'):
+            ssl._create_default_https_context = ssl._create_unverified_context
+
+        proxy_fn = hf.config.get('downloadService', 'voms_proxy_file')
+        if proxy_fn == '$X509_USER_PROXY':
+            proxy_fn = os.environ['X509_USER_PROXY']
+
+        https_opener = self._HTTPSAuthHandler.build_opener(proxy_fn)
+        response = https_opener.open(self.file.url)
+        with open(self.file.getTmpPath(True), 'w') as out_f:
+            out_f.write(response.read())
+
+    class _HTTPSAuthHandler(urllib2.HTTPSHandler):
+        def __init__(self, proxy_fn):
+            urllib2.HTTPSHandler.__init__(self)
+            self.proxy_fn = proxy_fn
+
+        def https_open(self, request):
+            return self.do_open(self.get_connection, request)
+
+        def get_connection(self, host, **kwargs):
+            return httplib.HTTPSConnection(host,
+                                           key_file=self.proxy_fn,
+                                           cert_file=self.proxy_fn)
+
+        @classmethod
+        def build_opener(cls, proxy_fn):
+            return urllib2.build_opener(cls(proxy_fn))
 
 
 class DownloadService:
