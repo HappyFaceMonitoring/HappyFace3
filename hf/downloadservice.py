@@ -131,6 +131,7 @@ class DownloadService:
         self.archive_dir = None
         self.archive_url = None
         self.remote_archive_dir = None
+        self.clean_local_archive_dir = False
         self.runtime = None
 
     def addDownload(self, download_command):
@@ -159,6 +160,8 @@ class DownloadService:
             if hf.config.get('paths', 'remote_archive_dir'):
                 self.remote_archive_dir = os.path.join(hf.config.get('paths', 'remote_archive_dir'),
                                                        runtime.strftime("%Y/%m/%d/%H/%M"))
+                clean = hf.config.get('paths', 'clean_local_archive_dir')
+                self.clean_local_archive_dir = (clean.lower() == 'true')
 
             try:
                 os.makedirs(self.archive_dir)
@@ -212,6 +215,15 @@ class DownloadService:
             if not file.keep_tmp and file.isDownloaded():
                 if os.path.exists(file.getTmpPath()):
                     os.unlink(file.getTmpPath())
+
+        if self.clean_local_archive_dir:
+            archive_dir = hf.config.get("paths", "archive_dir")
+            for filename in os.listdir(archive_dir):
+                filepath = os.path.join(archive_dir, filename)
+                if os.path.isdir(filepath):
+                    shutil.rmtree(filepath)
+                elif os.path.isfile(filepath):
+                    os.unlink(filepath)
 
     def getFilesForInstance(self, instance):
         if hasattr(instance, "instance_name"):
