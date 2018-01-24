@@ -130,6 +130,7 @@ class DownloadService:
         self.module_files = {}
         self.archive_dir = None
         self.archive_url = None
+        self.remote_archive_dir = None
         self.runtime = None
 
     def addDownload(self, download_command):
@@ -155,6 +156,9 @@ class DownloadService:
             self.runtime = runtime
             self.archive_dir = os.path.join(hf.config.get("paths", "archive_dir"), runtime.strftime("%Y/%m/%d/%H/%M"))
             self.archive_url = os.path.join(hf.config.get("paths", "archive_url"), runtime.strftime("%Y/%m/%d/%H/%M"))
+            if hf.config.get('paths', 'remote_archive_dir'):
+                self.remote_archive_dir = os.path.join(hf.config.get('paths', 'remote_archive_dir'),
+                                                       runtime.strftime("%Y/%m/%d/%H/%M"))
 
             try:
                 os.makedirs(self.archive_dir)
@@ -309,6 +313,16 @@ class DownloadFile:
             self.is_archived = True
             self.filename = module.instance_name + name
             shutil.copy(self.getTmpPath(), self.getArchivePath())
+
+            remote_archive_path = hf.downloadService.remote_archive_dir
+            if remote_archive_path:
+                # scp to remote archive path
+                remote_archive_path = os.path.join(remote_archive_path, self.filename)
+                remote, rdir =  remote_archive_path.split(':')
+                rdir = os.path.dirname(rdir)
+                # make sure the remote directory exists
+                subprocess.call(['ssh', remote, 'mkdir -p '+rdir])
+                subprocess.call(['scp', '-q', self.getTmpPath(), remote_archive_path])
 
 
 class File:
