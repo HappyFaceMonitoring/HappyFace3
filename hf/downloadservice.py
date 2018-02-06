@@ -333,11 +333,15 @@ class DownloadFile:
             if remote_archive_path:
                 # scp to remote archive path
                 remote_archive_path = os.path.join(remote_archive_path, self.filename)
-                remote, rdir =  remote_archive_path.split(':')
-                rdir = os.path.dirname(rdir)
-                # make sure the remote directory exists
-                subprocess.call(['ssh', remote, 'mkdir -p '+rdir])
-                subprocess.call(['scp', '-q', self.getTmpPath(), remote_archive_path])
+                self.scp(self.getTmpPath(), remote_archive_path)
+
+    @staticmethod
+    def scp(local_path, remote_path):
+        remote, rdir =  remote_path.split(':')
+        rdir = os.path.dirname(rdir)
+        # make sure the remote directory exists
+        subprocess.call(['ssh', remote, 'mkdir -p '+rdir])
+        subprocess.call(['scp', '-q', local_path, remote_path])
 
 
 class File:
