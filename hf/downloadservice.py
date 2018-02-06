@@ -155,11 +155,11 @@ class DownloadService:
         try:
             self.global_options = hf.config.get("downloadService", "global_options")
             self.runtime = runtime
-            self.archive_dir = os.path.join(hf.config.get("paths", "archive_dir"), runtime.strftime("%Y/%m/%d/%H/%M"))
-            self.archive_url = os.path.join(hf.config.get("paths", "archive_url"), runtime.strftime("%Y/%m/%d/%H/%M"))
+            self.archive_dir = os.path.join(hf.config.get("paths", "archive_dir"), self.getDatePath(runtime))
+            self.archive_url = os.path.join(hf.config.get("paths", "archive_url"), self.getDatePath(runtime))
             if hf.config.get('paths', 'remote_archive_dir'):
                 self.remote_archive_dir = os.path.join(hf.config.get('paths', 'remote_archive_dir'),
-                                                       runtime.strftime("%Y/%m/%d/%H/%M"))
+                                                       self.getDatePath(runtime))
                 clean = hf.config.get('paths', 'clean_local_archive_dir')
                 self.clean_local_archive_dir = (clean.lower() == 'true')
 
@@ -205,10 +205,10 @@ class DownloadService:
             raise
 
     def getArchivePath(self, run, filename):
-        return os.path.join(hf.config.get('paths', 'archive_dir'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
+        return os.path.join(hf.config.get('paths', 'archive_dir'), self.getDatePath(run['time']), filename)
 
     def getArchiveUrl(self, run, filename):
-        return os.path.join(hf.config.get('paths', 'archive_url'), run['time'].strftime("%Y/%m/%d/%H/%M"), filename)
+        return os.path.join(hf.config.get('paths', 'archive_url'), self.getDatePath(run['time']), filename)
 
     def cleanup(self):
         for file in self.file_list.itervalues():
@@ -234,6 +234,9 @@ class DownloadService:
             return []
         return [self.file_list[cmd] for cmd in download_commands]
 
+    @staticmethod
+    def getDatePath(date):
+        return date.strftime("%Y/%m/%d/%H/%M")
 
 class DownloadFile:
     def __init__(self, download_command):
@@ -330,11 +333,15 @@ class DownloadFile:
             if remote_archive_path:
                 # scp to remote archive path
                 remote_archive_path = os.path.join(remote_archive_path, self.filename)
-                remote, rdir =  remote_archive_path.split(':')
-                rdir = os.path.dirname(rdir)
-                # make sure the remote directory exists
-                subprocess.call(['ssh', remote, 'mkdir -p '+rdir])
-                subprocess.call(['scp', '-q', self.getTmpPath(), remote_archive_path])
+                self.scp(self.getTmpPath(), remote_archive_path)
+
+    @staticmethod
+    def scp(local_path, remote_path):
+        remote, rdir =  remote_path.split(':')
+        rdir = os.path.dirname(rdir)
+        # make sure the remote directory exists
+        subprocess.call(['ssh', remote, 'mkdir -p '+rdir])
+        subprocess.call(['scp', '-q', local_path, remote_path])
 
 
 class File:
